@@ -57,6 +57,13 @@ class MovieModel {
     public function getTheaterMovies() {
         return $this->db->fetchAll("SELECT * FROM movies WHERE status = 'Chiếu rạp' ORDER BY title");
     }
+    
+    public function getByCountry($country) {
+        return $this->db->fetchAll("SELECT m.*, c.name as category_name FROM movies m 
+                                    LEFT JOIN categories c ON m.category_id = c.id 
+                                    WHERE m.country = ? 
+                                    ORDER BY m.created_at DESC", [$country]);
+    }
 }
 ?>
 

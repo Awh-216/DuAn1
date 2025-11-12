@@ -7,11 +7,14 @@ class MovieController extends Controller {
         
         $search = $_GET['search'] ?? '';
         $category_id = $_GET['category'] ?? null;
+        $country = $_GET['country'] ?? null;
         
         if ($search) {
             $movies = $movieModel->search($search, $category_id);
         } elseif ($category_id) {
             $movies = $movieModel->getByCategory($category_id);
+        } elseif ($country) {
+            $movies = $movieModel->getByCountry($country);
         } else {
             $movies = $movieModel->getAll();
         }
@@ -23,6 +26,7 @@ class MovieController extends Controller {
             'categories' => $categories,
             'search' => $search,
             'category_id' => $category_id,
+            'country' => $country,
             'user' => $this->getCurrentUser()
         ]);
     }

@@ -6,6 +6,9 @@
 -- Generation Time: Nov 12, 2025 at 03:47 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
+--
+-- Database: `cinehub`
+-- File này chứa toàn bộ cấu trúc database và dữ liệu mẫu
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -62,7 +65,12 @@ INSERT INTO `categories` (`id`, `name`, `parent_id`) VALUES
 (2, 'Tình cảm', NULL),
 (3, 'Hài', NULL),
 (4, 'Kinh dị', NULL),
-(5, 'Hoạt hình', NULL);
+(5, 'Hoạt hình', NULL),
+(6, 'Khoa học viễn tưởng', NULL),
+(7, 'Phiêu lưu', NULL),
+(8, 'Tài liệu', NULL),
+(9, 'Chiến tranh', NULL),
+(10, 'Thể thao', NULL);
 
 -- --------------------------------------------------------
 
@@ -133,6 +141,19 @@ CREATE TABLE `movies` (
   `language` varchar(50) DEFAULT NULL,
   `age_rating` varchar(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `movies`
+--
+
+INSERT INTO `movies` (`title`, `category_id`, `level`, `duration`, `description`, `director`, `actors`, `video_url`, `trailer_url`, `thumbnail`, `status`, `rating`, `status_admin`, `country`, `language`, `age_rating`) VALUES
+('Avengers: Endgame', 1, 'Premium', 181, 'Phim siêu anh hùng Marvel, kết thúc của Infinity Saga', 'Anthony Russo, Joe Russo', 'Robert Downey Jr., Chris Evans, Mark Ruffalo', 'https://example.com/avengers.mp4', 'https://example.com/avengers-trailer.mp4', 'avengers.jpg', 'Chiếu online', 9.2, 'published', 'Mỹ', 'Tiếng Anh', 'PG-13'),
+('Titanic', 2, 'Gold', 194, 'Câu chuyện tình yêu trên con tàu định mệnh', 'James Cameron', 'Leonardo DiCaprio, Kate Winslet', 'https://example.com/titanic.mp4', 'https://example.com/titanic-trailer.mp4', 'titanic.jpg', 'Chiếu online', 8.8, 'published', 'Mỹ', 'Tiếng Anh', 'PG-13'),
+('The Hangover', 3, 'Silver', 100, 'Phim hài về chuyến đi Las Vegas đầy biến cố', 'Todd Phillips', 'Bradley Cooper, Ed Helms, Zach Galifianakis', 'https://example.com/hangover.mp4', 'https://example.com/hangover-trailer.mp4', 'hangover.jpg', 'Chiếu online', 7.7, 'published', 'Mỹ', 'Tiếng Anh', 'R'),
+('The Conjuring', 4, 'Gold', 112, 'Phim kinh dị về các nhà điều tra siêu nhiên', 'James Wan', 'Patrick Wilson, Vera Farmiga', 'https://example.com/conjuring.mp4', 'https://example.com/conjuring-trailer.mp4', 'conjuring.jpg', 'Chiếu online', 7.5, 'published', 'Mỹ', 'Tiếng Anh', 'R'),
+('Toy Story 4', 5, 'Free', 100, 'Cuộc phiêu lưu mới của Woody và Buzz', 'Josh Cooley', 'Tom Hanks, Tim Allen', 'https://example.com/toystory.mp4', 'https://example.com/toystory-trailer.mp4', 'toystory.jpg', 'Chiếu online', 8.0, 'published', 'Mỹ', 'Tiếng Anh', 'G'),
+('Interstellar', 6, 'Premium', 169, 'Cuộc hành trình không gian để cứu nhân loại', 'Christopher Nolan', 'Matthew McConaughey, Anne Hathaway', 'https://example.com/interstellar.mp4', 'https://example.com/interstellar-trailer.mp4', 'interstellar.jpg', 'Chiếu online', 8.6, 'published', 'Mỹ', 'Tiếng Anh', 'PG-13'),
+('Indiana Jones', 7, 'Gold', 122, 'Cuộc phiêu lưu tìm kiếm cổ vật', 'Steven Spielberg', 'Harrison Ford', 'https://example.com/indiana.mp4', 'https://example.com/indiana-trailer.mp4', 'indiana.jpg', 'Chiếu online', 8.2, 'published', 'Mỹ', 'Tiếng Anh', 'PG-13');
 
 -- --------------------------------------------------------
 
@@ -213,7 +234,7 @@ CREATE TABLE `reviews` (
   `rating` tinyint(4) DEFAULT NULL,
   `comment` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -325,7 +346,8 @@ INSERT INTO `subscriptions` (`id`, `name`, `price`, `description`, `benefits`, `
 (1, 'Free', 0.00, 'Xem trailer, phim miễn phí', 'Giới hạn nội dung, có quảng cáo', '2025-11-09 16:03:14'),
 (2, 'Silver', 79000.00, 'Xem phim HD không quảng cáo', 'HD quality, không quảng cáo', '2025-11-09 16:03:14'),
 (3, 'Gold', 129000.00, 'Full HD, nội dung độc quyền', 'Full HD, nội dung mới', '2025-11-09 16:03:14'),
-(4, 'Premium', 199000.00, '4K, xem sớm, ưu đãi vé rạp', '4K, early access, ưu đãi vé', '2025-11-09 16:03:14');
+(4, 'Premium', 199000.00, '4K, xem sớm, ưu đãi vé rạp', '4K, early access, ưu đãi vé', '2025-11-09 16:03:14'),
+(5, 'Basic', 49000.00, 'Gói cơ bản với chất lượng SD', 'SD quality, có quảng cáo', '2025-11-09 16:03:14');
 
 -- --------------------------------------------------------
 
@@ -472,7 +494,12 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `avatar`, `birthdate`, `rank`, `points`, `subscription_id`, `status`, `email_verified`, `created_at`, `updated_at`, `role`, `is_active`, `last_login`) VALUES
 (1, 'Tuan Anh', 'noble.toad.nict@letterguard.net', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-10 15:10:16', '2025-11-10 15:10:16', 'user', 1, NULL),
 (2, 'Super Admin', 'admin@cinehub.com', '$2y$10$Q516uBkFiAAoP9sABaJJRebPWUFZjqKI9370ZLqFxlhtFE1L1r9ba', NULL, NULL, 'Bronze', 0, NULL, 'active', 0, '2025-11-10 16:41:17', '2025-11-10 16:45:54', 'admin', 1, NULL),
-(3, 'Admin Mới', 'admin2@cinehub.com', '$2y$10$DcmIe4LT6ByLRbWkKLRrE.r4fPNWpOtQylE4ISfTbP6TeCs/J5T2a', NULL, NULL, 'Bronze', 0, NULL, 'active', 0, '2025-11-12 02:39:06', '2025-11-12 02:39:39', 'admin', 1, NULL);
+(3, 'Admin Mới', 'admin2@cinehub.com', '$2y$10$DcmIe4LT6ByLRbWkKLRrE.r4fPNWpOtQylE4ISfTbP6TeCs/J5T2a', NULL, NULL, 'Bronze', 0, NULL, 'active', 0, '2025-11-12 02:39:06', '2025-11-12 02:39:39', 'admin', 1, NULL),
+(4, 'Nguyễn Văn A', 'nguyenvana@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Silver', 500, 2, 'active', 0, '2025-11-10 15:10:16', '2025-11-10 15:10:16', 'user', 1, NULL),
+(5, 'Trần Thị B', 'tranthib@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Gold', 1200, 3, 'active', 0, '2025-11-10 15:10:16', '2025-11-10 15:10:16', 'user', 1, NULL),
+(6, 'Lê Văn C', 'levanc@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Bronze', 100, 1, 'active', 0, '2025-11-10 15:10:16', '2025-11-10 15:10:16', 'user', 1, NULL),
+(7, 'Phạm Thị D', 'phamthid@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Platinum', 2500, 4, 'active', 0, '2025-11-10 15:10:16', '2025-11-10 15:10:16', 'user', 1, NULL),
+(8, 'Hoàng Văn E', 'hoangvane@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Silver', 800, 2, 'active', 0, '2025-11-10 15:10:16', '2025-11-10 15:10:16', 'user', 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -492,8 +519,11 @@ CREATE TABLE `user_roles` (
 --
 
 INSERT INTO `user_roles` (`id`, `user_id`, `role_id`, `created_at`) VALUES
-(4, 2, 1, '2025-11-10 16:45:54'),
-(7, 3, 1, '2025-11-12 02:39:39');
+(1, 2, 1, '2025-11-10 16:45:54'),
+(2, 3, 1, '2025-11-12 02:39:39'),
+(3, 4, 3, '2025-11-10 16:45:54'),
+(4, 5, 4, '2025-11-10 16:45:54'),
+(5, 1, 5, '2025-11-10 16:45:54');
 
 -- --------------------------------------------------------
 
@@ -510,6 +540,153 @@ CREATE TABLE `watch_history` (
   `favorite` tinyint(1) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `theaters`
+--
+
+INSERT INTO `theaters` (`name`, `location`, `phone`, `address`, `total_screens`, `is_active`) VALUES
+('CGV Vincom Center', 'Hà Nội', '0241234567', '72 Lê Thánh Tôn, Hoàn Kiếm, Hà Nội', 8, 1),
+('CGV Landmark', 'Hà Nội', '0242345678', '72A Nguyễn Trãi, Thanh Xuân, Hà Nội', 6, 1),
+('Lotte Cinema', 'Hồ Chí Minh', '0283456789', '469 Nguyễn Hữu Thọ, Quận 7, TP.HCM', 10, 1),
+('Galaxy Cinema', 'Đà Nẵng', '0236456789', '910A Ngô Quyền, Sơn Trà, Đà Nẵng', 7, 1),
+('BHD Star Cineplex', 'Hồ Chí Minh', '0284567890', 'L3-Vincom Center, 72 Lê Thánh Tôn, Quận 1, TP.HCM', 9, 1);
+
+--
+-- Dumping data for table `theater_screens`
+--
+
+INSERT INTO `theater_screens` (`theater_id`, `screen_name`, `total_seats`, `screen_type`, `is_active`) VALUES
+(1, 'Phòng 1', 120, '2D', 1),
+(1, 'Phòng 2', 150, '3D', 1),
+(2, 'Phòng 1', 100, '2D', 1),
+(2, 'Phòng 2', 120, 'IMAX', 1),
+(3, 'Phòng 1', 200, '4DX', 1),
+(3, 'Phòng 2', 180, '3D', 1),
+(4, 'Phòng 1', 110, '2D', 1),
+(5, 'Phòng 1', 130, '3D', 1);
+
+--
+-- Dumping data for table `showtimes`
+--
+
+INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`) VALUES
+(1, 1, '2025-11-15', '10:00:00', 120000.00, 1),
+(1, 1, '2025-11-15', '13:30:00', 120000.00, 1),
+(2, 2, '2025-11-15', '15:00:00', 100000.00, 3),
+(3, 3, '2025-11-16', '18:00:00', 110000.00, 5),
+(4, 4, '2025-11-16', '20:30:00', 115000.00, 7),
+(5, 5, '2025-11-17', '09:30:00', 90000.00, 8),
+(6, 1, '2025-11-17', '14:00:00', 130000.00, 2);
+
+--
+-- Dumping data for table `tickets`
+--
+
+INSERT INTO `tickets` (`user_id`, `showtime_id`, `seat`, `price`, `status`) VALUES
+(4, 1, 'A5', 120000.00, 'Đã đặt'),
+(4, 1, 'A6', 120000.00, 'Đã đặt'),
+(5, 2, 'B10', 120000.00, 'Đã đặt'),
+(6, 3, 'C15', 100000.00, 'Đã đặt'),
+(7, 4, 'D20', 110000.00, 'Đã đặt'),
+(8, 5, 'E12', 115000.00, 'Đã đặt');
+
+--
+-- Dumping data for table `transactions`
+--
+
+INSERT INTO `transactions` (`user_id`, `type`, `related_id`, `amount`, `method`, `status`) VALUES
+(4, 'subscription', 2, 79000.00, 'Momo', 'Thành công'),
+(5, 'subscription', 3, 129000.00, 'ZaloPay', 'Thành công'),
+(6, 'ticket', 1, 240000.00, 'Momo', 'Thành công'),
+(7, 'subscription', 4, 199000.00, 'Bank', 'Thành công'),
+(8, 'ticket', 5, 110000.00, 'Momo', 'Thành công'),
+(4, 'ticket', 2, 120000.00, 'ZaloPay', 'Thành công');
+
+--
+-- Dumping data for table `reviews`
+--
+
+INSERT INTO `reviews` (`user_id`, `movie_id`, `rating`, `comment`) VALUES
+(4, 1, 5, 'Phim tuyệt vời! Diễn xuất xuất sắc và cốt truyện hấp dẫn.'),
+(5, 2, 5, 'Titanic là một kiệt tác điện ảnh, tình yêu vĩnh cửu.'),
+(6, 3, 4, 'Phim hài rất vui nhộn, giải trí tốt.'),
+(7, 4, 4, 'Kinh dị đúng nghĩa, rùng rợn từ đầu đến cuối.'),
+(8, 5, 5, 'Hoạt hình hay, phù hợp cho cả gia đình.'),
+(4, 6, 5, 'Interstellar là một tác phẩm khoa học viễn tưởng xuất sắc.'),
+(5, 7, 4, 'Cuộc phiêu lưu thú vị với Indiana Jones.');
+
+--
+-- Dumping data for table `comments`
+--
+
+INSERT INTO `comments` (`user_id`, `movie_id`, `content`, `status`) VALUES
+(4, 1, 'Phim này thật sự đáng xem!', 'approved'),
+(5, 2, 'Cảm động quá, tôi đã khóc.', 'approved'),
+(6, 3, 'Hài quá, cười không ngừng.', 'approved'),
+(7, 4, 'Sợ quá, không dám xem một mình.', 'approved'),
+(8, 5, 'Phim hay cho trẻ em.', 'approved'),
+(4, 6, 'Khoa học viễn tưởng đỉnh cao!', 'approved'),
+(5, 7, 'Cuộc phiêu lưu thú vị.', 'approved');
+
+--
+-- Dumping data for table `watch_history`
+--
+
+INSERT INTO `watch_history` (`user_id`, `movie_id`, `last_time`, `rating`, `favorite`) VALUES
+(4, 1, 3600, 5, 1),
+(5, 2, 7200, 5, 1),
+(6, 3, 1800, 4, 0),
+(7, 4, 2400, 4, 0),
+(8, 5, 3000, 5, 1),
+(4, 6, 5400, 5, 1),
+(5, 7, 2100, 4, 0);
+
+--
+-- Dumping data for table `coupons`
+--
+
+INSERT INTO `coupons` (`code`, `name`, `type`, `value`, `min_amount`, `max_discount`, `usage_limit`, `valid_from`, `valid_to`, `status`) VALUES
+('WELCOME10', 'Giảm 10% cho khách hàng mới', 'percentage', 10.00, 50000.00, 50000.00, 100, '2025-11-01 00:00:00', '2025-12-31 23:59:59', 'active'),
+('SAVE50K', 'Giảm 50.000đ', 'fixed', 50000.00, 200000.00, NULL, 200, '2025-11-01 00:00:00', '2025-12-31 23:59:59', 'active'),
+('VIP20', 'Giảm 20% cho thành viên VIP', 'percentage', 20.00, 100000.00, 100000.00, 50, '2025-11-01 00:00:00', '2025-12-31 23:59:59', 'active'),
+('FLASH30', 'Giảm 30% trong ngày', 'percentage', 30.00, 150000.00, 150000.00, 30, '2025-11-15 00:00:00', '2025-11-15 23:59:59', 'active'),
+('NEWUSER', 'Giảm 25.000đ cho người dùng mới', 'fixed', 25000.00, 100000.00, NULL, 500, '2025-11-01 00:00:00', '2026-01-31 23:59:59', 'active');
+
+--
+-- Dumping data for table `promotions`
+--
+
+INSERT INTO `promotions` (`name`, `description`, `type`, `discount_value`, `start_date`, `end_date`, `status`, `target_audience`) VALUES
+('Khuyến mãi Black Friday', 'Giảm giá lớn nhân dịp Black Friday', 'discount', 30.00, '2025-11-20 00:00:00', '2025-11-30 23:59:59', 'draft', 'all'),
+('Gói Premium ưu đãi', 'Mua gói Premium được tặng thêm 1 tháng', 'bundle', 0.00, '2025-11-01 00:00:00', '2025-12-31 23:59:59', 'active', 'all'),
+('Dùng thử miễn phí', '7 ngày dùng thử miễn phí cho người dùng mới', 'free_trial', 0.00, '2025-11-01 00:00:00', '2026-01-31 23:59:59', 'active', 'new_users'),
+('Giảm giá cuối tuần', 'Giảm 15% cho tất cả gói dịch vụ cuối tuần', 'discount', 15.00, '2025-11-15 00:00:00', '2025-12-31 23:59:59', 'active', 'all'),
+('Ưu đãi thành viên Premium', 'Thành viên Premium được giảm thêm 10%', 'discount', 10.00, '2025-11-01 00:00:00', '2026-12-31 23:59:59', 'active', 'premium');
+
+--
+-- Dumping data for table `support_tickets`
+--
+
+INSERT INTO `support_tickets` (`user_id`, `subject`, `message`, `status`, `priority`) VALUES
+(4, 'Không thể đăng nhập', 'Tôi không thể đăng nhập vào tài khoản của mình', 'Mới', 'Cao'),
+(5, 'Vấn đề thanh toán', 'Giao dịch của tôi bị lỗi khi thanh toán', 'Đang xử lý', 'Trung bình'),
+(6, 'Yêu cầu hoàn tiền', 'Tôi muốn hoàn tiền cho vé đã mua', 'Mới', 'Cao'),
+(7, 'Câu hỏi về gói dịch vụ', 'Tôi muốn biết thêm về gói Premium', 'Đã giải quyết', 'Thấp'),
+(8, 'Lỗi phát video', 'Video không phát được trên trình duyệt của tôi', 'Đang xử lý', 'Trung bình'),
+(4, 'Thay đổi thông tin tài khoản', 'Tôi muốn thay đổi email đăng nhập', 'Mới', 'Thấp');
+
+--
+-- Dumping data for table `admin_logs`
+--
+
+INSERT INTO `admin_logs` (`user_id`, `action`, `module`, `target_type`, `target_id`, `ip_address`, `user_agent`) VALUES
+(2, 'create', 'movies', 'movie', 1, '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'),
+(2, 'update', 'users', 'user', 1, '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'),
+(3, 'delete', 'comments', 'comment', 1, '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'),
+(2, 'publish', 'movies', 'movie', 2, '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'),
+(3, 'update', 'theaters', 'theater', 1, '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'),
+(2, 'view', 'analytics', NULL, NULL, '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
 
 --
 -- Indexes for dumped tables
@@ -686,31 +863,31 @@ ALTER TABLE `watch_history`
 -- AUTO_INCREMENT for table `admin_logs`
 --
 ALTER TABLE `admin_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `coupons`
 --
 ALTER TABLE `coupons`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `movies`
 --
 ALTER TABLE `movies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `permissions`
@@ -722,13 +899,13 @@ ALTER TABLE `permissions`
 -- AUTO_INCREMENT for table `promotions`
 --
 ALTER TABLE `promotions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -746,19 +923,19 @@ ALTER TABLE `role_permissions`
 -- AUTO_INCREMENT for table `showtimes`
 --
 ALTER TABLE `showtimes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `subscriptions`
 --
 ALTER TABLE `subscriptions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `support_tickets`
 --
 ALTER TABLE `support_tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `system_config`
@@ -770,43 +947,43 @@ ALTER TABLE `system_config`
 -- AUTO_INCREMENT for table `theaters`
 --
 ALTER TABLE `theaters`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `theater_screens`
 --
 ALTER TABLE `theater_screens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `tickets`
 --
 ALTER TABLE `tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `user_roles`
 --
 ALTER TABLE `user_roles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `watch_history`
 --
 ALTER TABLE `watch_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
@@ -919,3 +1096,4 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+

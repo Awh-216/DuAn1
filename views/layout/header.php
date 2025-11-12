@@ -21,6 +21,22 @@
     ?>
     
     <?php if (!$isAuthPage): ?>
+    <?php
+    // Load categories và countries cho dropdown menu
+    try {
+        require_once __DIR__ . '/../../core/Database.php';
+        require_once __DIR__ . '/../../modules/movie/CategoryModel.php';
+        $db = Database::getInstance();
+        $categoryModel = new CategoryModel();
+        $menuCategories = $categoryModel->getAll();
+        
+        // Lấy danh sách quốc gia từ movies
+        $countries = $db->fetchAll("SELECT DISTINCT country FROM movies WHERE country IS NOT NULL AND country != '' ORDER BY country");
+    } catch (Exception $e) {
+        $menuCategories = [];
+        $countries = [];
+    }
+    ?>
     <header class="header-new">
         <div class="header-container">
             <div class="header-left">
@@ -44,12 +60,30 @@
                 <a href="http://localhost/DuAn1/?route=movie/index&category=phim-bo" class="nav-link-new">
                     Phim bộ <i class="fas fa-chevron-down"></i>
                 </a>
-                <a href="http://localhost/DuAn1/?route=movie/index" class="nav-link-new">
-                    Thể loại <i class="fas fa-chevron-down"></i>
-                </a>
-                <a href="http://localhost/DuAn1/?route=movie/index" class="nav-link-new">
-                    Quốc gia <i class="fas fa-chevron-down"></i>
-                </a>
+                <div class="nav-dropdown">
+                    <a href="http://localhost/DuAn1/?route=movie/index" class="nav-link-new">
+                        Thể loại <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <?php foreach ($menuCategories as $cat): ?>
+                            <a href="http://localhost/DuAn1/?route=movie/index&category=<?php echo $cat['id']; ?>" class="dropdown-item">
+                                <?php echo htmlspecialchars($cat['name']); ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <div class="nav-dropdown">
+                    <a href="http://localhost/DuAn1/?route=movie/index" class="nav-link-new">
+                        Quốc gia <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <?php foreach ($countries as $country): ?>
+                            <a href="http://localhost/DuAn1/?route=movie/index&country=<?php echo urlencode($country['country']); ?>" class="dropdown-item">
+                                <?php echo htmlspecialchars($country['country']); ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
                 <a href="http://localhost/DuAn1/?route=movie/index" class="nav-link-new">
                     Top phim<i class="fas fa-chevron-down"></i>
                 </a>

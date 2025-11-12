@@ -6,13 +6,30 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Autoload classes
 spl_autoload_register(function ($class) {
-    $paths = [
+    // Core classes
+    $corePath = __DIR__ . '/core/' . $class . '.php';
+    if (file_exists($corePath)) {
+        require_once $corePath;
+        return;
+    }
+    
+    // Module classes (controllers, models)
+    $modules = ['movie', 'user', 'booking', 'review', 'admin', 'home'];
+    foreach ($modules as $module) {
+        $controllerPath = __DIR__ . '/modules/' . $module . '/' . $class . '.php';
+        if (file_exists($controllerPath)) {
+            require_once $controllerPath;
+            return;
+        }
+    }
+    
+    // Fallback: old structure (for backward compatibility)
+    $oldPaths = [
         __DIR__ . '/models/' . $class . '.php',
-        __DIR__ . '/controllers/' . $class . '.php',
-        __DIR__ . '/core/' . $class . '.php'
+        __DIR__ . '/controllers/' . $class . '.php'
     ];
     
-    foreach ($paths as $path) {
+    foreach ($oldPaths as $path) {
         if (file_exists($path)) {
             require_once $path;
             return;
