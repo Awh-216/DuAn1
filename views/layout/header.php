@@ -34,7 +34,7 @@
                 <div class="search-bar">
                     <!-- <i class="fas fa-search"></i> -->
                     <form method="GET" action="http://localhost/DuAn1/?route=movie/index" class="search-form-inline">
-                        <label class="labeo" for="">Tìm kiếm phim.............................................................</label>
+                        <label class="labeo" for="">Tìm kiếm phim.....................................................</label>
                         <input type="text" name="search"  class="search-input">
                     </form>
                 </div>
