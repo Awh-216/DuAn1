@@ -81,8 +81,7 @@ $title = 'Trang chủ';
         </div>
     <?php else: ?>
         <div class="hero-placeholder-large">
-            <i class="fas fa-film"></i>
-            <p>Chưa có phim nổi bật</p>
+            <img src="https://phongvu.vn/cong-nghe/wp-content/uploads/2025/08/hinh-nen-thanh-guom-diet-quy-2.jpg" alt="">
         </div>
     <?php endif; ?>
 </section>

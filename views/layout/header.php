@@ -32,9 +32,10 @@
                 </div>
                 
                 <div class="search-bar">
-                    <i class="fas fa-search"></i>
+                    <!-- <i class="fas fa-search"></i> -->
                     <form method="GET" action="http://localhost/DuAn1/?route=movie/index" class="search-form-inline">
-                        <input type="text" name="search" placeholder="Tìm kiếm phim..." class="search-input">
+                        <label class="labeo" for="">Tìm kiếm phim.............................................................</label>
+                        <input type="text" name="search"  class="search-input">
                     </form>
                 </div>
             </div>
@@ -108,3 +109,24 @@
             <i class="fas fa-exclamation-circle"></i> <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
         </div>
     <?php endif; ?>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputt = document.querySelector('.search-input');
+    const label = document.querySelector('.labeo');
+
+    if (inputt && label) {
+        inputt.addEventListener('focus', function() {
+            label.style.opacity = '0';
+        });
+
+        inputt.addEventListener('blur', function() {
+            if (inputt.value.trim() === '') {
+                label.style.opacity = '0.7';
+            }
+        });
+    }
+});
+</script>
+
