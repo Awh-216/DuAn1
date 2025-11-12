@@ -1811,10 +1811,10 @@ background: linear-gradient(180deg, black, rgba(255, 255, 255, 0));
     
     border: 1px solid #ffffff;
     border-radius: 25px;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(2px);
     font-size: 0.9rem;
     color: #ffffff;
-    background-color: #ffffff8b;        
+    background-color: #ffffff5a;        
     transition: all 0.3s;
     font-size: 100%;
 }
@@ -1858,7 +1858,7 @@ background: linear-gradient(180deg, black, rgba(255, 255, 255, 0));
 }
 
 .search-input::placeholder {
-    color: #999999;
+    color: #ffffff;
 }
 
 .nav-new {
@@ -1953,8 +1953,8 @@ background: linear-gradient(180deg, black, rgba(255, 255, 255, 0));
     align-items: center;
     gap: 8px;
     padding: 0.75rem 1.5rem;
-    background: rgba(255, 255, 255, 0.41);
-    backdrop-filter: blur(3px);
+    background: rgba(255, 255, 255, 0.214);
+    backdrop-filter: blur(2px);
     color: #ffffff;
     border-radius: 25px;
     text-decoration: none;

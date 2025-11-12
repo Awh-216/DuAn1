@@ -50,7 +50,7 @@
                 <div class="search-bar">
                     <form method="GET" action="http://localhost/DuAn1/?route=movie/index" class="search-form-inline">
                         <input type="hidden" name="route" value="movie/index">
-                        <label class="labeo" for="search-input-header">Tìm kiếm phim.....................................................</label>
+                        <label class="labeo" for="search-input-header"></label>
                         <input type="text" name="search" id="search-input-header" class="search-input" placeholder="Tìm kiếm phim...">
                         <button type="submit" class="search-btn">
                             <i class="fas fa-search"></i>
