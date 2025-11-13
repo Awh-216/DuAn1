@@ -15,8 +15,8 @@ class Controller {
         $module = $viewParts[0] ?? 'home';
         $viewFile = $viewParts[1] ?? 'index';
         
-        // Xử lý auth views (đặc biệt)
-        if ($module === 'auth') {
+        // Xử lý auth và profile views (đặc biệt)
+        if ($module === 'auth' || $module === 'profile') {
             $module = 'user';
         }
         
@@ -24,12 +24,6 @@ class Controller {
         $viewPath = __DIR__ . '/../modules/' . $module . '/views/' . $viewFile . '.php';
         if (file_exists($viewPath)) {
             require_once $viewPath;
-        } else {
-            // Fallback cho views cũ
-            $oldViewPath = __DIR__ . '/../views/' . $view . '.php';
-            if (file_exists($oldViewPath)) {
-                require_once $oldViewPath;
-            }
         }
         
         require_once __DIR__ . '/../shared/layout/footer.php';
