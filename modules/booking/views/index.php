@@ -69,15 +69,22 @@ $title = 'Đặt Vé';
                     <?php if (empty($selected_movie)): ?>
                         <div class="booking-step mb-4">
                             <label class="booking-label">Chọn phim</label>
-                            <form method="GET" class="movie-select-form">
-                                <input type="hidden" name="route" value="booking/index">
-                                <select name="movie" class="form-select-booking" onchange="this.form.submit()" required>
-                                    <option value="">-- Chọn phim --</option>
-                                    <?php foreach ($movies as $m): ?>
-                                        <option value="<?php echo $m['id']; ?>"><?php echo htmlspecialchars($m['title']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </form>
+                            <?php if (empty($movies)): ?>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Hiện tại chưa có phim nào đang chiếu rạp. Vui lòng quay lại sau!
+                                </div>
+                            <?php else: ?>
+                                <form method="GET" class="movie-select-form">
+                                    <input type="hidden" name="route" value="booking/index">
+                                    <select name="movie" class="form-select-booking" onchange="this.form.submit()" required>
+                                        <option value="">-- Chọn phim --</option>
+                                        <?php foreach ($movies as $m): ?>
+                                            <option value="<?php echo $m['id']; ?>"><?php echo htmlspecialchars($m['title']); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </form>
+                            <?php endif; ?>
                         </div>
                     <?php else: ?>
                         <!-- Date Selection -->
@@ -116,14 +123,21 @@ $title = 'Đặt Vé';
                         <!-- Theater Selection -->
                         <div class="booking-step mb-4">
                             <label class="booking-label">Chọn rạp</label>
-                            <div class="theaters-list">
-                                <?php foreach ($theaters as $theater): ?>
-                                    <a href="?route=booking/index&movie=<?php echo $selected_movie; ?>&theater=<?php echo $theater['id']; ?>&date=<?php echo $selected_date; ?>&time=<?php echo $selected_time; ?>&showtime_id=<?php echo $selected_showtime_id; ?>" 
-                                       class="theater-btn <?php echo $selected_theater == $theater['id'] ? 'active' : ''; ?>">
-                                        <?php echo htmlspecialchars($theater['name']); ?>
-                                    </a>
-                                <?php endforeach; ?>
-                            </div>
+                            <?php if (empty($theaters)): ?>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Hiện tại chưa có rạp nào. Vui lòng liên hệ quản trị viên!
+                                </div>
+                            <?php else: ?>
+                                <div class="theaters-list">
+                                    <?php foreach ($theaters as $theater): ?>
+                                        <a href="?route=booking/index&movie=<?php echo $selected_movie; ?>&theater=<?php echo $theater['id']; ?>&date=<?php echo $selected_date; ?>&time=<?php echo $selected_time; ?>&showtime_id=<?php echo $selected_showtime_id; ?>" 
+                                           class="theater-btn <?php echo $selected_theater == $theater['id'] ? 'active' : ''; ?>">
+                                            <?php echo htmlspecialchars($theater['name']); ?>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                         
                         <!-- Seat Selection -->

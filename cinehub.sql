@@ -180,11 +180,11 @@ CREATE TABLE `movies` (
 --
 
 INSERT INTO `movies` (`id`, `title`, `category_id`, `level`, `duration`, `description`, `director`, `actors`, `video_url`, `trailer_url`, `thumbnail`, `status`, `rating`, `created_at`, `status_admin`, `publish_date`, `geo_restriction`, `drm_enabled`, `banner`, `country`, `language`, `age_rating`) VALUES
-(1, 'Avengers: Endgame', 1, 'Premium', 181, 'Phim siêu anh hùng Marvel, kết thúc của Infinity Saga', 'Anthony Russo, Joe Russo', 'Robert Downey Jr., Chris Evans, Mark Ruffalo', 'data/phim/phimle/Avengers_Endgame.mp4', 'https://example.com/avengers-trailer.mp4', 'data/img/Avengers_Endgame.webp', 'Chiếu online', 9.2, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13'),
-(2, 'Titanic', 2, 'Gold', 194, 'Câu chuyện tình yêu trên con tàu định mệnh', 'James Cameron', 'Leonardo DiCaprio, Kate Winslet', 'data/phim/phimle/titanic.mp4\r\n', 'https://example.com/titanic-trailer.mp4', 'data/img/titanic.jpg', 'Chiếu online', 8.8, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13'),
-(3, 'The Hangover', 3, 'Silver', 100, 'Phim hài về chuyến đi Las Vegas đầy biến cố', 'Todd Phillips', 'Bradley Cooper, Ed Helms, Zach Galifianakis', 'https://example.com/hangover.mp4', 'https://example.com/hangover-trailer.mp4', 'hangover.jpg', 'Chiếu online', 7.7, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'R'),
-(4, 'The Conjuring', 4, 'Gold', 112, 'Phim kinh dị về các nhà điều tra siêu nhiên', 'James Wan', 'Patrick Wilson, Vera Farmiga', 'https://example.com/conjuring.mp4', 'https://example.com/conjuring-trailer.mp4', 'conjuring.jpg', 'Chiếu online', 7.5, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'R'),
-(5, 'Toy Story 4', 5, 'Free', 100, 'Cuộc phiêu lưu mới của Woody và Buzz', 'Josh Cooley', 'Tom Hanks, Tim Allen', 'https://example.com/toystory.mp4', 'https://example.com/toystory-trailer.mp4', 'toystory.jpg', 'Chiếu online', 8, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'G'),
+(1, 'Avengers: Endgame', 1, 'Premium', 181, 'Phim siêu anh hùng Marvel, kết thúc của Infinity Saga', 'Anthony Russo, Joe Russo', 'Robert Downey Jr., Chris Evans, Mark Ruffalo', 'data/phim/phimle/Avengers_Endgame.mp4', 'https://example.com/avengers-trailer.mp4', 'data/img/Avengers_Endgame.webp', 'Chiếu rạp', 9.2, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13'),
+(2, 'Titanic', 2, 'Gold', 194, 'Câu chuyện tình yêu trên con tàu định mệnh', 'James Cameron', 'Leonardo DiCaprio, Kate Winslet', 'data/phim/phimle/titanic.mp4\r\n', 'https://example.com/titanic-trailer.mp4', 'data/img/titanic.jpg', 'Chiếu rạp', 8.8, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13'),
+(3, 'The Hangover', 3, 'Silver', 100, 'Phim hài về chuyến đi Las Vegas đầy biến cố', 'Todd Phillips', 'Bradley Cooper, Ed Helms, Zach Galifianakis', 'https://example.com/hangover.mp4', 'https://example.com/hangover-trailer.mp4', 'hangover.jpg', 'Chiếu rạp', 7.7, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'R'),
+(4, 'The Conjuring', 4, 'Gold', 112, 'Phim kinh dị về các nhà điều tra siêu nhiên', 'James Wan', 'Patrick Wilson, Vera Farmiga', 'https://example.com/conjuring.mp4', 'https://example.com/conjuring-trailer.mp4', 'conjuring.jpg', 'Chiếu rạp', 7.5, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'R'),
+(5, 'Toy Story 4', 5, 'Free', 100, 'Cuộc phiêu lưu mới của Woody và Buzz', 'Josh Cooley', 'Tom Hanks, Tim Allen', 'https://example.com/toystory.mp4', 'https://example.com/toystory-trailer.mp4', 'toystory.jpg', 'Chiếu rạp', 8, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'G'),
 (6, 'Interstellar', 6, 'Premium', 169, 'Cuộc hành trình không gian để cứu nhân loại', 'Christopher Nolan', 'Matthew McConaughey, Anne Hathaway', 'https://example.com/interstellar.mp4', 'https://example.com/interstellar-trailer.mp4', 'interstellar.jpg', 'Chiếu online', 8.6, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13'),
 (7, 'Indiana Jones', 7, 'Gold', 122, 'Cuộc phiêu lưu tìm kiếm cổ vật', 'Steven Spielberg', 'Harrison Ford', 'https://example.com/indiana.mp4', 'https://example.com/indiana-trailer.mp4', 'indiana.jpg', 'Chiếu online', 8.2, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13');
 
@@ -391,7 +391,70 @@ INSERT INTO `showtimes` (`id`, `movie_id`, `theater_id`, `show_date`, `show_time
 (4, 3, 3, '2025-11-16', '18:00:00', 110000.00, '2025-11-12 07:41:09', 5),
 (5, 4, 4, '2025-11-16', '20:30:00', 115000.00, '2025-11-12 07:41:09', 7),
 (6, 5, 5, '2025-11-17', '09:30:00', 90000.00, '2025-11-12 07:41:09', 8),
-(7, 6, 1, '2025-11-17', '14:00:00', 130000.00, '2025-11-12 07:41:09', 2);
+(7, 6, 1, '2025-11-17', '14:00:00', 130000.00, '2025-11-12 07:41:09', 2),
+(8, 1, 1, CURDATE(), '10:00:00', 120000.00, NOW(), 1),
+(9, 1, 1, CURDATE(), '13:30:00', 120000.00, NOW(), 1),
+(10, 1, 1, CURDATE(), '16:00:00', 120000.00, NOW(), 1),
+(11, 1, 1, CURDATE(), '19:00:00', 140000.00, NOW(), 1),
+(12, 1, 2, CURDATE(), '11:00:00', 120000.00, NOW(), 2),
+(13, 1, 2, CURDATE(), '14:30:00', 120000.00, NOW(), 2),
+(14, 1, 2, CURDATE(), '17:30:00', 120000.00, NOW(), 2),
+(15, 2, 1, CURDATE(), '09:30:00', 100000.00, NOW(), 3),
+(16, 2, 1, CURDATE(), '12:00:00', 100000.00, NOW(), 3),
+(17, 2, 1, CURDATE(), '15:00:00', 100000.00, NOW(), 3),
+(18, 2, 1, CURDATE(), '18:30:00', 120000.00, NOW(), 3),
+(19, 2, 3, CURDATE(), '10:30:00', 100000.00, NOW(), 4),
+(20, 2, 3, CURDATE(), '13:00:00', 100000.00, NOW(), 4),
+(21, 2, 3, CURDATE(), '16:30:00', 100000.00, NOW(), 4),
+(22, 3, 2, CURDATE(), '11:30:00', 110000.00, NOW(), 5),
+(23, 3, 2, CURDATE(), '14:00:00', 110000.00, NOW(), 5),
+(24, 3, 2, CURDATE(), '17:00:00', 110000.00, NOW(), 5),
+(25, 3, 4, CURDATE(), '12:30:00', 110000.00, NOW(), 6),
+(26, 3, 4, CURDATE(), '15:30:00', 110000.00, NOW(), 6),
+(27, 3, 4, CURDATE(), '19:30:00', 130000.00, NOW(), 6),
+(28, 4, 3, CURDATE(), '10:00:00', 115000.00, NOW(), 7),
+(29, 4, 3, CURDATE(), '13:30:00', 115000.00, NOW(), 7),
+(30, 4, 3, CURDATE(), '17:00:00', 115000.00, NOW(), 7),
+(31, 4, 5, CURDATE(), '11:00:00', 115000.00, NOW(), 8),
+(32, 4, 5, CURDATE(), '14:30:00', 115000.00, NOW(), 8),
+(33, 4, 5, CURDATE(), '18:00:00', 115000.00, NOW(), 8),
+(34, 5, 1, CURDATE(), '09:00:00', 90000.00, NOW(), 4),
+(35, 5, 1, CURDATE(), '12:30:00', 90000.00, NOW(), 4),
+(36, 5, 1, CURDATE(), '16:00:00', 90000.00, NOW(), 4),
+(37, 5, 2, CURDATE(), '10:00:00', 90000.00, NOW(), 3),
+(38, 5, 2, CURDATE(), '13:00:00', 90000.00, NOW(), 3),
+(39, 5, 2, CURDATE(), '16:30:00', 90000.00, NOW(), 3),
+(40, 1, 1, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '10:00:00', 120000.00, NOW(), 1),
+(41, 1, 1, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '13:30:00', 120000.00, NOW(), 1),
+(42, 1, 1, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '16:00:00', 120000.00, NOW(), 1),
+(43, 1, 1, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '19:00:00', 140000.00, NOW(), 1),
+(44, 2, 2, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '11:00:00', 100000.00, NOW(), 2),
+(45, 2, 2, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '14:30:00', 100000.00, NOW(), 2),
+(46, 2, 2, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '17:30:00', 100000.00, NOW(), 2),
+(47, 3, 3, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '10:30:00', 110000.00, NOW(), 3),
+(48, 3, 3, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '13:00:00', 110000.00, NOW(), 3),
+(49, 3, 3, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '16:30:00', 110000.00, NOW(), 3),
+(50, 4, 4, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '12:00:00', 115000.00, NOW(), 4),
+(51, 4, 4, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '15:00:00', 115000.00, NOW(), 4),
+(52, 4, 4, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '18:30:00', 115000.00, NOW(), 4),
+(53, 5, 5, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '09:30:00', 90000.00, NOW(), 5),
+(54, 5, 5, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '12:00:00', 90000.00, NOW(), 5),
+(55, 5, 5, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '15:30:00', 90000.00, NOW(), 5),
+(56, 1, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY), '10:00:00', 120000.00, NOW(), 1),
+(57, 1, 2, DATE_ADD(CURDATE(), INTERVAL 2 DAY), '13:30:00', 120000.00, NOW(), 2),
+(58, 2, 3, DATE_ADD(CURDATE(), INTERVAL 2 DAY), '15:00:00', 100000.00, NOW(), 3),
+(59, 3, 4, DATE_ADD(CURDATE(), INTERVAL 2 DAY), '18:00:00', 110000.00, NOW(), 4),
+(60, 4, 5, DATE_ADD(CURDATE(), INTERVAL 2 DAY), '20:30:00', 115000.00, NOW(), 5),
+(61, 5, 1, DATE_ADD(CURDATE(), INTERVAL 3 DAY), '09:30:00', 90000.00, NOW(), 1),
+(62, 1, 2, DATE_ADD(CURDATE(), INTERVAL 3 DAY), '14:00:00', 120000.00, NOW(), 2),
+(63, 2, 3, DATE_ADD(CURDATE(), INTERVAL 4 DAY), '16:00:00', 100000.00, NOW(), 3),
+(64, 3, 4, DATE_ADD(CURDATE(), INTERVAL 4 DAY), '19:00:00', 110000.00, NOW(), 4),
+(65, 4, 5, DATE_ADD(CURDATE(), INTERVAL 5 DAY), '11:00:00', 115000.00, NOW(), 5),
+(66, 5, 1, DATE_ADD(CURDATE(), INTERVAL 5 DAY), '13:30:00', 90000.00, NOW(), 1),
+(67, 1, 2, DATE_ADD(CURDATE(), INTERVAL 6 DAY), '15:30:00', 120000.00, NOW(), 2),
+(68, 2, 3, DATE_ADD(CURDATE(), INTERVAL 6 DAY), '17:30:00', 100000.00, NOW(), 3),
+(69, 3, 4, DATE_ADD(CURDATE(), INTERVAL 7 DAY), '18:30:00', 110000.00, NOW(), 4),
+(70, 4, 5, DATE_ADD(CURDATE(), INTERVAL 7 DAY), '20:00:00', 115000.00, NOW(), 5);
 
 -- --------------------------------------------------------
 
@@ -920,7 +983,7 @@ ALTER TABLE `role_permissions`
 -- AUTO_INCREMENT cho bảng `showtimes`
 --
 ALTER TABLE `showtimes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
 
 --
 -- AUTO_INCREMENT cho bảng `subscriptions`
