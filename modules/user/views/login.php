@@ -4,6 +4,7 @@ $title = 'Đăng nhập';
 ?>
 
 <section class="auth-section-new">
+    <div class="background_login"></div>
     <div class="auth-container-new">
         <div class="auth-card">
             <!-- Left Column: Login Form -->
