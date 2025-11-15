@@ -31,6 +31,12 @@ class Controller {
     
     protected function redirect($url) {
         $base_url = 'http://localhost/DuAn1/';
+        
+        // Nếu URL không bắt đầu bằng http hoặc ?route=, thêm ?route=
+        if (strpos($url, 'http') !== 0 && strpos($url, '?route=') !== 0 && strpos($url, '/') !== 0) {
+            $url = '?route=' . $url;
+        }
+        
         header('Location: ' . $base_url . $url);
         exit;
     }
@@ -55,6 +61,28 @@ class Controller {
     protected function requireLogin() {
         if (!$this->isLoggedIn()) {
             $this->redirect('?route=auth/login');
+        }
+    }
+    
+    protected function isAdmin() {
+        $user = $this->getCurrentUser();
+        if (!$user) {
+            return false;
+        }
+        
+        require_once __DIR__ . '/AdminMiddleware.php';
+        
+        // Kiểm tra role cũ
+        if (isset($user['role']) && $user['role'] === 'admin') {
+            return true;
+        }
+        
+        // Kiểm tra role trong bảng roles
+        try {
+            return AdminMiddleware::hasRole($user['id'], 'Super Admin') || 
+                   AdminMiddleware::hasRole($user['id'], 'Admin');
+        } catch (Exception $e) {
+            return false;
         }
     }
 }

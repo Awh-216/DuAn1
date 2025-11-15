@@ -41,14 +41,30 @@ class AdminController extends Controller {
             'active_users_today' => $db->fetch("SELECT COUNT(DISTINCT user_id) as count FROM watch_history WHERE DATE(created_at) = CURDATE()")['count'],
         ];
         
-        // Doanh thu theo ngày (7 ngày gần nhất)
+        // Doanh thu theo ngày (7 ngày gần nhất) - Đảm bảo có đủ 7 ngày
         $revenueByDay = $db->fetchAll("
-            SELECT DATE(created_at) as date, SUM(amount) as revenue
+            SELECT DATE(created_at) as date, SUM(amount) as revenue, COUNT(*) as transaction_count
             FROM transactions
             WHERE status = 'Thành công' AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
             GROUP BY DATE(created_at)
-            ORDER BY date DESC
+            ORDER BY date ASC
         ");
+        
+        // Tạo mảng đầy đủ 7 ngày gần nhất
+        $allDays = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-$i days"));
+            $allDays[$date] = ['date' => $date, 'revenue' => 0, 'transaction_count' => 0];
+        }
+        
+        // Merge dữ liệu thực tế
+        foreach ($revenueByDay as $day) {
+            if (isset($allDays[$day['date']])) {
+                $allDays[$day['date']] = $day;
+            }
+        }
+        
+        $revenueByDay = array_values($allDays);
         
         // Top phim xem nhiều nhất
         $topMovies = $db->fetchAll("
@@ -134,9 +150,9 @@ class AdminController extends Controller {
             $params[] = $category_id;
         }
         
-        if ($status) {
+        if (!empty($status)) {
             $sql .= " AND m.status = ?";
-            $params[] = $status;
+            $params[] = trim($status);
         }
         
         $sql .= " ORDER BY m.created_at DESC";
@@ -153,6 +169,364 @@ class AdminController extends Controller {
             'title' => 'Quản lý phim',
             'current_page' => 'movies'
         ]);
+    }
+    
+    // Create Movie (Form)
+    public function moviesCreate() {
+        $user = AdminMiddleware::checkAdmin();
+        $db = Database::getInstance();
+        
+        require_once __DIR__ . '/../movie/CategoryModel.php';
+        $categoryModel = new CategoryModel();
+        $categories = $categoryModel->getAll();
+        
+        // Lấy danh sách rạp
+        $theaters = $db->fetchAll("SELECT * FROM theaters WHERE is_active = 1 ORDER BY name");
+        
+        $this->adminView('movies/create', [
+            'categories' => $categories,
+            'theaters' => $theaters,
+            'user' => $user,
+            'title' => 'Thêm phim mới',
+            'current_page' => 'movies'
+        ]);
+    }
+    
+    // Store Movie
+    public function moviesStore() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/movies');
+        }
+        
+        $title = $_POST['title'] ?? '';
+        $category_id = !empty($_POST['category_id']) ? intval($_POST['category_id']) : null;
+        $level = $_POST['level'] ?? 'Free';
+        $duration = !empty($_POST['duration']) ? intval($_POST['duration']) : null;
+        $description = $_POST['description'] ?? '';
+        $director = $_POST['director'] ?? '';
+        $actors = $_POST['actors'] ?? '';
+        $video_url = $_POST['video_url'] ?? '';
+        $trailer_url = $_POST['trailer_url'] ?? '';
+        $thumbnail = $_POST['thumbnail'] ?? '';
+        $status = $_POST['status'] ?? 'Sắp chiếu';
+        $status_admin = $_POST['status_admin'] ?? 'draft';
+        $rating = floatval($_POST['rating'] ?? 0);
+        $country = $_POST['country'] ?? '';
+        $language = $_POST['language'] ?? '';
+        $age_rating = $_POST['age_rating'] ?? '';
+        $banner = $_POST['banner'] ?? '';
+        
+        if (empty($title)) {
+            $_SESSION['error'] = 'Tiêu đề phim không được để trống!';
+            $this->redirect('admin/movies/create');
+        }
+        
+        try {
+            $db->execute("
+                INSERT INTO movies (
+                    title, category_id, level, duration, description, director, actors,
+                    video_url, trailer_url, thumbnail, status, status_admin, rating,
+                    country, language, age_rating, banner
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ", [
+                $title, $category_id, $level, $duration, $description, $director, $actors,
+                $video_url, $trailer_url, $thumbnail, $status, $status_admin, $rating,
+                $country, $language, $age_rating, $banner
+            ]);
+            
+            $movie_id = $db->lastInsertId();
+            
+            // Log activity
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Thêm phim',
+                'Movie',
+                'movie',
+                $movie_id,
+                null,
+                ['title' => $title, 'status' => $status, 'status_admin' => $status_admin]
+            );
+            
+            // Nếu là phim chiếu rạp, tạo các suất chiếu
+            if ($status === 'Chiếu rạp') {
+                $showtimeCount = 0;
+                
+                // Kiểm tra dữ liệu từ form mới (khoảng ngày)
+                if (!empty($_POST['schedule_theater_id']) && !empty($_POST['from_date']) && !empty($_POST['to_date']) && !empty($_POST['showtimes_time'])) {
+                    $theater_id = intval($_POST['schedule_theater_id']);
+                    $from_date = $_POST['from_date'];
+                    $to_date = $_POST['to_date'];
+                    $times = $_POST['showtimes_time'] ?? [];
+                    $default_price = floatval($_POST['default_price'] ?? 120000);
+                    $screen_id = !empty($_POST['screen_id']) ? intval($_POST['screen_id']) : null;
+                    
+                    // Tạo suất chiếu cho từng ngày trong khoảng
+                    $start = new DateTime($from_date);
+                    $end = new DateTime($to_date);
+                    $end->modify('+1 day'); // Để bao gồm cả ngày cuối
+                    
+                    $interval = new DateInterval('P1D');
+                    $period = new DatePeriod($start, $interval, $end);
+                    
+                    foreach ($period as $date) {
+                        $show_date = $date->format('Y-m-d');
+                        
+                        // Tạo suất chiếu cho mỗi khung giờ
+                        foreach ($times as $show_time) {
+                            if (!empty($show_time)) {
+                                $db->execute("
+                                    INSERT INTO showtimes (movie_id, theater_id, show_date, show_time, price, screen_id)
+                                    VALUES (?, ?, ?, ?, ?, ?)
+                                ", [$movie_id, $theater_id, $show_date, $show_time, $default_price, $screen_id]);
+                                $showtimeCount++;
+                            }
+                        }
+                    }
+                    
+                    if ($showtimeCount > 0) {
+                        $_SESSION['success'] = 'Thêm phim thành công! Đã tạo ' . $showtimeCount . ' suất chiếu.';
+                    } else {
+                        $_SESSION['success'] = 'Thêm phim thành công!';
+                    }
+                } 
+                // Fallback: Xử lý dữ liệu cũ (nếu có)
+                elseif (isset($_POST['showtimes']) && is_array($_POST['showtimes'])) {
+                    foreach ($_POST['showtimes'] as $showtimeData) {
+                        if (!empty($showtimeData['theater_id']) && !empty($showtimeData['show_date']) && !empty($showtimeData['show_time'])) {
+                            $theater_id = intval($showtimeData['theater_id']);
+                            $show_date = $showtimeData['show_date'];
+                            $show_time = $showtimeData['show_time'];
+                            $price = floatval($showtimeData['price'] ?? 120000);
+                            $screen_id = !empty($showtimeData['screen_id']) ? intval($showtimeData['screen_id']) : null;
+                            
+                            $db->execute("
+                                INSERT INTO showtimes (movie_id, theater_id, show_date, show_time, price, screen_id)
+                                VALUES (?, ?, ?, ?, ?, ?)
+                            ", [$movie_id, $theater_id, $show_date, $show_time, $price, $screen_id]);
+                            $showtimeCount++;
+                        }
+                    }
+                    
+                    if ($showtimeCount > 0) {
+                        $_SESSION['success'] = 'Thêm phim thành công! Đã tạo ' . $showtimeCount . ' suất chiếu.';
+                    } else {
+                        $_SESSION['success'] = 'Thêm phim thành công!';
+                    }
+                } else {
+                    $_SESSION['success'] = 'Thêm phim thành công! (Chưa có lịch chiếu)';
+                }
+            } else {
+                $_SESSION['success'] = 'Thêm phim thành công!';
+            }
+            
+            $this->redirect('admin/movies');
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+            $this->redirect('admin/movies/create');
+        }
+    }
+    
+    // Edit Movie
+    public function moviesEdit() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            $this->redirect('admin/movies');
+        }
+        
+        $movie = $db->fetch("SELECT * FROM movies WHERE id = ?", [$id]);
+        if (!$movie) {
+            $_SESSION['error'] = 'Không tìm thấy phim!';
+            $this->redirect('admin/movies');
+        }
+        
+        require_once __DIR__ . '/../movie/CategoryModel.php';
+        $categoryModel = new CategoryModel();
+        $categories = $categoryModel->getAll();
+        
+        // Lấy danh sách rạp
+        $theaters = $db->fetchAll("SELECT * FROM theaters WHERE is_active = 1 ORDER BY name");
+        
+        // Lấy showtimes hiện tại nếu có
+        $existingShowtimes = [];
+        if ($movie['status'] === 'Chiếu rạp') {
+            $existingShowtimes = $db->fetchAll("SELECT * FROM showtimes WHERE movie_id = ? ORDER BY show_date, show_time", [$id]);
+        }
+        
+        $this->adminView('movies/edit', [
+            'movie' => $movie,
+            'categories' => $categories,
+            'theaters' => $theaters,
+            'existingShowtimes' => $existingShowtimes,
+            'user' => $user,
+            'title' => 'Sửa phim',
+            'current_page' => 'movies'
+        ]);
+    }
+    
+    // Update Movie
+    public function moviesUpdate() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/movies');
+        }
+        
+        $id = $_POST['id'] ?? null;
+        if (!$id) {
+            $this->redirect('admin/movies');
+        }
+        
+        $title = $_POST['title'] ?? '';
+        $category_id = !empty($_POST['category_id']) ? intval($_POST['category_id']) : null;
+        $level = $_POST['level'] ?? 'Free';
+        $duration = !empty($_POST['duration']) ? intval($_POST['duration']) : null;
+        $description = $_POST['description'] ?? '';
+        $director = $_POST['director'] ?? '';
+        $actors = $_POST['actors'] ?? '';
+        $video_url = $_POST['video_url'] ?? '';
+        $trailer_url = $_POST['trailer_url'] ?? '';
+        $thumbnail = $_POST['thumbnail'] ?? '';
+        $status = $_POST['status'] ?? 'Sắp chiếu';
+        $status_admin = $_POST['status_admin'] ?? 'draft';
+        $rating = floatval($_POST['rating'] ?? 0);
+        $country = $_POST['country'] ?? '';
+        $language = $_POST['language'] ?? '';
+        $age_rating = $_POST['age_rating'] ?? '';
+        $banner = $_POST['banner'] ?? '';
+        
+        if (empty($title)) {
+            $_SESSION['error'] = 'Tiêu đề phim không được để trống!';
+            $this->redirect('admin/movies/edit&id=' . $id);
+        }
+        
+        try {
+            // Lấy thông tin phim cũ để log
+            $oldMovie = $db->fetch("SELECT * FROM movies WHERE id = ?", [$id]);
+            
+            $db->execute("
+                UPDATE movies SET
+                    title = ?, category_id = ?, level = ?, duration = ?, description = ?,
+                    director = ?, actors = ?, video_url = ?, trailer_url = ?, thumbnail = ?,
+                    status = ?, status_admin = ?, rating = ?, country = ?, language = ?,
+                    age_rating = ?, banner = ?
+                WHERE id = ?
+            ", [
+                $title, $category_id, $level, $duration, $description, $director, $actors,
+                $video_url, $trailer_url, $thumbnail, $status, $status_admin, $rating,
+                $country, $language, $age_rating, $banner, $id
+            ]);
+            
+            // Log activity
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Cập nhật phim',
+                'Movie',
+                'movie',
+                $id,
+                ['title' => $oldMovie['title'] ?? '', 'status' => $oldMovie['status'] ?? '', 'status_admin' => $oldMovie['status_admin'] ?? ''],
+                ['title' => $title, 'status' => $status, 'status_admin' => $status_admin]
+            );
+            
+            // Xử lý lịch chiếu rạp
+            if ($status === 'Chiếu rạp') {
+                // Xóa tất cả showtimes cũ
+                $db->execute("DELETE FROM showtimes WHERE movie_id = ?", [$id]);
+                $showtimeCount = 0;
+                
+                // Kiểm tra dữ liệu từ form mới (khoảng ngày)
+                if (!empty($_POST['schedule_theater_id']) && !empty($_POST['from_date']) && !empty($_POST['to_date']) && !empty($_POST['showtimes_time'])) {
+                    $theater_id = intval($_POST['schedule_theater_id']);
+                    $from_date = $_POST['from_date'];
+                    $to_date = $_POST['to_date'];
+                    $times = $_POST['showtimes_time'] ?? [];
+                    $default_price = floatval($_POST['default_price'] ?? 120000);
+                    $screen_id = !empty($_POST['screen_id']) ? intval($_POST['screen_id']) : null;
+                    
+                    // Tạo suất chiếu cho từng ngày trong khoảng
+                    $start = new DateTime($from_date);
+                    $end = new DateTime($to_date);
+                    $end->modify('+1 day'); // Để bao gồm cả ngày cuối
+                    
+                    $interval = new DateInterval('P1D');
+                    $period = new DatePeriod($start, $interval, $end);
+                    
+                    foreach ($period as $date) {
+                        $show_date = $date->format('Y-m-d');
+                        
+                        // Tạo suất chiếu cho mỗi khung giờ
+                        foreach ($times as $show_time) {
+                            if (!empty($show_time)) {
+                                $db->execute("
+                                    INSERT INTO showtimes (movie_id, theater_id, show_date, show_time, price, screen_id)
+                                    VALUES (?, ?, ?, ?, ?, ?)
+                                ", [$id, $theater_id, $show_date, $show_time, $default_price, $screen_id]);
+                                $showtimeCount++;
+                            }
+                        }
+                    }
+                    
+                    if ($showtimeCount > 0) {
+                        $_SESSION['success'] = 'Cập nhật phim thành công! Đã cập nhật ' . $showtimeCount . ' suất chiếu.';
+                    } else {
+                        $_SESSION['success'] = 'Cập nhật phim thành công! (Đã xóa lịch chiếu cũ)';
+                    }
+                } else {
+                    $_SESSION['success'] = 'Cập nhật phim thành công! (Đã xóa lịch chiếu cũ)';
+                }
+            } else {
+                // Nếu không còn là "Chiếu rạp", xóa tất cả showtimes
+                $db->execute("DELETE FROM showtimes WHERE movie_id = ?", [$id]);
+                $_SESSION['success'] = 'Cập nhật phim thành công!';
+            }
+            
+            $this->redirect('admin/movies');
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+            $this->redirect('admin/movies/edit&id=' . $id);
+        }
+    }
+    
+    // Delete Movie
+    public function moviesDelete() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            $this->redirect('admin/movies');
+        }
+        
+        try {
+            // Lấy thông tin phim trước khi xóa để log
+            $movie = $db->fetch("SELECT * FROM movies WHERE id = ?", [$id]);
+            
+            if ($movie) {
+                // Log activity
+                AdminMiddleware::logAction(
+                    $user['id'],
+                    'Xóa phim',
+                    'Movie',
+                    'movie',
+                    $id,
+                    ['title' => $movie['title'], 'status' => $movie['status'], 'status_admin' => $movie['status_admin'] ?? ''],
+                    null
+                );
+            }
+            
+            $db->execute("DELETE FROM movies WHERE id = ?", [$id]);
+            $_SESSION['success'] = 'Xóa phim thành công!';
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+        }
+        
+        $this->redirect('admin/movies');
     }
     
     // Tickets Management
@@ -195,15 +569,276 @@ class AdminController extends Controller {
         ]);
     }
     
+    // Create Theater (Form)
+    public function theatersCreate() {
+        $user = AdminMiddleware::checkAdmin();
+        
+        $this->adminView('theaters/create', [
+            'user' => $user,
+            'title' => 'Thêm rạp mới',
+            'current_page' => 'theaters'
+        ]);
+    }
+    
+    // Store Theater
+    public function theatersStore() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/theaters');
+        }
+        
+        $name = $_POST['name'] ?? '';
+        $location = $_POST['location'] ?? '';
+        $phone = $_POST['phone'] ?? '';
+        $address = $_POST['address'] ?? '';
+        $total_screens = intval($_POST['total_screens'] ?? 1);
+        
+        if (empty($name)) {
+            $_SESSION['error'] = 'Tên rạp không được để trống!';
+            $this->redirect('admin/theaters/create');
+        }
+        
+        try {
+            $db->execute("
+                INSERT INTO theaters (name, location, phone, address, total_screens, is_active)
+                VALUES (?, ?, ?, ?, ?, 1)
+            ", [$name, $location, $phone, $address, $total_screens]);
+            
+            $theater_id = $db->lastInsertId();
+            
+            // Log activity
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Thêm rạp',
+                'Theater',
+                'theater',
+                $theater_id,
+                null,
+                ['name' => $name, 'location' => $location]
+            );
+            
+            $_SESSION['success'] = 'Thêm rạp thành công!';
+            $this->redirect('admin/theaters');
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+            $this->redirect('admin/theaters/create');
+        }
+    }
+    
+    // Edit Theater
+    public function theatersEdit() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            $this->redirect('admin/theaters');
+        }
+        
+        $theater = $db->fetch("SELECT * FROM theaters WHERE id = ?", [$id]);
+        if (!$theater) {
+            $_SESSION['error'] = 'Không tìm thấy rạp!';
+            $this->redirect('admin/theaters');
+        }
+        
+        $this->adminView('theaters/edit', [
+            'theater' => $theater,
+            'user' => $user,
+            'title' => 'Sửa rạp',
+            'current_page' => 'theaters'
+        ]);
+    }
+    
+    // Update Theater
+    public function theatersUpdate() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/theaters');
+        }
+        
+        $id = $_POST['id'] ?? null;
+        if (!$id) {
+            $this->redirect('admin/theaters');
+        }
+        
+        $name = $_POST['name'] ?? '';
+        $location = $_POST['location'] ?? '';
+        $phone = $_POST['phone'] ?? '';
+        $address = $_POST['address'] ?? '';
+        $total_screens = intval($_POST['total_screens'] ?? 1);
+        $is_active = isset($_POST['is_active']) ? 1 : 0;
+        
+        if (empty($name)) {
+            $_SESSION['error'] = 'Tên rạp không được để trống!';
+            $this->redirect('admin/theaters/edit&id=' . $id);
+        }
+        
+        try {
+            // Lấy thông tin rạp cũ để log
+            $oldTheater = $db->fetch("SELECT * FROM theaters WHERE id = ?", [$id]);
+            
+            $db->execute("
+                UPDATE theaters 
+                SET name = ?, location = ?, phone = ?, address = ?, total_screens = ?, is_active = ?
+                WHERE id = ?
+            ", [$name, $location, $phone, $address, $total_screens, $is_active, $id]);
+            
+            // Log activity
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Cập nhật rạp',
+                'Theater',
+                'theater',
+                $id,
+                ['name' => $oldTheater['name'] ?? '', 'location' => $oldTheater['location'] ?? ''],
+                ['name' => $name, 'location' => $location]
+            );
+            
+            $_SESSION['success'] = 'Cập nhật rạp thành công!';
+            $this->redirect('admin/theaters');
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+            $this->redirect('admin/theaters/edit&id=' . $id);
+        }
+    }
+    
+    // Delete Theater
+    public function theatersDelete() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            $this->redirect('admin/theaters');
+        }
+        
+        try {
+            // Lấy thông tin rạp trước khi xóa để log
+            $theater = $db->fetch("SELECT * FROM theaters WHERE id = ?", [$id]);
+            
+            if ($theater) {
+                // Log activity
+                AdminMiddleware::logAction(
+                    $user['id'],
+                    'Xóa rạp',
+                    'Theater',
+                    'theater',
+                    $id,
+                    ['name' => $theater['name'], 'location' => $theater['location'] ?? ''],
+                    null
+                );
+            }
+            
+            $db->execute("DELETE FROM theaters WHERE id = ?", [$id]);
+            $_SESSION['success'] = 'Xóa rạp thành công!';
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+        }
+        
+        $this->redirect('admin/theaters');
+    }
+    
     // Analytics
     public function analytics() {
         $db = Database::getInstance();
         $user = AdminMiddleware::checkAdmin();
         
+        $period = $_GET['period'] ?? 'month'; // day, week, month
+        
+        // Revenue analytics - Tính từ cả transactions và tickets
+        $revenueData = [];
+        switch ($period) {
+            case 'day':
+                // Doanh thu theo ngày (30 ngày gần nhất)
+                $revenueData = $db->fetchAll("
+                    SELECT DATE(created_at) as period, 
+                           SUM(amount) as revenue, 
+                           COUNT(*) as transaction_count
+                    FROM transactions
+                    WHERE status = 'Thành công' 
+                      AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                    GROUP BY DATE(created_at)
+                    ORDER BY period ASC
+                ");
+                // Format lại period để hiển thị
+                foreach ($revenueData as &$item) {
+                    $item['period'] = date('d/m', strtotime($item['period']));
+                }
+                break;
+            case 'week':
+                // Doanh thu theo tuần (12 tuần gần nhất)
+                $revenueData = $db->fetchAll("
+                    SELECT CONCAT('Tuần ', WEEK(created_at), '/', YEAR(created_at)) as period,
+                           SUM(amount) as revenue,
+                           COUNT(*) as transaction_count
+                    FROM transactions
+                    WHERE status = 'Thành công' 
+                      AND created_at >= DATE_SUB(NOW(), INTERVAL 12 WEEK)
+                    GROUP BY YEARWEEK(created_at)
+                    ORDER BY YEARWEEK(created_at) ASC
+                ");
+                break;
+            case 'month':
+                // Doanh thu theo tháng (12 tháng gần nhất)
+                $revenueData = $db->fetchAll("
+                    SELECT DATE_FORMAT(created_at, '%m/%Y') as period,
+                           SUM(amount) as revenue,
+                           COUNT(*) as transaction_count
+                    FROM transactions
+                    WHERE status = 'Thành công' 
+                      AND created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+                    GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+                    ORDER BY DATE_FORMAT(created_at, '%Y-%m') ASC
+                ");
+                break;
+        }
+        
+        // Top movies by revenue - Tính từ tickets
+        $topMoviesByRevenue = $db->fetchAll("
+            SELECT m.id, m.title, 
+                   SUM(t.price) as revenue, 
+                   COUNT(t.id) as ticket_count
+            FROM movies m
+            JOIN showtimes s ON m.id = s.movie_id
+            JOIN tickets t ON s.id = t.showtime_id
+            WHERE t.status = 'Đã đặt'
+            GROUP BY m.id, m.title
+            ORDER BY revenue DESC
+            LIMIT 10
+        ");
+        
+        // Thống kê tổng quan
+        $summaryStats = [
+            'total_revenue' => $db->fetch("SELECT SUM(amount) as total FROM transactions WHERE status = 'Thành công'")['total'] ?? 0,
+            'total_transactions' => $db->fetch("SELECT COUNT(*) as count FROM transactions WHERE status = 'Thành công'")['count'],
+            'total_tickets' => $db->fetch("SELECT COUNT(*) as count FROM tickets WHERE status = 'Đã đặt'")['count'],
+            'avg_ticket_price' => $db->fetch("SELECT AVG(price) as avg FROM tickets WHERE status = 'Đã đặt'")['avg'] ?? 0,
+        ];
+        
+        // Doanh thu theo phương thức thanh toán
+        $revenueByMethod = $db->fetchAll("
+            SELECT method, 
+                   SUM(amount) as revenue,
+                   COUNT(*) as count
+            FROM transactions
+            WHERE status = 'Thành công'
+            GROUP BY method
+            ORDER BY revenue DESC
+        ");
+        
         $this->adminView('analytics', [
             'user' => $user,
-            'title' => 'Phân tích',
-            'current_page' => 'analytics'
+            'title' => 'Analytics & Báo cáo',
+            'current_page' => 'analytics',
+            'period' => $period,
+            'revenueData' => $revenueData,
+            'topMoviesByRevenue' => $topMoviesByRevenue,
+            'summaryStats' => $summaryStats,
+            'revenueByMethod' => $revenueByMethod
         ]);
     }
     
@@ -232,19 +867,60 @@ class AdminController extends Controller {
         $db = Database::getInstance();
         $user = AdminMiddleware::checkAdmin();
         
-        $logs = $db->fetchAll("
-            SELECT al.*, u.name as user_name, u.email
-            FROM admin_logs al
-            JOIN users u ON al.user_id = u.id
-            ORDER BY al.created_at DESC
-            LIMIT 100
-        ");
+        $module = $_GET['module'] ?? '';
+        $action_filter = $_GET['action'] ?? '';
+        $page = intval($_GET['page'] ?? 1);
+        $limit = 50;
+        $offset = ($page - 1) * $limit;
+        
+        $sql = "SELECT al.*, u.name as user_name, u.email as user_email
+                FROM admin_logs al
+                LEFT JOIN users u ON al.user_id = u.id
+                WHERE 1=1";
+        $params = [];
+        
+        if ($module) {
+            $sql .= " AND al.module = ?";
+            $params[] = $module;
+        }
+        
+        if ($action_filter) {
+            $sql .= " AND al.action LIKE ?";
+            $params[] = "%$action_filter%";
+        }
+        
+        $sql .= " ORDER BY al.created_at DESC LIMIT $limit OFFSET $offset";
+        
+        $logs = $db->fetchAll($sql, $params);
+        
+        // Đếm tổng số log
+        $countSql = "SELECT COUNT(*) as count FROM admin_logs WHERE 1=1";
+        $countParams = [];
+        
+        if ($module) {
+            $countSql .= " AND module = ?";
+            $countParams[] = $module;
+        }
+        
+        if ($action_filter) {
+            $countSql .= " AND action LIKE ?";
+            $countParams[] = "%$action_filter%";
+        }
+        
+        $total = $db->fetch($countSql, $countParams)['count'];
+        $total_pages = ceil($total / $limit);
         
         $this->adminView('logs', [
             'logs' => $logs,
             'user' => $user,
-            'title' => 'Nhật ký',
-            'current_page' => 'logs'
+            'title' => 'Lịch sử hoạt động',
+            'current_page' => 'logs',
+            'module' => $module,
+            'action' => $action_filter,
+            'page' => $page,
+            'total_pages' => $total_pages,
+            'total' => $total,
+            'limit' => $limit
         ]);
     }
 }

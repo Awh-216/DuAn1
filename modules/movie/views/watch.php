@@ -53,15 +53,15 @@ $title = htmlspecialchars($movie['title']);
                 <?php endif; ?>
             </div>
 
-            <div class="reviews-section">
+            <div class="reviews-section" id="reviews">
                 <h2><i class="fas fa-comments"></i> Đánh giá</h2>
                 
                 <?php if (isset($user) && $user): ?>
-                    <form method="POST" action="http://localhost/DuAn1/?route=review/create" class="review-form">
+                    <form method="POST" action="?route=review/create" class="review-form" id="reviewForm">
                         <input type="hidden" name="movie_id" value="<?php echo $movie['id']; ?>">
                         <div class="rating-input">
                             <label>Đánh giá:</label>
-                            <select name="rating" required>
+                            <select name="rating" id="ratingSelect" required>
                                 <option value="">Chọn điểm</option>
                                 <option value="5">5 sao</option>
                                 <option value="4">4 sao</option>
@@ -70,7 +70,7 @@ $title = htmlspecialchars($movie['title']);
                                 <option value="1">1 sao</option>
                             </select>
                         </div>
-                        <textarea name="comment" placeholder="Viết đánh giá của bạn..." rows="3"></textarea>
+                        <textarea name="comment" id="commentText" placeholder="Viết đánh giá của bạn..." rows="3"></textarea>
                         <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
                     </form>
                 <?php endif; ?>
@@ -80,15 +80,44 @@ $title = htmlspecialchars($movie['title']);
                         <p class="no-reviews">Chưa có đánh giá nào.</p>
                     <?php else: ?>
                         <?php foreach ($reviews as $review): ?>
-                            <div class="review-item">
-                                <div class="review-header">
-                                    <strong><?php echo htmlspecialchars($review['user_name']); ?></strong>
-                                    <span class="review-rating">
-                                        <?php for ($i = 0; $i < $review['rating']; $i++): ?>
-                                            <i class="fas fa-star"></i>
-                                        <?php endfor; ?>
+                            <div class="review-item <?php echo (isset($review['is_pinned']) && $review['is_pinned']) ? 'review-pinned' : ''; ?>">
+                                <?php if (isset($review['is_pinned']) && $review['is_pinned']): ?>
+                                    <span class="badge bg-warning mb-2">
+                                        <i class="fas fa-thumbtack"></i> Đã ghim
                                     </span>
-                                    <span class="review-date"><?php echo date('d/m/Y', strtotime($review['created_at'])); ?></span>
+                                <?php endif; ?>
+                                
+                                <div class="review-header">
+                                    <div class="d-flex justify-content-between align-items-start w-100">
+                                        <div>
+                                            <strong><?php echo htmlspecialchars($review['user_name']); ?></strong>
+                                            <span class="review-rating ms-2">
+                                                <?php for ($i = 0; $i < $review['rating']; $i++): ?>
+                                                    <i class="fas fa-star text-warning"></i>
+                                                <?php endfor; ?>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="review-date"><?php echo date('d/m/Y', strtotime($review['created_at'])); ?></span>
+                                            
+                                            <?php if (isset($isAdmin) && $isAdmin): ?>
+                                                <div class="review-actions">
+                                                    <a href="?route=review/pin&id=<?php echo $review['id']; ?>&movie_id=<?php echo $movie['id']; ?>&pin=<?php echo (isset($review['is_pinned']) && $review['is_pinned']) ? 0 : 1; ?>" 
+                                                       class="btn btn-sm btn-outline-info" 
+                                                       title="<?php echo (isset($review['is_pinned']) && $review['is_pinned']) ? 'Bỏ ghim' : 'Ghim'; ?>"
+                                                       onclick="return confirm('<?php echo (isset($review['is_pinned']) && $review['is_pinned']) ? 'Bỏ ghim' : 'Ghim'; ?> bình luận này?')">
+                                                        <i class="fas fa-thumbtack"></i>
+                                                    </a>
+                                                    <a href="?route=review/delete&id=<?php echo $review['id']; ?>&movie_id=<?php echo $movie['id']; ?>" 
+                                                       class="btn btn-sm btn-outline-danger" 
+                                                       title="Xóa"
+                                                       onclick="return confirm('Bạn có chắc chắn muốn xóa bình luận này?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
                                 </div>
                                 <?php if ($review['comment']): ?>
                                     <p class="review-comment"><?php echo nl2br(htmlspecialchars($review['comment'])); ?></p>
@@ -101,4 +130,38 @@ $title = htmlspecialchars($movie['title']);
         </div>
     </div>
 </section>
+
+<script>
+// Scroll đến phần reviews nếu có hash trong URL
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.hash === '#reviews') {
+        setTimeout(function() {
+            const reviewsSection = document.getElementById('reviews');
+            if (reviewsSection) {
+                reviewsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
+    }
+    
+    // Scroll mượt đến reviews sau khi submit (fallback)
+    const reviewForm = document.getElementById('reviewForm');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', function() {
+            // Lưu vị trí scroll hiện tại vào sessionStorage
+            sessionStorage.setItem('scrollToReviews', 'true');
+        });
+    }
+    
+    // Kiểm tra nếu cần scroll sau khi reload
+    if (sessionStorage.getItem('scrollToReviews') === 'true') {
+        sessionStorage.removeItem('scrollToReviews');
+        setTimeout(function() {
+            const reviewsSection = document.getElementById('reviews');
+            if (reviewsSection) {
+                reviewsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 300);
+    }
+});
+</script>
 

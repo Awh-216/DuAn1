@@ -3,7 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($title) ? $title . ' - ' : ''; ?>CineHub</title>
+    <title><?php echo isset($title) ? $title . ($title != 'CineHub' ? ' - ' : '') : ''; ?>CineHub</title>
+    <?php if (isset($meta_description)): ?>
+    <meta name="description" content="<?php echo htmlspecialchars($meta_description); ?>">
+    <?php endif; ?>
+    <?php if (isset($meta_keywords)): ?>
+    <meta name="keywords" content="<?php echo htmlspecialchars($meta_keywords); ?>">
+    <?php endif; ?>
+    <?php if (isset($meta_og_title)): ?>
+    <meta property="og:title" content="<?php echo htmlspecialchars($meta_og_title); ?>">
+    <?php endif; ?>
+    <?php if (isset($meta_og_description)): ?>
+    <meta property="og:description" content="<?php echo htmlspecialchars($meta_og_description); ?>">
+    <?php endif; ?>
+    <?php if (isset($meta_og_image)): ?>
+    <meta property="og:image" content="<?php echo htmlspecialchars($meta_og_image); ?>">
+    <?php endif; ?>
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="CineHub">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="http://localhost/DuAn1/style.css">

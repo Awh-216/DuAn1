@@ -41,21 +41,89 @@ spl_autoload_register(function ($class) {
 $route = $_GET['route'] ?? 'home/index';
 $parts = explode('/', $route);
 
-$controllerName = ucfirst($parts[0]) . 'Controller';
-$action = $parts[1] ?? 'index';
+// Nếu route rỗng hoặc chỉ có '/', mặc định về home/index
+if (empty($route) || $route === '/' || (count($parts) === 1 && empty($parts[0]))) {
+    $route = 'home/index';
+    $parts = explode('/', $route);
+}
+
+// Map các route đặc biệt cho controller name
+$controllerMap = [
+    'auth' => 'AuthController',  // auth -> AuthController trong user module
+    'profile' => 'ProfileController'  // profile -> ProfileController trong user module
+];
+
+$firstPart = $parts[0];
+$controllerName = null;
+
+// Kiểm tra xem có controller đặc biệt không
+if (isset($controllerMap[$firstPart])) {
+    $controllerName = $controllerMap[$firstPart];
+    // Load controller từ user module
+    $controllerPath = __DIR__ . '/modules/user/' . $controllerName . '.php';
+    if (file_exists($controllerPath) && !class_exists($controllerName)) {
+        require_once $controllerPath;
+    }
+} else {
+    $controllerName = ucfirst($firstPart) . 'Controller';
+}
+
+// Xử lý nested routes (ví dụ: admin/theaters/create -> theatersCreate)
+$action = '';
+if (count($parts) >= 3) {
+    // Nested route: admin/theaters/create -> theatersCreate
+    $action = $parts[1] . ucfirst($parts[2]);
+} else {
+    $action = $parts[1] ?? 'index';
+}
 
 // Kiểm tra controller tồn tại
 if (!class_exists($controllerName)) {
-    $controllerName = 'HomeController';
-    $action = 'index';
+    // Nếu controller được map từ route đặc biệt, thử load từ module
+    if (isset($controllerMap[$firstPart])) {
+        $moduleForMap = 'user';
+        $controllerPath = __DIR__ . '/modules/' . $moduleForMap . '/' . $controllerName . '.php';
+        if (file_exists($controllerPath)) {
+            require_once $controllerPath;
+        }
+    }
+    
+    // Nếu vẫn không tồn tại, fallback về HomeController
+    if (!class_exists($controllerName)) {
+        $controllerName = 'HomeController';
+        $action = 'index';
+    }
 }
 
 // Kiểm tra action tồn tại
-$controller = new $controllerName();
-if (!method_exists($controller, $action)) {
-    $action = 'index';
+try {
+    $controller = new $controllerName();
+    if (!method_exists($controller, $action)) {
+        // Fallback: thử với action đơn giản (theaters/create -> theaters)
+        if (count($parts) >= 2 && !empty($parts[1])) {
+            $action = $parts[1];
+        } else {
+            $action = 'index';
+        }
+        
+        if (!method_exists($controller, $action)) {
+            // Nếu vẫn không có, dùng HomeController
+            $controllerName = 'HomeController';
+            $controller = new $controllerName();
+            $action = 'index';
+        }
+    }
+    
+    // Gọi action
+    $controller->$action();
+} catch (Exception $e) {
+    // Fallback về HomeController nếu có lỗi
+    if ($controllerName !== 'HomeController') {
+        $controllerName = 'HomeController';
+        $controller = new $controllerName();
+        $controller->index();
+    } else {
+        die('Error: Controller not found');
+    }
 }
-
-// Gọi action
-$controller->$action();
 ?>

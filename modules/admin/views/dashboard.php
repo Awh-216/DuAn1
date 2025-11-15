@@ -163,24 +163,73 @@
 const ctx = document.getElementById('revenueChart');
 if (ctx) {
     const revenueData = <?php echo json_encode($revenueByDay); ?>;
+    
+    // Format ngày để hiển thị
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+    };
+    
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: revenueData.map(item => item.date),
+            labels: revenueData.map(item => formatDate(item.date)),
             datasets: [{
                 label: 'Doanh thu (₫)',
                 data: revenueData.map(item => parseFloat(item.revenue || 0)),
                 borderColor: 'rgb(75, 192, 192)',
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                tension: 0.1
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: 'rgb(75, 192, 192)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed.y;
+                            return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND'
+                            }).format(value);
+                        }
+                    }
+                }
+            },
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            if (value >= 1000000) {
+                                return (value / 1000000).toFixed(1) + 'M₫';
+                            } else if (value >= 1000) {
+                                return (value / 1000).toFixed(0) + 'K₫';
+                            }
+                            return value + '₫';
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
                 }
             }
         }

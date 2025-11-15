@@ -132,7 +132,7 @@
                 <i class="fas fa-headset"></i> Hỗ trợ khách hàng
             </a></li>
             <li><a href="?route=admin/logs" class="<?php echo ($current_page ?? '') === 'logs' ? 'active' : ''; ?>">
-                <i class="fas fa-history"></i> System Logs
+                <i class="fas fa-history"></i> Lịch sử hoạt động
             </a></li>
             <li><a href="http://localhost/DuAn1/">
                 <i class="fas fa-home"></i> Về trang chủ

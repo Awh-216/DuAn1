@@ -13,12 +13,11 @@
             <input type="text" name="search" class="form-control" placeholder="Tìm kiếm phim..." value="<?php echo htmlspecialchars($search ?? ''); ?>">
         </div>
         <div class="col-md-3">
-            <select name="status" class="form-select">
+            <select name="status" class="form-select" id="statusFilter" onchange="this.form.submit()">
                 <option value="">Tất cả trạng thái</option>
-                <option value="draft" <?php echo ($status ?? '') === 'draft' ? 'selected' : ''; ?>>Draft</option>
-                <option value="scheduled" <?php echo ($status ?? '') === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
-                <option value="published" <?php echo ($status ?? '') === 'published' ? 'selected' : ''; ?>>Published</option>
-                <option value="archived" <?php echo ($status ?? '') === 'archived' ? 'selected' : ''; ?>>Archived</option>
+                <option value="Chiếu online" <?php echo (isset($status) && $status === 'Chiếu online') ? 'selected' : ''; ?>>Phim online</option>
+                <option value="Sắp chiếu" <?php echo (isset($status) && $status === 'Sắp chiếu') ? 'selected' : ''; ?>>Phim sắp chiếu</option>
+                <option value="Chiếu rạp" <?php echo (isset($status) && $status === 'Chiếu rạp') ? 'selected' : ''; ?>>Phim chiếu rạp</option>
             </select>
         </div>
         <div class="col-md-2">
@@ -72,15 +71,19 @@
                             <td><?php echo htmlspecialchars($m['category_name'] ?? 'N/A'); ?></td>
                             <td>
                                 <span class="badge bg-<?php 
-                                    echo match($m['status_admin'] ?? 'draft') {
-                                        'published' => 'success',
-                                        'scheduled' => 'info',
-                                        'archived' => 'secondary',
-                                        default => 'warning'
+                                    $movieStatus = $m['status'] ?? 'Sắp chiếu';
+                                    echo match($movieStatus) {
+                                        'Chiếu online' => 'success',
+                                        'Chiếu rạp' => 'info',
+                                        'Sắp chiếu' => 'warning',
+                                        default => 'secondary'
                                     };
                                 ?>">
-                                    <?php echo htmlspecialchars($m['status_admin'] ?? 'draft'); ?>
+                                    <?php echo htmlspecialchars($movieStatus); ?>
                                 </span>
+                                <?php if ($m['status_admin']): ?>
+                                    <br><small class="text-muted"><?php echo htmlspecialchars($m['status_admin']); ?></small>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <i class="fas fa-star text-warning"></i> <?php echo number_format($m['rating'], 1); ?>
