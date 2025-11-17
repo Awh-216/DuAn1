@@ -42,7 +42,16 @@ $title = 'Xem Phim';
                             </select>
                         </div>
                         
-                        <div class="col-md-3">
+                        <div class="col-md-2">
+                            <label class="form-label small">Loại phim</label>
+                            <select name="type" class="form-select form-select-sm">
+                                <option value="">Tất cả</option>
+                                <option value="phimle" <?php echo (isset($type) && $type === 'phimle') ? 'selected' : ''; ?>>Phim lẻ</option>
+                                <option value="phimbo" <?php echo (isset($type) && $type === 'phimbo') ? 'selected' : ''; ?>>Phim bộ</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-2">
                             <label class="form-label small">Quốc gia</label>
                             <select name="country" class="form-select form-select-sm">
                                 <option value="">Tất cả quốc gia</option>
@@ -154,15 +163,30 @@ $title = 'Xem Phim';
                             <div class="movie-overlay">
                                 <i class="fas fa-play"></i>
                             </div>
+                            <?php if (($movie['type'] ?? 'phimle') === 'phimbo'): ?>
+                            <div class="movie-badge">
+                                <?php echo number_format($movie['rating'] * 10); ?>
+                            </div>
+                            <?php else: ?>
                             <span class="movie-level"><?php echo $movie['level']; ?></span>
+                            <?php endif; ?>
                         </div>
                         <div class="movie-info">
                             <h3><?php echo htmlspecialchars($movie['title']); ?></h3>
                             <p class="movie-meta">
                                 <span><i class="fas fa-star"></i> <?php echo number_format($movie['rating'], 1); ?></span>
-                                <span><i class="fas fa-clock"></i> <?php echo $movie['duration']; ?> phút</span>
+                                <?php if ($movie['type'] === 'phimbo'): ?>
+                                    <span><i class="fas fa-tv"></i> Phim bộ</span>
+                                <?php else: ?>
+                                    <span><i class="fas fa-clock"></i> <?php echo $movie['duration']; ?> phút</span>
+                                <?php endif; ?>
                             </p>
-                            <p class="movie-category"><?php echo htmlspecialchars($movie['category_name'] ?? 'Chưa phân loại'); ?></p>
+                            <p class="movie-category">
+                                <span class="movie-type-badge"><?php echo ($movie['type'] ?? 'phimle') === 'phimbo' ? 'Phim bộ' : 'Phim lẻ'; ?></span>
+                                <?php if ($movie['category_name']): ?>
+                                    <span> • <?php echo htmlspecialchars($movie['category_name'] ?? 'Chưa phân loại'); ?></span>
+                                <?php endif; ?>
+                            </p>
                             <?php if ($movie['description']): ?>
                                 <p class="movie-description"><?php echo htmlspecialchars(mb_substr($movie['description'], 0, 100)) . '...'; ?></p>
                             <?php endif; ?>

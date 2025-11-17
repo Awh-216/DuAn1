@@ -29,8 +29,13 @@ $title = htmlspecialchars($movie['title']);
                 <h1><?php echo htmlspecialchars($movie['title']); ?></h1>
                 <div class="movie-meta-info">
                     <span><i class="fas fa-star"></i> <?php echo number_format($movie['rating'], 1); ?></span>
-                    <span><i class="fas fa-clock"></i> <?php echo $movie['duration']; ?> phút</span>
+                    <?php if (($movie['type'] ?? 'phimle') === 'phimbo'): ?>
+                        <span><i class="fas fa-tv"></i> Phim bộ</span>
+                    <?php else: ?>
+                        <span><i class="fas fa-clock"></i> <?php echo $movie['duration']; ?> phút</span>
+                    <?php endif; ?>
                     <span><i class="fas fa-tag"></i> <?php echo htmlspecialchars($movie['category_name'] ?? 'Chưa phân loại'); ?></span>
+                    <span class="movie-type-badge-inline"><?php echo ($movie['type'] ?? 'phimle') === 'phimbo' ? 'Phim bộ' : 'Phim lẻ'; ?></span>
                     <span><i class="fas fa-layer-group"></i> <?php echo $movie['level']; ?></span>
                 </div>
                 

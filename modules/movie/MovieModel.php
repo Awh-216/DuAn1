@@ -38,7 +38,7 @@ class MovieModel {
                                     ORDER BY m.rating DESC LIMIT $limit");
     }
     
-    public function search($keyword, $category_id = null, $status = null, $country = null, $min_rating = null) {
+    public function search($keyword, $category_id = null, $status = null, $country = null, $min_rating = null, $type = null) {
         $sql = "SELECT m.*, c.name as category_name FROM movies m 
                 LEFT JOIN categories c ON m.category_id = c.id 
                 WHERE (m.title LIKE ? OR m.director LIKE ? OR m.actors LIKE ? OR m.description LIKE ?)";
@@ -57,6 +57,11 @@ class MovieModel {
         if ($country) {
             $sql .= " AND m.country LIKE ?";
             $params[] = "%$country%";
+        }
+        
+        if ($type) {
+            $sql .= " AND m.type = ?";
+            $params[] = $type;
         }
         
         if ($min_rating !== null) {
@@ -79,11 +84,19 @@ class MovieModel {
         return $this->db->fetchAll("SELECT * FROM movies WHERE status = 'Chiếu rạp' ORDER BY title");
     }
     
-    public function getByCountry($country) {
-        return $this->db->fetchAll("SELECT m.*, c.name as category_name FROM movies m 
-                                    LEFT JOIN categories c ON m.category_id = c.id 
-                                    WHERE m.country = ? 
-                                    ORDER BY m.created_at DESC", [$country]);
+    public function getByCountry($country, $type = null) {
+        $sql = "SELECT m.*, c.name as category_name FROM movies m 
+                LEFT JOIN categories c ON m.category_id = c.id 
+                WHERE m.country = ?";
+        $params = [$country];
+        
+        if ($type) {
+            $sql .= " AND m.type = ?";
+            $params[] = $type;
+        }
+        
+        $sql .= " ORDER BY m.created_at DESC";
+        return $this->db->fetchAll($sql, $params);
     }
 }
 ?>

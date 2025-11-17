@@ -15,10 +15,11 @@ class MovieController extends Controller {
         $category_id = !empty($_GET['category']) ? intval($_GET['category']) : null;
         $status = $_GET['status'] ?? null;
         $country = $_GET['country'] ?? null;
+        $type = $_GET['type'] ?? null;
         $min_rating = isset($_GET['min_rating']) && $_GET['min_rating'] !== '' ? floatval($_GET['min_rating']) : null;
         
         if ($search) {
-            $movies = $movieModel->search($search, $category_id, $status, $country, $min_rating);
+            $movies = $movieModel->search($search, $category_id, $status, $country, $min_rating, $type);
         } elseif ($category_id) {
             $sql = "SELECT m.*, c.name as category_name FROM movies m 
                     LEFT JOIN categories c ON m.category_id = c.id 
@@ -30,10 +31,15 @@ class MovieController extends Controller {
                 $params[] = $status;
             }
             
+            if ($type) {
+                $sql .= " AND m.type = ?";
+                $params[] = $type;
+            }
+            
             $sql .= " ORDER BY m.rating DESC, m.created_at DESC";
             $movies = $movieModel->getDb()->fetchAll($sql, $params);
         } elseif ($country) {
-            $movies = $movieModel->getByCountry($country);
+            $movies = $movieModel->getByCountry($country, $type);
         } else {
             $sql = "SELECT m.*, c.name as category_name FROM movies m 
                     LEFT JOIN categories c ON m.category_id = c.id 
@@ -43,6 +49,11 @@ class MovieController extends Controller {
             if ($status) {
                 $sql .= " AND m.status = ?";
                 $params[] = $status;
+            }
+            
+            if ($type) {
+                $sql .= " AND m.type = ?";
+                $params[] = $type;
             }
             
             if ($min_rating !== null) {
@@ -72,6 +83,7 @@ class MovieController extends Controller {
             'category_id' => $category_id,
             'status' => $status,
             'country' => $country,
+            'type' => $type,
             'min_rating' => $min_rating,
             'user' => $this->getCurrentUser()
         ]);

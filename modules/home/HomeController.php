@@ -7,12 +7,77 @@ class HomeController extends Controller {
     public function index() {
         $movieModel = new MovieModel();
         
-        $hotMovies = $movieModel->getHotMovies(6);
-        $latestMovies = $movieModel->getAll(12);
+        // Lấy slider phim nổi bật - mix cả phim lẻ và phim bộ
+        // Ưu tiên phim có rating cao và thumbnail đẹp
+        $sliderMovies = $movieModel->getDb()->fetchAll("
+            SELECT m.*, c.name as category_name 
+            FROM movies m 
+            LEFT JOIN categories c ON m.category_id = c.id 
+            WHERE m.status = 'Chiếu online' 
+            AND m.status_admin = 'published'
+            AND m.thumbnail IS NOT NULL 
+            AND m.thumbnail != ''
+            ORDER BY m.rating DESC, RAND()
+            LIMIT 5
+        ");
+        
+        // Nếu không đủ 5 phim, lấy thêm từ phim khác
+        if (count($sliderMovies) < 5) {
+            $additionalMovies = $movieModel->getDb()->fetchAll("
+                SELECT m.*, c.name as category_name 
+                FROM movies m 
+                LEFT JOIN categories c ON m.category_id = c.id 
+                WHERE m.status_admin = 'published'
+                AND m.thumbnail IS NOT NULL 
+                AND m.thumbnail != ''
+                AND m.id NOT IN (" . (!empty($sliderMovies) ? implode(',', array_column($sliderMovies, 'id')) : '0') . ")
+                ORDER BY m.rating DESC, RAND()
+                LIMIT " . (5 - count($sliderMovies)) . "
+            ");
+            $sliderMovies = array_merge($sliderMovies, $additionalMovies);
+        }
+        
+        // Shuffle để random thứ tự hiển thị
+        if (!empty($sliderMovies)) {
+            shuffle($sliderMovies);
+        }
+        
+        // Lấy phim lẻ và phim bộ riêng biệt cho section
+        $phimLe = $movieModel->getDb()->fetchAll("
+            SELECT m.*, c.name as category_name 
+            FROM movies m 
+            LEFT JOIN categories c ON m.category_id = c.id 
+            WHERE (m.type = 'phimle' OR m.type IS NULL)
+            AND m.status_admin = 'published'
+            ORDER BY m.rating DESC, m.created_at DESC 
+            LIMIT 8
+        ");
+        
+        $phimBo = $movieModel->getDb()->fetchAll("
+            SELECT m.*, c.name as category_name 
+            FROM movies m 
+            LEFT JOIN categories c ON m.category_id = c.id 
+            WHERE m.type = 'phimbo'
+            AND m.status_admin = 'published'
+            ORDER BY m.rating DESC, m.created_at DESC 
+            LIMIT 8
+        ");
+        
+        // Phim mới nhất - cả phim lẻ và phim bộ
+        $latestMovies = $movieModel->getDb()->fetchAll("
+            SELECT m.*, c.name as category_name 
+            FROM movies m 
+            LEFT JOIN categories c ON m.category_id = c.id 
+            WHERE m.status_admin = 'published'
+            ORDER BY m.created_at DESC 
+            LIMIT 12
+        ");
         
         $this->view('home/index', [
-            'hotMovies' => $hotMovies,
+            'sliderMovies' => $sliderMovies,
             'latestMovies' => $latestMovies,
+            'phimLe' => $phimLe,
+            'phimBo' => $phimBo,
             'user' => $this->getCurrentUser()
         ]);
     }
