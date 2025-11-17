@@ -141,7 +141,7 @@
                         <i class="fas fa-chevron-down"></i>
                     </a>
                 <?php else: ?>
-                    <a href="http://localhost/DuAn1/?route=auth/login" class="sign-in-btn">
+                    <a href="#" class="sign-in-btn" onclick="event.preventDefault(); openAuthModal('login');">
                         <i class="fas fa-user"></i>
                         <span>Login</span>
                         <i class="fas fa-arrow-right"></i>
@@ -164,6 +164,289 @@
         </div>
     <?php endif; ?>
 
+
+<!-- Auth Modal (Login/Register) -->
+<div id="authModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content-login">
+        <span class="modal-close" onclick="closeAuthModal()">&times;</span>
+        
+        <!-- Tab Navigation -->
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuthTab('login')">Đăng nhập</button>
+            <button class="auth-tab" onclick="switchAuthTab('register')">Đăng ký</button>
+        </div>
+        
+        <!-- Login Form -->
+        <div id="loginTab" class="auth-tab-content active">
+            <h2 class="modal-title">Đăng nhập</h2>
+            <div id="loginError" class="alert alert-error" style="display: none;"></div>
+            <form id="loginForm" method="POST" action="http://localhost/DuAn1/?route=auth/login">
+                <div class="form-group-new">
+                    <input type="email" name="email" required placeholder="Email" class="input-field">
+                </div>
+                <div class="form-group-new">
+                    <input type="password" name="password" required placeholder="Mật khẩu" class="input-field">
+                </div>
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="remember_me">
+                        <span>Ghi nhớ đăng nhập</span>
+                    </label>
+                    <a href="#" class="forgot-password">Quên mật khẩu?</a>
+                </div>
+                <button type="submit" class="btn-login">Đăng nhập</button>
+            </form>
+            <div class="modal-footer">
+                <p>Chưa có tài khoản? <a href="#" onclick="event.preventDefault(); switchAuthTab('register');">Đăng ký ngay</a></p>
+            </div>
+        </div>
+        
+        <!-- Register Form -->
+        <div id="registerTab" class="auth-tab-content" style="display: none;">
+            <h2 class="modal-title">Đăng ký</h2>
+            <div id="registerError" class="alert alert-error" style="display: none;"></div>
+            <form id="registerForm" method="POST" action="http://localhost/DuAn1/?route=auth/register">
+                <div class="form-group-new">
+                    <input type="text" name="name" required placeholder="Họ và tên" class="input-field">
+                </div>
+                <div class="form-group-new">
+                    <input type="email" name="email" required placeholder="Email" class="input-field">
+                </div>
+                <div class="form-group-new">
+                    <input type="password" name="password" required placeholder="Mật khẩu" class="input-field">
+                </div>
+                <div class="form-group-new">
+                    <input type="password" name="confirm_password" required placeholder="Xác nhận mật khẩu" class="input-field">
+                </div>
+                <button type="submit" class="btn-register-form">Đăng ký</button>
+            </form>
+            <div class="modal-footer">
+                <p>Đã có tài khoản? <a href="#" onclick="event.preventDefault(); switchAuthTab('login');">Đăng nhập ngay</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content-login {
+    background: #1a1a1a;
+    padding: 40px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 450px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.modal-close:hover {
+    color: #e50914;
+}
+
+.modal-title {
+    color: #fff;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 28px;
+}
+
+.modal-footer {
+    text-align: center;
+    margin-top: 20px;
+    color: #999;
+}
+
+.modal-footer a {
+    color: #e50914;
+    text-decoration: none;
+}
+
+.modal-footer a:hover {
+    text-decoration: underline;
+}
+
+.auth-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #333;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+}
+
+.auth-tab:hover {
+    color: #fff;
+}
+
+.auth-tab.active {
+    color: #e50914;
+    border-bottom-color: #e50914;
+}
+
+.auth-tab-content {
+    display: none;
+}
+
+.auth-tab-content.active {
+    display: block;
+}
+</style>
+
+<script>
+function openAuthModal(tab = 'login') {
+    document.getElementById('authModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    switchAuthTab(tab);
+}
+
+function closeAuthModal() {
+    document.getElementById('authModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    document.getElementById('loginError').style.display = 'none';
+    document.getElementById('registerError').style.display = 'none';
+    document.getElementById('loginForm').reset();
+    document.getElementById('registerForm').reset();
+}
+
+function switchAuthTab(tab) {
+    // Ẩn tất cả tabs
+    document.querySelectorAll('.auth-tab-content').forEach(content => {
+        content.classList.remove('active');
+        content.style.display = 'none';
+    });
+    
+    document.querySelectorAll('.auth-tab').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Hiển thị tab được chọn
+    if (tab === 'login') {
+        document.getElementById('loginTab').classList.add('active');
+        document.getElementById('loginTab').style.display = 'block';
+        document.querySelectorAll('.auth-tab')[0].classList.add('active');
+    } else {
+        document.getElementById('registerTab').classList.add('active');
+        document.getElementById('registerTab').style.display = 'block';
+        document.querySelectorAll('.auth-tab')[1].classList.add('active');
+    }
+    
+    // Reset errors
+    document.getElementById('loginError').style.display = 'none';
+    document.getElementById('registerError').style.display = 'none';
+}
+
+// Đóng modal khi click bên ngoài
+document.getElementById('authModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAuthModal();
+    }
+});
+
+// Xử lý form đăng nhập với AJAX
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.style.display = 'none';
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            errorDiv.textContent = data.error || 'Đăng nhập thất bại!';
+            errorDiv.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        // Nếu không phải JSON response, thử submit form bình thường
+        this.submit();
+    });
+});
+
+// Xử lý form đăng ký với AJAX
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const errorDiv = document.getElementById('registerError');
+    errorDiv.style.display = 'none';
+    
+    // Kiểm tra mật khẩu khớp
+    const password = formData.get('password');
+    const confirmPassword = formData.get('confirm_password');
+    
+    if (password !== confirmPassword) {
+        errorDiv.textContent = 'Mật khẩu xác nhận không khớp!';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            errorDiv.textContent = data.error || 'Đăng ký thất bại!';
+            errorDiv.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        // Nếu không phải JSON response, thử submit form bình thường
+        this.submit();
+    });
+});
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

@@ -6,6 +6,11 @@ class AuthController extends Controller {
     
     public function login() {
         if ($this->isLoggedIn()) {
+            if ($this->isAjaxRequest()) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'redirect' => '']);
+                return;
+            }
             $this->redirect('');
         }
         
@@ -34,6 +39,15 @@ class AuthController extends Controller {
                     }
                 }
                 
+                if ($this->isAjaxRequest()) {
+                    header('Content-Type: application/json');
+                    echo json_encode([
+                        'success' => true,
+                        'redirect' => $isAdmin ? '?route=admin/index' : ''
+                    ]);
+                    return;
+                }
+                
                 if ($isAdmin) {
                     $this->redirect('?route=admin/index');
                 } else {
@@ -41,16 +55,36 @@ class AuthController extends Controller {
                 }
             } else {
                 $error = 'Email hoặc mật khẩu không đúng!';
-                $this->view('auth/login', ['error' => $error]);
+                
+                if ($this->isAjaxRequest()) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'error' => $error]);
+                    return;
+                }
+                
+                // Nếu không phải AJAX, redirect về trang chủ với modal login
+                $_SESSION['error'] = $error;
+                $this->redirect('');
                 return;
             }
         }
         
-        $this->view('auth/login');
+        // Nếu GET request (không phải POST), redirect về trang chủ
+        $this->redirect('');
+    }
+    
+    private function isAjaxRequest() {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
     }
     
     public function register() {
         if ($this->isLoggedIn()) {
+            if ($this->isAjaxRequest()) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'redirect' => '']);
+                return;
+            }
             $this->redirect('');
         }
         
@@ -62,7 +96,16 @@ class AuthController extends Controller {
             
             if ($password !== $confirm_password) {
                 $error = 'Mật khẩu xác nhận không khớp!';
-                $this->view('auth/register', ['error' => $error]);
+                
+                if ($this->isAjaxRequest()) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'error' => $error]);
+                    return;
+                }
+                
+                // Nếu không phải AJAX, redirect về trang chủ với modal register
+                $_SESSION['error'] = $error;
+                $this->redirect('');
                 return;
             }
             
@@ -71,7 +114,16 @@ class AuthController extends Controller {
             
             if ($existingUser) {
                 $error = 'Email đã được sử dụng!';
-                $this->view('auth/register', ['error' => $error]);
+                
+                if ($this->isAjaxRequest()) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'error' => $error]);
+                    return;
+                }
+                
+                // Nếu không phải AJAX, redirect về trang chủ với modal register
+                $_SESSION['error'] = $error;
+                $this->redirect('');
                 return;
             }
             
@@ -84,10 +136,18 @@ class AuthController extends Controller {
             
             $_SESSION['user_id'] = $user_id;
             $_SESSION['user_name'] = $name;
+            
+            if ($this->isAjaxRequest()) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'redirect' => '']);
+                return;
+            }
+            
             $this->redirect('');
         }
         
-        $this->view('auth/register');
+        // Nếu GET request (không phải POST), redirect về trang chủ
+        $this->redirect('');
     }
     
     public function logout() {

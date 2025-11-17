@@ -123,6 +123,60 @@ class AdminController extends Controller {
         ]);
     }
     
+    /**
+     * Cập nhật điểm của user
+     */
+    public function updatePoints() {
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/users');
+            return;
+        }
+        
+        $userId = $_POST['user_id'] ?? null;
+        $action = $_POST['action'] ?? 'set';
+        $points = intval($_POST['points'] ?? 0);
+        
+        if (!$userId || $points < 0) {
+            $_SESSION['error'] = 'Dữ liệu không hợp lệ!';
+            $this->redirect('admin/users');
+            return;
+        }
+        
+        require_once __DIR__ . '/../user/UserModel.php';
+        $userModel = new UserModel();
+        
+        $targetUser = $userModel->getById($userId);
+        if (!$targetUser) {
+            $_SESSION['error'] = 'Người dùng không tồn tại!';
+            $this->redirect('admin/users');
+            return;
+        }
+        
+        $currentPoints = $targetUser['points'] ?? 0;
+        
+        switch ($action) {
+            case 'set':
+                $newPoints = $points;
+                break;
+            case 'add':
+                $newPoints = $currentPoints + $points;
+                break;
+            case 'subtract':
+                $newPoints = max(0, $currentPoints - $points);
+                break;
+            default:
+                $_SESSION['error'] = 'Thao tác không hợp lệ!';
+                $this->redirect('admin/users');
+                return;
+        }
+        
+        $userModel->updatePoints($userId, $newPoints);
+        $_SESSION['success'] = "Đã cập nhật điểm thành công! Điểm mới: " . number_format($newPoints);
+        $this->redirect('admin/users');
+    }
+    
     // Movies Management
     public function movies() {
         $db = Database::getInstance();

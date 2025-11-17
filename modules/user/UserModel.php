@@ -65,6 +65,43 @@ class UserModel {
             $id
         ]);
     }
+    
+    /**
+     * Cập nhật điểm của user
+     */
+    public function updatePoints($id, $points) {
+        $sql = "UPDATE users SET points = ? WHERE id = ?";
+        $this->db->execute($sql, [$points, $id]);
+    }
+    
+    /**
+     * Thêm điểm cho user
+     */
+    public function addPoints($id, $points) {
+        $user = $this->getById($id);
+        if ($user) {
+            $newPoints = ($user['points'] ?? 0) + $points;
+            $this->updatePoints($id, $newPoints);
+            return $newPoints;
+        }
+        return false;
+    }
+    
+    /**
+     * Trừ điểm của user
+     */
+    public function deductPoints($id, $points) {
+        $user = $this->getById($id);
+        if ($user) {
+            $currentPoints = $user['points'] ?? 0;
+            if ($currentPoints >= $points) {
+                $newPoints = $currentPoints - $points;
+                $this->updatePoints($id, $newPoints);
+                return $newPoints;
+            }
+        }
+        return false;
+    }
 }
 ?>
 

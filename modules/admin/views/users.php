@@ -31,6 +31,7 @@
                     <th>Email</th>
                     <th>Role</th>
                     <th>Gói đăng ký</th>
+                    <th>Điểm</th>
                     <th>Trạng thái</th>
                     <th>Ngày tạo</th>
                     <th>Thao tác</th>
@@ -39,7 +40,7 @@
             <tbody>
                 <?php if (empty($users)): ?>
                     <tr>
-                        <td colspan="8" class="text-center text-muted">Không có người dùng nào</td>
+                        <td colspan="9" class="text-center text-muted">Không có người dùng nào</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($users as $u): ?>
@@ -65,6 +66,9 @@
                             </td>
                             <td><?php echo htmlspecialchars($u['subscription_name'] ?? 'Chưa có'); ?></td>
                             <td>
+                                <span class="badge bg-info"><?php echo number_format($u['points'] ?? 0); ?> điểm</span>
+                            </td>
+                            <td>
                                 <span class="badge bg-<?php echo ($u['is_active'] ?? true) ? 'success' : 'danger'; ?>">
                                     <?php echo ($u['is_active'] ?? true) ? 'Hoạt động' : 'Bị chặn'; ?>
                                 </span>
@@ -78,6 +82,9 @@
                                     <a href="?route=admin/users/view&id=<?php echo $u['id']; ?>" class="btn btn-outline-info" title="Xem chi tiết">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    <button onclick="openPointsModal(<?php echo $u['id']; ?>, '<?php echo htmlspecialchars($u['name']); ?>', <?php echo $u['points'] ?? 0; ?>)" class="btn btn-outline-success" title="Quản lý điểm">
+                                        <i class="fas fa-coins"></i>
+                                    </button>
                                     <?php if ($u['id'] != $user['id']): ?>
                                         <a href="?route=admin/users/block&id=<?php echo $u['id']; ?>" class="btn btn-outline-warning" title="Chặn/Mở khóa">
                                             <i class="fas fa-ban"></i>
@@ -107,4 +114,55 @@
         </nav>
     <?php endif; ?>
 </div>
+
+<!-- Points Management Modal -->
+<div class="modal fade" id="pointsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quản lý điểm - <span id="pointsUserName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="pointsForm" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="route" value="admin/users/updatePoints">
+                    <input type="hidden" id="pointsUserId" name="user_id">
+                    <div class="mb-3">
+                        <label class="form-label">Điểm hiện tại</label>
+                        <input type="text" id="currentPoints" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Thao tác</label>
+                        <select name="action" id="pointsAction" class="form-select" required>
+                            <option value="set">Đặt số điểm</option>
+                            <option value="add">Thêm điểm</option>
+                            <option value="subtract">Trừ điểm</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số điểm</label>
+                        <input type="number" name="points" class="form-control" min="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openPointsModal(userId, userName, currentPoints) {
+    document.getElementById('pointsUserId').value = userId;
+    document.getElementById('pointsUserName').textContent = userName;
+    document.getElementById('currentPoints').value = currentPoints.toLocaleString('vi-VN');
+    document.getElementById('pointsForm').querySelector('input[name="points"]').value = '';
+    document.getElementById('pointsAction').value = 'set';
+    
+    const modal = new bootstrap.Modal(document.getElementById('pointsModal'));
+    modal.show();
+}
+</script>
 

@@ -105,8 +105,26 @@ class MovieController extends Controller {
             $this->redirect('movie');
         }
         
-        // Lưu lịch sử xem
+        // Kiểm tra gói thành viên
         $user = $this->getCurrentUser();
+        if (!$user) {
+            $_SESSION['error'] = 'Vui lòng đăng nhập để xem phim!';
+            $this->redirect('?route=auth/login');
+            return;
+        }
+        
+        // Kiểm tra quyền xem phim dựa trên level
+        $movieLevel = $movie['level'] ?? 'Free';
+        $hasAccess = $this->checkMovieAccess($user, $movieLevel);
+        
+        if (!$hasAccess) {
+            $subscriptionName = $this->getUserSubscriptionName($user['id']);
+            $_SESSION['error'] = "Phim này yêu cầu gói {$movieLevel}. Gói hiện tại của bạn: " . ($subscriptionName ?: 'Free');
+            $this->redirect('movie');
+            return;
+        }
+        
+        // Lưu lịch sử xem
         if ($user) {
             $watchHistoryModel = new WatchHistoryModel();
             $watchHistoryModel->add($user['id'], $movie_id);
@@ -166,6 +184,68 @@ class MovieController extends Controller {
             'user' => $user,
             'isAdmin' => $isAdmin
         ]);
+    }
+    
+    /**
+     * Kiểm tra quyền truy cập phim dựa trên gói thành viên
+     */
+    private function checkMovieAccess($user, $movieLevel) {
+        // Admin luôn có quyền xem
+        if (isset($user['role']) && $user['role'] === 'admin') {
+            return true;
+        }
+        
+        try {
+            require_once __DIR__ . '/../../core/AdminMiddleware.php';
+            if (AdminMiddleware::hasRole($user['id'], 'Super Admin') || 
+                AdminMiddleware::hasRole($user['id'], 'Admin')) {
+                return true;
+            }
+        } catch (Exception $e) {
+            // Bỏ qua nếu bảng chưa tồn tại
+        }
+        
+        // Free phim ai cũng xem được
+        if ($movieLevel === 'Free') {
+            return true;
+        }
+        
+        // Lấy thông tin subscription của user
+        $subscriptionName = $this->getUserSubscriptionName($user['id']);
+        if (!$subscriptionName) {
+            return false; // Không có gói
+        }
+        
+        // Map subscription names to levels
+        $levelHierarchy = [
+            'Free' => 0,
+            'Basic' => 1,
+            'Silver' => 2,
+            'Gold' => 3,
+            'Premium' => 4
+        ];
+        
+        $userLevel = $levelHierarchy[$subscriptionName] ?? 0;
+        $requiredLevel = $levelHierarchy[$movieLevel] ?? 0;
+        
+        return $userLevel >= $requiredLevel;
+    }
+    
+    /**
+     * Lấy tên gói subscription của user
+     */
+    private function getUserSubscriptionName($userId) {
+        require_once __DIR__ . '/../../core/Database.php';
+        $db = Database::getInstance();
+        
+        $user = $db->fetch("
+            SELECT u.subscription_id, s.name as subscription_name 
+            FROM users u 
+            LEFT JOIN subscriptions s ON u.subscription_id = s.id 
+            WHERE u.id = ?
+        ", [$userId]);
+        
+        return $user['subscription_name'] ?? null;
     }
 }
 ?>

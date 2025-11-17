@@ -30,8 +30,16 @@ $title = 'Hồ Sơ';
                             <?php endif; ?>
                         </div>
                         
+                        <!-- Current Subscription -->
+                        <?php if ($subscription): ?>
+                            <div class="alert alert-info mb-3">
+                                <small class="d-block text-muted mb-1">Gói hiện tại</small>
+                                <strong><?php echo htmlspecialchars($subscription['name']); ?></strong>
+                            </div>
+                        <?php endif; ?>
+                        
                         <!-- Upgrade Button -->
-                        <button class="btn btn-warning w-100 mb-4 fw-bold">
+                        <button class="btn btn-warning w-100 mb-4 fw-bold" onclick="openUpgradeModal()">
                             <i class="fas fa-wallet me-2"></i> Nâng cấp gói ngay
                         </button>
                         
@@ -39,13 +47,13 @@ $title = 'Hồ Sơ';
                         <div class="card bg-light mb-4">
                             <div class="card-body p-3 d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
-                                    <i class="fas fa-wallet text-primary me-2 fs-5"></i>
+                                    <i class="fas fa-coins text-warning me-2 fs-5"></i>
                                     <div>
-                                        <small class="text-muted d-block">Số dư</small>
-                                        <strong class="fs-5"><?php echo number_format($balance, 0, ',', '.'); ?>₫</strong>
+                                        <small class="text-muted d-block">Số dư (điểm)</small>
+                                        <strong class="fs-5"><?php echo number_format($balance, 0, ',', '.'); ?> điểm</strong>
                                     </div>
                                 </div>
-                                <button class="btn btn-danger btn-sm">
+                                <button class="btn btn-danger btn-sm" onclick="alert('Tính năng nạp điểm sẽ được thêm sau!');">
                                     <i class="fas fa-plus me-1"></i> Nạp
                                 </button>
                             </div>
@@ -153,4 +161,74 @@ $title = 'Hồ Sơ';
         </div>
     </div>
 </section>
+
+<!-- Upgrade Subscription Modal -->
+<div class="modal fade" id="upgradeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nâng cấp gói</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Điểm hiện tại của bạn: <strong><?php echo number_format($balance, 0, ',', '.'); ?> điểm</strong>
+                </div>
+                
+                <div class="row g-3">
+                    <?php foreach ($allSubscriptions as $sub): ?>
+                        <?php 
+                        $subPrice = intval($sub['price']);
+                        $canAfford = $balance >= $subPrice;
+                        $isCurrent = $subscription && $subscription['id'] == $sub['id'];
+                        $isHigher = $subscription && intval($subscription['price']) >= $subPrice;
+                        ?>
+                        <div class="col-md-6">
+                            <div class="card h-100 <?php echo $isCurrent ? 'border-warning' : ''; ?> <?php echo !$canAfford ? 'opacity-50' : ''; ?>">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <?php echo htmlspecialchars($sub['name']); ?>
+                                        <?php if ($isCurrent): ?>
+                                            <span class="badge bg-warning text-dark">Gói hiện tại</span>
+                                        <?php endif; ?>
+                                    </h5>
+                                    <p class="card-text text-muted small"><?php echo htmlspecialchars($sub['description']); ?></p>
+                                    <div class="mb-2">
+                                        <strong class="text-danger"><?php echo number_format($subPrice, 0, ',', '.'); ?> điểm</strong>
+                                    </div>
+                                    <?php if ($sub['benefits']): ?>
+                                        <small class="text-muted d-block mb-2"><?php echo htmlspecialchars($sub['benefits']); ?></small>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($isCurrent): ?>
+                                        <button class="btn btn-secondary w-100" disabled>Đang sử dụng</button>
+                                    <?php elseif ($isHigher): ?>
+                                        <button class="btn btn-secondary w-100" disabled>Gói thấp hơn</button>
+                                    <?php elseif (!$canAfford): ?>
+                                        <button class="btn btn-secondary w-100" disabled>Không đủ điểm</button>
+                                    <?php else: ?>
+                                        <form method="POST" action="http://localhost/DuAn1/?route=profile/upgradeSubscription" class="d-inline">
+                                            <input type="hidden" name="subscription_id" value="<?php echo $sub['id']; ?>">
+                                            <button type="submit" class="btn btn-warning w-100" onclick="return confirm('Bạn có chắc muốn nâng cấp lên gói <?php echo htmlspecialchars($sub['name']); ?> với giá <?php echo number_format($subPrice, 0, ',', '.'); ?> điểm?');">
+                                                <i class="fas fa-arrow-up me-2"></i> Nâng cấp
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openUpgradeModal() {
+    const modal = new bootstrap.Modal(document.getElementById('upgradeModal'));
+    modal.show();
+}
+</script>
 
