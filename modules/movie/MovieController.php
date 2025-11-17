@@ -114,6 +114,41 @@ class MovieController extends Controller {
         
         $reviews = $reviewModel->getByMovie($movie_id);
         
+        // Lấy episodes nếu là phim bộ
+        $episodes = [];
+        $currentEpisode = null;
+        $episode_id = $_GET['episode_id'] ?? null;
+        
+        // Debug: Kiểm tra type của phim
+        error_log("Movie type: " . ($movie['type'] ?? 'not set') . " for movie ID: " . $movie_id);
+        
+        if (isset($movie['type']) && $movie['type'] === 'phimbo') {
+            require_once __DIR__ . '/../../core/Database.php';
+            $db = Database::getInstance();
+            try {
+                $episodes = $db->fetchAll("SELECT * FROM episodes WHERE movie_id = ? ORDER BY episode_number", [$movie_id]);
+                error_log("Found " . count($episodes) . " episodes for movie ID: " . $movie_id);
+                
+                // Nếu không có episode_id và có tập, tự động chuyển đến tập 1
+                if (!$episode_id && !empty($episodes)) {
+                    $firstEpisode = $episodes[0];
+                    $this->redirect('movie/watch&id=' . $movie_id . '&episode_id=' . $firstEpisode['id']);
+                    return;
+                }
+                
+                // Lấy tập hiện tại
+                if ($episode_id) {
+                    $currentEpisode = $db->fetch("SELECT * FROM episodes WHERE id = ? AND movie_id = ?", [$episode_id, $movie_id]);
+                }
+            } catch (Exception $e) {
+                // Log lỗi để debug
+                error_log("Error fetching episodes: " . $e->getMessage());
+                $episodes = [];
+            }
+        } else {
+            error_log("Movie is not phimbo. Type: " . ($movie['type'] ?? 'not set'));
+        }
+        
         // Kiểm tra nếu user là admin
         $isAdmin = false;
         if ($user) {
@@ -126,6 +161,8 @@ class MovieController extends Controller {
         $this->view('movie/watch', [
             'movie' => $movie,
             'reviews' => $reviews,
+            'episodes' => $episodes,
+            'currentEpisode' => $currentEpisode,
             'user' => $user,
             'isAdmin' => $isAdmin
         ]);

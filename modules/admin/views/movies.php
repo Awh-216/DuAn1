@@ -37,6 +37,7 @@
                     <th>ID</th>
                     <th>Poster</th>
                     <th>Tiêu đề</th>
+                    <th>Loại</th>
                     <th>Thể loại</th>
                     <th>Trạng thái</th>
                     <th>Rating</th>
@@ -47,7 +48,7 @@
             <tbody>
                 <?php if (empty($movies)): ?>
                     <tr>
-                        <td colspan="8" class="text-center text-muted">Không có phim nào</td>
+                        <td colspan="9" class="text-center text-muted">Không có phim nào</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($movies as $m): ?>
@@ -66,6 +67,16 @@
                                 <strong><?php echo htmlspecialchars($m['title']); ?></strong>
                                 <?php if ($m['director']): ?>
                                     <br><small class="text-muted">Đạo diễn: <?php echo htmlspecialchars($m['director']); ?></small>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php 
+                                $movieType = $m['type'] ?? 'phimle';
+                                if ($movieType === 'phimbo'): 
+                                ?>
+                                    <span class="badge bg-primary">Phim bộ</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">Phim lẻ</span>
                                 <?php endif; ?>
                             </td>
                             <td><?php echo htmlspecialchars($m['category_name'] ?? 'N/A'); ?></td>

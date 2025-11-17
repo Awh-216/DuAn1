@@ -6,7 +6,7 @@
 </div>
 
 <div class="stat-card">
-    <form method="POST" action="?route=admin/movies/update">
+    <form method="POST" action="?route=admin/movies/update" enctype="multipart/form-data">
         <input type="hidden" name="id" value="<?php echo $movie['id']; ?>">
         
         <div class="row">
@@ -44,6 +44,14 @@
                     <option value="scheduled" <?php echo (($movie['status_admin'] ?? '') == 'scheduled') ? 'selected' : ''; ?>>Scheduled</option>
                     <option value="published" <?php echo (($movie['status_admin'] ?? '') == 'published') ? 'selected' : ''; ?>>Published</option>
                     <option value="archived" <?php echo (($movie['status_admin'] ?? '') == 'archived') ? 'selected' : ''; ?>>Archived</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <label for="type" class="form-label">Loại phim <span class="text-danger">*</span></label>
+                <select class="form-select" id="type" name="type" onchange="toggleSeriesSection()">
+                    <option value="phimle" <?php echo (($movie['type'] ?? 'phimle') == 'phimle') ? 'selected' : ''; ?>>Phim lẻ</option>
+                    <option value="phimbo" <?php echo (($movie['type'] ?? '') == 'phimbo') ? 'selected' : ''; ?>>Phim bộ</option>
                 </select>
             </div>
             
@@ -117,6 +125,63 @@
             </div>
         </div>
         
+        <!-- Phần quản lý tập phim bộ (hiện khi chọn "Phim bộ") -->
+        <div id="seriesSection" style="display: <?php echo (($movie['type'] ?? 'phimle') == 'phimbo') ? 'block' : 'none'; ?>;">
+            <hr class="my-4">
+            <h6 class="mb-3"><i class="fas fa-list me-2"></i>Quản lý tập phim bộ</h6>
+            
+            <!-- Hiển thị các tập hiện có -->
+            <?php if (!empty($episodes)): ?>
+            <div class="mb-4">
+                <h6 class="mb-3">Các tập hiện có:</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Số tập</th>
+                                <th>Tiêu đề</th>
+                                <th>URL Video</th>
+                                <th>Thời lượng</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($episodes as $episode): ?>
+                            <tr>
+                                <td><?php echo $episode['episode_number']; ?></td>
+                                <td><?php echo htmlspecialchars($episode['title'] ?? 'N/A'); ?></td>
+                                <td><a href="<?php echo htmlspecialchars($episode['video_url']); ?>" target="_blank">Xem</a></td>
+                                <td><?php echo $episode['duration'] ? $episode['duration'] . ' phút' : 'N/A'; ?></td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteEpisode(<?php echo $episode['id']; ?>)">
+                                        <i class="fas fa-trash"></i> Xóa
+                                    </button>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <!-- Thêm tập mới -->
+            <div class="row mb-3">
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Thêm tập mới</label>
+                    <div class="border rounded p-3">
+                        <div id="episodesContainer">
+                            <!-- Các tập mới sẽ được thêm bởi JavaScript -->
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-3" onclick="addEpisodeInput()">
+                            <i class="fas fa-plus"></i> Thêm tập
+                        </button>
+                    </div>
+                    <small class="text-muted">Thêm các tập phim bộ mới. Mỗi tập cần có số tập, tiêu đề và file video.</small>
+                </div>
+            </div>
+        </div>
+        
         <!-- Phần lịch chiếu rạp (hiện khi chọn "Chiếu rạp") -->
         <div id="theaterScheduleSection" style="display: none;">
             <hr class="my-4">
@@ -130,7 +195,7 @@
             <div class="row mb-3">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Chọn rạp <span class="text-danger">*</span></label>
-                    <select class="form-select" id="scheduleTheater" name="schedule_theater_id" required>
+                    <select class="form-select" id="scheduleTheater" name="schedule_theater_id">
                         <option value="">-- Chọn rạp --</option>
                         <?php foreach ($theaters as $theater): ?>
                             <option value="<?php echo $theater['id']; ?>" <?php echo (isset($existingShowtimes) && !empty($existingShowtimes) && $existingShowtimes[0]['theater_id'] == $theater['id']) ? 'selected' : ''; ?>>
@@ -143,19 +208,19 @@
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Giá vé mặc định (VNĐ) <span class="text-danger">*</span></label>
                     <input type="number" class="form-control" id="defaultPrice" name="default_price" min="0" step="1000" 
-                           value="<?php echo isset($existingShowtimes) && !empty($existingShowtimes) ? $existingShowtimes[0]['price'] : '120000'; ?>" required>
+                           value="<?php echo isset($existingShowtimes) && !empty($existingShowtimes) ? $existingShowtimes[0]['price'] : '120000'; ?>">
                 </div>
             </div>
             
             <div class="row mb-3">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Từ ngày <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="fromDate" name="from_date" required>
+                    <input type="date" class="form-control" id="fromDate" name="from_date">
                 </div>
                 
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Đến ngày <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="toDate" name="to_date" required>
+                    <input type="date" class="form-control" id="toDate" name="to_date">
                 </div>
             </div>
             
@@ -201,14 +266,91 @@
 
 <script>
 let timeSlotCount = 0;
+let episodeCount = 0;
 const defaultTimeSlots = ['10:00', '14:00', '18:00', '20:30'];
+
+function toggleSeriesSection() {
+    const type = document.getElementById('type').value;
+    const section = document.getElementById('seriesSection');
+    
+    if (type === 'phimbo') {
+        section.style.display = 'block';
+    } else {
+        section.style.display = 'none';
+    }
+}
+
+function addEpisodeInput() {
+    episodeCount++;
+    const container = document.getElementById('episodesContainer');
+    const existingEpisodes = <?php echo json_encode(array_column($episodes ?? [], 'episode_number')); ?>;
+    const maxEpisode = existingEpisodes.length > 0 ? Math.max(...existingEpisodes) : 0;
+    const nextEpisode = maxEpisode + episodeCount;
+    
+    const episodeDiv = document.createElement('div');
+    episodeDiv.className = 'row mb-3 episode-item';
+    episodeDiv.id = 'episode-' + episodeCount;
+    
+    episodeDiv.innerHTML = `
+        <div class="col-md-2">
+            <label class="form-label">Số tập <span class="text-danger">*</span></label>
+            <input type="number" class="form-control episode-number" name="episodes[${episodeCount}][episode_number]" 
+                   value="${nextEpisode}" min="1" required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Tiêu đề tập</label>
+            <input type="text" class="form-control" name="episodes[${episodeCount}][title]" 
+                   placeholder="VD: Tập ${nextEpisode}: Tên tập">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Video File <span class="text-danger">*</span></label>
+            <input type="file" class="form-control" name="episodes[${episodeCount}][video_file]" 
+                   accept="video/*" required>
+            <small class="text-muted">Chọn file video (MP4, AVI, MOV, etc.)</small>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">&nbsp;</label>
+            <button type="button" class="btn btn-outline-danger w-100" onclick="removeEpisode(${episodeCount})">
+                <i class="fas fa-times"></i> Xóa
+            </button>
+        </div>
+    `;
+    
+    container.appendChild(episodeDiv);
+}
+
+function removeEpisode(id) {
+    const episode = document.getElementById('episode-' + id);
+    if (episode) {
+        episode.remove();
+    }
+}
+
+function deleteEpisode(episodeId) {
+    if (confirm('Bạn có chắc chắn muốn xóa tập này?')) {
+        window.location.href = '?route=admin/movies/delete-episode&id=' + episodeId + '&movie_id=<?php echo $movie['id']; ?>';
+    }
+}
 const existingTimes = <?php echo isset($existingShowtimes) && !empty($existingShowtimes) ? json_encode(array_unique(array_column($existingShowtimes, 'show_time'))) : '[]'; ?>;
 
 function toggleTheaterSection() {
     const status = document.getElementById('status').value;
     const section = document.getElementById('theaterScheduleSection');
+    const scheduleTheater = document.getElementById('scheduleTheater');
+    const defaultPrice = document.getElementById('defaultPrice');
+    const fromDate = document.getElementById('fromDate');
+    const toDate = document.getElementById('toDate');
+    const timeInputs = document.querySelectorAll('input[name="showtimes_time[]"]');
+    
     if (status === 'Chiếu rạp') {
         section.style.display = 'block';
+        // Thêm required cho các trường khi hiển thị
+        if (scheduleTheater) scheduleTheater.setAttribute('required', 'required');
+        if (defaultPrice) defaultPrice.setAttribute('required', 'required');
+        if (fromDate) fromDate.setAttribute('required', 'required');
+        if (toDate) toDate.setAttribute('required', 'required');
+        timeInputs.forEach(input => input.setAttribute('required', 'required'));
+        
         if (timeSlotCount === 0) {
             // Nếu có showtimes cũ, load các giờ đó, nếu không thì dùng mặc định
             if (existingTimes.length > 0) {
@@ -224,19 +366,29 @@ function toggleTheaterSection() {
         updateSchedulePreview();
     } else {
         section.style.display = 'none';
+        // Xóa required khi ẩn phần này
+        if (scheduleTheater) scheduleTheater.removeAttribute('required');
+        if (defaultPrice) defaultPrice.removeAttribute('required');
+        if (fromDate) fromDate.removeAttribute('required');
+        if (toDate) toDate.removeAttribute('required');
+        timeInputs.forEach(input => input.removeAttribute('required'));
     }
 }
 
 function addTimeSlot(time = '') {
     timeSlotCount++;
     const container = document.getElementById('timeSlotsContainer');
+    const section = document.getElementById('theaterScheduleSection');
+    const isVisible = section && section.style.display !== 'none';
+    
     const col = document.createElement('div');
     col.className = 'col-md-3 mb-2';
     col.id = 'timeslot-' + timeSlotCount;
     
+    const requiredAttr = isVisible ? 'required' : '';
     col.innerHTML = `
         <div class="input-group">
-            <input type="time" class="form-control" name="showtimes_time[]" value="${time}" required 
+            <input type="time" class="form-control" name="showtimes_time[]" value="${time}" ${requiredAttr}
                    onchange="updateSchedulePreview()">
             <button type="button" class="btn btn-outline-danger" onclick="removeTimeSlot(${timeSlotCount})">
                 <i class="fas fa-times"></i>
@@ -345,6 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     toggleTheaterSection();
+    toggleSeriesSection();
 });
 </script>
 

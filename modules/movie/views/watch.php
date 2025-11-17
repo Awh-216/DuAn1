@@ -6,10 +6,32 @@ $title = htmlspecialchars($movie['title']);
 <section class="watch-section">
     <div class="container">
         <div class="watch-container">
+            <!-- Header với nút quay lại và tên phim -->
+            <div class="watch-header">
+                <a href="javascript:history.back()" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="watch-movie-title"><?php echo htmlspecialchars($movie['title']); ?></h1>
+            </div>
+            
             <div class="video-wrapper">
-                <?php if ($movie['video_url']): ?>
+                <?php 
+                // Xác định video URL để hiển thị
+                $videoUrl = null;
+                if (isset($currentEpisode) && $currentEpisode && !empty($currentEpisode['video_url'])) {
+                    // Nếu là phim bộ và có tập được chọn
+                    $videoUrl = $currentEpisode['video_url'];
+                } elseif (($movie['type'] ?? 'phimle') === 'phimbo' && !empty($episodes)) {
+                    // Nếu là phim bộ nhưng chưa chọn tập, dùng tập đầu tiên
+                    $videoUrl = $episodes[0]['video_url'] ?? null;
+                } else {
+                    // Phim lẻ hoặc không có tập
+                    $videoUrl = $movie['video_url'] ?? null;
+                }
+                
+                if ($videoUrl): ?>
                     <video id="videoPlayer" controls>
-                        <source src="<?php echo htmlspecialchars($movie['video_url']); ?>" type="video/mp4">
+                        <source src="<?php echo htmlspecialchars($videoUrl); ?>" type="video/mp4">
                         Trình duyệt của bạn không hỗ trợ video.
                     </video>
                 <?php elseif ($movie['trailer_url']): ?>
@@ -24,9 +46,44 @@ $title = htmlspecialchars($movie['title']);
                     </div>
                 <?php endif; ?>
             </div>
+            
+            <?php if (($movie['type'] ?? 'phimle') === 'phimbo'): ?>
+            <div class="episodes-section">
+                <h3><i class="fas fa-list"></i> Danh sách tập</h3>
+                <?php if (!empty($episodes)): ?>
+                    <div class="episodes-list">
+                        <?php foreach ($episodes as $episode): ?>
+                            <a href="?route=movie/watch&id=<?php echo $movie['id']; ?>&episode_id=<?php echo $episode['id']; ?>" 
+                               class="episode-item <?php echo (isset($currentEpisode) && $currentEpisode && $currentEpisode['id'] == $episode['id']) ? 'active' : ''; ?>">
+                                <div class="episode-number">Tập <?php echo $episode['episode_number']; ?></div>
+                                <div class="episode-info">
+                                    <?php if ($episode['title']): ?>
+                                        <div class="episode-title"><?php echo htmlspecialchars($episode['title']); ?></div>
+                                    <?php endif; ?>
+                                    <?php if ($episode['duration']): ?>
+                                        <div class="episode-duration"><?php echo $episode['duration']; ?> phút</div>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if ($episode['thumbnail']): ?>
+                                    <div class="episode-thumbnail">
+                                        <img src="<?php echo htmlspecialchars($episode['thumbnail']); ?>" alt="Tập <?php echo $episode['episode_number']; ?>">
+                                    </div>
+                                <?php endif; ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Chưa có tập nào được thêm vào phim này. 
+                        <?php if (isset($isAdmin) && $isAdmin): ?>
+                            <a href="?route=admin/movies/edit&id=<?php echo $movie['id']; ?>" class="alert-link">Thêm tập ngay</a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
 
             <div class="movie-details">
-                <h1><?php echo htmlspecialchars($movie['title']); ?></h1>
                 <div class="movie-meta-info">
                     <span><i class="fas fa-star"></i> <?php echo number_format($movie['rating'], 1); ?></span>
                     <?php if (($movie['type'] ?? 'phimle') === 'phimbo'): ?>

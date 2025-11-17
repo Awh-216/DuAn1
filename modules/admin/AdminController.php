@@ -218,6 +218,7 @@ class AdminController extends Controller {
         $language = $_POST['language'] ?? '';
         $age_rating = $_POST['age_rating'] ?? '';
         $banner = $_POST['banner'] ?? '';
+        $type = $_POST['type'] ?? 'phimle';
         
         if (empty($title)) {
             $_SESSION['error'] = 'Tiêu đề phim không được để trống!';
@@ -229,12 +230,12 @@ class AdminController extends Controller {
                 INSERT INTO movies (
                     title, category_id, level, duration, description, director, actors,
                     video_url, trailer_url, thumbnail, status, status_admin, rating,
-                    country, language, age_rating, banner
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    country, language, age_rating, banner, type
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ", [
                 $title, $category_id, $level, $duration, $description, $director, $actors,
                 $video_url, $trailer_url, $thumbnail, $status, $status_admin, $rating,
-                $country, $language, $age_rating, $banner
+                $country, $language, $age_rating, $banner, $type
             ]);
             
             $movie_id = $db->lastInsertId();
@@ -322,6 +323,81 @@ class AdminController extends Controller {
                 $_SESSION['success'] = 'Thêm phim thành công!';
             }
             
+            // Nếu là phim bộ, lưu các tập
+            if ($type === 'phimbo' && isset($_POST['episodes']) && is_array($_POST['episodes'])) {
+                $episodeCount = 0;
+                $episodeDir = __DIR__ . '/../../data/phim/phimbo/';
+                
+                // Đảm bảo thư mục tồn tại
+                if (!is_dir($episodeDir)) {
+                    mkdir($episodeDir, 0755, true);
+                }
+                
+                foreach ($_POST['episodes'] as $index => $episodeData) {
+                    if (!empty($episodeData['episode_number'])) {
+                        $episode_number = intval($episodeData['episode_number']);
+                        $episode_title = !empty($episodeData['title']) ? $episodeData['title'] : null;
+                        $episode_thumbnail = !empty($episodeData['thumbnail']) ? $episodeData['thumbnail'] : null;
+                        $episode_duration = !empty($episodeData['duration']) ? intval($episodeData['duration']) : null;
+                        $episode_description = !empty($episodeData['description']) ? $episodeData['description'] : null;
+                        
+                        // Xử lý upload file video
+                        $episode_video_url = null;
+                        if (isset($_FILES['episodes']['name'][$index]['video_file']) && 
+                            $_FILES['episodes']['error'][$index]['video_file'] === UPLOAD_ERR_OK) {
+                            
+                            $uploadedFile = $_FILES['episodes']['tmp_name'][$index]['video_file'];
+                            $originalName = $_FILES['episodes']['name'][$index]['video_file'];
+                            
+                            // Tạo tên file duy nhất
+                            $fileExtension = pathinfo($originalName, PATHINFO_EXTENSION);
+                            $fileName = 'movie_' . $movie_id . '_episode_' . $episode_number . '_' . time() . '.' . $fileExtension;
+                            $targetPath = $episodeDir . $fileName;
+                            
+                            // Upload file
+                            if (move_uploaded_file($uploadedFile, $targetPath)) {
+                                $episode_video_url = 'data/phim/phimbo/' . $fileName;
+                            } else {
+                                error_log("Failed to upload episode video file: " . $originalName);
+                                continue; // Bỏ qua tập này nếu upload thất bại
+                            }
+                        }
+                        
+                        // Chỉ lưu nếu có video URL
+                        if ($episode_video_url) {
+                            try {
+                                $db->execute("
+                                    INSERT INTO episodes (movie_id, episode_number, title, video_url, thumbnail, duration, description)
+                                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                                ", [
+                                    $movie_id, 
+                                    $episode_number, 
+                                    $episode_title, 
+                                    $episode_video_url, 
+                                    $episode_thumbnail, 
+                                    $episode_duration, 
+                                    $episode_description
+                                ]);
+                                $episodeCount++;
+                            } catch (Exception $e) {
+                                // Log lỗi để debug
+                                error_log("Error inserting episode: " . $e->getMessage());
+                                // Nếu lỗi do bảng chưa tồn tại, thông báo rõ ràng
+                                if (strpos($e->getMessage(), "doesn't exist") !== false || 
+                                    strpos($e->getMessage(), "Unknown table") !== false) {
+                                    throw new Exception("Bảng 'episodes' chưa được tạo. Vui lòng chạy file create_episodes_table.sql trong phpMyAdmin trước!");
+                                }
+                                // Bỏ qua nếu tập đã tồn tại hoặc có lỗi khác
+                            }
+                        }
+                    }
+                }
+                
+                if ($episodeCount > 0) {
+                    $_SESSION['success'] = ($_SESSION['success'] ?? 'Thêm phim thành công!') . ' Đã thêm ' . $episodeCount . ' tập.';
+                }
+            }
+            
             $this->redirect('admin/movies');
         } catch (Exception $e) {
             $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
@@ -358,11 +434,23 @@ class AdminController extends Controller {
             $existingShowtimes = $db->fetchAll("SELECT * FROM showtimes WHERE movie_id = ? ORDER BY show_date, show_time", [$id]);
         }
         
+        // Lấy episodes nếu là phim bộ
+        $episodes = [];
+        if (isset($movie['type']) && $movie['type'] === 'phimbo') {
+            try {
+                $episodes = $db->fetchAll("SELECT * FROM episodes WHERE movie_id = ? ORDER BY episode_number", [$id]);
+            } catch (Exception $e) {
+                // Nếu bảng episodes chưa tồn tại, bỏ qua
+                $episodes = [];
+            }
+        }
+        
         $this->adminView('movies/edit', [
             'movie' => $movie,
             'categories' => $categories,
             'theaters' => $theaters,
             'existingShowtimes' => $existingShowtimes,
+            'episodes' => $episodes,
             'user' => $user,
             'title' => 'Sửa phim',
             'current_page' => 'movies'
@@ -400,6 +488,7 @@ class AdminController extends Controller {
         $language = $_POST['language'] ?? '';
         $age_rating = $_POST['age_rating'] ?? '';
         $banner = $_POST['banner'] ?? '';
+        $type = $_POST['type'] ?? 'phimle';
         
         if (empty($title)) {
             $_SESSION['error'] = 'Tiêu đề phim không được để trống!';
@@ -410,18 +499,54 @@ class AdminController extends Controller {
             // Lấy thông tin phim cũ để log
             $oldMovie = $db->fetch("SELECT * FROM movies WHERE id = ?", [$id]);
             
-            $db->execute("
+            if (!$oldMovie) {
+                $_SESSION['error'] = 'Không tìm thấy phim để cập nhật!';
+                $this->redirect('admin/movies');
+                return;
+            }
+            
+            // Chuẩn bị dữ liệu
+            $updateParams = [
+                $title, 
+                $category_id, 
+                $level, 
+                $duration, 
+                $description, 
+                $director, 
+                $actors,
+                $video_url, 
+                $trailer_url, 
+                $thumbnail, 
+                $status, 
+                $status_admin, 
+                $rating,
+                $country, 
+                $language, 
+                $age_rating, 
+                $banner, 
+                $type, 
+                $id
+            ];
+            
+            // Đếm số placeholder và số giá trị để debug
+            $sql = "
                 UPDATE movies SET
                     title = ?, category_id = ?, level = ?, duration = ?, description = ?,
                     director = ?, actors = ?, video_url = ?, trailer_url = ?, thumbnail = ?,
                     status = ?, status_admin = ?, rating = ?, country = ?, language = ?,
-                    age_rating = ?, banner = ?
+                    age_rating = ?, banner = ?, type = ?
                 WHERE id = ?
-            ", [
-                $title, $category_id, $level, $duration, $description, $director, $actors,
-                $video_url, $trailer_url, $thumbnail, $status, $status_admin, $rating,
-                $country, $language, $age_rating, $banner, $id
-            ]);
+            ";
+            
+            $placeholderCount = substr_count($sql, '?');
+            $paramCount = count($updateParams);
+            
+            if ($placeholderCount !== $paramCount) {
+                throw new Exception("Lỗi SQL: Số placeholder ($placeholderCount) không khớp với số tham số ($paramCount)");
+            }
+            
+            // Thực hiện cập nhật
+            $db->execute($sql, $updateParams);
             
             // Log activity
             AdminMiddleware::logAction(
@@ -434,9 +559,19 @@ class AdminController extends Controller {
                 ['title' => $title, 'status' => $status, 'status_admin' => $status_admin]
             );
             
+            // Đặt thông báo thành công (nếu chưa có)
+            if (!isset($_SESSION['success'])) {
+                $_SESSION['success'] = 'Cập nhật phim thành công!';
+            }
+            
             // Xử lý lịch chiếu rạp
+            // Nếu không phải "Chiếu rạp", xóa tất cả showtimes
+            if ($status !== 'Chiếu rạp') {
+                $db->execute("DELETE FROM showtimes WHERE movie_id = ?", [$id]);
+            }
+            
             if ($status === 'Chiếu rạp') {
-                // Xóa tất cả showtimes cũ
+                // Xóa tất cả showtimes cũ trước khi tạo mới
                 $db->execute("DELETE FROM showtimes WHERE movie_id = ?", [$id]);
                 $showtimeCount = 0;
                 
@@ -486,11 +621,162 @@ class AdminController extends Controller {
                 $_SESSION['success'] = 'Cập nhật phim thành công!';
             }
             
-            $this->redirect('admin/movies');
+            // Nếu là phim bộ, xử lý các tập mới
+            if ($type === 'phimbo' && isset($_POST['episodes']) && is_array($_POST['episodes']) && count($_POST['episodes']) > 0) {
+                try {
+                    // Kiểm tra xem bảng episodes có tồn tại không
+                    $db->fetch("SELECT 1 FROM episodes LIMIT 1");
+                } catch (Exception $e) {
+                    // Nếu bảng chưa tồn tại, bỏ qua phần xử lý episodes
+                    error_log("Bảng episodes chưa tồn tại: " . $e->getMessage());
+                }
+                
+                $episodeCount = 0;
+                $episodeDir = __DIR__ . '/../../data/phim/phimbo/';
+                
+                // Đảm bảo thư mục tồn tại
+                if (!is_dir($episodeDir)) {
+                    mkdir($episodeDir, 0755, true);
+                }
+                
+                foreach ($_POST['episodes'] as $index => $episodeData) {
+                    if (!empty($episodeData['episode_number'])) {
+                        $episode_number = intval($episodeData['episode_number']);
+                        $episode_title = !empty($episodeData['title']) ? $episodeData['title'] : null;
+                        $episode_thumbnail = !empty($episodeData['thumbnail']) ? $episodeData['thumbnail'] : null;
+                        $episode_duration = !empty($episodeData['duration']) ? intval($episodeData['duration']) : null;
+                        $episode_description = !empty($episodeData['description']) ? $episodeData['description'] : null;
+                        
+                        // Xử lý upload file video
+                        $episode_video_url = null;
+                        $hasNewVideo = false;
+                        
+                        // Kiểm tra xem có file video mới được upload không
+                        if (isset($_FILES['episodes']['name'][$index]['video_file']) && 
+                            $_FILES['episodes']['error'][$index]['video_file'] === UPLOAD_ERR_OK) {
+                            
+                            $uploadedFile = $_FILES['episodes']['tmp_name'][$index]['video_file'];
+                            $originalName = $_FILES['episodes']['name'][$index]['video_file'];
+                            
+                            // Tạo tên file duy nhất
+                            $fileExtension = pathinfo($originalName, PATHINFO_EXTENSION);
+                            $fileName = 'movie_' . $id . '_episode_' . $episode_number . '_' . time() . '.' . $fileExtension;
+                            $targetPath = $episodeDir . $fileName;
+                            
+                            // Upload file
+                            if (move_uploaded_file($uploadedFile, $targetPath)) {
+                                $episode_video_url = 'data/phim/phimbo/' . $fileName;
+                                $hasNewVideo = true;
+                            } else {
+                                error_log("Failed to upload episode video file: " . $originalName);
+                                continue; // Bỏ qua tập này nếu upload thất bại
+                            }
+                        }
+                        
+                        try {
+                            // Kiểm tra xem tập đã tồn tại chưa
+                            $existing = $db->fetch("SELECT id, video_url FROM episodes WHERE movie_id = ? AND episode_number = ?", [$id, $episode_number]);
+                            
+                            if ($existing) {
+                                // Nếu không có video mới, giữ nguyên video cũ
+                                if (!$hasNewVideo) {
+                                    $episode_video_url = $existing['video_url'];
+                                }
+                                
+                                // Cập nhật tập đã tồn tại
+                                $db->execute("
+                                    UPDATE episodes SET 
+                                        title = ?, 
+                                        video_url = ?, 
+                                        thumbnail = ?, 
+                                        duration = ?, 
+                                        description = ?
+                                    WHERE movie_id = ? AND episode_number = ?
+                                ", [
+                                    $episode_title, 
+                                    $episode_video_url, 
+                                    $episode_thumbnail, 
+                                    $episode_duration, 
+                                    $episode_description,
+                                    $id, 
+                                    $episode_number
+                                ]);
+                            } else {
+                                // Chỉ thêm tập mới nếu có video
+                                if ($episode_video_url) {
+                                    $db->execute("
+                                        INSERT INTO episodes (movie_id, episode_number, title, video_url, thumbnail, duration, description)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                                    ", [
+                                        $id, 
+                                        $episode_number, 
+                                        $episode_title, 
+                                        $episode_video_url, 
+                                        $episode_thumbnail, 
+                                        $episode_duration, 
+                                        $episode_description
+                                    ]);
+                                    $episodeCount++;
+                                }
+                            }
+                        } catch (Exception $e) {
+                            // Log lỗi để debug
+                            error_log("Error inserting/updating episode: " . $e->getMessage());
+                            // Bỏ qua nếu có lỗi (có thể do bảng chưa tồn tại hoặc tập đã tồn tại)
+                        }
+                    }
+                }
+                
+                if ($episodeCount > 0) {
+                    $_SESSION['success'] = ($_SESSION['success'] ?? 'Cập nhật phim thành công!') . ' Đã thêm ' . $episodeCount . ' tập mới.';
+                }
+            }
+            
+            // Redirect về trang edit để người dùng thấy thay đổi ngay
+            $this->redirect('admin/movies/edit&id=' . $id);
         } catch (Exception $e) {
-            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+            // Log lỗi chi tiết để debug
+            error_log("Error updating movie: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            error_log("POST data: " . print_r($_POST, true));
+            
+            $_SESSION['error'] = 'Có lỗi xảy ra khi cập nhật phim: ' . $e->getMessage();
             $this->redirect('admin/movies/edit&id=' . $id);
         }
+    }
+    
+    // Delete Episode
+    public function moviesDeleteEpisode() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        $episode_id = $_GET['id'] ?? null;
+        $movie_id = $_GET['movie_id'] ?? null;
+        
+        if (!$episode_id || !$movie_id) {
+            $_SESSION['error'] = 'Thông tin không hợp lệ!';
+            $this->redirect('admin/movies');
+        }
+        
+        try {
+            $db->execute("DELETE FROM episodes WHERE id = ? AND movie_id = ?", [$episode_id, $movie_id]);
+            $_SESSION['success'] = 'Xóa tập phim thành công!';
+            
+            // Log activity
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Xóa tập phim',
+                'Episode',
+                'episode',
+                $episode_id,
+                null,
+                ['movie_id' => $movie_id]
+            );
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+        }
+        
+        $this->redirect('admin/movies/edit&id=' . $movie_id);
     }
     
     // Delete Movie
