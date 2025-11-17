@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th10 17, 2025 lúc 03:57 AM
+-- Thời gian đã tạo: Th10 17, 2025 lúc 04:30 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -143,6 +143,25 @@ INSERT INTO `coupons` (`id`, `code`, `name`, `type`, `value`, `min_amount`, `max
 (3, 'VIP20', 'Giảm 20% cho thành viên VIP', 'percentage', 20.00, 100000.00, 100000.00, 50, 0, '2025-11-01 00:00:00', '2025-12-31 23:59:59', 'active', '2025-11-12 07:41:09'),
 (4, 'FLASH30', 'Giảm 30% trong ngày', 'percentage', 30.00, 150000.00, 150000.00, 30, 0, '2025-11-15 00:00:00', '2025-11-15 23:59:59', 'active', '2025-11-12 07:41:09'),
 (5, 'NEWUSER', 'Giảm 25.000đ cho người dùng mới', 'fixed', 25000.00, 100000.00, NULL, 500, 0, '2025-11-01 00:00:00', '2026-01-31 23:59:59', 'active', '2025-11-12 07:41:09');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `episodes`
+--
+
+CREATE TABLE `episodes` (
+  `id` int(11) NOT NULL,
+  `movie_id` int(11) NOT NULL,
+  `episode_number` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `video_url` varchar(255) DEFAULT NULL,
+  `thumbnail` varchar(255) DEFAULT NULL,
+  `duration` int(11) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -648,7 +667,7 @@ INSERT INTO `tickets` (`id`, `user_id`, `showtime_id`, `seat`, `qr_code`, `price
 CREATE TABLE `transactions` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `type` enum('ticket','subscription') NOT NULL,
+  `type` enum('ticket','subscription','deposit') NOT NULL,
   `related_id` int(11) DEFAULT NULL,
   `amount` decimal(10,2) NOT NULL,
   `method` enum('Momo','ZaloPay','Stripe','Bank','Cash') DEFAULT 'Momo',
@@ -761,7 +780,8 @@ INSERT INTO `watch_history` (`id`, `user_id`, `movie_id`, `last_time`, `rating`,
 (5, 5, 5, 3000, 5, 1, '2025-11-12 07:41:09'),
 (6, 1, 6, 5400, 5, 1, '2025-11-12 07:41:09'),
 (7, 2, 7, 2100, 4, 0, '2025-11-12 07:41:09'),
-(8, 9, 2, 0, NULL, 0, '2025-11-14 01:37:54');
+(8, 9, 2, 0, NULL, 0, '2025-11-14 01:37:54'),
+(9, 9, 5, 0, NULL, 0, '2025-11-17 08:57:34');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -801,6 +821,14 @@ ALTER TABLE `coupons`
   ADD UNIQUE KEY `code` (`code`),
   ADD KEY `idx_code` (`code`),
   ADD KEY `idx_status` (`status`);
+
+--
+-- Chỉ mục cho bảng `episodes`
+--
+ALTER TABLE `episodes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_movie_episode` (`movie_id`,`episode_number`),
+  ADD KEY `idx_movie_id` (`movie_id`);
 
 --
 -- Chỉ mục cho bảng `movies`
@@ -959,6 +987,12 @@ ALTER TABLE `coupons`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
+-- AUTO_INCREMENT cho bảng `episodes`
+--
+ALTER TABLE `episodes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT cho bảng `movies`
 --
 ALTER TABLE `movies`
@@ -1058,7 +1092,7 @@ ALTER TABLE `user_roles`
 -- AUTO_INCREMENT cho bảng `watch_history`
 --
 ALTER TABLE `watch_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
@@ -1083,6 +1117,12 @@ ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `episodes`
+--
+ALTER TABLE `episodes`
+  ADD CONSTRAINT `fk_episodes_movie` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `movies`
