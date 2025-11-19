@@ -81,9 +81,9 @@
                     Phim bộ <i class="fas fa-chevron-down"></i>
                 </a>
                 <div class="nav-dropdown">
-                    <a href="http://localhost/DuAn1/?route=movie/index" class="nav-link-new">
+                    <span class="nav-link-new dropdown-trigger">
                         Thể loại <i class="fas fa-chevron-down"></i>
-                    </a>
+                    </span>
                     <div class="dropdown-menu">
                         <?php foreach ($menuCategories as $cat): ?>
                             <a href="http://localhost/DuAn1/?route=movie/index&category=<?php echo $cat['id']; ?>" class="dropdown-item">
@@ -93,9 +93,9 @@
                     </div>
                 </div>
                 <div class="nav-dropdown">
-                    <a href="http://localhost/DuAn1/?route=movie/index" class="nav-link-new">
+                    <span class="nav-link-new dropdown-trigger">
                         Quốc gia <i class="fas fa-chevron-down"></i>
-                    </a>
+                    </span>
                     <div class="dropdown-menu">
                         <?php foreach ($countries as $country): ?>
                             <a href="http://localhost/DuAn1/?route=movie/index&country=<?php echo urlencode($country['country']); ?>" class="dropdown-item">
@@ -153,15 +153,41 @@
     <?php endif; ?>
 
     <?php if (isset($_SESSION['success'])): ?>
-        <div class="alert alert-success">
-            <i class="fas fa-check-circle"></i> <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+        <?php 
+        $successMsg = $_SESSION['success'];
+        unset($_SESSION['success']);
+        ?>
+        <div class="alert-modal alert-success-modal" id="alertModal">
+            <div class="alert-modal-content">
+                <i class="fas fa-check-circle"></i>
+                <span><?php echo htmlspecialchars($successMsg); ?></span>
+                <button class="alert-close" onclick="closeAlertModal()">&times;</button>
+            </div>
         </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showAlertModal('success', <?php echo json_encode($successMsg); ?>);
+            });
+        </script>
     <?php endif; ?>
 
     <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-error">
-            <i class="fas fa-exclamation-circle"></i> <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+        <?php 
+        $errorMsg = $_SESSION['error'];
+        unset($_SESSION['error']);
+        ?>
+        <div class="alert-modal alert-error-modal" id="alertModal">
+            <div class="alert-modal-content">
+                <i class="fas fa-exclamation-circle"></i>
+                <span><?php echo htmlspecialchars($errorMsg); ?></span>
+                <button class="alert-close" onclick="closeAlertModal()">&times;</button>
+            </div>
         </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showAlertModal('error', <?php echo json_encode($errorMsg); ?>);
+            });
+        </script>
     <?php endif; ?>
 
 
@@ -239,6 +265,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
 }
 
 .modal-content-login {
@@ -249,6 +283,14 @@
     max-width: 450px;
     position: relative;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    transform: scale(0.7) translateY(-50px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modal-overlay.show .modal-content-login {
+    transform: scale(1) translateY(0);
+    opacity: 1;
 }
 
 .modal-close {
@@ -320,27 +362,45 @@
 
 .auth-tab-content {
     display: none;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .auth-tab-content.active {
     display: block;
+    opacity: 1;
+    transform: translateX(0);
 }
 </style>
 
 <script>
 function openAuthModal(tab = 'login') {
-    document.getElementById('authModal').style.display = 'flex';
+    const modal = document.getElementById('authModal');
+    modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    
+    // Trigger animation by adding 'show' class after a small delay
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+    
     switchAuthTab(tab);
 }
 
 function closeAuthModal() {
-    document.getElementById('authModal').style.display = 'none';
-    document.body.style.overflow = 'auto';
-    document.getElementById('loginError').style.display = 'none';
-    document.getElementById('registerError').style.display = 'none';
-    document.getElementById('loginForm').reset();
-    document.getElementById('registerForm').reset();
+    const modal = document.getElementById('authModal');
+    modal.classList.remove('show');
+    
+    // Wait for animation to complete before hiding
+    setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        document.getElementById('loginError').style.display = 'none';
+        document.getElementById('registerError').style.display = 'none';
+        document.getElementById('loginForm').reset();
+        document.getElementById('registerForm').reset();
+    }, 300);
 }
 
 function switchAuthTab(tab) {
@@ -463,6 +523,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 label.style.opacity = '0.7';
             }
         });
+    }
+});
+
+// Alert Modal Functions
+function showAlertModal(type, message) {
+    const modal = document.getElementById('alertModal');
+    if (modal) {
+        modal.classList.add('show');
+        // Tự động đóng sau 5 giây
+        setTimeout(function() {
+            closeAlertModal();
+        }, 5000);
+    } else {
+        // Fallback: dùng alert nếu không tìm thấy modal
+        alert(message);
+    }
+}
+
+function closeAlertModal() {
+    const modal = document.getElementById('alertModal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(function() {
+            modal.remove();
+        }, 300);
+    }
+}
+
+// Đóng modal khi click vào overlay
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('alertModal');
+    if (modal && e.target === modal) {
+        closeAlertModal();
+    }
+});
+
+// Đóng modal khi nhấn ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAlertModal();
     }
 });
 </script>

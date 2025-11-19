@@ -142,16 +142,27 @@ $title = 'Trang chủ';
                             <i class="fas fa-play"></i>
                         </div>
                     </div>
-                    <div class="movie-info-new">
-                        <h3 class="movie-title-new"><?php echo htmlspecialchars($movie['title']); ?></h3>
-                        <p class="movie-tags">
-                            <span class="movie-type">_phim lẻ</span>
-                            <?php if ($movie['category_name']): ?>
-                                <span class="movie-tag">#<?php echo strtolower(str_replace(' ', '', htmlspecialchars($movie['category_name']))); ?></span>
-                            <?php endif; ?>
-                        </p>
-                    </div>
                 </a>
+                <div class="movie-info-new">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                        <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $movie['id']; ?>" style="flex: 1; text-decoration: none; color: inherit;">
+                            <h3 class="movie-title-new"><?php echo htmlspecialchars($movie['title']); ?></h3>
+                        </a>
+                        <?php if (isset($user) && $user): ?>
+                        <button class="favorite-btn-inline <?php echo (isset($favorites) && in_array($movie['id'], $favorites)) ? 'active' : ''; ?>" 
+                                data-movie-id="<?php echo $movie['id']; ?>"
+                                onclick="event.preventDefault(); event.stopPropagation(); toggleFavorite(this, <?php echo $movie['id']; ?>);">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <?php endif; ?>
+                    </div>
+                    <p class="movie-tags">
+                        <span class="movie-type">_phim lẻ</span>
+                        <?php if ($movie['category_name']): ?>
+                            <span class="movie-tag">#<?php echo strtolower(str_replace(' ', '', htmlspecialchars($movie['category_name']))); ?></span>
+                        <?php endif; ?>
+                    </p>
+                </div>
             </div>
             <?php endforeach; ?>
         </div>
@@ -189,16 +200,27 @@ $title = 'Trang chủ';
                             <i class="fas fa-play"></i>
                         </div>
                     </div>
-                    <div class="movie-info-new">
-                        <h3 class="movie-title-new"><?php echo htmlspecialchars($movie['title']); ?></h3>
-                        <p class="movie-tags">
-                            <span class="movie-type">_phim bộ</span>
-                            <?php if ($movie['category_name']): ?>
-                                <span class="movie-tag">#<?php echo strtolower(str_replace(' ', '', htmlspecialchars($movie['category_name']))); ?></span>
-                            <?php endif; ?>
-                        </p>
-                    </div>
                 </a>
+                <div class="movie-info-new">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                        <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $movie['id']; ?>" style="flex: 1; text-decoration: none; color: inherit;">
+                            <h3 class="movie-title-new"><?php echo htmlspecialchars($movie['title']); ?></h3>
+                        </a>
+                        <?php if (isset($user) && $user): ?>
+                        <button class="favorite-btn-inline <?php echo (isset($favorites) && in_array($movie['id'], $favorites)) ? 'active' : ''; ?>" 
+                                data-movie-id="<?php echo $movie['id']; ?>"
+                                onclick="event.preventDefault(); event.stopPropagation(); toggleFavorite(this, <?php echo $movie['id']; ?>);">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <?php endif; ?>
+                    </div>
+                    <p class="movie-tags">
+                        <span class="movie-type">_phim bộ</span>
+                        <?php if ($movie['category_name']): ?>
+                            <span class="movie-tag">#<?php echo strtolower(str_replace(' ', '', htmlspecialchars($movie['category_name']))); ?></span>
+                        <?php endif; ?>
+                    </p>
+                </div>
             </div>
             <?php endforeach; ?>
         </div>
@@ -238,16 +260,27 @@ $title = 'Trang chủ';
                             <i class="fas fa-play"></i>
                         </div>
                     </div>
-                    <div class="movie-info-new">
-                        <h3 class="movie-title-new"><?php echo htmlspecialchars($movie['title']); ?></h3>
-                        <p class="movie-tags">
-                            <span class="movie-type"><?php echo ($movie['type'] ?? 'phimle') === 'phimbo' ? '_phim bộ' : '_phim lẻ'; ?></span>
-                            <?php if ($movie['category_name']): ?>
-                                <span class="movie-tag">#<?php echo strtolower(str_replace(' ', '', htmlspecialchars($movie['category_name']))); ?></span>
-                            <?php endif; ?>
-                        </p>
-                    </div>
                 </a>
+                <div class="movie-info-new">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                        <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $movie['id']; ?>" style="flex: 1; text-decoration: none; color: inherit;">
+                            <h3 class="movie-title-new"><?php echo htmlspecialchars($movie['title']); ?></h3>
+                        </a>
+                        <?php if (isset($user) && $user): ?>
+                        <button class="favorite-btn-inline <?php echo (isset($favorites) && in_array($movie['id'], $favorites)) ? 'active' : ''; ?>" 
+                                data-movie-id="<?php echo $movie['id']; ?>"
+                                onclick="event.preventDefault(); event.stopPropagation(); toggleFavorite(this, <?php echo $movie['id']; ?>);">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <?php endif; ?>
+                    </div>
+                    <p class="movie-tags">
+                        <span class="movie-type"><?php echo ($movie['type'] ?? 'phimle') === 'phimbo' ? '_phim bộ' : '_phim lẻ'; ?></span>
+                        <?php if ($movie['category_name']): ?>
+                            <span class="movie-tag">#<?php echo strtolower(str_replace(' ', '', htmlspecialchars($movie['category_name']))); ?></span>
+                        <?php endif; ?>
+                    </p>
+                </div>
             </div>
             <?php endforeach; ?>
         </div>
@@ -256,6 +289,49 @@ $title = 'Trang chủ';
 <?php endif; ?>
 
 <script>
+function toggleFavorite(btn, movieId) {
+    <?php if (!isset($user) || !$user): ?>
+    // Nếu chưa đăng nhập, yêu cầu đăng nhập
+    if (confirm('Vui lòng đăng nhập để thêm vào yêu thích!')) {
+        window.location.href = '?route=auth/login';
+    }
+    return;
+    <?php endif; ?>
+    
+    // Disable button while processing
+    btn.disabled = true;
+    const icon = btn.querySelector('i');
+    
+    fetch('?route=movie/toggleFavorite', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'movie_id=' + movieId
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Toggle active class
+            btn.classList.toggle('active', data.favorite);
+            
+            // Show message
+            if (data.message) {
+                // Có thể thêm toast notification ở đây
+                console.log(data.message);
+            }
+        } else {
+            alert(data.error || 'Có lỗi xảy ra');
+        }
+        btn.disabled = false;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi thêm vào yêu thích');
+        btn.disabled = false;
+    });
+}
+
 // Hero Slider JavaScript
 let currentSlide = 0;
 const slides = document.querySelectorAll('.hero-slide');

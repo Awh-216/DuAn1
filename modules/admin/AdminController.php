@@ -126,55 +126,94 @@ class AdminController extends Controller {
     /**
      * Cập nhật điểm của user
      */
-    public function updatePoints() {
-        $user = AdminMiddleware::checkAdmin();
-        
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirect('admin/users');
-            return;
-        }
-        
-        $userId = $_POST['user_id'] ?? null;
-        $action = $_POST['action'] ?? 'set';
-        $points = intval($_POST['points'] ?? 0);
-        
-        if (!$userId || $points < 0) {
-            $_SESSION['error'] = 'Dữ liệu không hợp lệ!';
-            $this->redirect('admin/users');
-            return;
-        }
-        
-        require_once __DIR__ . '/../user/UserModel.php';
-        $userModel = new UserModel();
-        
-        $targetUser = $userModel->getById($userId);
-        if (!$targetUser) {
-            $_SESSION['error'] = 'Người dùng không tồn tại!';
-            $this->redirect('admin/users');
-            return;
-        }
-        
-        $currentPoints = $targetUser['points'] ?? 0;
-        
-        switch ($action) {
-            case 'set':
-                $newPoints = $points;
-                break;
-            case 'add':
-                $newPoints = $currentPoints + $points;
-                break;
-            case 'subtract':
-                $newPoints = max(0, $currentPoints - $points);
-                break;
-            default:
-                $_SESSION['error'] = 'Thao tác không hợp lệ!';
+    public function usersUpdatePoints() {
+        try {
+            $user = AdminMiddleware::checkAdmin();
+            
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $_SESSION['error'] = 'Phương thức không hợp lệ!';
                 $this->redirect('admin/users');
                 return;
+            }
+            
+            $userId = $_POST['user_id'] ?? null;
+            $action = $_POST['action'] ?? 'set';
+            $points = intval($_POST['points'] ?? 0);
+            
+            // Debug log
+            error_log("Update Points Request - User ID: $userId, Action: $action, Points: $points");
+            
+            if (!$userId) {
+                $_SESSION['error'] = 'Thiếu thông tin user ID!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            if ($points < 0) {
+                $_SESSION['error'] = 'Số điểm phải lớn hơn hoặc bằng 0!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            // Kiểm tra nếu action là 'add' hoặc 'subtract' nhưng points = 0
+            if (($action === 'add' || $action === 'subtract') && $points === 0) {
+                $_SESSION['error'] = 'Vui lòng nhập số điểm lớn hơn 0!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            require_once __DIR__ . '/../user/UserModel.php';
+            $userModel = new UserModel();
+            
+            $targetUser = $userModel->getById($userId);
+            if (!$targetUser) {
+                $_SESSION['error'] = 'Người dùng không tồn tại!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            $currentPoints = intval($targetUser['points'] ?? 0);
+            
+            switch ($action) {
+                case 'set':
+                    $newPoints = $points;
+                    break;
+                case 'add':
+                    $newPoints = $currentPoints + $points;
+                    break;
+                case 'subtract':
+                    $newPoints = max(0, $currentPoints - $points);
+                    break;
+                default:
+                    $_SESSION['error'] = 'Thao tác không hợp lệ!';
+                    $this->redirect('admin/users');
+                    return;
+            }
+            
+            // Log trước khi update
+            error_log("Updating points - User ID: $userId, Current: $currentPoints, New: $newPoints, Action: $action");
+            
+            $userModel->updatePoints($userId, $newPoints);
+            
+            // Log action
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Cập nhật điểm người dùng',
+                'User',
+                'user',
+                $userId,
+                ['points' => $currentPoints],
+                ['points' => $newPoints, 'action' => $action, 'points_changed' => $points]
+            );
+            
+            $_SESSION['success'] = "Đã cập nhật điểm thành công! Điểm hiện tại: " . number_format($newPoints) . " (Thay đổi: " . ($action === 'add' ? '+' : ($action === 'subtract' ? '-' : '')) . number_format($points) . ")";
+            $this->redirect('admin/users');
+        } catch (Exception $e) {
+            error_log("Error in usersUpdatePoints: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            $_SESSION['error'] = 'Có lỗi xảy ra khi cập nhật điểm: ' . $e->getMessage();
+            $this->redirect('admin/users');
         }
-        
-        $userModel->updatePoints($userId, $newPoints);
-        $_SESSION['success'] = "Đã cập nhật điểm thành công! Điểm mới: " . number_format($newPoints);
-        $this->redirect('admin/users');
     }
     
     // Movies Management
@@ -413,13 +452,34 @@ class AdminController extends Controller {
                                 $episode_video_url = 'data/phim/phimbo/' . $fileName;
                             } else {
                                 error_log("Failed to upload episode video file: " . $originalName);
-                                continue; // Bỏ qua tập này nếu upload thất bại
+                                // Không bỏ qua, vẫn lưu episode nhưng không có video_url
                             }
                         }
                         
-                        // Chỉ lưu nếu có video URL
-                        if ($episode_video_url) {
-                            try {
+                        // Kiểm tra xem episode đã tồn tại chưa
+                        try {
+                            $existing = $db->fetch("SELECT id, video_url FROM episodes WHERE movie_id = ? AND episode_number = ?", 
+                                [$movie_id, $episode_number]);
+                            
+                            if ($existing) {
+                                // Update episode hiện có
+                                $updateVideoUrl = $episode_video_url ?: $existing['video_url']; // Giữ video_url cũ nếu không có mới
+                                
+                                $db->execute("
+                                    UPDATE episodes SET title = ?, video_url = ?, thumbnail = ?, duration = ?, description = ?
+                                    WHERE movie_id = ? AND episode_number = ?
+                                ", [
+                                    $episode_title, 
+                                    $updateVideoUrl, 
+                                    $episode_thumbnail, 
+                                    $episode_duration, 
+                                    $episode_description,
+                                    $movie_id, 
+                                    $episode_number
+                                ]);
+                                $episodeCount++;
+                            } else {
+                                // Thêm episode mới (cho phép không có video_url ban đầu)
                                 $db->execute("
                                     INSERT INTO episodes (movie_id, episode_number, title, video_url, thumbnail, duration, description)
                                     VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -427,22 +487,22 @@ class AdminController extends Controller {
                                     $movie_id, 
                                     $episode_number, 
                                     $episode_title, 
-                                    $episode_video_url, 
+                                    $episode_video_url, // Có thể là null
                                     $episode_thumbnail, 
                                     $episode_duration, 
                                     $episode_description
                                 ]);
                                 $episodeCount++;
-                            } catch (Exception $e) {
-                                // Log lỗi để debug
-                                error_log("Error inserting episode: " . $e->getMessage());
-                                // Nếu lỗi do bảng chưa tồn tại, thông báo rõ ràng
-                                if (strpos($e->getMessage(), "doesn't exist") !== false || 
-                                    strpos($e->getMessage(), "Unknown table") !== false) {
-                                    throw new Exception("Bảng 'episodes' chưa được tạo. Vui lòng chạy file create_episodes_table.sql trong phpMyAdmin trước!");
-                                }
-                                // Bỏ qua nếu tập đã tồn tại hoặc có lỗi khác
                             }
+                        } catch (Exception $e) {
+                            // Log lỗi để debug
+                            error_log("Error inserting/updating episode: " . $e->getMessage());
+                            // Nếu lỗi do bảng chưa tồn tại, thông báo rõ ràng
+                            if (strpos($e->getMessage(), "doesn't exist") !== false || 
+                                strpos($e->getMessage(), "Unknown table") !== false) {
+                                throw new Exception("Bảng 'episodes' chưa được tạo. Vui lòng chạy file create_episodes_table.sql trong phpMyAdmin trước!");
+                            }
+                            // Bỏ qua nếu có lỗi khác
                         }
                     }
                 }
@@ -723,7 +783,7 @@ class AdminController extends Controller {
                                 $hasNewVideo = true;
                             } else {
                                 error_log("Failed to upload episode video file: " . $originalName);
-                                continue; // Bỏ qua tập này nếu upload thất bại
+                                // Không bỏ qua, vẫn lưu episode nhưng không có video_url
                             }
                         }
                         
@@ -756,22 +816,20 @@ class AdminController extends Controller {
                                     $episode_number
                                 ]);
                             } else {
-                                // Chỉ thêm tập mới nếu có video
-                                if ($episode_video_url) {
-                                    $db->execute("
-                                        INSERT INTO episodes (movie_id, episode_number, title, video_url, thumbnail, duration, description)
-                                        VALUES (?, ?, ?, ?, ?, ?, ?)
-                                    ", [
-                                        $id, 
-                                        $episode_number, 
-                                        $episode_title, 
-                                        $episode_video_url, 
-                                        $episode_thumbnail, 
-                                        $episode_duration, 
-                                        $episode_description
-                                    ]);
-                                    $episodeCount++;
-                                }
+                                // Thêm tập mới (cho phép không có video_url ban đầu, có thể upload sau)
+                                $db->execute("
+                                    INSERT INTO episodes (movie_id, episode_number, title, video_url, thumbnail, duration, description)
+                                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                                ", [
+                                    $id, 
+                                    $episode_number, 
+                                    $episode_title, 
+                                    $episode_video_url, // Có thể là null
+                                    $episode_thumbnail, 
+                                    $episode_duration, 
+                                    $episode_description
+                                ]);
+                                $episodeCount++;
                             }
                         } catch (Exception $e) {
                             // Log lỗi để debug
@@ -1262,6 +1320,143 @@ class AdminController extends Controller {
             'total' => $total,
             'limit' => $limit
         ]);
+    }
+    
+    // Scan episodes from folder
+    public function moviesScanEpisodes() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        $episodeDir = __DIR__ . '/../../data/phim/phimbo/';
+        
+        // Scan folders
+        $folders = [];
+        if (is_dir($episodeDir)) {
+            $items = scandir($episodeDir);
+            foreach ($items as $item) {
+                if ($item !== '.' && $item !== '..' && is_dir($episodeDir . $item)) {
+                    $folderPath = $episodeDir . $item;
+                    $files = [];
+                    
+                    // Scan video files in folder
+                    $videoFiles = glob($folderPath . '/*.{mp4,avi,mkv,mov,wmv,flv}', GLOB_BRACE);
+                    foreach ($videoFiles as $file) {
+                        $files[] = [
+                            'name' => basename($file),
+                            'path' => 'data/phim/phimbo/' . $item . '/' . basename($file),
+                            'size' => filesize($file),
+                            'modified' => filemtime($file)
+                        ];
+                    }
+                    
+                    if (!empty($files)) {
+                        $folders[] = [
+                            'name' => $item,
+                            'files' => $files,
+                            'count' => count($files)
+                        ];
+                    }
+                }
+            }
+        }
+        
+        // Lấy danh sách phim bộ
+        $movies = $db->fetchAll("SELECT id, title, type FROM movies WHERE type = 'phimbo' ORDER BY title");
+        
+        $this->adminView('movies/scan-episodes', [
+            'folders' => $folders,
+            'movies' => $movies,
+            'user' => $user,
+            'title' => 'Import tập phim từ folder',
+            'current_page' => 'movies'
+        ]);
+    }
+    
+    // Import episodes from folder
+    public function moviesImportEpisodes() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/movies/scanEpisodes');
+        }
+        
+        $movie_id = intval($_POST['movie_id'] ?? 0);
+        $folder_name = $_POST['folder_name'] ?? '';
+        $files = $_POST['files'] ?? [];
+        
+        if (!$movie_id || !$folder_name || empty($files)) {
+            $_SESSION['error'] = 'Vui lòng chọn phim và các file cần import!';
+            $this->redirect('admin/movies/scanEpisodes');
+            return;
+        }
+        
+        // Kiểm tra phim có tồn tại không
+        $movie = $db->fetch("SELECT id, title FROM movies WHERE id = ? AND type = 'phimbo'", [$movie_id]);
+        if (!$movie) {
+            $_SESSION['error'] = 'Không tìm thấy phim bộ!';
+            $this->redirect('admin/movies/scanEpisodes');
+            return;
+        }
+        
+        $imported = 0;
+        $updated = 0;
+        
+        try {
+            foreach ($files as $fileData) {
+                // Kiểm tra xem có checkbox import được chọn không
+                if (!isset($fileData['import']) || $fileData['import'] != '1') {
+                    continue;
+                }
+                
+                if (!isset($fileData['path']) || !isset($fileData['episode_number'])) {
+                    continue;
+                }
+                
+                $file_path = $fileData['path'];
+                $episode_number = intval($fileData['episode_number']);
+                
+                // Kiểm tra file có tồn tại không
+                $fullPath = __DIR__ . '/../../' . $file_path;
+                if (!file_exists($fullPath)) {
+                    continue;
+                }
+                
+                // Kiểm tra episode đã tồn tại chưa
+                $existing = $db->fetch("SELECT id, video_url FROM episodes WHERE movie_id = ? AND episode_number = ?", 
+                    [$movie_id, $episode_number]);
+                
+                if ($existing) {
+                    // Update episode hiện có (chỉ nếu chưa có video_url)
+                    if (empty($existing['video_url'])) {
+                        $db->execute("
+                            UPDATE episodes SET video_url = ? WHERE movie_id = ? AND episode_number = ?
+                        ", [$file_path, $movie_id, $episode_number]);
+                        $updated++;
+                    }
+                } else {
+                    // Thêm episode mới
+                    $episode_title = !empty($fileData['title']) ? $fileData['title'] : "Tập $episode_number";
+                    
+                    $db->execute("
+                        INSERT INTO episodes (movie_id, episode_number, title, video_url)
+                        VALUES (?, ?, ?, ?)
+                    ", [$movie_id, $episode_number, $episode_title, $file_path]);
+                    $imported++;
+                }
+            }
+            
+            AdminMiddleware::logAction($user['id'], 'movies', 'import_episodes', 
+                "Đã import $imported tập mới và cập nhật $updated tập cho phim: " . $movie['title']);
+            
+            $_SESSION['success'] = "Đã import $imported tập mới và cập nhật $updated tập cho phim: " . $movie['title'];
+            
+        } catch (Exception $e) {
+            error_log("Error importing episodes: " . $e->getMessage());
+            $_SESSION['error'] = 'Có lỗi xảy ra khi import: ' . $e->getMessage();
+        }
+        
+        $this->redirect('admin/movies/scanEpisodes');
     }
 }
 ?>

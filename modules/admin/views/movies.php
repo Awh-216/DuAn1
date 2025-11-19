@@ -1,8 +1,13 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h5>Quản lý phim</h5>
-    <a href="?route=admin/movies/create" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Thêm phim mới
-    </a>
+    <div>
+        <a href="?route=admin/movies/scanEpisodes" class="btn btn-info me-2">
+            <i class="fas fa-folder-open"></i> Import tập từ folder
+        </a>
+        <a href="?route=admin/movies/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Thêm phim mới
+        </a>
+    </div>
 </div>
 
 <!-- Filters -->

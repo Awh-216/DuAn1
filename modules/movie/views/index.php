@@ -171,8 +171,20 @@ $title = 'Xem Phim';
                             <span class="movie-level"><?php echo $movie['level']; ?></span>
                             <?php endif; ?>
                         </div>
-                        <div class="movie-info">
-                            <h3><?php echo htmlspecialchars($movie['title']); ?></h3>
+                    </a>
+                    <div class="movie-info">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                            <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $movie['id']; ?>" style="flex: 1; text-decoration: none; color: inherit;">
+                                <h3><?php echo htmlspecialchars($movie['title']); ?></h3>
+                            </a>
+                            <?php if (isset($user) && $user): ?>
+                            <button class="favorite-btn-inline <?php echo (isset($favorites) && in_array($movie['id'], $favorites)) ? 'active' : ''; ?>" 
+                                    data-movie-id="<?php echo $movie['id']; ?>"
+                                    onclick="event.preventDefault(); event.stopPropagation(); toggleFavorite(this, <?php echo $movie['id']; ?>);">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <?php endif; ?>
+                        </div>
                             <p class="movie-meta">
                                 <span><i class="fas fa-star"></i> <?php echo number_format($movie['rating'], 1); ?></span>
                                 <?php if ($movie['type'] === 'phimbo'): ?>
@@ -191,10 +203,54 @@ $title = 'Xem Phim';
                                 <p class="movie-description"><?php echo htmlspecialchars(mb_substr($movie['description'], 0, 100)) . '...'; ?></p>
                             <?php endif; ?>
                         </div>
-                    </a>
                 </div>
                 <?php endforeach; ?>
         </div>
+        
+<script>
+function toggleFavorite(btn, movieId) {
+    <?php if (!isset($user) || !$user): ?>
+    // Nếu chưa đăng nhập, yêu cầu đăng nhập
+    if (confirm('Vui lòng đăng nhập để thêm vào yêu thích!')) {
+        window.location.href = '?route=auth/login';
+    }
+    return;
+    <?php endif; ?>
+    
+    // Disable button while processing
+    btn.disabled = true;
+    const icon = btn.querySelector('i');
+    
+    fetch('?route=movie/toggleFavorite', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'movie_id=' + movieId
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Toggle active class
+            btn.classList.toggle('active', data.favorite);
+            
+            // Show message
+            if (data.message) {
+                // Có thể thêm toast notification ở đây
+                console.log(data.message);
+            }
+        } else {
+            alert(data.error || 'Có lỗi xảy ra');
+        }
+        btn.disabled = false;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi thêm vào yêu thích');
+        btn.disabled = false;
+    });
+}
+</script>
         <?php endif; ?>
     </div>
 </section>

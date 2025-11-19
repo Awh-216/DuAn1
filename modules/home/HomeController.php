@@ -73,12 +73,26 @@ class HomeController extends Controller {
             LIMIT 12
         ");
         
+        // Lấy danh sách favorites của user nếu đã đăng nhập
+        $favorites = [];
+        $user = $this->getCurrentUser();
+        if ($user) {
+            require_once __DIR__ . '/../movie/WatchHistoryModel.php';
+            $favoriteMovies = $movieModel->getDb()->fetchAll("
+                SELECT movie_id 
+                FROM watch_history 
+                WHERE user_id = ? AND favorite = 1
+            ", [$user['id']]);
+            $favorites = array_column($favoriteMovies, 'movie_id');
+        }
+        
         $this->view('home/index', [
             'sliderMovies' => $sliderMovies,
             'latestMovies' => $latestMovies,
             'phimLe' => $phimLe,
             'phimBo' => $phimBo,
-            'user' => $this->getCurrentUser()
+            'user' => $user,
+            'favorites' => $favorites
         ]);
     }
 }

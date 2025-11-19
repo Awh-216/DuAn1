@@ -18,22 +18,154 @@ $title = htmlspecialchars($movie['title']);
                 <?php 
                 // Xác định video URL để hiển thị
                 $videoUrl = null;
-                if (isset($currentEpisode) && $currentEpisode && !empty($currentEpisode['video_url'])) {
-                    // Nếu là phim bộ và có tập được chọn
-                    $videoUrl = $currentEpisode['video_url'];
-                } elseif (($movie['type'] ?? 'phimle') === 'phimbo' && !empty($episodes)) {
-                    // Nếu là phim bộ nhưng chưa chọn tập, dùng tập đầu tiên
-                    $videoUrl = $episodes[0]['video_url'] ?? null;
+                $noVideoMessage = null;
+                $episodeNumber = null;
+                $isPhimBo = ($movie['type'] ?? 'phimle') === 'phimbo';
+                
+                if ($isPhimBo) {
+                    // Xử lý phim bộ
+                    $folderPath = null;
+                    
+                    // Debug: Kiểm tra episodes từ database
+                    error_log("Watch view - Episodes count from DB: " . (isset($episodes) ? count($episodes) : 0));
+                    error_log("Watch view - Current episode: " . (isset($currentEpisode) && $currentEpisode ? "Yes (ID: " . $currentEpisode['id'] . ", Number: " . $currentEpisode['episode_number'] . ")" : "No"));
+                    error_log("Watch view - Movie video_url: " . ($movie['video_url'] ?? 'N/A'));
+                    
+                    if (isset($currentEpisode) && $currentEpisode) {
+                        // Có tập được chọn
+                        $episodeNumber = $currentEpisode['episode_number'];
+                        
+                        if (!empty($currentEpisode['video_url'])) {
+                            $videoPath = $currentEpisode['video_url'];
+                            // Extract folder path từ video_url
+                            if (preg_match('/\/tap\d+\.mp4$/i', $videoPath)) {
+                                // Nếu video_url chứa tên file (tap1.mp4, tap2.mp4, etc), extract folder
+                                $folderPath = dirname($videoPath);
+                            } else {
+                                // Nếu đã là folder path, dùng trực tiếp
+                                $folderPath = rtrim($videoPath, '/');
+                            }
+                            // Set videoUrl ngay sau khi có folderPath
+                            if ($folderPath) {
+                                $videoUrl = $folderPath;
+                            }
+                        } else {
+                            // Tập được chọn nhưng chưa có video_url, lấy từ tập khác hoặc phim
+                            if (!empty($episodes)) {
+                                foreach ($episodes as $ep) {
+                                    if (!empty($ep['video_url'])) {
+                                        $videoPath = $ep['video_url'];
+                                        if (preg_match('/\/tap\d+\.mp4$/i', $videoPath)) {
+                                            $folderPath = dirname($videoPath);
+                                        } else {
+                                            $folderPath = rtrim($videoPath, '/');
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                            // Nếu vẫn không có, thử lấy từ movie video_url
+                            if (!$folderPath && !empty($movie['video_url'])) {
+                                $folderPath = rtrim($movie['video_url'], '/');
+                            }
+                            
+                            if ($folderPath) {
+                                $videoUrl = $folderPath;
+                            } else {
+                                $noVideoMessage = "Tập " . $currentEpisode['episode_number'] . " chưa có video. Vui lòng chọn tập khác hoặc đợi admin upload video.";
+                            }
+                        }
+                    } elseif (!empty($episodes)) {
+                        // Chưa chọn tập, tìm tập đầu tiên có video_url
+                        $found = false;
+                        foreach ($episodes as $ep) {
+                            if (!empty($ep['video_url'])) {
+                                $episodeNumber = $ep['episode_number'];
+                                $videoPath = $ep['video_url'];
+                                // Extract folder path từ video_url
+                                if (preg_match('/\/tap\d+\.mp4$/i', $videoPath)) {
+                                    $folderPath = dirname($videoPath);
+                                } else {
+                                    $folderPath = rtrim($videoPath, '/');
+                                }
+                                // Set videoUrl ngay sau khi có folderPath
+                                if ($folderPath) {
+                                    $videoUrl = $folderPath;
+                                }
+                                $found = true;
+                                break;
+                            }
+                        }
+                        
+                        // Nếu không tìm thấy tập có video_url, mặc định dùng tập 1
+                        if (!$found) {
+                            $episodeNumber = 1;
+                            // Lấy folder path từ bất kỳ episode nào hoặc từ phim
+                            if (!empty($episodes[0]['video_url'])) {
+                                $videoPath = $episodes[0]['video_url'];
+                                if (preg_match('/\/tap\d+\.mp4$/i', $videoPath)) {
+                                    $folderPath = dirname($videoPath);
+                                } else {
+                                    $folderPath = rtrim($videoPath, '/');
+                                }
+                            } elseif (!empty($movie['video_url'])) {
+                                $folderPath = rtrim($movie['video_url'], '/');
+                            }
+                            // Set videoUrl nếu có folderPath
+                            if ($folderPath) {
+                                $videoUrl = $folderPath;
+                            }
+                        }
+                    } else {
+                        // Không có episodes trong database, mặc định dùng tập 1
+                        $episodeNumber = 1;
+                        if (!empty($movie['video_url'])) {
+                            $folderPath = rtrim($movie['video_url'], '/');
+                            $videoUrl = $folderPath;
+                            error_log("Watch view - Using default episode 1 with folder: " . $folderPath);
+                        } else {
+                            $noVideoMessage = "Chưa có tập nào có video. Vui lòng đợi admin upload video.";
+                        }
+                    }
+                    
+                    // Nếu vẫn không có videoUrl và không có thông báo lỗi, mặc định dùng tập 1
+                    if (!$videoUrl && !$noVideoMessage) {
+                        $episodeNumber = 1;
+                        if (!empty($movie['video_url'])) {
+                            $videoUrl = rtrim($movie['video_url'], '/');
+                        } else {
+                            $noVideoMessage = "Chưa có tập nào có video. Vui lòng đợi admin upload video.";
+                        }
+                    }
                 } else {
-                    // Phim lẻ hoặc không có tập
+                    // Phim lẻ
                     $videoUrl = $movie['video_url'] ?? null;
+                    if (!$videoUrl) {
+                        $noVideoMessage = "Video chưa có sẵn.";
+                    }
                 }
                 
                 if ($videoUrl): ?>
                     <video id="videoPlayer" controls>
-                        <source src="<?php echo htmlspecialchars($videoUrl); ?>" type="video/mp4">
+                        <?php if ($isPhimBo && $episodeNumber !== null): ?>
+                            <!-- Phim bộ: thêm số tập động vào URL -->
+                            <source src="<?php echo htmlspecialchars($videoUrl); ?>/tap<?php echo $episodeNumber; ?>.mp4" type="video/mp4">
+                        <?php else: ?>
+                            <!-- Phim lẻ: dùng URL trực tiếp -->
+                            <source src="<?php echo htmlspecialchars($videoUrl); ?>" type="video/mp4">
+                        <?php endif; ?>
                         Trình duyệt của bạn không hỗ trợ video.
                     </video>
+                <?php elseif ($noVideoMessage): ?>
+                    <div class="video-placeholder">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ff9800;"></i>
+                        <p style="margin-top: 1rem; font-size: 1.1rem; color: var(--text-primary);"><?php echo htmlspecialchars($noVideoMessage); ?></p>
+                        <?php if (($movie['type'] ?? 'phimle') === 'phimbo' && !empty($episodes)): ?>
+                            <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                                <i class="fas fa-info-circle"></i> Vui lòng chọn tập khác từ danh sách bên dưới.
+                            </p>
+                        <?php endif; ?>
+                    </div>
                 <?php elseif ($movie['trailer_url']): ?>
                     <video id="videoPlayer" controls>
                         <source src="<?php echo htmlspecialchars($movie['trailer_url']); ?>" type="video/mp4">
@@ -47,36 +179,47 @@ $title = htmlspecialchars($movie['title']);
                 <?php endif; ?>
             </div>
             
-            <?php if (($movie['type'] ?? 'phimle') === 'phimbo'): ?>
+            <?php 
+            // Luôn hiển thị phần episodes nếu phim có type là 'phimbo'
+            $isPhimBo = ($movie['type'] ?? 'phimle') === 'phimbo';
+            
+            // Debug: Kiểm tra episodes
+            error_log("Watch page - Movie ID: " . ($movie['id'] ?? 'N/A') . ", Type: " . ($movie['type'] ?? 'N/A') . ", Is Phim Bo: " . ($isPhimBo ? 'Yes' : 'No'));
+            error_log("Watch page - Episodes count: " . (isset($episodes) ? count($episodes) : 0));
+            if (isset($episodes) && !empty($episodes)) {
+                error_log("Watch page - First episode: " . print_r($episodes[0], true));
+            }
+            
+            if ($isPhimBo): 
+            ?>
             <div class="episodes-section">
-                <h3><i class="fas fa-list"></i> Danh sách tập</h3>
-                <?php if (!empty($episodes)): ?>
+                <h3><i class="fas fa-list"></i> Danh sách tập 
+                    <?php if (isset($episodes) && !empty($episodes)): ?>
+                        <span class="badge bg-primary ms-2"><?php echo count($episodes); ?> tập</span>
+                    <?php else: ?>
+                        <span class="badge bg-warning ms-2">Chưa có tập</span>
+                    <?php endif; ?>
+                </h3>
+                
+                <?php if (isset($episodes) && !empty($episodes)): ?>
                     <div class="episodes-list">
                         <?php foreach ($episodes as $episode): ?>
                             <a href="?route=movie/watch&id=<?php echo $movie['id']; ?>&episode_id=<?php echo $episode['id']; ?>" 
-                               class="episode-item <?php echo (isset($currentEpisode) && $currentEpisode && $currentEpisode['id'] == $episode['id']) ? 'active' : ''; ?>">
-                                <div class="episode-number">Tập <?php echo $episode['episode_number']; ?></div>
-                                <div class="episode-info">
-                                    <?php if ($episode['title']): ?>
-                                        <div class="episode-title"><?php echo htmlspecialchars($episode['title']); ?></div>
-                                    <?php endif; ?>
-                                    <?php if ($episode['duration']): ?>
-                                        <div class="episode-duration"><?php echo $episode['duration']; ?> phút</div>
-                                    <?php endif; ?>
-                                </div>
-                                <?php if ($episode['thumbnail']): ?>
-                                    <div class="episode-thumbnail">
-                                        <img src="<?php echo htmlspecialchars($episode['thumbnail']); ?>" alt="Tập <?php echo $episode['episode_number']; ?>">
-                                    </div>
-                                <?php endif; ?>
+                               class="episode-item <?php echo (isset($currentEpisode) && $currentEpisode && $currentEpisode['id'] == $episode['id']) ? 'active' : ''; ?> <?php echo empty($episode['video_url']) ? 'episode-no-video' : ''; ?>"
+                               title="<?php echo htmlspecialchars($episode['title'] ?? 'Tập ' . $episode['episode_number']); ?>">
+                                <div class="episode-number"><?php echo $episode['episode_number']; ?></div>
                             </a>
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Chưa có tập nào được thêm vào phim này. 
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <strong>Chưa có tập nào được thêm vào phim này.</strong>
+                        <p class="mb-0 mt-2">Để hiển thị danh sách tập, vui lòng thêm các tập cho phim bộ này trong phần quản trị.</p>
                         <?php if (isset($isAdmin) && $isAdmin): ?>
-                            <a href="?route=admin/movies/edit&id=<?php echo $movie['id']; ?>" class="alert-link">Thêm tập ngay</a>
+                            <a href="?route=admin/movies/edit&id=<?php echo $movie['id']; ?>" class="btn btn-primary btn-sm mt-2">
+                                <i class="fas fa-plus"></i> Thêm tập ngay
+                            </a>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>

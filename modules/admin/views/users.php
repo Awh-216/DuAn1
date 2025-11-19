@@ -123,9 +123,8 @@
                 <h5 class="modal-title">Quản lý điểm - <span id="pointsUserName"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="pointsForm" method="POST">
+            <form id="pointsForm" method="POST" action="?route=admin/users/updatePoints">
                 <div class="modal-body">
-                    <input type="hidden" name="route" value="admin/users/updatePoints">
                     <input type="hidden" id="pointsUserId" name="user_id">
                     <div class="mb-3">
                         <label class="form-label">Điểm hiện tại</label>

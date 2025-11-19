@@ -150,7 +150,13 @@
                             <tr>
                                 <td><?php echo $episode['episode_number']; ?></td>
                                 <td><?php echo htmlspecialchars($episode['title'] ?? 'N/A'); ?></td>
-                                <td><a href="<?php echo htmlspecialchars($episode['video_url']); ?>" target="_blank">Xem</a></td>
+                                <td>
+                                    <?php if (!empty($episode['video_url'])): ?>
+                                        <a href="<?php echo htmlspecialchars($episode['video_url']); ?>" target="_blank">Xem video</a>
+                                    <?php else: ?>
+                                        <span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Chưa có video</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?php echo $episode['duration'] ? $episode['duration'] . ' phút' : 'N/A'; ?></td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-danger" onclick="deleteEpisode(<?php echo $episode['id']; ?>)">
@@ -177,7 +183,11 @@
                             <i class="fas fa-plus"></i> Thêm tập
                         </button>
                     </div>
-                    <small class="text-muted">Thêm các tập phim bộ mới. Mỗi tập cần có số tập, tiêu đề và file video.</small>
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> Thêm các tập phim bộ mới. 
+                        Mỗi tập cần có số tập (bắt buộc). Video file có thể thêm sau khi cần. 
+                        <strong>Danh sách tập sẽ hiển thị ngay sau khi thêm, kể cả khi chưa có video.</strong>
+                    </small>
                 </div>
             </div>
         </div>
@@ -303,10 +313,10 @@ function addEpisodeInput() {
                    placeholder="VD: Tập ${nextEpisode}: Tên tập">
         </div>
         <div class="col-md-4">
-            <label class="form-label">Video File <span class="text-danger">*</span></label>
+            <label class="form-label">Video File</label>
             <input type="file" class="form-control" name="episodes[${episodeCount}][video_file]" 
-                   accept="video/*" required>
-            <small class="text-muted">Chọn file video (MP4, AVI, MOV, etc.)</small>
+                   accept="video/*">
+            <small class="text-muted">Chọn file video (MP4, AVI, MOV, etc.). Có thể thêm video sau.</small>
         </div>
         <div class="col-md-2">
             <label class="form-label">&nbsp;</label>

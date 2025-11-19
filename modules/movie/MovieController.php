@@ -75,6 +75,19 @@ class MovieController extends Controller {
             ORDER BY country
         ");
         
+        // Lấy danh sách favorites của user nếu đã đăng nhập
+        $favorites = [];
+        $user = $this->getCurrentUser();
+        if ($user) {
+            $watchHistoryModel = new WatchHistoryModel();
+            $favoriteMovies = $movieModel->getDb()->fetchAll("
+                SELECT movie_id 
+                FROM watch_history 
+                WHERE user_id = ? AND favorite = 1
+            ", [$user['id']]);
+            $favorites = array_column($favoriteMovies, 'movie_id');
+        }
+        
         $this->view('movie/index', [
             'movies' => $movies,
             'categories' => $categories,
@@ -85,7 +98,8 @@ class MovieController extends Controller {
             'country' => $country,
             'type' => $type,
             'min_rating' => $min_rating,
-            'user' => $this->getCurrentUser()
+            'user' => $user,
+            'favorites' => $favorites
         ]);
     }
     
@@ -137,34 +151,78 @@ class MovieController extends Controller {
         $currentEpisode = null;
         $episode_id = $_GET['episode_id'] ?? null;
         
-        // Debug: Kiểm tra type của phim
-        error_log("Movie type: " . ($movie['type'] ?? 'not set') . " for movie ID: " . $movie_id);
+        // Kiểm tra type của phim - hỗ trợ cả 'phimbo' và 'phim bộ'
+        $movieType = $movie['type'] ?? 'phimle';
+        $isPhimBo = ($movieType === 'phimbo' || $movieType === 'phim bộ');
         
-        if (isset($movie['type']) && $movie['type'] === 'phimbo') {
+        // Debug: Kiểm tra type của phim
+        error_log("Movie type: " . $movieType . " for movie ID: " . $movie_id . " | Is Phim Bo: " . ($isPhimBo ? 'Yes' : 'No'));
+        
+        if ($isPhimBo) {
             require_once __DIR__ . '/../../core/Database.php';
             $db = Database::getInstance();
             try {
-                $episodes = $db->fetchAll("SELECT * FROM episodes WHERE movie_id = ? ORDER BY episode_number", [$movie_id]);
+                // Kiểm tra xem bảng episodes có tồn tại không
+                $db->fetch("SELECT 1 FROM episodes LIMIT 1");
+                
+                // Lấy tất cả episodes của phim này (kể cả chưa có video_url)
+                $episodes = $db->fetchAll("SELECT * FROM episodes WHERE movie_id = ? ORDER BY episode_number ASC", [$movie_id]);
                 error_log("Found " . count($episodes) . " episodes for movie ID: " . $movie_id);
                 
-                // Nếu không có episode_id và có tập, tự động chuyển đến tập 1
+                // Nếu không có episode_id và có tập, tự động chuyển đến tập 1 (chỉ nếu có video_url)
                 if (!$episode_id && !empty($episodes)) {
-                    $firstEpisode = $episodes[0];
-                    $this->redirect('movie/watch&id=' . $movie_id . '&episode_id=' . $firstEpisode['id']);
-                    return;
+                    // Tìm tập đầu tiên có video_url
+                    $firstEpisodeWithVideo = null;
+                    foreach ($episodes as $ep) {
+                        if (!empty($ep['video_url'])) {
+                            $firstEpisodeWithVideo = $ep;
+                            break;
+                        }
+                    }
+                    
+                    // Nếu có tập với video, chuyển đến tập đó
+                    if ($firstEpisodeWithVideo) {
+                        $this->redirect('movie/watch&id=' . $movie_id . '&episode_id=' . $firstEpisodeWithVideo['id']);
+                        return;
+                    }
+                    // Nếu không có tập nào có video, chọn tập đầu tiên (người dùng sẽ thấy thông báo)
                 }
                 
-                // Lấy tập hiện tại
+                // Lấy tập hiện tại nếu có episode_id
                 if ($episode_id) {
                     $currentEpisode = $db->fetch("SELECT * FROM episodes WHERE id = ? AND movie_id = ?", [$episode_id, $movie_id]);
+                    if (!$currentEpisode) {
+                        error_log("Warning: Episode ID " . $episode_id . " not found for movie ID: " . $movie_id);
+                        // Nếu episode không tồn tại, tự động chuyển đến tập đầu tiên có video
+                        if (!empty($episodes)) {
+                            $firstEpisodeWithVideo = null;
+                            foreach ($episodes as $ep) {
+                                if (!empty($ep['video_url'])) {
+                                    $firstEpisodeWithVideo = $ep;
+                                    break;
+                                }
+                            }
+                            if ($firstEpisodeWithVideo) {
+                                $this->redirect('movie/watch&id=' . $movie_id . '&episode_id=' . $firstEpisodeWithVideo['id']);
+                                return;
+                            }
+                        }
+                    }
                 }
             } catch (Exception $e) {
                 // Log lỗi để debug
-                error_log("Error fetching episodes: " . $e->getMessage());
+                error_log("Error fetching episodes for movie ID " . $movie_id . ": " . $e->getMessage());
+                error_log("Stack trace: " . $e->getTraceAsString());
                 $episodes = [];
+                
+                // Nếu lỗi do bảng chưa tồn tại, thông báo rõ ràng
+                if (strpos($e->getMessage(), "doesn't exist") !== false || 
+                    strpos($e->getMessage(), "Unknown table") !== false) {
+                    error_log("CRITICAL: Episodes table does not exist! Please run the SQL schema to create it.");
+                }
             }
         } else {
-            error_log("Movie is not phimbo. Type: " . ($movie['type'] ?? 'not set'));
+            error_log("Movie ID " . $movie_id . " is not phimbo. Type: " . $movieType);
         }
         
         // Kiểm tra nếu user là admin
@@ -246,6 +304,42 @@ class MovieController extends Controller {
         ", [$userId]);
         
         return $user['subscription_name'] ?? null;
+    }
+    
+    /**
+     * Toggle favorite cho một phim
+     */
+    public function toggleFavorite() {
+        if (!$this->isLoggedIn()) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => 'Vui lòng đăng nhập']);
+            exit;
+        }
+        
+        $user = $this->getCurrentUser();
+        $movie_id = $_POST['movie_id'] ?? $_GET['movie_id'] ?? null;
+        
+        if (!$movie_id) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => 'Thiếu thông tin phim']);
+            exit;
+        }
+        
+        try {
+            $watchHistoryModel = new WatchHistoryModel();
+            $favorite = $watchHistoryModel->toggleFavorite($user['id'], $movie_id);
+            
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'favorite' => $favorite == 1,
+                'message' => $favorite == 1 ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích'
+            ]);
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => 'Có lỗi xảy ra: ' . $e->getMessage()]);
+        }
+        exit;
     }
 }
 ?>
