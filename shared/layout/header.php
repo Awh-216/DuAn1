@@ -53,6 +53,20 @@
         $menuCategories = [];
         $countries = [];
     }
+    
+    // Lấy thông tin user nếu chưa có
+    if (!isset($user)) {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (isset($_SESSION['user_id'])) {
+            require_once __DIR__ . '/../../modules/user/UserModel.php';
+            $userModel = new UserModel();
+            $user = $userModel->getById($_SESSION['user_id']);
+        } else {
+            $user = null;
+        }
+    }
     ?>
     <header class="header-new">
         <div class="header-container">
@@ -77,8 +91,11 @@
             </div>
             
             <nav class="nav-new">
-                <a href="http://localhost/DuAn1/?route=movie/index&category=phim-bo" class="nav-link-new">
-                    Phim bộ <i class="fas fa-chevron-down"></i>
+                <a href="http://localhost/DuAn1/?route=movie/index&type=phimle" class="nav-link-new">
+                    Phim lẻ
+                </a>
+                <a href="http://localhost/DuAn1/?route=movie/index&type=phimbo" class="nav-link-new">
+                    Phim bộ
                 </a>
                 <div class="nav-dropdown">
                     <span class="nav-link-new dropdown-trigger">
@@ -107,7 +124,7 @@
                 <a href="http://localhost/DuAn1/?route=movie/index" class="nav-link-new">
                     Top phim<i class="fas fa-chevron-down"></i>
                 </a>
-                <a href="http://localhost/DuAn1/?route=booking/index" class="nav-link-new">
+                <a href="http://localhost/DuAn1/?route=booking/index" class="nav-link-new" id="booking-link">
                     Vé xem phim
                 </a>
             </nav>
@@ -563,6 +580,32 @@ document.addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeAlertModal();
+    }
+});
+
+// Biến JavaScript để kiểm tra trạng thái đăng nhập
+var isUserLoggedIn = <?php echo (isset($user) && $user) ? 'true' : 'false'; ?>;
+
+// Kiểm tra đăng nhập khi click vào "Vé xem phim"
+document.addEventListener('DOMContentLoaded', function() {
+    const bookingLink = document.getElementById('booking-link');
+    if (bookingLink) {
+        bookingLink.addEventListener('click', function(e) {
+            if (!isUserLoggedIn) {
+                // Nếu chưa đăng nhập, hiển thị modal đăng nhập
+                e.preventDefault();
+                openAuthModal('login');
+                // Hiển thị thông báo yêu cầu đăng nhập
+                setTimeout(function() {
+                    const loginError = document.getElementById('loginError');
+                    if (loginError) {
+                        loginError.textContent = 'Vui lòng đăng nhập để đặt vé xem phim!';
+                        loginError.style.display = 'block';
+                        loginError.classList.add('alert-error');
+                    }
+                }, 100);
+            }
+        });
     }
 });
 </script>

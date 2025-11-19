@@ -26,6 +26,11 @@ class MovieController extends Controller {
                     WHERE m.category_id = ?";
             $params = [$category_id];
             
+            // Mặc định loại bỏ phim chiếu rạp, trừ khi người dùng chủ động filter
+            if (!$status) {
+                $sql .= " AND m.status != 'Chiếu rạp'";
+            }
+            
             if ($status) {
                 $sql .= " AND m.status = ?";
                 $params[] = $status;
@@ -45,6 +50,11 @@ class MovieController extends Controller {
                     LEFT JOIN categories c ON m.category_id = c.id 
                     WHERE 1=1";
             $params = [];
+            
+            // Mặc định loại bỏ phim chiếu rạp, trừ khi người dùng chủ động filter
+            if (!$status) {
+                $sql .= " AND m.status != 'Chiếu rạp'";
+            }
             
             if ($status) {
                 $sql .= " AND m.status = ?";

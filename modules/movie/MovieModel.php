@@ -44,6 +44,11 @@ class MovieModel {
                 WHERE (m.title LIKE ? OR m.director LIKE ? OR m.actors LIKE ? OR m.description LIKE ?)";
         $params = ["%$keyword%", "%$keyword%", "%$keyword%", "%$keyword%"];
         
+        // Mặc định loại bỏ phim chiếu rạp, trừ khi người dùng chủ động filter
+        if (!$status) {
+            $sql .= " AND m.status != 'Chiếu rạp'";
+        }
+        
         if ($category_id) {
             $sql .= " AND m.category_id = ?";
             $params[] = $category_id;
@@ -87,7 +92,8 @@ class MovieModel {
     public function getByCountry($country, $type = null) {
         $sql = "SELECT m.*, c.name as category_name FROM movies m 
                 LEFT JOIN categories c ON m.category_id = c.id 
-                WHERE m.country = ?";
+                WHERE m.country = ?
+                AND m.status != 'Chiếu rạp'";
         $params = [$country];
         
         if ($type) {

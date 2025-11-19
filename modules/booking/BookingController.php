@@ -18,13 +18,15 @@ class BookingController extends Controller {
         $selected_showtime_id = $_GET['showtime_id'] ?? null;
         
         $movies = $movieModel->getTheaterMovies();
-        $theaters = $bookingModel->getTheaters();
+        $theaters = [];
         $showtimes = [];
         $movie = null;
         $bookedSeats = [];
         
         if ($selected_movie_id) {
             $movie = $movieModel->getById($selected_movie_id);
+            // Chỉ lấy các rạp có suất chiếu phim này
+            $theaters = $bookingModel->getTheatersByMovie($selected_movie_id);
         }
         
         if ($selected_movie_id && $selected_theater && $selected_date) {

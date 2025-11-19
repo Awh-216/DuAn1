@@ -21,13 +21,14 @@ class HomeController extends Controller {
             LIMIT 5
         ");
         
-        // Nếu không đủ 5 phim, lấy thêm từ phim khác
+        // Nếu không đủ 5 phim, lấy thêm từ phim khác (không bao gồm phim chiếu rạp)
         if (count($sliderMovies) < 5) {
             $additionalMovies = $movieModel->getDb()->fetchAll("
                 SELECT m.*, c.name as category_name 
                 FROM movies m 
                 LEFT JOIN categories c ON m.category_id = c.id 
-                WHERE m.status_admin = 'published'
+                WHERE m.status != 'Chiếu rạp'
+                AND m.status_admin = 'published'
                 AND m.thumbnail IS NOT NULL 
                 AND m.thumbnail != ''
                 AND m.id NOT IN (" . (!empty($sliderMovies) ? implode(',', array_column($sliderMovies, 'id')) : '0') . ")
@@ -42,12 +43,13 @@ class HomeController extends Controller {
             shuffle($sliderMovies);
         }
         
-        // Lấy phim lẻ và phim bộ riêng biệt cho section
+        // Lấy phim lẻ và phim bộ riêng biệt cho section (không bao gồm phim chiếu rạp)
         $phimLe = $movieModel->getDb()->fetchAll("
             SELECT m.*, c.name as category_name 
             FROM movies m 
             LEFT JOIN categories c ON m.category_id = c.id 
             WHERE (m.type = 'phimle' OR m.type IS NULL)
+            AND m.status != 'Chiếu rạp'
             AND m.status_admin = 'published'
             ORDER BY m.rating DESC, m.created_at DESC 
             LIMIT 8
@@ -58,17 +60,19 @@ class HomeController extends Controller {
             FROM movies m 
             LEFT JOIN categories c ON m.category_id = c.id 
             WHERE m.type = 'phimbo'
+            AND m.status != 'Chiếu rạp'
             AND m.status_admin = 'published'
             ORDER BY m.rating DESC, m.created_at DESC 
             LIMIT 8
         ");
         
-        // Phim mới nhất - cả phim lẻ và phim bộ
+        // Phim mới nhất - cả phim lẻ và phim bộ (không bao gồm phim chiếu rạp)
         $latestMovies = $movieModel->getDb()->fetchAll("
             SELECT m.*, c.name as category_name 
             FROM movies m 
             LEFT JOIN categories c ON m.category_id = c.id 
-            WHERE m.status_admin = 'published'
+            WHERE m.status != 'Chiếu rạp'
+            AND m.status_admin = 'published'
             ORDER BY m.created_at DESC 
             LIMIT 12
         ");

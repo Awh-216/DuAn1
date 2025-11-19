@@ -139,12 +139,12 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                             <?php if (empty($theaters)): ?>
                                 <div class="alert alert-warning">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
-                                    Hiện tại chưa có rạp nào. Vui lòng liên hệ quản trị viên!
+                                    Hiện tại chưa có rạp nào có suất chiếu phim này. Vui lòng liên hệ quản trị viên!
                                 </div>
                             <?php else: ?>
                                 <div class="theaters-list" role="group" aria-label="Danh sách rạp chiếu phim">
                                     <?php foreach ($theaters as $theater): ?>
-                                        <a href="?route=booking/index&movie=<?php echo $selected_movie; ?>&theater=<?php echo $theater['id']; ?>&date=<?php echo $selected_date; ?>&time=<?php echo $selected_time; ?>&showtime_id=<?php echo $selected_showtime_id; ?>" 
+                                        <a href="?route=booking/index&movie=<?php echo $selected_movie; ?>&theater=<?php echo $theater['id']; ?>" 
                                            class="theater-btn <?php echo $selected_theater == $theater['id'] ? 'active' : ''; ?>"
                                            aria-pressed="<?php echo $selected_theater == $theater['id'] ? 'true' : 'false'; ?>">
                                             <i class="fas fa-map-marker-alt me-2"></i>
@@ -155,14 +155,15 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                             <?php endif; ?>
                         </div>
                         
-                        <!-- Date Selection -->
+                        <!-- Date Selection - chỉ hiển thị khi đã chọn rạp -->
+                        <?php if ($selected_theater): ?>
                         <div class="booking-step mb-4">
                             <label class="booking-label">
                                 <i class="fas fa-calendar-alt me-2"></i>Chọn ngày
                             </label>
                             <div class="dates-scroll" role="group" aria-label="Chọn ngày chiếu">
                                 <?php foreach ($dates as $dateItem): ?>
-                                    <a href="?route=booking/index&movie=<?php echo $selected_movie; ?>&theater=<?php echo $selected_theater; ?>&date=<?php echo $dateItem['value']; ?>&time=<?php echo $selected_time; ?>&showtime_id=<?php echo $selected_showtime_id; ?>" 
+                                    <a href="?route=booking/index&movie=<?php echo $selected_movie; ?>&theater=<?php echo $selected_theater; ?>&date=<?php echo $dateItem['value']; ?>" 
                                        class="date-btn <?php echo $selected_date == $dateItem['value'] ? 'active' : ''; ?>"
                                        aria-pressed="<?php echo $selected_date == $dateItem['value'] ? 'true' : 'false'; ?>"
                                        aria-label="Chọn ngày <?php echo $dateItem['label']; ?>">
@@ -172,8 +173,9 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                 <?php endforeach; ?>
                             </div>
                         </div>
+                        <?php endif; ?>
                         
-                        <!-- Time Selection -->
+                        <!-- Time Selection - chỉ hiển thị khi đã chọn ngày và rạp -->
                         <?php if ($selected_date && $selected_theater): ?>
                             <div class="booking-step mb-4">
                                 <label class="booking-label">
@@ -187,7 +189,7 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                         </div>
                                     <?php else: ?>
                                         <?php foreach ($showtimes as $showtime): ?>
-                                            <a href="?route=booking/index&movie=<?php echo $selected_movie; ?>&theater=<?php echo $selected_theater; ?>&date=<?php echo $selected_date; ?>&time=<?php echo date('H:i', strtotime($showtime['show_time'])); ?>&showtime_id=<?php echo $showtime['id']; ?>" 
+                                            <a href="?route=booking/index&movie=<?php echo $selected_movie; ?>&theater=<?php echo $selected_theater; ?>&date=<?php echo $selected_date; ?>&showtime_id=<?php echo $showtime['id']; ?>" 
                                                class="time-btn <?php echo $selected_showtime_id == $showtime['id'] ? 'active' : ''; ?>"
                                                aria-pressed="<?php echo $selected_showtime_id == $showtime['id'] ? 'true' : 'false'; ?>"
                                                aria-label="Chọn suất chiếu lúc <?php echo date('H:i', strtotime($showtime['show_time'])); ?>">

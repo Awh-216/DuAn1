@@ -12,6 +12,14 @@ class BookingModel {
         return $this->db->fetchAll("SELECT * FROM theaters ORDER BY name");
     }
     
+    public function getTheatersByMovie($movie_id) {
+        return $this->db->fetchAll("SELECT DISTINCT t.* FROM theaters t 
+                                   JOIN showtimes s ON t.id = s.theater_id 
+                                   WHERE s.movie_id = ? 
+                                   ORDER BY t.name", 
+                                   [$movie_id]);
+    }
+    
     public function getShowtimes($movie_id, $theater_id, $date) {
         return $this->db->fetchAll("SELECT s.*, t.name as theater_name FROM showtimes s 
                                     JOIN theaters t ON s.theater_id = t.id 

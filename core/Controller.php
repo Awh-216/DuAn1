@@ -60,6 +60,10 @@ class Controller {
     
     protected function requireLogin() {
         if (!$this->isLoggedIn()) {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['error'] = 'Vui lòng đăng nhập để tiếp tục!';
             $this->redirect('?route=auth/login');
         }
     }
