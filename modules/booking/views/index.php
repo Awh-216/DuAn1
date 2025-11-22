@@ -324,6 +324,61 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                             </div>
                         <?php endif; ?>
                     <?php endif; ?>
+                    
+                    <!-- Support Section -->
+                    <div class="booking-step mb-4 mt-4">
+                        <div class="support-section">
+                            <button type="button" class="btn-support-toggle" id="supportToggleBtn" onclick="toggleSupportForm()">
+                                <i class="fas fa-headset me-2"></i>
+                                <span>Cần hỗ trợ?</span>
+                            </button>
+                            
+                            <div class="support-form-container" id="supportFormContainer" style="display: none;">
+                                <div class="support-form-header">
+                                    <h5><i class="fas fa-headset me-2"></i>Gửi yêu cầu hỗ trợ</h5>
+                                    <button type="button" class="btn-close-support" onclick="toggleSupportForm()" aria-label="Đóng form hỗ trợ">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <form method="POST" action="?route=booking/submit-support" class="support-form" id="supportForm">
+                                    <div class="mb-3">
+                                        <label for="support-issue" class="form-label">Mục vấn đề <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="support-issue" name="issue" required>
+                                            <option value="">-- Chọn mục vấn đề --</option>
+                                            <option value="Lỗi thanh toán">Lỗi thanh toán</option>
+                                            <option value="Không nhận được vé">Không nhận được vé</option>
+                                            <option value="Vấn đề về ghế ngồi">Vấn đề về ghế ngồi</option>
+                                            <option value="Hủy/Đổi vé">Hủy/Đổi vé</option>
+                                            <option value="Lỗi hệ thống">Lỗi hệ thống</option>
+                                            <option value="Thông tin rạp chiếu">Thông tin rạp chiếu</option>
+                                            <option value="Khác">Khác</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="support-message" class="form-label">Nội dung <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" 
+                                                  id="support-message" 
+                                                  name="message" 
+                                                  rows="5" 
+                                                  placeholder="Mô tả chi tiết vấn đề bạn gặp phải..." 
+                                                  required></textarea>
+                                        <small class="text-muted">Vui lòng mô tả chi tiết để chúng tôi có thể hỗ trợ bạn tốt nhất.</small>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="toggleSupportForm()">
+                                            Hủy
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -452,4 +507,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// Support Form Toggle
+function toggleSupportForm() {
+    const container = document.getElementById('supportFormContainer');
+    const btn = document.getElementById('supportToggleBtn');
+    
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        btn.style.display = 'none';
+    } else {
+        container.style.display = 'none';
+        btn.style.display = 'block';
+    }
+}
 </script>

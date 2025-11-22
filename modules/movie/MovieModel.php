@@ -39,10 +39,49 @@ class MovieModel {
     }
     
     public function search($keyword, $category_id = null, $status = null, $country = null, $min_rating = null, $type = null) {
-        $sql = "SELECT m.*, c.name as category_name FROM movies m 
-                LEFT JOIN categories c ON m.category_id = c.id 
-                WHERE (m.title LIKE ? OR m.director LIKE ? OR m.actors LIKE ? OR m.description LIKE ?)";
-        $params = ["%$keyword%", "%$keyword%", "%$keyword%", "%$keyword%"];
+        // Loại bỏ các từ phổ biến nếu từ khóa quá ngắn (ít hơn 3 ký tự)
+        $keyword = trim($keyword);
+        if (strlen($keyword) < 3) {
+            // Nếu từ khóa quá ngắn, chỉ tìm trong title và phải bắt đầu bằng từ khóa
+            $sql = "SELECT m.*, c.name as category_name,
+                    CASE 
+                        WHEN m.title LIKE ? THEN 1
+                        ELSE 0
+                    END as relevance
+                    FROM movies m 
+                    LEFT JOIN categories c ON m.category_id = c.id 
+                    WHERE m.title LIKE ?";
+            $searchPattern = $keyword . "%";
+            $params = [$searchPattern, $searchPattern];
+        } else {
+            // Từ khóa đủ dài, tìm kiếm toàn diện với độ ưu tiên
+            $sql = "SELECT m.*, c.name as category_name,
+                    CASE 
+                        WHEN m.title LIKE ? THEN 4
+                        WHEN m.title LIKE ? THEN 3
+                        WHEN m.director LIKE ? OR m.actors LIKE ? THEN 2
+                        WHEN m.description LIKE ? THEN 1
+                        ELSE 0
+                    END as relevance
+                    FROM movies m 
+                    LEFT JOIN categories c ON m.category_id = c.id 
+                    WHERE (m.title LIKE ? OR m.title LIKE ? OR m.director LIKE ? OR m.actors LIKE ? OR m.description LIKE ?)";
+            $exactMatch = $keyword;
+            $startsWith = $keyword . "%";
+            $contains = "%" . $keyword . "%";
+            $params = [
+                $exactMatch,      // relevance = 4: title exact match
+                $startsWith,      // relevance = 3: title starts with
+                $contains,        // relevance = 2: director/actors contains
+                $contains,        // relevance = 2: director/actors contains
+                $contains,        // relevance = 1: description contains
+                $exactMatch,      // WHERE: title exact match
+                $startsWith,      // WHERE: title starts with
+                $contains,        // WHERE: director contains
+                $contains,        // WHERE: actors contains
+                $contains         // WHERE: description contains
+            ];
+        }
         
         // Mặc định loại bỏ phim chiếu rạp, trừ khi người dùng chủ động filter
         if (!$status) {
@@ -74,7 +113,8 @@ class MovieModel {
             $params[] = floatval($min_rating);
         }
         
-        $sql .= " ORDER BY m.rating DESC, m.created_at DESC";
+        // Sắp xếp theo độ liên quan (relevance) trước, sau đó mới đến rating
+        $sql .= " ORDER BY relevance DESC, m.rating DESC, m.created_at DESC";
         return $this->db->fetchAll($sql, $params);
     }
     
@@ -86,7 +126,13 @@ class MovieModel {
     }
     
     public function getTheaterMovies() {
-        return $this->db->fetchAll("SELECT * FROM movies WHERE status = 'Chiếu rạp' ORDER BY title");
+        $today = date('Y-m-d');
+        return $this->db->fetchAll("SELECT DISTINCT m.* FROM movies m 
+                                    INNER JOIN showtimes s ON m.id = s.movie_id 
+                                    WHERE m.status = 'Chiếu rạp' 
+                                    AND s.show_date >= ? 
+                                    ORDER BY m.title", 
+                                    [$today]);
     }
     
     public function getByCountry($country, $type = null) {

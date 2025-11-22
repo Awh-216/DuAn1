@@ -13,19 +13,35 @@ class BookingModel {
     }
     
     public function getTheatersByMovie($movie_id) {
+        $today = date('Y-m-d');
         return $this->db->fetchAll("SELECT DISTINCT t.* FROM theaters t 
                                    JOIN showtimes s ON t.id = s.theater_id 
                                    WHERE s.movie_id = ? 
+                                   AND s.show_date >= ?
                                    ORDER BY t.name", 
-                                   [$movie_id]);
+                                   [$movie_id, $today]);
     }
     
     public function getShowtimes($movie_id, $theater_id, $date) {
-        return $this->db->fetchAll("SELECT s.*, t.name as theater_name FROM showtimes s 
-                                    JOIN theaters t ON s.theater_id = t.id 
-                                    WHERE s.movie_id = ? AND s.theater_id = ? AND s.show_date = ? 
-                                    ORDER BY s.show_time", 
-                                    [$movie_id, $theater_id, $date]);
+        $today = date('Y-m-d');
+        $currentTime = date('H:i:s');
+        
+        // Nếu là ngày hôm nay, chỉ lấy các suất chiếu chưa bắt đầu
+        if ($date === $today) {
+            return $this->db->fetchAll("SELECT s.*, t.name as theater_name FROM showtimes s 
+                                        JOIN theaters t ON s.theater_id = t.id 
+                                        WHERE s.movie_id = ? AND s.theater_id = ? AND s.show_date = ? 
+                                        AND s.show_time >= ?
+                                        ORDER BY s.show_time", 
+                                        [$movie_id, $theater_id, $date, $currentTime]);
+        } else {
+            // Nếu là ngày tương lai, lấy tất cả suất chiếu
+            return $this->db->fetchAll("SELECT s.*, t.name as theater_name FROM showtimes s 
+                                        JOIN theaters t ON s.theater_id = t.id 
+                                        WHERE s.movie_id = ? AND s.theater_id = ? AND s.show_date = ? 
+                                        ORDER BY s.show_time", 
+                                        [$movie_id, $theater_id, $date]);
+        }
     }
     
     public function getShowtimeById($id) {
@@ -63,6 +79,20 @@ class BookingModel {
                                    JOIN theaters th ON s.theater_id = th.id 
                                    WHERE t.user_id = ? 
                                    ORDER BY t.created_at DESC", [$user_id]);
+    }
+    
+    public function createSupportTicket($data) {
+        $sql = "INSERT INTO support_tickets (user_id, subject, message, status, priority, tags) 
+                VALUES (?, ?, ?, ?, ?, ?)";
+        $this->db->execute($sql, [
+            $data['user_id'],
+            $data['subject'],
+            $data['message'],
+            $data['status'] ?? 'Mới',
+            $data['priority'] ?? 'Trung bình',
+            $data['tags'] ?? null
+        ]);
+        return $this->db->lastInsertId();
     }
 }
 ?>

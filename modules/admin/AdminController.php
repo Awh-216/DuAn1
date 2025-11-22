@@ -319,6 +319,38 @@ class AdminController extends Controller {
         }
         
         try {
+            // Xử lý upload video file
+            if (isset($_FILES['video_file']) && $_FILES['video_file']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../../data/phim/' . ($type === 'phimbo' ? 'phimbo' : 'phimle') . '/';
+                
+                // Tạo thư mục nếu chưa tồn tại
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                
+                $fileName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $title);
+                $fileExtension = pathinfo($_FILES['video_file']['name'], PATHINFO_EXTENSION);
+                $uploadFileName = $fileName . '.' . $fileExtension;
+                $uploadPath = $uploadDir . $uploadFileName;
+                
+                // Kiểm tra nếu file đã tồn tại, thêm số vào tên
+                $counter = 1;
+                while (file_exists($uploadPath)) {
+                    $uploadFileName = $fileName . '_' . $counter . '.' . $fileExtension;
+                    $uploadPath = $uploadDir . $uploadFileName;
+                    $counter++;
+                }
+                
+                // Upload file
+                if (move_uploaded_file($_FILES['video_file']['tmp_name'], $uploadPath)) {
+                    // Lưu đường dẫn tương đối
+                    $video_url = 'data/phim/' . ($type === 'phimbo' ? 'phimbo' : 'phimle') . '/' . $uploadFileName;
+                } else {
+                    $_SESSION['error'] = 'Lỗi khi upload file video!';
+                    $this->redirect('admin/movies/create');
+                    return;
+                }
+            }
             $db->execute("
                 INSERT INTO movies (
                     title, category_id, level, duration, description, director, actors,
@@ -619,6 +651,50 @@ class AdminController extends Controller {
                 return;
             }
             
+            // Xử lý upload video file (ưu tiên file upload hơn URL)
+            if (isset($_FILES['video_file']) && $_FILES['video_file']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../../data/phim/' . ($type === 'phimbo' ? 'phimbo' : 'phimle') . '/';
+                
+                // Tạo thư mục nếu chưa tồn tại
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                
+                // Xóa file video cũ nếu có (chỉ nếu là file local, không phải URL)
+                if (!empty($oldMovie['video_url']) && strpos($oldMovie['video_url'], 'http') !== 0) {
+                    $oldFilePath = __DIR__ . '/../../' . $oldMovie['video_url'];
+                    if (file_exists($oldFilePath)) {
+                        @unlink($oldFilePath);
+                    }
+                }
+                
+                $fileName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $title);
+                $fileExtension = pathinfo($_FILES['video_file']['name'], PATHINFO_EXTENSION);
+                $uploadFileName = $fileName . '.' . $fileExtension;
+                $uploadPath = $uploadDir . $uploadFileName;
+                
+                // Kiểm tra nếu file đã tồn tại, thêm số vào tên
+                $counter = 1;
+                while (file_exists($uploadPath)) {
+                    $uploadFileName = $fileName . '_' . $counter . '.' . $fileExtension;
+                    $uploadPath = $uploadDir . $uploadFileName;
+                    $counter++;
+                }
+                
+                // Upload file
+                if (move_uploaded_file($_FILES['video_file']['tmp_name'], $uploadPath)) {
+                    // Lưu đường dẫn tương đối
+                    $video_url = 'data/phim/' . ($type === 'phimbo' ? 'phimbo' : 'phimle') . '/' . $uploadFileName;
+                } else {
+                    $_SESSION['error'] = 'Lỗi khi upload file video!';
+                    $this->redirect('admin/movies/edit&id=' . $id);
+                    return;
+                }
+            } elseif (empty($video_url) && !empty($oldMovie['video_url'])) {
+                // Nếu không có file mới và không có URL mới, giữ nguyên video_url cũ
+                $video_url = $oldMovie['video_url'];
+            }
+            
             // Chuẩn bị dữ liệu
             $updateParams = [
                 $title, 
@@ -682,15 +758,13 @@ class AdminController extends Controller {
             // Nếu không phải "Chiếu rạp", xóa tất cả showtimes
             if ($status !== 'Chiếu rạp') {
                 $db->execute("DELETE FROM showtimes WHERE movie_id = ?", [$id]);
-            }
-            
-            if ($status === 'Chiếu rạp') {
-                // Xóa tất cả showtimes cũ trước khi tạo mới
-                $db->execute("DELETE FROM showtimes WHERE movie_id = ?", [$id]);
-                $showtimeCount = 0;
-                
-                // Kiểm tra dữ liệu từ form mới (khoảng ngày)
+            } elseif ($status === 'Chiếu rạp') {
+                // Chỉ cập nhật showtimes nếu có dữ liệu mới từ form
                 if (!empty($_POST['schedule_theater_id']) && !empty($_POST['from_date']) && !empty($_POST['to_date']) && !empty($_POST['showtimes_time'])) {
+                    // Xóa tất cả showtimes cũ trước khi tạo mới
+                    $db->execute("DELETE FROM showtimes WHERE movie_id = ?", [$id]);
+                    $showtimeCount = 0;
+                    
                     $theater_id = intval($_POST['schedule_theater_id']);
                     $from_date = $_POST['from_date'];
                     $to_date = $_POST['to_date'];
@@ -698,41 +772,50 @@ class AdminController extends Controller {
                     $default_price = floatval($_POST['default_price'] ?? 120000);
                     $screen_id = !empty($_POST['screen_id']) ? intval($_POST['screen_id']) : null;
                     
+                    // Validate dates
+                    if ($from_date > $to_date) {
+                        $_SESSION['error'] = 'Ngày bắt đầu không thể lớn hơn ngày kết thúc!';
+                        $this->redirect('admin/movies/edit&id=' . $id);
+                        return;
+                    }
+                    
                     // Tạo suất chiếu cho từng ngày trong khoảng
-                    $start = new DateTime($from_date);
-                    $end = new DateTime($to_date);
-                    $end->modify('+1 day'); // Để bao gồm cả ngày cuối
-                    
-                    $interval = new DateInterval('P1D');
-                    $period = new DatePeriod($start, $interval, $end);
-                    
-                    foreach ($period as $date) {
-                        $show_date = $date->format('Y-m-d');
+                    try {
+                        $start = new DateTime($from_date);
+                        $end = new DateTime($to_date);
+                        $end->modify('+1 day'); // Để bao gồm cả ngày cuối
                         
-                        // Tạo suất chiếu cho mỗi khung giờ
-                        foreach ($times as $show_time) {
-                            if (!empty($show_time)) {
-                                $db->execute("
-                                    INSERT INTO showtimes (movie_id, theater_id, show_date, show_time, price, screen_id)
-                                    VALUES (?, ?, ?, ?, ?, ?)
-                                ", [$id, $theater_id, $show_date, $show_time, $default_price, $screen_id]);
-                                $showtimeCount++;
+                        $interval = new DateInterval('P1D');
+                        $period = new DatePeriod($start, $interval, $end);
+                        
+                        foreach ($period as $date) {
+                            $show_date = $date->format('Y-m-d');
+                            
+                            // Tạo suất chiếu cho mỗi khung giờ
+                            foreach ($times as $show_time) {
+                                if (!empty($show_time)) {
+                                    $db->execute("
+                                        INSERT INTO showtimes (movie_id, theater_id, show_date, show_time, price, screen_id)
+                                        VALUES (?, ?, ?, ?, ?, ?)
+                                    ", [$id, $theater_id, $show_date, $show_time, $default_price, $screen_id]);
+                                    $showtimeCount++;
+                                }
                             }
                         }
+                        
+                        if ($showtimeCount > 0) {
+                            $_SESSION['success'] = 'Cập nhật phim thành công! Đã cập nhật ' . $showtimeCount . ' suất chiếu.';
+                        } else {
+                            $_SESSION['success'] = 'Cập nhật phim thành công! (Đã xóa lịch chiếu cũ)';
+                        }
+                    } catch (Exception $e) {
+                        error_log("Error creating showtimes: " . $e->getMessage());
+                        $_SESSION['error'] = 'Lỗi khi tạo lịch chiếu: ' . $e->getMessage();
+                        $this->redirect('admin/movies/edit&id=' . $id);
+                        return;
                     }
-                    
-                    if ($showtimeCount > 0) {
-                        $_SESSION['success'] = 'Cập nhật phim thành công! Đã cập nhật ' . $showtimeCount . ' suất chiếu.';
-                    } else {
-                        $_SESSION['success'] = 'Cập nhật phim thành công! (Đã xóa lịch chiếu cũ)';
-                    }
-                } else {
-                    $_SESSION['success'] = 'Cập nhật phim thành công! (Đã xóa lịch chiếu cũ)';
                 }
-            } else {
-                // Nếu không còn là "Chiếu rạp", xóa tất cả showtimes
-                $db->execute("DELETE FROM showtimes WHERE movie_id = ?", [$id]);
-                $_SESSION['success'] = 'Cập nhật phim thành công!';
+                // Nếu không có dữ liệu mới từ form, giữ nguyên showtimes cũ (không làm gì)
             }
             
             // Nếu là phim bộ, xử lý các tập mới
@@ -933,7 +1016,7 @@ class AdminController extends Controller {
         $user = AdminMiddleware::checkAdmin();
         
         $tickets = $db->fetchAll("
-            SELECT t.*, u.name as user_name, u.email, 
+            SELECT t.*, u.name as user_name, u.email as user_email, 
                    s.show_date, s.show_time, s.price,
                    m.title as movie_title, th.name as theater_name
             FROM tickets t
@@ -950,6 +1033,148 @@ class AdminController extends Controller {
             'title' => 'Quản lý vé',
             'current_page' => 'tickets'
         ]);
+    }
+    
+    // View Ticket Details
+    public function ticketsView() {
+        try {
+            $db = Database::getInstance();
+            $user = AdminMiddleware::checkAdmin();
+            
+            $ticket_id = $_GET['id'] ?? null;
+            
+            if (!$ticket_id) {
+                $_SESSION['error'] = 'Không tìm thấy vé!';
+                $this->redirect('admin/tickets');
+                return;
+            }
+            
+            $ticket = $db->fetch("
+                SELECT t.*, 
+                       u.name as user_name, u.email as user_email, u.phone as user_phone,
+                       s.show_date, s.show_time, s.price as showtime_price,
+                       m.title as movie_title, m.poster as movie_poster,
+                       th.name as theater_name, th.location as theater_location, th.address as theater_address,
+                       ts.screen_name, ts.screen_type
+                FROM tickets t
+                JOIN users u ON t.user_id = u.id
+                JOIN showtimes s ON t.showtime_id = s.id
+                JOIN movies m ON s.movie_id = m.id
+                JOIN theaters th ON s.theater_id = th.id
+                LEFT JOIN theater_screens ts ON s.screen_id = ts.id
+                WHERE t.id = ?
+            ", [$ticket_id]);
+            
+            if (!$ticket) {
+                $_SESSION['error'] = 'Không tìm thấy vé!';
+                $this->redirect('admin/tickets');
+                return;
+            }
+            
+            // Lấy các báo cáo của người dùng liên quan đến vé
+            $supportTickets = [];
+            try {
+                $supportTickets = $db->fetchAll("
+                    SELECT st.*, 
+                           u.name as user_name, u.email as user_email,
+                           sub.name as subscription_name,
+                           admin.name as assigned_name
+                    FROM support_tickets st
+                    JOIN users u ON st.user_id = u.id
+                    LEFT JOIN subscriptions sub ON u.subscription_id = sub.id
+                    LEFT JOIN users admin ON st.assigned_to = admin.id
+                    WHERE st.user_id = ? 
+                    AND (st.tags LIKE '%Mua bán vé%' OR st.tags LIKE '%Đặt vé%' OR st.message LIKE '%vé%' OR st.message LIKE '%ticket%')
+                    ORDER BY st.created_at DESC
+                ", [$ticket['user_id']]);
+            } catch (Exception $e) {
+                error_log("Error fetching support tickets: " . $e->getMessage());
+                // Tiếp tục với mảng rỗng nếu có lỗi
+            }
+            
+            $this->adminView('tickets/view', [
+                'ticket' => $ticket,
+                'supportTickets' => $supportTickets,
+                'user' => $user,
+                'title' => 'Chi tiết vé #' . $ticket_id,
+                'current_page' => 'tickets'
+            ]);
+        } catch (Exception $e) {
+            error_log("Error in ticketsView: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            $_SESSION['error'] = 'Có lỗi xảy ra khi tải chi tiết vé: ' . $e->getMessage();
+            $this->redirect('admin/tickets');
+        }
+    }
+    
+    // Complete Ticket Manually
+    public function ticketsComplete() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/tickets');
+            return;
+        }
+        
+        $ticket_id = $_POST['ticket_id'] ?? null;
+        
+        if (!$ticket_id) {
+            $_SESSION['error'] = 'Không tìm thấy vé!';
+            $this->redirect('admin/tickets');
+            return;
+        }
+        
+        try {
+            // Lấy thông tin vé
+            $ticket = $db->fetch("
+                SELECT t.*, s.id as showtime_id, u.id as user_id
+                FROM tickets t
+                JOIN showtimes s ON t.showtime_id = s.id
+                JOIN users u ON t.user_id = u.id
+                WHERE t.id = ?
+            ", [$ticket_id]);
+            
+            if (!$ticket) {
+                $_SESSION['error'] = 'Không tìm thấy vé!';
+                $this->redirect('admin/tickets');
+                return;
+            }
+            
+            // Kiểm tra xem vé đã có QR code chưa
+            if (empty($ticket['qr_code'])) {
+                // Tạo QR code mới
+                $qr_code = uniqid('TICKET_') . '_' . $ticket['user_id'] . '_' . $ticket['showtime_id'];
+                
+                // Cập nhật vé với QR code
+                $db->execute("
+                    UPDATE tickets 
+                    SET qr_code = ? 
+                    WHERE id = ?
+                ", [$qr_code, $ticket_id]);
+                
+                $_SESSION['success'] = 'Đã hoàn thành vé thủ công thành công! QR code đã được tạo.';
+            } else {
+                $_SESSION['success'] = 'Vé đã có QR code. Đã xác nhận hoàn thành vé.';
+            }
+            
+            // Log activity
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Hoàn thành vé thủ công',
+                'Ticket',
+                'ticket',
+                $ticket_id,
+                null,
+                'Admin đã hoàn thành vé thủ công cho khách hàng'
+            );
+            
+        } catch (Exception $e) {
+            error_log("Error completing ticket: " . $e->getMessage());
+            $_SESSION['error'] = 'Có lỗi xảy ra khi hoàn thành vé: ' . $e->getMessage();
+        }
+        
+        $this->redirect('admin/tickets/view?id=' . $ticket_id);
     }
     
     // Theaters Management
@@ -1245,19 +1470,384 @@ class AdminController extends Controller {
         $db = Database::getInstance();
         $user = AdminMiddleware::checkAdmin();
         
+        $status = $_GET['status'] ?? '';
+        $category = $_GET['category'] ?? '';
+        
+        $where = "1=1";
+        $params = [];
+        
+        if ($status) {
+            $where .= " AND st.status = ?";
+            $params[] = $status;
+        }
+        
+        if ($category) {
+            // Filter theo category dựa trên tags
+            if ($category === 'Mua bán vé') {
+                // Mua bán vé: có "Đặt vé" hoặc "Mua bán vé" nhưng KHÔNG có "Lỗi"
+                $where .= " AND ((st.tags LIKE ? OR st.tags LIKE ?) AND st.tags NOT LIKE ? AND st.tags NOT LIKE ?)";
+                $params[] = '%Đặt vé%';
+                $params[] = '%Mua bán vé%';
+                $params[] = '%Lỗi%';
+                $params[] = '%Lỗi thanh toán%';
+            } elseif ($category === 'Lỗi mua bán vé') {
+                // Lỗi mua bán vé: có "Đặt vé" hoặc "Mua bán vé" VÀ có "Lỗi" hoặc các issue liên quan đến lỗi
+                $where .= " AND ((st.tags LIKE ? OR st.tags LIKE ?) AND (st.tags LIKE ? OR st.tags LIKE ? OR st.tags LIKE ? OR st.tags LIKE ? OR st.tags LIKE ?))";
+                $params[] = '%Đặt vé%';
+                $params[] = '%Mua bán vé%';
+                $params[] = '%Lỗi%';
+                $params[] = '%Lỗi thanh toán%';
+                $params[] = '%Không nhận được vé%';
+                $params[] = '%Vấn đề về ghế ngồi%';
+                $params[] = '%Hủy/Đổi vé%';
+            } elseif ($category === 'Lỗi về phim') {
+                // Lỗi về phim: có "Phim" và "Lỗi"
+                $where .= " AND (st.tags LIKE ? OR st.tags LIKE ?) AND st.tags LIKE ?";
+                $params[] = '%Phim%';
+                $params[] = '%phim%';
+                $params[] = '%Lỗi%';
+            } elseif ($category === 'Đăng nhập/Đăng xuất') {
+                // Đăng nhập/Đăng xuất
+                $where .= " AND (st.tags LIKE ? OR st.tags LIKE ?)";
+                $params[] = '%Đăng nhập%';
+                $params[] = '%Đăng xuất%';
+            }
+        }
+        
+        // Sắp xếp theo subscription level: Premium > Gold > Silver > Basic > Free
+        // Sau đó mới sắp xếp theo ID (mới nhất trước)
         $tickets = $db->fetchAll("
-            SELECT st.*, u.name as user_name, u.email
+            SELECT st.*, 
+                   u.name as user_name, 
+                   u.email as user_email,
+                   u.subscription_id,
+                   s.name as subscription_name,
+                   CASE 
+                       WHEN s.name = 'Premium' THEN 1
+                       WHEN s.name = 'Gold' THEN 2
+                       WHEN s.name = 'Silver' THEN 3
+                       WHEN s.name = 'Basic' THEN 4
+                       WHEN s.name = 'Free' THEN 5
+                       ELSE 6
+                   END as subscription_priority,
+                   a.name as assigned_name
             FROM support_tickets st
             JOIN users u ON st.user_id = u.id
-            ORDER BY st.created_at DESC
-        ");
+            LEFT JOIN subscriptions s ON u.subscription_id = s.id
+            LEFT JOIN users a ON st.assigned_to = a.id
+            WHERE $where
+            ORDER BY subscription_priority ASC, st.id DESC
+        ", $params);
         
         $this->adminView('support', [
             'tickets' => $tickets,
+            'status' => $status,
+            'category' => $category,
             'user' => $user,
-            'title' => 'Hỗ trợ',
+            'title' => 'Hỗ trợ khách hàng',
             'current_page' => 'support'
         ]);
+    }
+    
+    // Support View Detail
+    public function supportView() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            $_SESSION['error'] = 'Không tìm thấy ticket!';
+            $this->redirect('admin/support');
+            return;
+        }
+        
+        $ticket = $db->fetch("
+            SELECT st.*, 
+                   u.name as user_name, 
+                   u.email as user_email,
+                   u.subscription_id,
+                   s.name as subscription_name,
+                   a.name as assigned_name,
+                   a.email as assigned_email
+            FROM support_tickets st
+            JOIN users u ON st.user_id = u.id
+            LEFT JOIN subscriptions s ON u.subscription_id = s.id
+            LEFT JOIN users a ON st.assigned_to = a.id
+            WHERE st.id = ?
+        ", [$id]);
+        
+        if (!$ticket) {
+            $_SESSION['error'] = 'Không tìm thấy ticket!';
+            $this->redirect('admin/support');
+            return;
+        }
+        
+        // Extract category từ tags
+        $category = 'Khác';
+        $tags = $ticket['tags'] ?? '';
+        if (!empty($tags)) {
+            if ((stripos($tags, 'Đặt vé') !== false || stripos($tags, 'Mua bán vé') !== false) && 
+                (stripos($tags, 'Lỗi') !== false || stripos($tags, 'Lỗi thanh toán') !== false || 
+                 stripos($tags, 'Không nhận được vé') !== false || stripos($tags, 'Vấn đề về ghế ngồi') !== false)) {
+                $category = 'Lỗi mua bán vé';
+            } elseif (stripos($tags, 'Đặt vé') !== false || stripos($tags, 'Mua bán vé') !== false) {
+                $category = 'Mua bán vé';
+            } elseif (stripos($tags, 'Phim') !== false && stripos($tags, 'Lỗi') !== false) {
+                $category = 'Lỗi về phim';
+            } elseif (stripos($tags, 'Đăng nhập') !== false || stripos($tags, 'Đăng xuất') !== false) {
+                $category = 'Đăng nhập/Đăng xuất';
+            }
+        }
+        $ticket['category'] = $category;
+        
+        $this->adminView('support/view', [
+            'ticket' => $ticket,
+            'user' => $user,
+            'title' => 'Chi tiết ticket #' . $id,
+            'current_page' => 'support'
+        ]);
+    }
+    
+    // Support Update Status
+    public function supportUpdateStatus() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/support');
+            return;
+        }
+        
+        $ticket_id = $_POST['ticket_id'] ?? null;
+        $status = trim($_POST['status'] ?? '');
+        
+        error_log("supportUpdateStatus called - ticket_id: {$ticket_id}, status: '{$status}'");
+        
+        if (!$ticket_id || !$status) {
+            $_SESSION['error'] = 'Thiếu thông tin! Ticket ID: ' . ($ticket_id ?? 'null') . ', Status: ' . ($status ?? 'null');
+            error_log("Missing info - ticket_id: " . ($ticket_id ?? 'null') . ", status: " . ($status ?? 'null'));
+            $this->redirect('admin/support');
+            return;
+        }
+        
+        // Validate status - kiểm tra cả với và không có khoảng trắng
+        $validStatuses = ['Mới', 'Đang xử lý', 'Đã giải quyết', 'Đã đóng'];
+        if (!in_array($status, $validStatuses)) {
+            $_SESSION['error'] = 'Trạng thái không hợp lệ! Status nhận được: "' . $status . '"';
+            error_log("Invalid status: '{$status}'");
+            $this->redirect('admin/support');
+            return;
+        }
+        
+        try {
+            // Lấy thông tin ticket cũ
+            $oldTicket = $db->fetch("SELECT * FROM support_tickets WHERE id = ?", [$ticket_id]);
+            if (!$oldTicket) {
+                $_SESSION['error'] = 'Không tìm thấy ticket!';
+                $this->redirect('admin/support');
+                return;
+            }
+            
+            // Cập nhật status và assigned_to nếu chuyển sang "Đang xử lý"
+            $updateSql = "";
+            $updateParams = [];
+            
+            if ($status === 'Đang xử lý' && empty($oldTicket['assigned_to'])) {
+                $updateSql = "UPDATE support_tickets SET status = ?, assigned_to = ? WHERE id = ?";
+                $updateParams = [$status, $user['id'], $ticket_id];
+            } else {
+                $updateSql = "UPDATE support_tickets SET status = ? WHERE id = ?";
+                $updateParams = [$status, $ticket_id];
+            }
+            
+            // Thực hiện update - sử dụng PDO trực tiếp để có control tốt hơn
+            error_log("Executing SQL: {$updateSql} with params: " . json_encode($updateParams));
+            
+            $pdo = $db->getConnection();
+            $stmt = $pdo->prepare($updateSql);
+            
+            try {
+                $result = $stmt->execute($updateParams);
+                
+                if (!$result) {
+                    $errorInfo = $stmt->errorInfo();
+                    error_log("Execute returned false. Error info: " . json_encode($errorInfo));
+                    throw new Exception("Lỗi khi cập nhật: " . ($errorInfo[2] ?? 'Unknown error'));
+                }
+                
+                $affectedRows = $stmt->rowCount();
+                error_log("Update executed. Affected rows: {$affectedRows}");
+                
+            } catch (PDOException $e) {
+                error_log("PDO Exception: " . $e->getMessage());
+                error_log("SQL State: " . $e->getCode());
+                throw new Exception("Lỗi database: " . $e->getMessage());
+            }
+            
+            // Verify update ngay lập tức - đợi một chút để đảm bảo commit
+            sleep(1); // Đợi 1 giây để đảm bảo database đã commit
+            
+            $updatedTicket = $db->fetch("SELECT status, assigned_to FROM support_tickets WHERE id = ?", [$ticket_id]);
+            if (!$updatedTicket) {
+                throw new Exception("Không tìm thấy ticket sau khi cập nhật!");
+            }
+            
+            error_log("Ticket after update - Status: '{$updatedTicket['status']}', Expected: '{$status}'");
+            error_log("Status comparison - Equal: " . ($updatedTicket['status'] === $status ? 'YES' : 'NO'));
+            
+            if ($updatedTicket['status'] !== $status) {
+                error_log("Status mismatch! Expected: '{$status}' (length: " . strlen($status) . "), Got: '{$updatedTicket['status']}' (length: " . strlen($updatedTicket['status']) . ")");
+                error_log("Byte comparison: " . bin2hex($status) . " vs " . bin2hex($updatedTicket['status']));
+                throw new Exception("Không thể cập nhật trạng thái ticket! Status hiện tại: " . $updatedTicket['status']);
+            }
+            
+            
+            // Log activity
+            try {
+                AdminMiddleware::logAction(
+                    $user['id'],
+                    'Cập nhật trạng thái ticket',
+                    'Support',
+                    'support_ticket',
+                    $ticket_id,
+                    ['status' => $oldTicket['status']],
+                    ['status' => $status]
+                );
+            } catch (Exception $e) {
+                // Log lỗi nhưng không dừng quá trình
+                error_log("Error logging action: " . $e->getMessage());
+            }
+            
+            $_SESSION['success'] = 'Đã cập nhật trạng thái ticket thành công!';
+            
+            // Force reload bằng cách thêm timestamp
+            $timestamp = time();
+            
+            // Redirect về view nếu có referer
+            $referer = $_SERVER['HTTP_REFERER'] ?? '';
+            if (strpos($referer, 'support/view') !== false) {
+                $this->redirect('?route=admin/support/view&id=' . $ticket_id . '&_t=' . $timestamp);
+            } else {
+                // Giữ lại filter nếu có và thêm timestamp để force reload
+                $redirectUrl = '?route=admin/support&_t=' . $timestamp;
+                $queryParams = [];
+                if (!empty($_GET['status'])) {
+                    $queryParams[] = 'status=' . urlencode($_GET['status']);
+                }
+                if (!empty($_GET['category'])) {
+                    $queryParams[] = 'category=' . urlencode($_GET['category']);
+                }
+                if (!empty($queryParams)) {
+                    $redirectUrl .= '&' . implode('&', $queryParams);
+                }
+                $this->redirect($redirectUrl);
+            }
+        } catch (Exception $e) {
+            error_log("Error updating support ticket status: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            $_SESSION['error'] = 'Có lỗi xảy ra khi cập nhật trạng thái: ' . $e->getMessage();
+            $this->redirect('admin/support');
+        }
+    }
+    
+    // Support Reply
+    public function supportReply() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/support');
+            return;
+        }
+        
+        $ticket_id = $_POST['ticket_id'] ?? null;
+        $reply_message = trim($_POST['reply_message'] ?? '');
+        
+        if (!$ticket_id || empty($reply_message)) {
+            $_SESSION['error'] = 'Vui lòng điền đầy đủ thông tin!';
+            $this->redirect('admin/support');
+            return;
+        }
+        
+        // Lấy thông tin ticket và user
+        $ticket = $db->fetch("
+            SELECT st.*, u.name as user_name, u.email as user_email
+            FROM support_tickets st
+            JOIN users u ON st.user_id = u.id
+            WHERE st.id = ?
+        ", [$ticket_id]);
+        
+        if (!$ticket) {
+            $_SESSION['error'] = 'Không tìm thấy ticket!';
+            $this->redirect('admin/support');
+            return;
+        }
+        
+        // Gửi email
+        require_once __DIR__ . '/../../core/Email.php';
+        $email = new Email();
+        
+        $to = $ticket['user_email'];
+        $subject = "Phản hồi từ CineHub - Ticket #" . $ticket_id;
+        $message = "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #e50914, #c40812); color: white; padding: 30px 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .header h2 { margin: 0; font-size: 24px; }
+                .content { background: #f9f9f9; padding: 30px 20px; border: 1px solid #ddd; border-top: none; }
+                .reply-box { background: white; padding: 20px; border-left: 4px solid #e50914; margin: 20px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+                .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; padding: 20px; background: #f5f5f5; border-radius: 0 0 10px 10px; }
+                .btn { display: inline-block; padding: 12px 30px; background: #e50914; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h2>🎬 CineHub - Hỗ trợ khách hàng</h2>
+                </div>
+                <div class='content'>
+                    <p>Xin chào <strong>" . htmlspecialchars($ticket['user_name']) . "</strong>,</p>
+                    <p>Cảm ơn bạn đã liên hệ với chúng tôi về vấn đề:</p>
+                    <p style='font-weight: bold; color: #e50914; font-size: 16px;'>" . htmlspecialchars($ticket['subject']) . "</p>
+                    <p>Phản hồi của chúng tôi:</p>
+                    <div class='reply-box'>
+                        " . nl2br(htmlspecialchars($reply_message)) . "
+                    </div>
+                    <p>Nếu bạn cần hỗ trợ thêm, vui lòng liên hệ lại với chúng tôi qua hệ thống hỗ trợ.</p>
+                    <p>Trân trọng,<br><strong>Đội ngũ CineHub</strong></p>
+                </div>
+                <div class='footer'>
+                    <p><strong>Ticket ID:</strong> #" . $ticket_id . "</p>
+                    <p>Email này được gửi tự động từ hệ thống CineHub</p>
+                    <p style='margin-top: 10px; font-size: 11px; color: #999;'>© " . date('Y') . " CineHub. All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+        
+        $mailSent = $email->send($to, $subject, $message, true);
+        
+        if ($mailSent) {
+            // Cập nhật status ticket thành "Đang xử lý" nếu đang là "Mới"
+            if ($ticket['status'] === 'Mới') {
+                $db->execute("UPDATE support_tickets SET status = 'Đang xử lý', assigned_to = ? WHERE id = ?", 
+                    [$user['id'], $ticket_id]);
+            }
+            
+            $_SESSION['success'] = 'Đã gửi phản hồi thành công đến email: ' . $ticket['user_email'];
+            error_log("Support reply sent successfully to: " . $ticket['user_email']);
+        } else {
+            $_SESSION['error'] = 'Không thể gửi email. Vui lòng kiểm tra cấu hình email server trong config.php!';
+            error_log("Failed to send support reply email to: " . $ticket['user_email']);
+        }
+        
+        $this->redirect('admin/support');
     }
     
     // Logs

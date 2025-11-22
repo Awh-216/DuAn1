@@ -122,7 +122,7 @@
                     </div>
                 </div>
                 <a href="http://localhost/DuAn1/?route=movie/index" class="nav-link-new">
-                    Top phim<i class="fas fa-chevron-down"></i>
+                    Top phim
                 </a>
                 <a href="http://localhost/DuAn1/?route=booking/index" class="nav-link-new" id="booking-link">
                     Vé xem phim
@@ -604,6 +604,39 @@ document.addEventListener('DOMContentLoaded', function() {
                         loginError.classList.add('alert-error');
                     }
                 }, 100);
+            }
+        });
+    }
+    
+    // Search bar functionality (giữ lại cho tương lai)
+    const searchBar = document.querySelector('.search-bar');
+    const searchInput = document.getElementById('search-input-header');
+    const searchForm = document.querySelector('.search-form-inline');
+    
+    if (searchInput && searchForm) {
+        // Focus vào input khi click vào search bar
+        if (searchBar) {
+            searchBar.addEventListener('click', function(e) {
+                if (e.target === searchBar || (e.target.closest('.search-bar') && !e.target.closest('.search-btn'))) {
+                    searchInput.focus();
+                }
+            });
+        }
+        
+        // Xử lý submit form
+        searchForm.addEventListener('submit', function(e) {
+            const searchValue = searchInput.value.trim();
+            if (!searchValue) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Clear search khi nhấn ESC
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                searchInput.blur();
             }
         });
     }

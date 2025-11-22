@@ -10,6 +10,18 @@ define('DB_CHARSET', 'utf8mb4');
 define('BASE_URL', 'http://localhost/DuAn1/');
 define('SITE_NAME', 'CineHub');
 
+// Cấu hình Email SMTP
+// Để gửi email thật, cần cấu hình thông tin SMTP dưới đây
+// Xem file HUONG_DAN_CAU_HINH_EMAIL.md để biết chi tiết
+// Ví dụ với Gmail:
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_PORT', 587);
+define('SMTP_USERNAME', ''); // Email đầy đủ của bạn (VD: nguyenvana@gmail.com) - BẮT BUỘC phải có @ và domain
+define('SMTP_PASSWORD', ''); // App Password của Gmail (16 ký tự, không phải mật khẩu thường)
+define('SMTP_ENCRYPTION', 'tls'); // 'tls' hoặc 'ssl'
+define('SMTP_FROM_EMAIL', 'noreply@cinehub.com'); // Email gửi đi (thường giống SMTP_USERNAME)
+define('SMTP_FROM_NAME', 'CineHub'); // Tên người gửi
+
 // Khởi động session
 session_start();
 

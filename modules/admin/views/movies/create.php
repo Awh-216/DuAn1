@@ -111,8 +111,13 @@
             </div>
             
             <div class="col-md-6 mb-3">
-                <label for="video_url" class="form-label">URL Video phim</label>
-                <input type="url" class="form-control" id="video_url" name="video_url" placeholder="https://example.com/video.mp4">
+                <label for="video_file" class="form-label">Video phim</label>
+                <input type="file" class="form-control" id="video_file" name="video_file" accept="video/*">
+                <small class="text-muted">Chọn file video (MP4, AVI, MOV, etc.) hoặc để trống nếu chưa có</small>
+                <div class="mt-2">
+                    <label class="form-label">Hoặc nhập URL video (nếu có)</label>
+                    <input type="url" class="form-control" id="video_url" name="video_url" placeholder="https://example.com/video.mp4">
+                </div>
             </div>
             
             <div class="col-md-6 mb-3">

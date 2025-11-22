@@ -72,7 +72,13 @@ if (isset($controllerMap[$firstPart])) {
 $action = '';
 if (count($parts) >= 3) {
     // Nested route: admin/theaters/create -> theatersCreate
-    $action = $parts[1] . ucfirst($parts[2]);
+    // Xử lý dấu gạch ngang trong action: update-status -> updateStatus
+    $actionPart = $parts[2];
+    // Convert kebab-case to camelCase: update-status -> UpdateStatus
+    $actionPart = str_replace('-', ' ', $actionPart);
+    $actionPart = ucwords($actionPart);
+    $actionPart = str_replace(' ', '', $actionPart); // UpdateStatus
+    $action = $parts[1] . $actionPart; // supportUpdateStatus
 } else {
     $action = $parts[1] ?? 'index';
 }
@@ -108,6 +114,7 @@ try {
         
         if (!method_exists($controller, $action)) {
             // Nếu vẫn không có, dùng HomeController
+            error_log("Method $action not found in $controllerName, falling back to HomeController");
             $controllerName = 'HomeController';
             $controller = new $controllerName();
             $action = 'index';
@@ -117,6 +124,11 @@ try {
     // Gọi action
     $controller->$action();
 } catch (Exception $e) {
+    // Log lỗi để debug
+    error_log("Error in routing: " . $e->getMessage());
+    error_log("Route: $route, Controller: $controllerName, Action: $action");
+    error_log("Stack trace: " . $e->getTraceAsString());
+    
     // Fallback về HomeController nếu có lỗi
     if ($controllerName !== 'HomeController') {
         $controllerName = 'HomeController';

@@ -115,8 +115,24 @@
             </div>
             
             <div class="col-md-6 mb-3">
-                <label for="video_url" class="form-label">URL Video phim</label>
-                <input type="url" class="form-control" id="video_url" name="video_url" value="<?php echo htmlspecialchars($movie['video_url'] ?? ''); ?>" placeholder="https://example.com/video.mp4">
+                <label for="video_file" class="form-label">Video phim</label>
+                <input type="file" class="form-control" id="video_file" name="video_file" accept="video/*">
+                <small class="text-muted">Chọn file video mới để thay thế (MP4, AVI, MOV, etc.)</small>
+                <?php if (!empty($movie['video_url'])): ?>
+                    <div class="mt-2">
+                        <small class="text-muted">Video hiện tại: 
+                            <?php if (strpos($movie['video_url'], 'http') === 0): ?>
+                                <a href="<?php echo htmlspecialchars($movie['video_url']); ?>" target="_blank"><?php echo htmlspecialchars($movie['video_url']); ?></a>
+                            <?php else: ?>
+                                <?php echo htmlspecialchars($movie['video_url']); ?>
+                            <?php endif; ?>
+                        </small>
+                    </div>
+                <?php endif; ?>
+                <div class="mt-2">
+                    <label class="form-label">Hoặc nhập URL video (nếu có)</label>
+                    <input type="url" class="form-control" id="video_url" name="video_url" value="<?php echo htmlspecialchars($movie['video_url'] ?? ''); ?>" placeholder="https://example.com/video.mp4">
+                </div>
             </div>
             
             <div class="col-md-6 mb-3">
@@ -193,7 +209,7 @@
         </div>
         
         <!-- Phần lịch chiếu rạp (hiện khi chọn "Chiếu rạp") -->
-        <div id="theaterScheduleSection" style="display: none;">
+        <div id="theaterScheduleSection" style="display: <?php echo ($movie['status'] === 'Chiếu rạp') ? 'block' : 'none'; ?>;">
             <hr class="my-4">
             <h6 class="mb-3"><i class="fas fa-calendar-alt me-2"></i>Lịch chiếu rạp</h6>
             
@@ -225,12 +241,14 @@
             <div class="row mb-3">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Từ ngày <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="fromDate" name="from_date">
+                    <input type="date" class="form-control" id="fromDate" name="from_date" 
+                           value="<?php echo isset($existingShowtimes) && !empty($existingShowtimes) ? min(array_column($existingShowtimes, 'show_date')) : ''; ?>">
                 </div>
                 
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Đến ngày <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="toDate" name="to_date">
+                    <input type="date" class="form-control" id="toDate" name="to_date"
+                           value="<?php echo isset($existingShowtimes) && !empty($existingShowtimes) ? max(array_column($existingShowtimes, 'show_date')) : ''; ?>">
                 </div>
             </div>
             
