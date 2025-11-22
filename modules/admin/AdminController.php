@@ -1015,20 +1015,88 @@ class AdminController extends Controller {
         $db = Database::getInstance();
         $user = AdminMiddleware::checkAdmin();
         
+        $page = $_GET['page'] ?? 1;
+        $limit = 20;
+        $offset = ($page - 1) * $limit;
+        $status = $_GET['status'] ?? '';
+        $movie_id = $_GET['movie_id'] ?? '';
+        
+        // Lấy danh sách phim để filter
+        $movies = $db->fetchAll("SELECT id, title FROM movies WHERE status = 'Chiếu rạp' ORDER BY title");
+        
+        // Build WHERE clause
+        $where = "1=1";
+        $params = [];
+        
+        if ($status) {
+            $where .= " AND t.status = ?";
+            $params[] = $status;
+        }
+        
+        if ($movie_id) {
+            $where .= " AND m.id = ?";
+            $params[] = $movie_id;
+        }
+        
+        // Lấy danh sách vé với filter và pagination
         $tickets = $db->fetchAll("
             SELECT t.*, u.name as user_name, u.email as user_email, 
                    s.show_date, s.show_time, s.price,
-                   m.title as movie_title, th.name as theater_name
+                   m.id as movie_id, m.title as movie_title, 
+                   th.name as theater_name, th.id as theater_id
             FROM tickets t
             JOIN users u ON t.user_id = u.id
             JOIN showtimes s ON t.showtime_id = s.id
             JOIN movies m ON s.movie_id = m.id
             JOIN theaters th ON s.theater_id = th.id
+            WHERE $where
             ORDER BY t.created_at DESC
+            LIMIT $limit OFFSET $offset
+        ", $params);
+        
+        // Đếm tổng số vé
+        $total = $db->fetch("SELECT COUNT(*) as count FROM tickets t 
+                            JOIN showtimes s ON t.showtime_id = s.id
+                            JOIN movies m ON s.movie_id = m.id
+                            WHERE $where", $params)['count'];
+        
+        // Thống kê vé tồn kho theo phim
+        // Tính tổng số ghế = số ghế mỗi showtime (132: 11 hàng x 12 cột + 6 ghế đôi hàng L)
+        // Vé tồn kho = tổng số ghế - số vé đã bán
+        $inventoryStats = $db->fetchAll("
+            SELECT 
+                m.id as movie_id,
+                m.title as movie_title,
+                COUNT(DISTINCT s.id) as total_showtimes,
+                COUNT(CASE WHEN t.status = 'Đã đặt' THEN 1 END) as tickets_sold,
+                (COUNT(DISTINCT s.id) * 132) - COUNT(CASE WHEN t.status = 'Đã đặt' THEN 1 END) as tickets_available,
+                SUM(CASE WHEN t.status = 'Đã đặt' THEN t.price ELSE 0 END) as total_revenue
+            FROM movies m
+            LEFT JOIN showtimes s ON m.id = s.movie_id AND s.show_date >= CURDATE()
+            LEFT JOIN tickets t ON s.id = t.showtime_id
+            WHERE m.status = 'Chiếu rạp'
+            GROUP BY m.id, m.title
+            HAVING total_showtimes > 0
+            ORDER BY total_revenue DESC
         ");
+        
+        // Thống kê tổng quan
+        $overallStats = [
+            'total_tickets' => $db->fetch("SELECT COUNT(*) as count FROM tickets")['count'],
+            'tickets_sold' => $db->fetch("SELECT COUNT(*) as count FROM tickets WHERE status = 'Đã đặt'")['count'],
+            'tickets_cancelled' => $db->fetch("SELECT COUNT(*) as count FROM tickets WHERE status = 'Đã hủy'")['count'],
+            'total_revenue' => $db->fetch("SELECT SUM(price) as total FROM tickets WHERE status = 'Đã đặt'")['total'] ?? 0
+        ];
         
         $this->adminView('tickets', [
             'tickets' => $tickets,
+            'movies' => $movies,
+            'status' => $status,
+            'movie_id' => $movie_id,
+            'page' => $page,
+            'total_pages' => ceil($total / $limit),
+            'inventoryStats' => $inventoryStats,
+            'overallStats' => $overallStats,
             'user' => $user,
             'title' => 'Quản lý vé',
             'current_page' => 'tickets'

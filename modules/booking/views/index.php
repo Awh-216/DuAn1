@@ -133,9 +133,32 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                     <?php else: ?>
                         <!-- Theater Selection -->
                         <div class="booking-step mb-4">
-                            <label class="booking-label">
-                                <i class="fas fa-building me-2"></i>Chọn rạp
-                            </label>
+                            <div class="row align-items-center mb-3">
+                                <div class="col-md-6 col-12">
+                                    <label class="booking-label mb-0">
+                                        <i class="fas fa-building me-2"></i>Chọn rạp
+                                    </label>
+                                </div>
+                                <div class="col-md-6 col-12 text-md-end text-start mt-md-0 mt-2">
+                                    <button type="button" 
+                                            class="btn btn-location-detect" 
+                                            id="location-detect-btn"
+                                            onclick="detectUserLocation()"
+                                            aria-label="Xác định vị trí của bạn">
+                                        <i class="fas fa-crosshairs me-2"></i>
+                                        <span id="location-btn-text">Xác định vị trí</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Location Info -->
+                            <div class="location-info" id="location-info" style="display: none;">
+                                <div class="location-display">
+                                    <!-- <i class="fas fa-map-marker-alt text-primary me-2"></i> -->
+                                    <span id="location-text">Đang xác định vị trí...</span>
+                                </div>
+                            </div>
+                            
                             <?php if (empty($theaters)): ?>
                                 <div class="alert alert-warning">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
@@ -149,6 +172,9 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                            aria-pressed="<?php echo $selected_theater == $theater['id'] ? 'true' : 'false'; ?>">
                                             <i class="fas fa-map-marker-alt me-2"></i>
                                             <?php echo htmlspecialchars($theater['name']); ?>
+                                            <?php if (!empty($theater['location'])): ?>
+                                                <span class="theater-location"> - <?php echo htmlspecialchars($theater['location']); ?></span>
+                                            <?php endif; ?>
                                         </a>
                                     <?php endforeach; ?>
                                 </div>
@@ -205,6 +231,41 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                         <!-- Seat Selection -->
                         <?php if ($selected_showtime_id): ?>
                             <?php 
+                            // Debug: Log booked seats passed to view
+                            error_log("View - bookedSeats passed to view: " . print_r($bookedSeats ?? [], true));
+                            error_log("View - reservedSeats passed to view: " . print_r($reservedSeats ?? [], true));
+                            error_log("View - showtime_id: $selected_showtime_id");
+                            
+                            // Đảm bảo bookedSeats là array
+                            if (!is_array($bookedSeats)) {
+                                $bookedSeats = [];
+                            }
+                            if (!is_array($reservedSeats)) {
+                                $reservedSeats = [];
+                            }
+                            
+                            // Double check: Query lại từ BookingModel để đảm bảo lấy dữ liệu mới nhất
+                            try {
+                                require_once __DIR__ . '/../BookingModel.php';
+                                $bookingModel = new BookingModel();
+                                $directQuery = $bookingModel->getBookedSeats($selected_showtime_id);
+                                $directBookedSeats = array_column($directQuery, 'seat');
+                                error_log("View - Direct database query for showtime $selected_showtime_id - seats: " . implode(', ', $directBookedSeats));
+                                
+                                // Ưu tiên dữ liệu từ database (mới nhất) thay vì merge
+                                // Vì có thể controller chưa cập nhật kịp
+                                if (!empty($directBookedSeats)) {
+                                    $bookedSeats = $directBookedSeats;
+                                    error_log("View - Using direct query result as bookedSeats: " . implode(', ', $bookedSeats));
+                                } else {
+                                    // Nếu direct query rỗng nhưng controller có dữ liệu, vẫn dùng controller
+                                    error_log("View - Direct query empty, using controller data: " . implode(', ', $bookedSeats));
+                                }
+                            } catch (Exception $e) {
+                                error_log("Error in direct query: " . $e->getMessage());
+                                // Nếu có lỗi, vẫn dùng dữ liệu từ controller
+                            }
+                            
                             $showtime = null;
                             foreach ($showtimes as $st) {
                                 if ($st['id'] == $selected_showtime_id) {
@@ -247,9 +308,14 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                                 for ($i = 1; $i <= 12; $i += 2) {
                                                     $seat1 = $row . $i;
                                                     $seat2 = $row . ($i + 1);
-                                                    $isBooked1 = in_array($seat1, $bookedSeats);
-                                                    $isBooked2 = in_array($seat2, $bookedSeats);
+                                                    $isBooked1 = in_array($seat1, $bookedSeats ?? []);
+                                                    $isBooked2 = in_array($seat2, $bookedSeats ?? []);
                                                     $isBooked = $isBooked1 || $isBooked2;
+                                                    
+                                                    // Debug: Log couple seat status
+                                                    if ($isBooked) {
+                                                        error_log("Couple seat $seat1-$seat2 is BOOKED - showtime: $selected_showtime_id");
+                                                    }
                                                     
                                                     echo '<label class="seat-label couple-seat ' . ($isBooked ? 'booked' : 'available') . '" title="Ghế đôi ' . $i . '-' . ($i + 1) . '">';
                                                     if (!$isBooked) {
@@ -265,10 +331,23 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                                 // Các hàng khác vẫn là ghế đơn
                                                 foreach ($cols as $col) {
                                                     $seat = $row . $col;
-                                                    $isBooked = in_array($seat, $bookedSeats);
+                                                    $isBooked = in_array($seat, $bookedSeats ?? []);
+                                                    $isReserved = in_array($seat, $reservedSeats ?? []);
                                                     
-                                                    echo '<label class="seat-label ' . ($isBooked ? 'booked' : 'available') . '">';
-                                                    if (!$isBooked) {
+                                                    // Debug: Log seat status
+                                                    if ($isBooked) {
+                                                        error_log("Seat $seat is BOOKED - showtime: $selected_showtime_id");
+                                                    }
+                                                    
+                                                    $seatClass = 'available';
+                                                    if ($isBooked) {
+                                                        $seatClass = 'booked';
+                                                    } elseif ($isReserved) {
+                                                        $seatClass = 'reserved';
+                                                    }
+                                                    
+                                                    echo '<label class="seat-label ' . $seatClass . '" data-seat="' . $seat . '">';
+                                                    if (!$isBooked && !$isReserved) {
                                                         echo '<input type="checkbox" name="seats[]" value="' . $seat . '" class="seat-checkbox">';
                                                     }
                                                     echo '<span class="seat-number">' . $col . '</span>';
@@ -293,6 +372,10 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                             <span>Ghế đang chọn</span>
                                         </div>
                                         <div class="legend-item">
+                                            <span class="legend-seat reserved" aria-label="Ghế đang chọn (người khác)"></span>
+                                            <span>Ghế đang chọn (người khác)</span>
+                                        </div>
+                                        <div class="legend-item">
                                             <span class="legend-seat booked" aria-label="Ghế đã bán"></span>
                                             <span>Ghế đã bán</span>
                                         </div>
@@ -309,6 +392,24 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                             <span class="total-seats" id="total-seats">0 ghế</span>
                                         </div>
                                         <span class="total-amount" id="total-amount" aria-label="Tổng số tiền phải thanh toán">0₫</span>
+                                    </div>
+                                    
+                                    <!-- Email Input -->
+                                    <div class="email-input-container-booking mb-4" id="email-container" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="customer_email" class="form-label-booking">
+                                                <i class="fas fa-envelope me-2"></i> Email nhận vé <span class="required">*</span>
+                                            </label>
+                                            <input 
+                                                type="email" 
+                                                id="customer_email" 
+                                                name="customer_email" 
+                                                class="form-control-booking" 
+                                                placeholder="Nhập email của bạn để nhận vé"
+                                                required
+                                            >
+                                            <small class="form-text-booking">Vé và QR code sẽ được gửi đến email này sau khi thanh toán</small>
+                                        </div>
                                     </div>
                                     
                                     <!-- Submit Button -->
@@ -424,6 +525,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submit-btn');
     const pricePerSeat = <?php echo isset($showtime) && $showtime ? $showtime['price'] : 0; ?>;
     
+    // Kiểm tra vị trí đã lưu khi trang load
+    const savedLocation = localStorage.getItem('userLocation');
+    if (savedLocation) {
+        try {
+            const location = JSON.parse(savedLocation);
+            const now = Date.now();
+            // Nếu vị trí còn mới (dưới 1 giờ), hiển thị lại
+            if (now - location.timestamp < 3600000) {
+                const locationInfo = document.getElementById('location-info');
+                const locationText = document.getElementById('location-text');
+                if (locationInfo && locationText) {
+                    locationInfo.style.display = 'block';
+                    locationText.innerHTML = `
+                        <span class="text-info">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            Vị trí đã lưu: ${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}
+                        </span>
+                    `;
+                    getAddressFromCoordinates(location.lat, location.lng);
+                }
+            }
+        } catch (e) {
+            console.log('Error loading saved location:', e);
+        }
+    }
+    
     checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             // Xử lý ghế đôi: khi chọn 1 ghế trong cặp thì tự động chọn ghế còn lại
@@ -462,6 +589,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .filter(cb => cb.checked)
             .map(cb => cb.value);
         
+        const emailContainer = document.getElementById('email-container');
+        const emailInput = document.getElementById('customer_email');
+        
         // Update visual
         checkboxes.forEach(cb => {
             const label = cb.closest('.seat-label');
@@ -499,12 +629,268 @@ document.addEventListener('DOMContentLoaded', function() {
             totalSeatsSpan.textContent = selected.length + ' ghế';
             submitBtn.disabled = false;
             submitBtn.setAttribute('aria-label', 'Xác nhận đặt ' + selected.length + ' vé');
+            
+            // Hiển thị trường email
+            if (emailContainer) {
+                emailContainer.style.display = 'block';
+            }
         } else {
             totalAmountSpan.textContent = '0₫';
             totalAmountSpan.setAttribute('aria-label', 'Chưa chọn ghế nào');
             totalSeatsSpan.textContent = '0 ghế';
             submitBtn.disabled = true;
+            
+            // Ẩn trường email và xóa giá trị
+            if (emailContainer) {
+                emailContainer.style.display = 'none';
+            }
+            if (emailInput) {
+                emailInput.value = '';
+            }
         }
+    }
+    
+    // Real-time seat reservation system
+    <?php if ($selected_showtime_id): ?>
+    const showtimeId = <?php echo $selected_showtime_id; ?>;
+    let selectedSeats = [];
+    let pollingInterval = null;
+    let reservationTimeout = null;
+    
+    // Reserve seats when selected
+    function reserveSeats(seats) {
+        if (seats.length === 0) return;
+        
+        fetch('?route=booking/reserve-seats-api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                showtime_id: showtimeId,
+                seats: seats
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Extend reservation every 4 minutes (before 5 minutes expire)
+                reservationTimeout = setInterval(() => {
+                    extendReservations(seats);
+                }, 4 * 60 * 1000);
+            }
+        })
+        .catch(error => console.error('Error reserving seats:', error));
+    }
+    
+    // Release seats when deselected
+    function releaseSeats(seats) {
+        if (seats.length === 0) return;
+        
+        if (reservationTimeout) {
+            clearInterval(reservationTimeout);
+            reservationTimeout = null;
+        }
+        
+        fetch('?route=booking/release-seats-api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                showtime_id: showtimeId,
+                seats: seats
+            })
+        })
+        .catch(error => console.error('Error releasing seats:', error));
+    }
+    
+    // Extend reservations
+    function extendReservations(seats) {
+        if (seats.length === 0) return;
+        
+        fetch('?route=booking/extend-reservation-api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                showtime_id: showtimeId,
+                seats: seats
+            })
+        })
+        .catch(error => console.error('Error extending reservations:', error));
+    }
+    
+    // Check seat status real-time
+    function checkSeatStatus() {
+        fetch(`?route=booking/get-seat-status-api&showtime_id=${showtimeId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateSeatStatus(data.booked_seats, data.reserved_seats);
+                }
+            })
+            .catch(error => console.error('Error checking seat status:', error));
+    }
+    
+    // Update seat visual status
+    function updateSeatStatus(bookedSeats, reservedSeats) {
+        document.querySelectorAll('.seat-label').forEach(label => {
+            const seat = label.getAttribute('data-seat');
+            if (!seat) return;
+            
+            // Skip if seat is currently selected by this user
+            const checkbox = label.querySelector('.seat-checkbox');
+            if (checkbox && checkbox.checked) return;
+            
+            // Remove all status classes
+            label.classList.remove('booked', 'reserved', 'available');
+            
+            if (bookedSeats.includes(seat)) {
+                label.classList.add('booked');
+                // Remove checkbox if booked
+                if (checkbox) checkbox.remove();
+            } else if (reservedSeats[seat]) {
+                label.classList.add('reserved');
+                // Remove checkbox if reserved
+                if (checkbox) checkbox.remove();
+            } else {
+                label.classList.add('available');
+                // Re-add checkbox if available
+                if (!checkbox) {
+                    const seatNum = label.querySelector('.seat-number').textContent;
+                    const row = seat.charAt(0);
+                    const col = seat.substring(1);
+                    const newCheckbox = document.createElement('input');
+                    newCheckbox.type = 'checkbox';
+                    newCheckbox.name = 'seats[]';
+                    newCheckbox.value = seat;
+                    newCheckbox.className = 'seat-checkbox';
+                    if (label.classList.contains('couple-seat')) {
+                        newCheckbox.classList.add('couple-seat-checkbox');
+                    }
+                    label.insertBefore(newCheckbox, label.firstChild);
+                }
+            }
+        });
+    }
+    
+    // Start polling for seat status updates (every 2 seconds)
+    if (showtimeId) {
+        checkSeatStatus(); // Check immediately
+        pollingInterval = setInterval(checkSeatStatus, 2000);
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', function() {
+            if (selectedSeats.length > 0) {
+                releaseSeats(selectedSeats);
+            }
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+        });
+        
+        // Override updateSelection to handle reservations
+        const originalUpdateSelection = updateSelection;
+        updateSelection = function() {
+            const newSelected = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+            
+            // Release seats that are no longer selected
+            const toRelease = selectedSeats.filter(seat => !newSelected.includes(seat));
+            if (toRelease.length > 0) {
+                releaseSeats(toRelease);
+            }
+            
+            // Reserve newly selected seats
+            const toReserve = newSelected.filter(seat => !selectedSeats.includes(seat));
+            if (toReserve.length > 0) {
+                reserveSeats(toReserve);
+            }
+            
+            selectedSeats = newSelected;
+            originalUpdateSelection();
+        };
+    }
+    <?php endif; ?>
+    
+    // Handle form submit - Mark seats as booked before submitting
+    const bookingForm = document.getElementById('booking-form');
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', function(e) {
+            // Lấy các ghế đã chọn
+            const selectedCheckboxes = Array.from(document.querySelectorAll('.seat-checkbox:checked'));
+            const selectedSeatValues = selectedCheckboxes.map(cb => cb.value);
+            
+            if (selectedSeatValues.length > 0) {
+                // Đánh dấu ghế đã chọn thành "đã bán" ngay lập tức
+                selectedCheckboxes.forEach(checkbox => {
+                    const label = checkbox.closest('.seat-label');
+                    if (label) {
+                        // Remove selected class
+                        label.classList.remove('selected', 'available', 'reserved');
+                        // Add booked class
+                        label.classList.add('booked');
+                        
+                        // Remove checkbox
+                        checkbox.remove();
+                        
+                        // Disable seat interaction
+                        label.style.cursor = 'not-allowed';
+                        label.style.opacity = '0.6';
+                        
+                        // Update aria-checked
+                        label.setAttribute('aria-checked', 'false');
+                        label.setAttribute('aria-disabled', 'true');
+                    }
+                });
+                
+                // Release reservations của ghế đã chọn (vì đã được đặt rồi)
+                <?php if ($selected_showtime_id): ?>
+                if (typeof releaseSeats === 'function') {
+                    releaseSeats(selectedSeatValues);
+                }
+                if (reservationTimeout) {
+                    clearInterval(reservationTimeout);
+                    reservationTimeout = null;
+                }
+                // Stop polling vì đã đặt vé rồi
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                }
+                <?php endif; ?>
+                
+                // Disable submit button để tránh double submit
+                const submitBtn = document.getElementById('submit-btn');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    const originalBtnText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+                }
+                
+                // Update total info để hiển thị "Đã đặt"
+                const totalSeatsSpan = document.getElementById('total-seats');
+                if (totalSeatsSpan) {
+                    totalSeatsSpan.textContent = selectedSeatValues.length + ' ghế - Đang xử lý...';
+                }
+                
+                // Update selected seats display
+                const selectedSeatsSpan = document.getElementById('selected-seats');
+                if (selectedSeatsSpan) {
+                    selectedSeatsSpan.textContent = selectedSeatValues.join(', ') + ' (Đã đặt)';
+                    selectedSeatsSpan.style.color = '#dc3545';
+                }
+                
+                // Hide email input
+                const emailContainer = document.getElementById('email-container');
+                if (emailContainer) {
+                    emailContainer.style.display = 'none';
+                }
+            }
+        });
     }
 });
 
@@ -521,4 +907,125 @@ function toggleSupportForm() {
         btn.style.display = 'block';
     }
 }
+
+// Location Detection
+function detectUserLocation() {
+    const locationInfo = document.getElementById('location-info');
+    const locationText = document.getElementById('location-text');
+    const locationBtn = document.getElementById('location-detect-btn');
+    const locationBtnText = document.getElementById('location-btn-text');
+    
+    if (!navigator.geolocation) {
+        locationText.innerHTML = '<span class="text-warning">Trình duyệt của bạn không hỗ trợ xác định vị trí</span>';
+        locationInfo.style.display = 'block';
+        return;
+    }
+    
+    // Hiển thị trạng thái đang tải
+    locationBtn.disabled = true;
+    locationBtnText.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xác định...';
+    locationInfo.style.display = 'block';
+    locationText.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xác định vị trí của bạn...';
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            
+            // Lưu vị trí vào localStorage
+            localStorage.setItem('userLocation', JSON.stringify({
+                lat: latitude,
+                lng: longitude,
+                timestamp: Date.now()
+            }));
+            
+            // Hiển thị tọa độ
+            locationText.innerHTML = `
+                <span class="text-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Đã xác định vị trí: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}
+                </span>
+            `;
+            
+            // Thử lấy địa chỉ từ reverse geocoding (nếu có thể)
+            getAddressFromCoordinates(latitude, longitude);
+            
+            locationBtn.disabled = false;
+            locationBtnText.innerHTML = '<i class="fas fa-redo me-2"></i>Cập nhật vị trí';
+            
+            // Sắp xếp rạp theo khoảng cách (nếu có thể)
+            sortTheatersByDistance(latitude, longitude);
+        },
+        function(error) {
+            let errorMessage = 'Không thể xác định vị trí. ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage += 'Bạn đã từ chối quyền truy cập vị trí.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage += 'Thông tin vị trí không khả dụng.';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage += 'Yêu cầu xác định vị trí đã hết thời gian chờ.';
+                    break;
+                default:
+                    errorMessage += 'Đã xảy ra lỗi không xác định.';
+                    break;
+            }
+            locationText.innerHTML = `<span class="text-warning"><i class="fas fa-exclamation-triangle me-2"></i>${errorMessage}</span>`;
+            locationBtn.disabled = false;
+            locationBtnText.innerHTML = '<i class="fas fa-crosshairs me-2"></i>Xác định vị trí';
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
+// Reverse Geocoding - Lấy địa chỉ từ tọa độ
+function getAddressFromCoordinates(lat, lng) {
+    // Sử dụng Nominatim API (OpenStreetMap) để reverse geocoding
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.address) {
+                const address = data.address;
+                let addressString = '';
+                
+                if (address.road) addressString += address.road + ', ';
+                if (address.suburb || address.village) addressString += (address.suburb || address.village) + ', ';
+                if (address.city || address.town || address.county) addressString += (address.city || address.town || address.county) + ', ';
+                if (address.state) addressString += address.state;
+                
+                if (addressString) {
+                    const locationText = document.getElementById('location-text');
+                    locationText.innerHTML = `
+                        <span class="text-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Vị trí: ${addressString.trim().replace(/,\s*$/, '')}
+                        </span>
+                    `;
+                }
+            }
+        })
+        .catch(error => {
+            console.log('Reverse geocoding failed:', error);
+        });
+}
+
+// Sắp xếp rạp theo khoảng cách (nếu có tọa độ rạp)
+function sortTheatersByDistance(userLat, userLng) {
+    const theaters = document.querySelectorAll('.theater-btn');
+    const theatersArray = Array.from(theaters);
+    
+    // Tính khoảng cách và sắp xếp
+    theatersArray.forEach(theater => {
+        const locationSpan = theater.querySelector('.theater-location');
+        // Có thể thêm logic tính khoảng cách nếu có tọa độ rạp trong database
+        // Hiện tại chỉ hiển thị thông tin
+    });
+}
+
 </script>

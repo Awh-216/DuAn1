@@ -118,6 +118,7 @@ body.dark-bg {
 
 /* Buttons */
 .btn {
+    color: white;
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 5px;
@@ -131,7 +132,7 @@ body.dark-bg {
 
 .btn-primary {
     background-color: var(--primary-color);
-    color: var(--text-primary);
+    color: white !important;
 }
 
 .btn-primary:hover {
@@ -141,13 +142,13 @@ body.dark-bg {
 
 .btn-secondary {
     background-color: transparent;
-    color: var(--text-primary);
+    color: white !important;
     border: 2px solid var(--text-primary);
 }
 
 .btn-secondary:hover {
     background-color: var(--text-primary);
-    color: var(--dark-bg);
+    color: var(--dark-bg) !important;
 }
 
 .btn-block {
@@ -1440,6 +1441,66 @@ body.dark-bg {
     color: var(--primary-color);
     font-weight: bold;
     font-size: 1.5rem;
+}
+
+/* Email Input Container */
+.email-input-container {
+    background-color: #1f1f1f;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.email-input-container .form-group {
+    margin-bottom: 0;
+}
+
+.email-input-container .form-label {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.email-input-container .form-label .required {
+    color: var(--primary-color);
+}
+
+.email-input-container .form-control {
+    background-color: var(--dark-bg);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.email-input-container .form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.1);
+}
+
+.email-input-container .form-text {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: block;
 }
 
 /* Tickets List */
@@ -3049,11 +3110,220 @@ body.dark-bg {
     font-weight: 600;
     color: #ffffff;
     margin-bottom: 1rem;
+    line-height: 1.5;
 }
 
 .booking-label i {
     color: #f5c518;
     margin-right: 0.5rem;
+    font-size: 1.1rem;
+}
+
+/* Booking Label Row - Bootstrap compatible */
+.booking-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1.5rem;
+    flex-wrap: nowrap;
+    width: 100%;
+}
+
+/* Location Detection Button - Override Bootstrap */
+.btn.btn-location-detect,
+button.btn-location-detect,
+#location-detect-btn.btn-location-detect {
+    padding: 0.625rem 1.5rem !important;
+    background: linear-gradient(135deg, #f5c518 0%, #ffd700 50%, #f5c518 100%) !important;
+    background-size: 200% 200% !important;
+    background-color: transparent !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(245, 197, 24, 0.5) !important;
+    border-radius: 25px !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    box-shadow: 0 4px 15px rgba(245, 197, 24, 0.3),
+                0 2px 8px rgba(245, 197, 24, 0.2) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    min-width: fit-content !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3),
+                 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+    /* Override Bootstrap */
+    box-sizing: border-box !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* Đảm bảo tất cả text trong button luôn màu trắng - Override Bootstrap */
+.btn.btn-location-detect *,
+button.btn-location-detect *,
+#location-detect-btn.btn-location-detect *,
+.btn.btn-location-detect,
+button.btn-location-detect,
+#location-detect-btn.btn-location-detect {
+    color: #ffffff !important;
+}
+
+.btn-location-detect::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-location-detect:hover:not(:disabled)::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn.btn-location-detect:hover:not(:disabled),
+button.btn-location-detect:hover:not(:disabled),
+#location-detect-btn.btn-location-detect:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ffd700 0%, #f5c518 50%, #ffd700 100%) !important;
+    background-position: 100% 0 !important;
+    background-color: transparent !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 6px 20px rgba(245, 197, 24, 0.5),
+                0 4px 12px rgba(245, 197, 24, 0.3) !important;
+    border-color: rgba(245, 197, 24, 0.8) !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4),
+                 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.btn.btn-location-detect:hover:not(:disabled) i,
+.btn.btn-location-detect:hover:not(:disabled) span,
+.btn.btn-location-detect:hover:not(:disabled) #location-btn-text {
+    color: #ffffff !important;
+}
+
+.btn.btn-location-detect:active:not(:disabled),
+.btn.btn-location-detect:focus:not(:disabled),
+button.btn-location-detect:active:not(:disabled),
+button.btn-location-detect:focus:not(:disabled),
+#location-detect-btn.btn-location-detect:active:not(:disabled),
+#location-detect-btn.btn-location-detect:focus:not(:disabled) {
+    transform: translateY(0) scale(0.98) !important;
+    box-shadow: 0 2px 10px rgba(245, 197, 24, 0.4), 0 0 0 0.25rem rgba(245, 197, 24, 0.25) !important;
+    color: #ffffff !important;
+    outline: none !important;
+    background: linear-gradient(135deg, #f5c518 0%, #ffd700 50%, #f5c518 100%) !important;
+    background-color: transparent !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3),
+                 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.btn.btn-location-detect:active:not(:disabled) *,
+.btn.btn-location-detect:focus:not(:disabled) *,
+.btn.btn-location-detect:active:not(:disabled) i,
+.btn.btn-location-detect:focus:not(:disabled) i,
+.btn.btn-location-detect:active:not(:disabled) span,
+.btn.btn-location-detect:focus:not(:disabled) span {
+    color: #ffffff !important;
+}
+
+.btn.btn-location-detect:disabled,
+button.btn-location-detect:disabled,
+#location-detect-btn.btn-location-detect:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: 0 2px 8px rgba(245, 197, 24, 0.2) !important;
+    color: #ffffff !important;
+}
+
+.btn.btn-location-detect:disabled *,
+.btn.btn-location-detect:disabled i,
+.btn.btn-location-detect:disabled span {
+    color: #ffffff !important;
+}
+
+.btn-location-detect i,
+.btn.btn-location-detect i,
+button.btn-location-detect i,
+#location-detect-btn.btn-location-detect i {
+    margin-right: 0 !important;
+    font-size: 1rem !important;
+    position: relative !important;
+    z-index: 1 !important;
+    animation: pulse 2s infinite !important;
+    color: #ffffff !important;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.btn-location-detect:hover:not(:disabled) i {
+    animation: spin 0.5s ease-in-out;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.btn-location-detect span,
+.btn.btn-location-detect span,
+button.btn-location-detect span,
+#location-detect-btn.btn-location-detect span,
+.btn-location-detect #location-btn-text {
+    position: relative !important;
+    z-index: 1 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* Location Info */
+.location-info {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, rgba(245, 197, 24, 0.1), rgba(245, 197, 24, 0.05));
+    border: 1px solid rgba(245, 197, 24, 0.3);
+    border-radius: 8px;
+    animation: slideDown 0.3s ease-out;
+}
+
+.location-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.location-display i {
+    color: #f5c518;
+}
+
+.theater-location {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    font-weight: normal;
+    margin-left: 0.25rem;
 }
 
 .form-select-booking {
@@ -3343,6 +3613,30 @@ body.dark-bg {
     color: #ffffff;
 }
 
+/* Reserved Seat (đang chọn bởi người khác) */
+.seat-label.reserved {
+    background-color: #ff9800;
+    border-color: #ff9800;
+    cursor: not-allowed;
+    opacity: 0.8;
+    animation: pulseReserved 2s infinite;
+}
+
+.seat-label.reserved .seat-number {
+    color: #ffffff;
+}
+
+@keyframes pulseReserved {
+    0%, 100% {
+        opacity: 0.8;
+        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7);
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 0 8px rgba(255, 152, 0, 0);
+    }
+}
+
 /* Couple Seat (Ghế đôi) */
 .couple-seat-row {
     margin-top: 1rem;
@@ -3443,6 +3737,11 @@ body.dark-bg {
     background-color: #28a745;
 }
 
+.legend-seat.reserved {
+    background-color: #ff9800;
+    border-color: #ff9800;
+}
+
 .legend-seat.booked {
     background-color: #dc3545;
 }
@@ -3480,6 +3779,73 @@ body.dark-bg {
     font-weight: bold;
     color: #f5c518;
     text-shadow: 0 2px 10px rgba(245, 197, 24, 0.3);
+}
+
+/* Email Input Container for Booking Page */
+.email-input-container-booking {
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 2px solid rgba(245, 197, 24, 0.3);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.email-input-container-booking .form-group {
+    margin-bottom: 0;
+}
+
+.email-input-container-booking .form-label-booking {
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.email-input-container-booking .form-label-booking .required {
+    color: #f5c518;
+}
+
+.email-input-container-booking .form-control-booking {
+    background-color: #0a0a0a;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 0.875rem 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.email-input-container-booking .form-control-booking::placeholder {
+    color: #666;
+}
+
+.email-input-container-booking .form-control-booking:focus {
+    outline: none;
+    border-color: #f5c518;
+    box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.2);
+    background-color: #141414;
+}
+
+.email-input-container-booking .form-text-booking {
+    color: #b3b3b3;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: block;
 }
 
 /* Submit Button */

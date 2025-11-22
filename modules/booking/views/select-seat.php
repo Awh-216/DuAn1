@@ -67,7 +67,24 @@ $title = 'Chọn Ghế';
                     <p>Tổng tiền: <span id="total-price">0</span> đ</p>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-large" id="submit-btn" disabled>Đặt vé</button>
+                <div class="email-input-container" id="email-container" style="display: none;">
+                    <div class="form-group">
+                        <label for="customer_email" class="form-label">
+                            <i class="fas fa-envelope"></i> Email nhận vé <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            id="customer_email" 
+                            name="customer_email" 
+                            class="form-control" 
+                            placeholder="Nhập email của bạn để nhận vé"
+                            required
+                        >
+                        <small class="form-text">Vé và QR code sẽ được gửi đến email này sau khi thanh toán</small>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-large" id="submit-btn" disabled>Thanh toán</button>
             </form>
         </div>
     </div>
@@ -92,10 +109,14 @@ document.addEventListener('DOMContentLoaded', function() {
             .filter(cb => cb.checked)
             .map(cb => cb.value);
         
+        const emailContainer = document.getElementById('email-container');
+        const emailInput = document.getElementById('customer_email');
+        
         if (selected.length > 0) {
             selectedSeatsSpan.textContent = selected.join(', ');
             totalPriceSpan.textContent = (selected.length * pricePerSeat).toLocaleString('vi-VN');
             submitBtn.disabled = false;
+            emailContainer.style.display = 'block';
             
             // Update visual
             checkboxes.forEach(cb => {
@@ -110,6 +131,8 @@ document.addEventListener('DOMContentLoaded', function() {
             selectedSeatsSpan.textContent = 'Chưa chọn';
             totalPriceSpan.textContent = '0';
             submitBtn.disabled = true;
+            emailContainer.style.display = 'none';
+            emailInput.value = '';
             
             checkboxes.forEach(cb => {
                 cb.closest('label').classList.remove('selected');

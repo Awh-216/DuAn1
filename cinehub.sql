@@ -674,6 +674,28 @@ INSERT INTO `tickets` (`id`, `user_id`, `showtime_id`, `seat`, `qr_code`, `price
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `seat_reservations`
+--
+
+CREATE TABLE `seat_reservations` (
+  `id` int(11) NOT NULL,
+  `showtime_id` int(11) NOT NULL,
+  `seat` varchar(10) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `session_id` varchar(255) NOT NULL,
+  `reserved_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `expires_at` timestamp NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `seat_reservations`
+--
+
+-- Bảng này không có dữ liệu mẫu, chỉ lưu trạng thái ghế đang được chọn tạm thời
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `transactions`
 --
 
@@ -943,7 +965,21 @@ ALTER TABLE `theater_screens`
 ALTER TABLE `tickets`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_user` (`user_id`),
-  ADD KEY `idx_showtime` (`showtime_id`);
+  ADD KEY `idx_showtime` (`showtime_id`),
+  ADD KEY `idx_showtime_status` (`showtime_id`, `status`),
+  ADD KEY `idx_user_showtime` (`user_id`, `showtime_id`),
+  ADD KEY `idx_showtime_seat_status` (`showtime_id`, `seat`, `status`);
+
+--
+-- Chỉ mục cho bảng `seat_reservations`
+--
+ALTER TABLE `seat_reservations`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_seat_reservation` (`showtime_id`, `seat`),
+  ADD KEY `idx_showtime_seat` (`showtime_id`, `seat`),
+  ADD KEY `idx_expires_at` (`expires_at`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_active_reservations` (`showtime_id`, `expires_at`);
 
 --
 -- Chỉ mục cho bảng `transactions`
@@ -1091,6 +1127,12 @@ ALTER TABLE `tickets`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT cho bảng `seat_reservations`
+--
+ALTER TABLE `seat_reservations`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT cho bảng `transactions`
 --
 ALTER TABLE `transactions`
@@ -1200,6 +1242,13 @@ ALTER TABLE `theater_screens`
 ALTER TABLE `tickets`
   ADD CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `tickets_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `seat_reservations`
+--
+ALTER TABLE `seat_reservations`
+  ADD CONSTRAINT `fk_seat_reservations_showtime` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_seat_reservations_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `transactions`

@@ -53,9 +53,15 @@ class Controller {
             return null;
         }
         
-        require_once __DIR__ . '/../modules/user/UserModel.php';
-        $userModel = new UserModel();
-        return $userModel->getById($_SESSION['user_id']);
+        try {
+            require_once __DIR__ . '/../modules/user/UserModel.php';
+            $userModel = new UserModel();
+            $user = $userModel->getById($_SESSION['user_id']);
+            return $user ? $user : null;
+        } catch (Exception $e) {
+            error_log("Error getting current user: " . $e->getMessage());
+            return null;
+        }
     }
     
     protected function requireLogin() {
