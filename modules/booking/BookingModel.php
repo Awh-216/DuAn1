@@ -22,6 +22,19 @@ class BookingModel {
                                    [$movie_id, $today]);
     }
     
+    public function getMoviesByTheater($theater_id) {
+        $today = date('Y-m-d');
+        return $this->db->fetchAll("SELECT DISTINCT m.*, c.name as category_name 
+                                   FROM movies m 
+                                   LEFT JOIN categories c ON m.category_id = c.id
+                                   INNER JOIN showtimes s ON m.id = s.movie_id 
+                                   WHERE s.theater_id = ? 
+                                   AND m.status = 'Chiếu rạp'
+                                   AND s.show_date >= ?
+                                   ORDER BY m.title", 
+                                   [$theater_id, $today]);
+    }
+    
     public function getShowtimes($movie_id, $theater_id, $date) {
         $today = date('Y-m-d');
         $currentTime = date('H:i:s');

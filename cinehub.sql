@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th10 19, 2025 lúc 04:46 AM
--- Phiên bản máy phục vụ: 10.4.32-MariaDB
--- Phiên bản PHP: 8.2.12
+-- Host: 127.0.0.1:3306
+-- Generation Time: Nov 24, 2025 at 05:25 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `cinehub`
+-- Database: `cinehub`
 --
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `admin_logs`
+-- Table structure for table `admin_logs`
 --
 
 CREATE TABLE `admin_logs` (
@@ -42,7 +42,7 @@ CREATE TABLE `admin_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `admin_logs`
+-- Dumping data for table `admin_logs`
 --
 
 INSERT INTO `admin_logs` (`id`, `user_id`, `action`, `module`, `target_type`, `target_id`, `old_data`, `new_data`, `ip_address`, `user_agent`, `created_at`) VALUES
@@ -58,7 +58,7 @@ INSERT INTO `admin_logs` (`id`, `user_id`, `action`, `module`, `target_type`, `t
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `categories`
+-- Table structure for table `categories`
 --
 
 CREATE TABLE `categories` (
@@ -68,7 +68,7 @@ CREATE TABLE `categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `categories`
+-- Dumping data for table `categories`
 --
 
 INSERT INTO `categories` (`id`, `name`, `parent_id`) VALUES
@@ -86,7 +86,7 @@ INSERT INTO `categories` (`id`, `name`, `parent_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `comments`
+-- Table structure for table `comments`
 --
 
 CREATE TABLE `comments` (
@@ -101,7 +101,7 @@ CREATE TABLE `comments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `comments`
+-- Dumping data for table `comments`
 --
 
 INSERT INTO `comments` (`id`, `user_id`, `movie_id`, `parent_id`, `content`, `status`, `created_at`, `updated_at`) VALUES
@@ -116,7 +116,7 @@ INSERT INTO `comments` (`id`, `user_id`, `movie_id`, `parent_id`, `content`, `st
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `coupons`
+-- Table structure for table `coupons`
 --
 
 CREATE TABLE `coupons` (
@@ -136,7 +136,7 @@ CREATE TABLE `coupons` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `coupons`
+-- Dumping data for table `coupons`
 --
 
 INSERT INTO `coupons` (`id`, `code`, `name`, `type`, `value`, `min_amount`, `max_discount`, `usage_limit`, `used_count`, `valid_from`, `valid_to`, `status`, `created_at`) VALUES
@@ -149,7 +149,7 @@ INSERT INTO `coupons` (`id`, `code`, `name`, `type`, `value`, `min_amount`, `max
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `episodes`
+-- Table structure for table `episodes`
 --
 
 CREATE TABLE `episodes` (
@@ -166,19 +166,20 @@ CREATE TABLE `episodes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `episodes`
+-- Dumping data for table `episodes`
 --
 
 INSERT INTO `episodes` (`id`, `movie_id`, `episode_number`, `title`, `video_url`, `thumbnail`, `duration`, `description`, `created_at`, `updated_at`) VALUES
 (1, 8, 1, 'Tập 1', 'data/phim/phimbo/gameofthrones', NULL, NULL, NULL, '2025-11-19 02:21:55', '2025-11-19 02:21:55'),
 (2, 8, 2, 'Tập 2', 'data/phim/phimbo/gameofthrones', NULL, NULL, NULL, '2025-11-19 02:21:55', '2025-11-19 02:21:55'),
 (3, 8, 3, 'Tập 3', 'data/phim/phimbo/gameofthrones', NULL, NULL, NULL, '2025-11-19 02:21:55', '2025-11-19 02:21:55'),
-(4, 8, 4, 'Tập 4', 'data/phim/phimbo/gameofthrones', NULL, NULL, NULL, '2025-11-19 02:21:55', '2025-11-19 02:21:55');
+(4, 8, 4, 'Tập 4', 'data/phim/phimbo/gameofthrones', NULL, NULL, NULL, '2025-11-19 02:21:55', '2025-11-19 02:21:55'),
+(5, 29, 1, 'tập 1', 'data/phim/phimbo/venhadicon', NULL, NULL, NULL, '2025-11-25 03:19:46', '2025-11-24 03:28:37');
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `movies`
+-- Table structure for table `movies`
 --
 
 CREATE TABLE `movies` (
@@ -208,7 +209,7 @@ CREATE TABLE `movies` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `movies`
+-- Dumping data for table `movies`
 --
 
 INSERT INTO `movies` (`id`, `title`, `category_id`, `level`, `duration`, `description`, `director`, `actors`, `video_url`, `trailer_url`, `thumbnail`, `status`, `rating`, `created_at`, `status_admin`, `publish_date`, `geo_restriction`, `drm_enabled`, `banner`, `country`, `language`, `age_rating`, `type`) VALUES
@@ -228,12 +229,32 @@ INSERT INTO `movies` (`id`, `title`, `category_id`, `level`, `duration`, `descri
 (14, 'Sherlock', 1, 'Gold', 90, 'Phiên bản hiện đại của các câu chuyện điều tra nổi tiếng của Sir Arthur Conan Doyle, với Sherlock Holmes và Dr. John Watson giải quyết các vụ án ở London thế kỷ 21.', 'Mark Gatiss, Steven Moffat', 'Benedict Cumberbatch, Martin Freeman, Rupert Graves, Mark Gatiss', 'data/phim/phimbo/sherlock', 'https://example.com/sherlock-trailer.mp4', 'data/img/sherlock.png', 'Chiếu online', 9.1, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Anh', 'Tiếng Anh', 'TV-14', 'phimbo'),
 (15, 'The Office', 3, 'Silver', 22, 'Một mockumentary về nhóm nhân viên văn phòng hàng ngày tại văn phòng chi nhánh Scranton của công ty giấy Dunder Mifflin.', 'Greg Daniels', 'Steve Carell, Rainn Wilson, John Krasinski, Jenna Fischer', 'data/phim/phimbo/the_office', 'https://example.com/the-office-trailer.mp4', 'data/img/the_office.png', 'Chiếu online', 8.9, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
 (16, 'Friends', 3, 'Silver', 22, 'Cuộc sống và tình yêu của sáu người bạn ở Manhattan, New York, khi họ cố gắng tìm ra con đường của mình trong cuộc sống.', 'David Crane, Marta Kauffman', 'Jennifer Aniston, Courteney Cox, Lisa Kudrow, Matt LeBlanc, Matthew Perry, David Schwimmer', 'data/phim/phimbo/friends', 'https://example.com/friends-trailer.mp4', 'data/img/friends.jpg', 'Chiếu online', 9, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
-(17, 'The Witcher', 7, 'Premium', 60, 'Geralt of Rivia, một thợ săn quái vật đột biến đi khắp đất liền để tìm nơi thuộc về mình trong một thế giới nơi con người thường tồi tệ hơn quái vật.', 'Lauren Schmidt Hissrich', 'Henry Cavill, Anya Chalotra, Freya Allan, Joey Batey', 'data/phim/phimbo/the_witcher', 'https://example.com/the-witcher-trailer.mp4', 'data/img/the_witcher.jpg', 'Chiếu online', 8.2, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ/ Ba Lan', 'Tiếng Anh', 'TV-MA', 'phimbo');
+(17, 'The Witcher', 7, 'Premium', 60, 'Geralt of Rivia, một thợ săn quái vật đột biến đi khắp đất liền để tìm nơi thuộc về mình trong một thế giới nơi con người thường tồi tệ hơn quái vật.', 'Lauren Schmidt Hissrich', 'Henry Cavill, Anya Chalotra, Freya Allan, Joey Batey', 'data/phim/phimbo/the_witcher', 'https://example.com/the-witcher-trailer.mp4', 'data/img/the_witcher.jpg', 'Chiếu online', 8.2, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ/ Ba Lan', 'Tiếng Anh', 'TV-MA', 'phimbo'),
+(18, 'Hai Phượng', 1, 'Premium', 98, 'Mẹ đơn thân từng là dân giang hồ phải chiến đấu với băng nhóm bắt cóc con gái mình.', 'Lê Văn Kiệt', 'Ngô Thanh Vân, Mai Cát Vi', 'data/phim/phimle/hai_phuong.mp4', 'https://example.com/hai-phuong-trailer.mp4', 'data/img/hai_phuong.jpg', 'Chiếu rạp', 7.5, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
+(19, 'Mắt Biếc', 2, 'Gold', 117, 'Câu chuyện tình đơn phương lãng mạn và đầy hoài niệm ở thập niên 70.', 'Victor Vũ', 'Trần Nghĩa, Trúc Anh, Trần Phong', 'data/phim/phimle/mat_biec.mp4', 'https://example.com/mat-biec-trailer.mp4', 'data/img/mat_biec.jpg', 'Chiếu rạp', 8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
+(20, 'Bố Già', 3, 'Premium', 128, 'Phim về tình cha con đầy cảm xúc và những mâu thuẫn trong gia đình.', 'Trấn Thành, Vũ Ngọc Đãng', 'Trấn Thành, Lê Giang, Tuấn Trần', 'data/phim/phimle/bo_gia.mp4', 'https://example.com/bo-gia-trailer.mp4', 'data/img/bo_gia.jpg', 'Chiếu rạp', 8.5, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
+(21, 'Tiệc Trăng Máu', 3, 'Gold', 100, 'Bảy người bạn cùng chơi một trò chơi công khai tin nhắn và cuộc gọi điện thoại, dẫn đến những bí mật bị phanh phui.', 'Nguyễn Quang Dũng', 'Thái Hòa, Thu Trang, Hồng Ánh, Hứa Vĩ Văn', 'data/phim/phimle/tiec_trang_mau.mp4', 'https://example.com/tiec-trang-mau-trailer.mp4', 'data/img/tiec_trang_mau.jpg', 'Chiếu rạp', 7.8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
+(22, 'Lật Mặt 4: Nhà Có Khách', 4, 'Silver', 90, 'Phim hài kinh dị với những tình huống dở khóc dở cười và yếu tố ma quái.', 'Lý Hải', 'Lý Hải, Katleen Phan Võ, Huy Khánh', 'data/phim/phimle/lat_mat_4.mp4', 'https://example.com/lat-mat-4-trailer.mp4', 'data/img/lat_mat_4.jpg', 'Chiếu rạp', 7, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
+(23, 'Em Chưa 18', 3, 'Free', 95, 'Chuyện tình hài hước giữa một cô gái tuổi teen và một chàng trai đã trưởng thành.', 'Lê Thanh Sơn', 'Kaity Nguyễn, Kiều Minh Tuấn', 'data/phim/phimle/em_chua_18.mp4', 'https://example.com/em-chua-18-trailer.mp4', 'data/img/em_chua_18.jpg', 'Chiếu rạp', 7.2, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
+(24, 'Chị Trợ Lý Của Anh', 2, 'Gold', 105, 'Giám đốc trẻ phải thuê một cô trợ lý bí ẩn để cứu công ty của mình.', 'Lý Minh Thắng', 'Mỹ Tâm, Mai Tài Phến', 'data/phim/phimle/chi_tro_ly_cua_anh.mp4', 'https://example.com/chi-tro-ly-cua-anh-trailer.mp4', 'data/img/chi_tro_ly_cua_anh.jpg', 'Chiếu online', 6.8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
+(25, 'Gái Già Lắm Chiêu 3', 3, 'Premium', 108, 'Cuộc chiến mẹ chồng nàng dâu đầy xa hoa và kịch tính ở Huế.', 'Nam Cito, Bảo Nhân', 'Ninh Dương Lan Ngọc, Lê Khanh, Hồng Vân', 'data/phim/phimle/gai_gia_lam_chieu_3.mp4', 'https://example.com/gai-gia-lam-chieu-3-trailer.mp4', 'data/img/gai_gia_lam_chieu_3.jpg', 'Chiếu rạp', 7.4, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
+(26, 'Quỳnh Hoa Nhất Dạ', 7, 'Premium', 120, 'Phim cổ trang, dã sử về cuộc đời đầy sóng gió của Thái hậu Dương Vân Nga.', 'Lý Minh Thắng', 'Nhã Phương, Thuý Ngân, Lương Thế Thành', 'data/phim/phimle/quynh_hoa_nhat_da.mp4', 'https://example.com/quynh-hoa-nhat-da-trailer.mp4', 'data/img/quynh_hoa_nhat_da.jpg', 'Chiếu rạp', 7.7, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
+(27, 'Tấm Cám: Chuyện Chưa Kể', 5, 'Gold', 116, 'Phiên bản cải biên của truyện cổ tích Tấm Cám, kết hợp yếu tố giả tưởng và hành động.', 'Ngô Thanh Vân', 'Hạ Vi, Isaac, Ngô Thanh Vân', 'data/phim/phimle/tam_cam.mp4', 'https://example.com/tam-cam-trailer.mp4', 'data/img/tam_cam.jpg', 'Chiếu rạp', 7.1, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
+(28, 'Hương Vị Tình Thân (Phần 1)', 2, 'Free', 45, 'Phim truyền hình về cuộc đời đầy thử thách của Phương Nam, người luôn khát khao tình cảm gia đình.', 'Nguyễn Danh Dũng', 'Phương Oanh, Mạnh Trường, Công Lý', 'data/phim/phimbo/huong_vi_tinh_than_p1', 'https://example.com/hvtt-trailer.mp4', 'data/img/huong_vi_tinh_than_p1.jpg', 'Chiếu online', 8.4, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
+(29, 'Về Nhà Đi Con', 2, 'Gold', 45, 'Phim về tình cảm gia đình, đặc biệt là tình cha và ba cô con gái có tính cách khác nhau.', 'Nguyễn Danh Dũng', 'NSND Hoàng Dũng, Thu Quỳnh, Bảo Thanh, Bảo Hân', 'data/phim/phimbo/venhadicon', 'https://example.com/vndc-trailer.mp4', 'data/img/venhadicon.jpg', 'Chiếu online', 9, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
+(30, 'Người Phán Xử', 1, 'Premium', 45, 'Ông trùm Phan Quân và những cuộc chiến tranh giành quyền lực trong thế giới ngầm.', 'Nguyễn Mai Hiền, Nguyễn Khải Anh, Bùi Quốc Việt', 'NSND Hoàng Dũng, Việt Anh, Hồng Đăng', 'data/phim/phimbo/nguoi_phan_xu', 'https://example.com/npx-trailer.mp4', 'data/img/nguoi_phan_xu.jpg', 'Chiếu online', 8.7, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C18', 'phimbo'),
+(31, 'Sống Chung Với Mẹ Chồng', 2, 'Gold', 45, 'Những mâu thuẫn nảy sinh khi nàng dâu và mẹ chồng sống chung dưới một mái nhà.', 'Vũ Trường Khoa', 'NSND Lan Hương, Bảo Thanh, Anh Dũng', 'data/phim/phimbo/song_chung_voi_me_chong', 'https://example.com/scvmc-trailer.mp4', 'data/img/song_chung_voi_me_chong.jpg', 'Chiếu online', 8.1, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
+(32, 'Thương Ngày Nắng Về (Phần 2)', 2, 'Premium', 45, 'Câu chuyện về bà mẹ đơn thân cùng ba cô con gái, xoay quanh tình yêu, sự nghiệp và những mâu thuẫn.', 'Bùi Tiến Huy', 'NSƯT Thanh Quý, Phan Minh Huyền, Lan Phương', 'data/phim/phimbo/thuong_ngay_nang_ve_p2', 'https://example.com/tnnv-trailer.mp4', 'data/img/thuong_ngay_nang_ve_p2.jpg', 'Chiếu online', 8.5, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
+(33, 'Phim ngắn: 20 Năm 20 Món Ăn', 5, 'Free', 15, 'Loạt phim ngắn ẩm thực về hành trình tìm kiếm hương vị đã mất sau 20 năm xa quê.', 'Nguyễn Hoàng Điệp', 'Nhiều diễn viên', 'data/phim/phimle/20_nam_20_mon_an.mp4', 'https://example.com/20nam-trailer.mp4', 'data/img/20_nam_20_mon_an.jpg', 'Chiếu online', 7, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimle'),
+(34, 'Series: Ai Là Hung Thủ (Mùa 1)', 1, 'Gold', 40, 'Series trinh thám điều tra các vụ án mạng phức tạp tại thành phố Hồ Chí Minh.', 'Lý Hải (Đóng vai trò sản xuất)', 'Trương Thế Vinh, Nhan Phúc Vinh', 'data/phim/phimbo/ai_la_hung_thu_s1', 'https://example.com/alht-trailer.mp4', 'data/img/ai_la_hung_thu_s1.jpg', 'Chiếu online', 7.9, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimbo'),
+(35, 'Phim lẻ: Cô Ba Sài Gòn', 2, 'Premium', 94, 'Phim lãng mạn, giả tưởng về thời trang áo dài và câu chuyện xuyên không giữa hai thế hệ.', 'Trần Bửu Lộc, Nguyễn Lê Minh', 'Ninh Dương Lan Ngọc, Diễm My 9x, Ngô Thanh Vân', 'data/phim/phimle/co_ba_sai_gon.mp4', 'https://example.com/cbsg-trailer.mp4', 'data/img/co_ba_sai_gon.jpg', 'Chiếu online', 7.6, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
+(36, 'Series: Tình Yêu và Tham Vọng', 7, 'Gold', 45, 'Phim thương trường với những cuộc chiến khốc liệt giữa các tập đoàn và câu chuyện tình yêu phức tạp.', 'Bùi Tiến Huy', 'Nhan Phúc Vinh, Diễm My 9x, Lã Thanh Huyền', 'data/phim/phimbo/tinh_yeu_va_tham_vong', 'https://example.com/tyvtc-trailer.mp4', 'data/img/tinh_yeu_va_tham_vong.jpg', 'Chiếu online', 7.8, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
+(37, 'Phim ngắn: Ngã Ba Đồng Lộc', 7, 'Free', 30, 'Phim tài liệu/chiến tranh về sự hy sinh anh dũng của 10 cô gái thanh niên xung phong.', 'Nguyễn Minh Chung', 'Nhiều diễn viên', 'data/phim/phimle/nga_ba_dong_loc.mp4', 'https://example.com/nbdl-trailer.mp4', 'data/img/nga_ba_dong_loc.jpg', 'Chiếu online', 8.2, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimle');
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `permissions`
+-- Table structure for table `permissions`
 --
 
 CREATE TABLE `permissions` (
@@ -245,7 +266,7 @@ CREATE TABLE `permissions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `permissions`
+-- Dumping data for table `permissions`
 --
 
 INSERT INTO `permissions` (`id`, `name`, `description`, `module`, `created_at`) VALUES
@@ -280,7 +301,7 @@ INSERT INTO `permissions` (`id`, `name`, `description`, `module`, `created_at`) 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `promotions`
+-- Table structure for table `promotions`
 --
 
 CREATE TABLE `promotions` (
@@ -297,7 +318,7 @@ CREATE TABLE `promotions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `promotions`
+-- Dumping data for table `promotions`
 --
 
 INSERT INTO `promotions` (`id`, `name`, `description`, `type`, `discount_value`, `start_date`, `end_date`, `status`, `target_audience`, `created_at`) VALUES
@@ -310,7 +331,7 @@ INSERT INTO `promotions` (`id`, `name`, `description`, `type`, `discount_value`,
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `reviews`
+-- Table structure for table `reviews`
 --
 
 CREATE TABLE `reviews` (
@@ -324,7 +345,7 @@ CREATE TABLE `reviews` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `reviews`
+-- Dumping data for table `reviews`
 --
 
 INSERT INTO `reviews` (`id`, `user_id`, `movie_id`, `rating`, `comment`, `created_at`, `is_pinned`) VALUES
@@ -340,7 +361,7 @@ INSERT INTO `reviews` (`id`, `user_id`, `movie_id`, `rating`, `comment`, `create
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `roles`
+-- Table structure for table `roles`
 --
 
 CREATE TABLE `roles` (
@@ -351,7 +372,7 @@ CREATE TABLE `roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `roles`
+-- Dumping data for table `roles`
 --
 
 INSERT INTO `roles` (`id`, `name`, `description`, `created_at`) VALUES
@@ -364,7 +385,7 @@ INSERT INTO `roles` (`id`, `name`, `description`, `created_at`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `role_permissions`
+-- Table structure for table `role_permissions`
 --
 
 CREATE TABLE `role_permissions` (
@@ -375,7 +396,7 @@ CREATE TABLE `role_permissions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `role_permissions`
+-- Dumping data for table `role_permissions`
 --
 
 INSERT INTO `role_permissions` (`id`, `role_id`, `permission_id`, `created_at`) VALUES
@@ -410,7 +431,23 @@ INSERT INTO `role_permissions` (`id`, `role_id`, `permission_id`, `created_at`) 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `showtimes`
+-- Table structure for table `seat_reservations`
+--
+
+CREATE TABLE `seat_reservations` (
+  `id` int(11) NOT NULL,
+  `showtime_id` int(11) NOT NULL,
+  `seat` varchar(10) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `session_id` varchar(255) NOT NULL,
+  `reserved_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `expires_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `showtimes`
 --
 
 CREATE TABLE `showtimes` (
@@ -425,85 +462,239 @@ CREATE TABLE `showtimes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `showtimes`
+-- Dumping data for table `showtimes`
 --
 
 INSERT INTO `showtimes` (`id`, `movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `created_at`, `screen_id`) VALUES
-(1, 1, 1, '2025-11-15', '10:00:00', 120000.00, '2025-11-12 07:41:09', 1),
-(2, 1, 1, '2025-11-15', '13:30:00', 120000.00, '2025-11-12 07:41:09', 1),
-(3, 2, 2, '2025-11-15', '15:00:00', 100000.00, '2025-11-12 07:41:09', 3),
-(4, 3, 3, '2025-11-16', '18:00:00', 110000.00, '2025-11-12 07:41:09', 5),
-(5, 4, 4, '2025-11-16', '20:30:00', 115000.00, '2025-11-12 07:41:09', 7),
-(6, 5, 5, '2025-11-17', '09:30:00', 90000.00, '2025-11-12 07:41:09', 8),
-(7, 6, 1, '2025-11-17', '14:00:00', 130000.00, '2025-11-12 07:41:09', 2),
-(8, 1, 1, '2025-11-13', '10:00:00', 120000.00, '2025-11-13 13:57:24', 1),
-(9, 1, 1, '2025-11-13', '13:30:00', 120000.00, '2025-11-13 13:57:24', 1),
-(10, 1, 1, '2025-11-13', '16:00:00', 120000.00, '2025-11-13 13:57:24', 1),
-(11, 1, 1, '2025-11-13', '19:00:00', 140000.00, '2025-11-13 13:57:24', 1),
-(12, 1, 2, '2025-11-13', '11:00:00', 120000.00, '2025-11-13 13:57:24', 2),
-(13, 1, 2, '2025-11-13', '14:30:00', 120000.00, '2025-11-13 13:57:24', 2),
-(14, 1, 2, '2025-11-13', '17:30:00', 120000.00, '2025-11-13 13:57:24', 2),
-(15, 2, 1, '2025-11-13', '09:30:00', 100000.00, '2025-11-13 13:57:24', 3),
-(16, 2, 1, '2025-11-13', '12:00:00', 100000.00, '2025-11-13 13:57:24', 3),
-(17, 2, 1, '2025-11-13', '15:00:00', 100000.00, '2025-11-13 13:57:24', 3),
-(18, 2, 1, '2025-11-13', '18:30:00', 120000.00, '2025-11-13 13:57:24', 3),
-(19, 2, 3, '2025-11-13', '10:30:00', 100000.00, '2025-11-13 13:57:24', 4),
-(20, 2, 3, '2025-11-13', '13:00:00', 100000.00, '2025-11-13 13:57:24', 4),
-(21, 2, 3, '2025-11-13', '16:30:00', 100000.00, '2025-11-13 13:57:24', 4),
-(22, 3, 2, '2025-11-13', '11:30:00', 110000.00, '2025-11-13 13:57:24', 5),
-(23, 3, 2, '2025-11-13', '14:00:00', 110000.00, '2025-11-13 13:57:24', 5),
-(24, 3, 2, '2025-11-13', '17:00:00', 110000.00, '2025-11-13 13:57:24', 5),
-(25, 3, 4, '2025-11-13', '12:30:00', 110000.00, '2025-11-13 13:57:24', 6),
-(26, 3, 4, '2025-11-13', '15:30:00', 110000.00, '2025-11-13 13:57:24', 6),
-(27, 3, 4, '2025-11-13', '19:30:00', 130000.00, '2025-11-13 13:57:24', 6),
-(28, 4, 3, '2025-11-13', '10:00:00', 115000.00, '2025-11-13 13:57:24', 7),
-(29, 4, 3, '2025-11-13', '13:30:00', 115000.00, '2025-11-13 13:57:24', 7),
-(30, 4, 3, '2025-11-13', '17:00:00', 115000.00, '2025-11-13 13:57:24', 7),
-(31, 4, 5, '2025-11-13', '11:00:00', 115000.00, '2025-11-13 13:57:24', 8),
-(32, 4, 5, '2025-11-13', '14:30:00', 115000.00, '2025-11-13 13:57:24', 8),
-(33, 4, 5, '2025-11-13', '18:00:00', 115000.00, '2025-11-13 13:57:24', 8),
-(34, 5, 1, '2025-11-13', '09:00:00', 90000.00, '2025-11-13 13:57:24', 4),
-(35, 5, 1, '2025-11-13', '12:30:00', 90000.00, '2025-11-13 13:57:24', 4),
-(36, 5, 1, '2025-11-13', '16:00:00', 90000.00, '2025-11-13 13:57:24', 4),
-(37, 5, 2, '2025-11-13', '10:00:00', 90000.00, '2025-11-13 13:57:24', 3),
-(38, 5, 2, '2025-11-13', '13:00:00', 90000.00, '2025-11-13 13:57:24', 3),
-(39, 5, 2, '2025-11-13', '16:30:00', 90000.00, '2025-11-13 13:57:24', 3),
-(40, 1, 1, '2025-11-14', '10:00:00', 120000.00, '2025-11-13 13:57:24', 1),
-(41, 1, 1, '2025-11-14', '13:30:00', 120000.00, '2025-11-13 13:57:24', 1),
-(42, 1, 1, '2025-11-14', '16:00:00', 120000.00, '2025-11-13 13:57:24', 1),
-(43, 1, 1, '2025-11-14', '19:00:00', 140000.00, '2025-11-13 13:57:24', 1),
-(44, 2, 2, '2025-11-14', '11:00:00', 100000.00, '2025-11-13 13:57:24', 2),
-(45, 2, 2, '2025-11-14', '14:30:00', 100000.00, '2025-11-13 13:57:24', 2),
-(46, 2, 2, '2025-11-14', '17:30:00', 100000.00, '2025-11-13 13:57:24', 2),
-(47, 3, 3, '2025-11-14', '10:30:00', 110000.00, '2025-11-13 13:57:24', 3),
-(48, 3, 3, '2025-11-14', '13:00:00', 110000.00, '2025-11-13 13:57:24', 3),
-(49, 3, 3, '2025-11-14', '16:30:00', 110000.00, '2025-11-13 13:57:24', 3),
-(50, 4, 4, '2025-11-14', '12:00:00', 115000.00, '2025-11-13 13:57:24', 4),
-(51, 4, 4, '2025-11-14', '15:00:00', 115000.00, '2025-11-13 13:57:24', 4),
-(52, 4, 4, '2025-11-14', '18:30:00', 115000.00, '2025-11-13 13:57:24', 4),
-(53, 5, 5, '2025-11-14', '09:30:00', 90000.00, '2025-11-13 13:57:24', 5),
-(54, 5, 5, '2025-11-14', '12:00:00', 90000.00, '2025-11-13 13:57:24', 5),
-(55, 5, 5, '2025-11-14', '15:30:00', 90000.00, '2025-11-13 13:57:24', 5),
-(56, 1, 1, '2025-11-15', '10:00:00', 120000.00, '2025-11-13 13:57:24', 1),
-(57, 1, 2, '2025-11-15', '13:30:00', 120000.00, '2025-11-13 13:57:24', 2),
-(58, 2, 3, '2025-11-15', '15:00:00', 100000.00, '2025-11-13 13:57:24', 3),
-(59, 3, 4, '2025-11-15', '18:00:00', 110000.00, '2025-11-13 13:57:24', 4),
-(60, 4, 5, '2025-11-15', '20:30:00', 115000.00, '2025-11-13 13:57:24', 5),
-(61, 5, 1, '2025-11-16', '09:30:00', 90000.00, '2025-11-13 13:57:24', 1),
-(62, 1, 2, '2025-11-16', '14:00:00', 120000.00, '2025-11-13 13:57:24', 2),
-(63, 2, 3, '2025-11-17', '16:00:00', 100000.00, '2025-11-13 13:57:24', 3),
-(64, 3, 4, '2025-11-17', '19:00:00', 110000.00, '2025-11-13 13:57:24', 4),
-(65, 4, 5, '2025-11-18', '11:00:00', 115000.00, '2025-11-13 13:57:24', 5),
-(66, 5, 1, '2025-11-18', '13:30:00', 90000.00, '2025-11-13 13:57:24', 1),
-(67, 1, 2, '2025-11-19', '15:30:00', 120000.00, '2025-11-13 13:57:24', 2),
-(68, 2, 3, '2025-11-19', '17:30:00', 100000.00, '2025-11-13 13:57:24', 3),
-(69, 3, 4, '2025-11-20', '18:30:00', 110000.00, '2025-11-13 13:57:24', 4),
-(70, 4, 5, '2025-11-20', '20:00:00', 115000.00, '2025-11-13 13:57:24', 5);
+(71, 1, 1, '2025-11-24', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(72, 2, 2, '2025-11-24', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(73, 3, 3, '2025-11-24', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(74, 4, 4, '2025-11-24', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(75, 5, 5, '2025-11-24', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(76, 1, 2, '2025-11-24', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(77, 2, 3, '2025-11-24', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(78, 3, 4, '2025-11-24', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(79, 4, 5, '2025-11-24', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(80, 5, 1, '2025-11-24', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(81, 1, 3, '2025-11-24', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(82, 2, 4, '2025-11-24', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(83, 3, 5, '2025-11-24', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(84, 4, 1, '2025-11-24', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(85, 5, 2, '2025-11-24', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(86, 1, 4, '2025-11-24', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(87, 2, 5, '2025-11-24', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(88, 3, 1, '2025-11-24', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(89, 4, 2, '2025-11-24', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(90, 5, 3, '2025-11-24', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(91, 1, 5, '2025-11-24', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
+(92, 2, 1, '2025-11-24', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
+(93, 3, 2, '2025-11-24', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
+(94, 4, 3, '2025-11-24', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
+(95, 5, 4, '2025-11-24', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
+(96, 1, 1, '2025-11-24', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
+(97, 2, 2, '2025-11-24', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
+(98, 3, 3, '2025-11-24', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
+(99, 4, 4, '2025-11-24', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
+(100, 5, 5, '2025-11-24', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
+(101, 1, 1, '2025-11-25', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(102, 2, 2, '2025-11-25', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(103, 3, 3, '2025-11-25', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(104, 4, 4, '2025-11-25', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(105, 5, 5, '2025-11-25', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(106, 1, 2, '2025-11-25', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(107, 2, 3, '2025-11-25', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(108, 3, 4, '2025-11-25', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(109, 4, 5, '2025-11-25', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(110, 5, 1, '2025-11-25', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(111, 1, 3, '2025-11-25', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(112, 2, 4, '2025-11-25', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(113, 3, 5, '2025-11-25', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(114, 4, 1, '2025-11-25', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(115, 5, 2, '2025-11-25', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(116, 1, 4, '2025-11-25', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(117, 2, 5, '2025-11-25', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(118, 3, 1, '2025-11-25', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(119, 4, 2, '2025-11-25', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(120, 5, 3, '2025-11-25', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(121, 1, 5, '2025-11-25', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
+(122, 2, 1, '2025-11-25', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
+(123, 3, 2, '2025-11-25', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
+(124, 4, 3, '2025-11-25', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
+(125, 5, 4, '2025-11-25', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
+(126, 1, 1, '2025-11-25', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
+(127, 2, 2, '2025-11-25', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
+(128, 3, 3, '2025-11-25', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
+(129, 4, 4, '2025-11-25', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
+(130, 5, 5, '2025-11-25', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
+(131, 1, 1, '2025-11-26', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(132, 2, 2, '2025-11-26', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(133, 3, 3, '2025-11-26', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(134, 4, 4, '2025-11-26', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(135, 5, 5, '2025-11-26', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(136, 1, 2, '2025-11-26', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(137, 2, 3, '2025-11-26', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(138, 3, 4, '2025-11-26', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(139, 4, 5, '2025-11-26', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(140, 5, 1, '2025-11-26', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(141, 1, 3, '2025-11-26', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(142, 2, 4, '2025-11-26', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(143, 3, 5, '2025-11-26', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(144, 4, 1, '2025-11-26', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(145, 5, 2, '2025-11-26', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(146, 1, 4, '2025-11-26', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(147, 2, 5, '2025-11-26', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(148, 3, 1, '2025-11-26', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(149, 4, 2, '2025-11-26', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(150, 5, 3, '2025-11-26', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(151, 1, 5, '2025-11-26', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
+(152, 2, 1, '2025-11-26', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
+(153, 3, 2, '2025-11-26', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
+(154, 4, 3, '2025-11-26', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
+(155, 5, 4, '2025-11-26', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
+(156, 1, 1, '2025-11-26', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
+(157, 2, 2, '2025-11-26', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
+(158, 3, 3, '2025-11-26', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
+(159, 4, 4, '2025-11-26', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
+(160, 5, 5, '2025-11-26', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
+(161, 1, 1, '2025-11-27', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(162, 2, 2, '2025-11-27', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(163, 3, 3, '2025-11-27', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(164, 4, 4, '2025-11-27', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(165, 5, 5, '2025-11-27', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(166, 1, 2, '2025-11-27', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(167, 2, 3, '2025-11-27', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(168, 3, 4, '2025-11-27', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(169, 4, 5, '2025-11-27', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(170, 5, 1, '2025-11-27', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(171, 1, 3, '2025-11-27', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(172, 2, 4, '2025-11-27', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(173, 3, 5, '2025-11-27', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(174, 4, 1, '2025-11-27', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(175, 5, 2, '2025-11-27', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(176, 1, 4, '2025-11-27', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(177, 2, 5, '2025-11-27', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(178, 3, 1, '2025-11-27', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(179, 4, 2, '2025-11-27', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(180, 5, 3, '2025-11-27', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(181, 1, 5, '2025-11-27', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
+(182, 2, 1, '2025-11-27', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
+(183, 3, 2, '2025-11-27', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
+(184, 4, 3, '2025-11-27', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
+(185, 5, 4, '2025-11-27', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
+(186, 1, 1, '2025-11-27', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
+(187, 2, 2, '2025-11-27', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
+(188, 3, 3, '2025-11-27', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
+(189, 4, 4, '2025-11-27', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
+(190, 5, 5, '2025-11-27', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
+(191, 1, 1, '2025-11-28', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(192, 2, 2, '2025-11-28', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(193, 3, 3, '2025-11-28', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(194, 4, 4, '2025-11-28', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(195, 5, 5, '2025-11-28', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(196, 1, 2, '2025-11-28', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(197, 2, 3, '2025-11-28', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(198, 3, 4, '2025-11-28', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(199, 4, 5, '2025-11-28', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(200, 5, 1, '2025-11-28', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(201, 1, 3, '2025-11-28', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(202, 2, 4, '2025-11-28', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(203, 3, 5, '2025-11-28', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(204, 4, 1, '2025-11-28', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(205, 5, 2, '2025-11-28', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(206, 1, 4, '2025-11-28', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(207, 2, 5, '2025-11-28', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(208, 3, 1, '2025-11-28', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(209, 4, 2, '2025-11-28', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(210, 5, 3, '2025-11-28', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(211, 1, 5, '2025-11-28', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
+(212, 2, 1, '2025-11-28', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
+(213, 3, 2, '2025-11-28', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
+(214, 4, 3, '2025-11-28', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
+(215, 5, 4, '2025-11-28', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
+(216, 1, 1, '2025-11-28', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
+(217, 2, 2, '2025-11-28', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
+(218, 3, 3, '2025-11-28', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
+(219, 4, 4, '2025-11-28', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
+(220, 5, 5, '2025-11-28', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
+(221, 1, 1, '2025-11-29', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(222, 2, 2, '2025-11-29', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(223, 3, 3, '2025-11-29', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(224, 4, 4, '2025-11-29', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(225, 5, 5, '2025-11-29', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(226, 1, 2, '2025-11-29', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(227, 2, 3, '2025-11-29', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(228, 3, 4, '2025-11-29', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(229, 4, 5, '2025-11-29', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(230, 5, 1, '2025-11-29', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(231, 1, 3, '2025-11-29', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(232, 2, 4, '2025-11-29', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(233, 3, 5, '2025-11-29', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(234, 4, 1, '2025-11-29', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(235, 5, 2, '2025-11-29', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(236, 1, 4, '2025-11-29', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(237, 2, 5, '2025-11-29', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(238, 3, 1, '2025-11-29', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(239, 4, 2, '2025-11-29', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(240, 5, 3, '2025-11-29', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(241, 1, 5, '2025-11-29', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
+(242, 2, 1, '2025-11-29', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
+(243, 3, 2, '2025-11-29', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
+(244, 4, 3, '2025-11-29', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
+(245, 5, 4, '2025-11-29', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
+(246, 1, 1, '2025-11-29', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
+(247, 2, 2, '2025-11-29', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
+(248, 3, 3, '2025-11-29', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
+(249, 4, 4, '2025-11-29', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
+(250, 5, 5, '2025-11-29', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
+(251, 1, 1, '2025-11-30', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(252, 2, 2, '2025-11-30', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(253, 3, 3, '2025-11-30', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(254, 4, 4, '2025-11-30', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(255, 5, 5, '2025-11-30', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(256, 1, 2, '2025-11-30', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(257, 2, 3, '2025-11-30', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(258, 3, 4, '2025-11-30', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(259, 4, 5, '2025-11-30', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(260, 5, 1, '2025-11-30', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(261, 1, 3, '2025-11-30', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(262, 2, 4, '2025-11-30', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(263, 3, 5, '2025-11-30', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(264, 4, 1, '2025-11-30', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(265, 5, 2, '2025-11-30', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(266, 1, 4, '2025-11-30', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(267, 2, 5, '2025-11-30', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(268, 3, 1, '2025-11-30', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(269, 4, 2, '2025-11-30', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(270, 5, 3, '2025-11-30', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(319, 18, 1, '2025-11-25', '10:00:00', 85000.00, '2025-11-24 02:58:07', 1),
+(320, 18, 2, '2025-11-25', '14:30:00', 85000.00, '2025-11-24 02:58:07', 3),
+(321, 18, 3, '2025-11-26', '18:00:00', 95000.00, '2025-11-24 02:58:07', 5),
+(322, 18, 5, '2025-11-26', '21:00:00', 90000.00, '2025-11-24 02:58:07', 8),
+(323, 19, 1, '2025-11-25', '13:00:00', 90000.00, '2025-11-24 02:58:07', 2),
+(324, 19, 3, '2025-11-25', '16:30:00', 100000.00, '2025-11-24 02:58:07', 6),
+(325, 19, 4, '2025-11-26', '10:30:00', 80000.00, '2025-11-24 02:58:07', 7),
+(326, 19, 5, '2025-11-26', '15:00:00', 90000.00, '2025-11-24 02:58:07', 8),
+(327, 20, 2, '2025-11-25', '19:00:00', 95000.00, '2025-11-24 02:58:07', 4),
+(328, 20, 3, '2025-11-25', '22:00:00', 105000.00, '2025-11-24 02:58:07', 5),
+(329, 20, 4, '2025-11-26', '18:00:00', 90000.00, '2025-11-24 02:58:07', 7),
+(330, 21, 5, '2025-11-25', '12:00:00', 90000.00, '2025-11-24 02:58:07', 8),
+(331, 21, 1, '2025-11-26', '14:00:00', 80000.00, '2025-11-24 02:58:07', 1),
+(332, 21, 2, '2025-11-26', '20:30:00', 90000.00, '2025-11-24 02:58:07', 3),
+(333, 22, 1, '2025-11-25', '17:00:00', 80000.00, '2025-11-24 02:58:07', 2),
+(334, 22, 5, '2025-11-26', '19:30:00', 90000.00, '2025-11-24 02:58:07', 8),
+(335, 23, 2, '2025-11-25', '21:00:00', 85000.00, '2025-11-24 02:58:07', 4),
+(336, 23, 3, '2025-11-26', '16:00:00', 95000.00, '2025-11-24 02:58:07', 6),
+(337, 25, 3, '2025-11-25', '15:00:00', 100000.00, '2025-11-24 02:58:07', 5),
+(338, 25, 4, '2025-11-26', '20:30:00', 85000.00, '2025-11-24 02:58:07', 7),
+(339, 26, 1, '2025-11-25', '09:30:00', 75000.00, '2025-11-24 02:58:07', 1),
+(340, 26, 5, '2025-11-26', '13:00:00', 88000.00, '2025-11-24 02:58:07', 8),
+(341, 27, 2, '2025-11-25', '11:00:00', 75000.00, '2025-11-24 02:58:07', 4),
+(342, 27, 4, '2025-11-26', '12:30:00', 78000.00, '2025-11-24 02:58:07', 7);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `subscriptions`
+-- Table structure for table `subscriptions`
 --
 
 CREATE TABLE `subscriptions` (
@@ -516,7 +707,7 @@ CREATE TABLE `subscriptions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `subscriptions`
+-- Dumping data for table `subscriptions`
 --
 
 INSERT INTO `subscriptions` (`id`, `name`, `price`, `description`, `benefits`, `created_at`) VALUES
@@ -529,7 +720,7 @@ INSERT INTO `subscriptions` (`id`, `name`, `price`, `description`, `benefits`, `
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `support_tickets`
+-- Table structure for table `support_tickets`
 --
 
 CREATE TABLE `support_tickets` (
@@ -546,7 +737,7 @@ CREATE TABLE `support_tickets` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `support_tickets`
+-- Dumping data for table `support_tickets`
 --
 
 INSERT INTO `support_tickets` (`id`, `user_id`, `subject`, `message`, `status`, `priority`, `tags`, `assigned_to`, `created_at`, `updated_at`) VALUES
@@ -560,7 +751,7 @@ INSERT INTO `support_tickets` (`id`, `user_id`, `subject`, `message`, `status`, 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `system_config`
+-- Table structure for table `system_config`
 --
 
 CREATE TABLE `system_config` (
@@ -573,7 +764,7 @@ CREATE TABLE `system_config` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `system_config`
+-- Dumping data for table `system_config`
 --
 
 INSERT INTO `system_config` (`id`, `config_key`, `config_value`, `description`, `updated_by`, `updated_at`) VALUES
@@ -586,7 +777,7 @@ INSERT INTO `system_config` (`id`, `config_key`, `config_value`, `description`, 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `theaters`
+-- Table structure for table `theaters`
 --
 
 CREATE TABLE `theaters` (
@@ -601,7 +792,7 @@ CREATE TABLE `theaters` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `theaters`
+-- Dumping data for table `theaters`
 --
 
 INSERT INTO `theaters` (`id`, `name`, `location`, `phone`, `created_at`, `total_screens`, `address`, `is_active`) VALUES
@@ -614,7 +805,7 @@ INSERT INTO `theaters` (`id`, `name`, `location`, `phone`, `created_at`, `total_
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `theater_screens`
+-- Table structure for table `theater_screens`
 --
 
 CREATE TABLE `theater_screens` (
@@ -629,7 +820,7 @@ CREATE TABLE `theater_screens` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `theater_screens`
+-- Dumping data for table `theater_screens`
 --
 
 INSERT INTO `theater_screens` (`id`, `theater_id`, `screen_name`, `total_seats`, `seat_layout`, `screen_type`, `is_active`, `created_at`) VALUES
@@ -645,7 +836,7 @@ INSERT INTO `theater_screens` (`id`, `theater_id`, `screen_name`, `total_seats`,
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `tickets`
+-- Table structure for table `tickets`
 --
 
 CREATE TABLE `tickets` (
@@ -660,43 +851,21 @@ CREATE TABLE `tickets` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `tickets`
+-- Dumping data for table `tickets`
 --
 
 INSERT INTO `tickets` (`id`, `user_id`, `showtime_id`, `seat`, `qr_code`, `price`, `status`, `created_at`) VALUES
-(1, 1, 1, 'A5', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(2, 1, 1, 'A6', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(3, 2, 2, 'B10', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(4, 3, 3, 'C15', NULL, 100000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(5, 4, 4, 'D20', NULL, 110000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(6, 5, 5, 'E12', NULL, 115000.00, 'Đã đặt', '2025-11-12 07:41:09');
+(1, 1, 71, 'A5', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(2, 1, 71, 'A6', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(3, 2, 72, 'B10', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(4, 3, 73, 'C15', NULL, 100000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(5, 4, 74, 'D20', NULL, 110000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(6, 5, 75, 'E12', NULL, 115000.00, 'Đã đặt', '2025-11-12 07:41:09');
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `seat_reservations`
---
-
-CREATE TABLE `seat_reservations` (
-  `id` int(11) NOT NULL,
-  `showtime_id` int(11) NOT NULL,
-  `seat` varchar(10) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `session_id` varchar(255) NOT NULL,
-  `reserved_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `expires_at` timestamp NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Đang đổ dữ liệu cho bảng `seat_reservations`
---
-
--- Bảng này không có dữ liệu mẫu, chỉ lưu trạng thái ghế đang được chọn tạm thời
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `transactions`
+-- Table structure for table `transactions`
 --
 
 CREATE TABLE `transactions` (
@@ -711,7 +880,7 @@ CREATE TABLE `transactions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `transactions`
+-- Dumping data for table `transactions`
 --
 
 INSERT INTO `transactions` (`id`, `user_id`, `type`, `related_id`, `amount`, `method`, `status`, `created_at`) VALUES
@@ -726,7 +895,7 @@ INSERT INTO `transactions` (`id`, `user_id`, `type`, `related_id`, `amount`, `me
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `users`
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
@@ -749,7 +918,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `users`
+-- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `avatar`, `birthdate`, `rank`, `points`, `subscription_id`, `status`, `email_verified`, `created_at`, `updated_at`, `role`, `is_active`, `last_login`) VALUES
@@ -767,7 +936,7 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `avatar`, `birthdate`, `
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `user_roles`
+-- Table structure for table `user_roles`
 --
 
 CREATE TABLE `user_roles` (
@@ -778,7 +947,7 @@ CREATE TABLE `user_roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `user_roles`
+-- Dumping data for table `user_roles`
 --
 
 INSERT INTO `user_roles` (`id`, `user_id`, `role_id`, `created_at`) VALUES
@@ -791,7 +960,7 @@ INSERT INTO `user_roles` (`id`, `user_id`, `role_id`, `created_at`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `watch_history`
+-- Table structure for table `watch_history`
 --
 
 CREATE TABLE `watch_history` (
@@ -805,7 +974,7 @@ CREATE TABLE `watch_history` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `watch_history`
+-- Dumping data for table `watch_history`
 --
 
 INSERT INTO `watch_history` (`id`, `user_id`, `movie_id`, `last_time`, `rating`, `favorite`, `created_at`) VALUES
@@ -823,14 +992,15 @@ INSERT INTO `watch_history` (`id`, `user_id`, `movie_id`, `last_time`, `rating`,
 (12, 9, 1, 0, NULL, 1, '2025-11-19 01:17:46'),
 (14, 9, 14, 0, NULL, 0, '2025-11-19 02:24:15'),
 (15, 9, 8, 0, NULL, 0, '2025-11-19 03:15:50'),
-(27, 3, 8, 0, NULL, 0, '2025-11-19 01:47:02');
+(27, 3, 8, 0, NULL, 0, '2025-11-19 01:47:02'),
+(61, 9, 29, 0, NULL, 0, '2025-11-24 03:28:50');
 
 --
--- Chỉ mục cho các bảng đã đổ
+-- Indexes for dumped tables
 --
 
 --
--- Chỉ mục cho bảng `admin_logs`
+-- Indexes for table `admin_logs`
 --
 ALTER TABLE `admin_logs`
   ADD PRIMARY KEY (`id`),
@@ -839,14 +1009,14 @@ ALTER TABLE `admin_logs`
   ADD KEY `idx_module` (`module`);
 
 --
--- Chỉ mục cho bảng `categories`
+-- Indexes for table `categories`
 --
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
   ADD KEY `parent_id` (`parent_id`);
 
 --
--- Chỉ mục cho bảng `comments`
+-- Indexes for table `comments`
 --
 ALTER TABLE `comments`
   ADD PRIMARY KEY (`id`),
@@ -856,7 +1026,7 @@ ALTER TABLE `comments`
   ADD KEY `idx_status` (`status`);
 
 --
--- Chỉ mục cho bảng `coupons`
+-- Indexes for table `coupons`
 --
 ALTER TABLE `coupons`
   ADD PRIMARY KEY (`id`),
@@ -865,7 +1035,7 @@ ALTER TABLE `coupons`
   ADD KEY `idx_status` (`status`);
 
 --
--- Chỉ mục cho bảng `episodes`
+-- Indexes for table `episodes`
 --
 ALTER TABLE `episodes`
   ADD PRIMARY KEY (`id`),
@@ -873,27 +1043,27 @@ ALTER TABLE `episodes`
   ADD KEY `idx_movie_id` (`movie_id`);
 
 --
--- Chỉ mục cho bảng `movies`
+-- Indexes for table `movies`
 --
 ALTER TABLE `movies`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_category` (`category_id`);
 
 --
--- Chỉ mục cho bảng `permissions`
+-- Indexes for table `permissions`
 --
 ALTER TABLE `permissions`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
 
 --
--- Chỉ mục cho bảng `promotions`
+-- Indexes for table `promotions`
 --
 ALTER TABLE `promotions`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `reviews`
+-- Indexes for table `reviews`
 --
 ALTER TABLE `reviews`
   ADD PRIMARY KEY (`id`),
@@ -901,14 +1071,14 @@ ALTER TABLE `reviews`
   ADD KEY `idx_rev_movie` (`movie_id`);
 
 --
--- Chỉ mục cho bảng `roles`
+-- Indexes for table `roles`
 --
 ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
 
 --
--- Chỉ mục cho bảng `role_permissions`
+-- Indexes for table `role_permissions`
 --
 ALTER TABLE `role_permissions`
   ADD PRIMARY KEY (`id`),
@@ -916,7 +1086,18 @@ ALTER TABLE `role_permissions`
   ADD KEY `permission_id` (`permission_id`);
 
 --
--- Chỉ mục cho bảng `showtimes`
+-- Indexes for table `seat_reservations`
+--
+ALTER TABLE `seat_reservations`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_seat_reservation` (`showtime_id`,`seat`),
+  ADD KEY `idx_showtime_seat` (`showtime_id`,`seat`),
+  ADD KEY `idx_expires_at` (`expires_at`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_active_reservations` (`showtime_id`,`expires_at`);
+
+--
+-- Indexes for table `showtimes`
 --
 ALTER TABLE `showtimes`
   ADD PRIMARY KEY (`id`),
@@ -925,13 +1106,13 @@ ALTER TABLE `showtimes`
   ADD KEY `screen_id` (`screen_id`);
 
 --
--- Chỉ mục cho bảng `subscriptions`
+-- Indexes for table `subscriptions`
 --
 ALTER TABLE `subscriptions`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `support_tickets`
+-- Indexes for table `support_tickets`
 --
 ALTER TABLE `support_tickets`
   ADD PRIMARY KEY (`id`),
@@ -939,7 +1120,7 @@ ALTER TABLE `support_tickets`
   ADD KEY `assigned_to` (`assigned_to`);
 
 --
--- Chỉ mục cho bảng `system_config`
+-- Indexes for table `system_config`
 --
 ALTER TABLE `system_config`
   ADD PRIMARY KEY (`id`),
@@ -947,49 +1128,38 @@ ALTER TABLE `system_config`
   ADD KEY `updated_by` (`updated_by`);
 
 --
--- Chỉ mục cho bảng `theaters`
+-- Indexes for table `theaters`
 --
 ALTER TABLE `theaters`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `theater_screens`
+-- Indexes for table `theater_screens`
 --
 ALTER TABLE `theater_screens`
   ADD PRIMARY KEY (`id`),
   ADD KEY `theater_id` (`theater_id`);
 
 --
--- Chỉ mục cho bảng `tickets`
+-- Indexes for table `tickets`
 --
 ALTER TABLE `tickets`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_user` (`user_id`),
   ADD KEY `idx_showtime` (`showtime_id`),
-  ADD KEY `idx_showtime_status` (`showtime_id`, `status`),
-  ADD KEY `idx_user_showtime` (`user_id`, `showtime_id`),
-  ADD KEY `idx_showtime_seat_status` (`showtime_id`, `seat`, `status`);
+  ADD KEY `idx_showtime_status` (`showtime_id`,`status`),
+  ADD KEY `idx_user_showtime` (`user_id`,`showtime_id`),
+  ADD KEY `idx_showtime_seat_status` (`showtime_id`,`seat`,`status`);
 
 --
--- Chỉ mục cho bảng `seat_reservations`
---
-ALTER TABLE `seat_reservations`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_seat_reservation` (`showtime_id`, `seat`),
-  ADD KEY `idx_showtime_seat` (`showtime_id`, `seat`),
-  ADD KEY `idx_expires_at` (`expires_at`),
-  ADD KEY `idx_user_id` (`user_id`),
-  ADD KEY `idx_active_reservations` (`showtime_id`, `expires_at`);
-
---
--- Chỉ mục cho bảng `transactions`
+-- Indexes for table `transactions`
 --
 ALTER TABLE `transactions`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_tx_user` (`user_id`);
 
 --
--- Chỉ mục cho bảng `users`
+-- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -998,7 +1168,7 @@ ALTER TABLE `users`
   ADD KEY `idx_subscription` (`subscription_id`);
 
 --
--- Chỉ mục cho bảng `user_roles`
+-- Indexes for table `user_roles`
 --
 ALTER TABLE `user_roles`
   ADD PRIMARY KEY (`id`),
@@ -1006,7 +1176,7 @@ ALTER TABLE `user_roles`
   ADD KEY `role_id` (`role_id`);
 
 --
--- Chỉ mục cho bảng `watch_history`
+-- Indexes for table `watch_history`
 --
 ALTER TABLE `watch_history`
   ADD PRIMARY KEY (`id`),
@@ -1015,165 +1185,165 @@ ALTER TABLE `watch_history`
   ADD KEY `idx_wh_movie` (`movie_id`);
 
 --
--- AUTO_INCREMENT cho các bảng đã đổ
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT cho bảng `admin_logs`
+-- AUTO_INCREMENT for table `admin_logs`
 --
 ALTER TABLE `admin_logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT cho bảng `categories`
+-- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT cho bảng `comments`
+-- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT cho bảng `coupons`
+-- AUTO_INCREMENT for table `coupons`
 --
 ALTER TABLE `coupons`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT cho bảng `episodes`
+-- AUTO_INCREMENT for table `episodes`
 --
 ALTER TABLE `episodes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT cho bảng `movies`
+-- AUTO_INCREMENT for table `movies`
 --
 ALTER TABLE `movies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
--- AUTO_INCREMENT cho bảng `permissions`
+-- AUTO_INCREMENT for table `permissions`
 --
 ALTER TABLE `permissions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
--- AUTO_INCREMENT cho bảng `promotions`
+-- AUTO_INCREMENT for table `promotions`
 --
 ALTER TABLE `promotions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT cho bảng `reviews`
+-- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT cho bảng `roles`
+-- AUTO_INCREMENT for table `roles`
 --
 ALTER TABLE `roles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT cho bảng `role_permissions`
+-- AUTO_INCREMENT for table `role_permissions`
 --
 ALTER TABLE `role_permissions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
--- AUTO_INCREMENT cho bảng `showtimes`
---
-ALTER TABLE `showtimes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
-
---
--- AUTO_INCREMENT cho bảng `subscriptions`
---
-ALTER TABLE `subscriptions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT cho bảng `support_tickets`
---
-ALTER TABLE `support_tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT cho bảng `system_config`
---
-ALTER TABLE `system_config`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT cho bảng `theaters`
---
-ALTER TABLE `theaters`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT cho bảng `theater_screens`
---
-ALTER TABLE `theater_screens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT cho bảng `tickets`
---
-ALTER TABLE `tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT cho bảng `seat_reservations`
+-- AUTO_INCREMENT for table `seat_reservations`
 --
 ALTER TABLE `seat_reservations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `transactions`
+-- AUTO_INCREMENT for table `showtimes`
+--
+ALTER TABLE `showtimes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=343;
+
+--
+-- AUTO_INCREMENT for table `subscriptions`
+--
+ALTER TABLE `subscriptions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `support_tickets`
+--
+ALTER TABLE `support_tickets`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `system_config`
+--
+ALTER TABLE `system_config`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `theaters`
+--
+ALTER TABLE `theaters`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `theater_screens`
+--
+ALTER TABLE `theater_screens`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `tickets`
+--
+ALTER TABLE `tickets`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT cho bảng `users`
+-- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT cho bảng `user_roles`
+-- AUTO_INCREMENT for table `user_roles`
 --
 ALTER TABLE `user_roles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT cho bảng `watch_history`
+-- AUTO_INCREMENT for table `watch_history`
 --
 ALTER TABLE `watch_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
--- Các ràng buộc cho các bảng đã đổ
+-- Constraints for dumped tables
 --
 
 --
--- Các ràng buộc cho bảng `admin_logs`
+-- Constraints for table `admin_logs`
 --
 ALTER TABLE `admin_logs`
   ADD CONSTRAINT `admin_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Các ràng buộc cho bảng `categories`
+-- Constraints for table `categories`
 --
 ALTER TABLE `categories`
   ADD CONSTRAINT `categories_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Các ràng buộc cho bảng `comments`
+-- Constraints for table `comments`
 --
 ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
@@ -1181,33 +1351,40 @@ ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;
 
 --
--- Các ràng buộc cho bảng `episodes`
+-- Constraints for table `episodes`
 --
 ALTER TABLE `episodes`
   ADD CONSTRAINT `fk_episodes_movie` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE;
 
 --
--- Các ràng buộc cho bảng `movies`
+-- Constraints for table `movies`
 --
 ALTER TABLE `movies`
   ADD CONSTRAINT `movies_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Các ràng buộc cho bảng `reviews`
+-- Constraints for table `reviews`
 --
 ALTER TABLE `reviews`
   ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Các ràng buộc cho bảng `role_permissions`
+-- Constraints for table `role_permissions`
 --
 ALTER TABLE `role_permissions`
   ADD CONSTRAINT `role_permissions_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `role_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE;
 
 --
--- Các ràng buộc cho bảng `showtimes`
+-- Constraints for table `seat_reservations`
+--
+ALTER TABLE `seat_reservations`
+  ADD CONSTRAINT `fk_seat_reservations_showtime` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_seat_reservations_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `showtimes`
 --
 ALTER TABLE `showtimes`
   ADD CONSTRAINT `showtimes_ibfk_1` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1218,59 +1395,52 @@ ALTER TABLE `showtimes`
   ADD CONSTRAINT `showtimes_ibfk_6` FOREIGN KEY (`screen_id`) REFERENCES `theater_screens` (`id`) ON DELETE SET NULL;
 
 --
--- Các ràng buộc cho bảng `support_tickets`
+-- Constraints for table `support_tickets`
 --
 ALTER TABLE `support_tickets`
   ADD CONSTRAINT `support_tickets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `support_tickets_ibfk_2` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
--- Các ràng buộc cho bảng `system_config`
+-- Constraints for table `system_config`
 --
 ALTER TABLE `system_config`
   ADD CONSTRAINT `system_config_ibfk_1` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
--- Các ràng buộc cho bảng `theater_screens`
+-- Constraints for table `theater_screens`
 --
 ALTER TABLE `theater_screens`
   ADD CONSTRAINT `theater_screens_ibfk_1` FOREIGN KEY (`theater_id`) REFERENCES `theaters` (`id`) ON DELETE CASCADE;
 
 --
--- Các ràng buộc cho bảng `tickets`
+-- Constraints for table `tickets`
 --
 ALTER TABLE `tickets`
   ADD CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `tickets_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Các ràng buộc cho bảng `seat_reservations`
---
-ALTER TABLE `seat_reservations`
-  ADD CONSTRAINT `fk_seat_reservations_showtime` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_seat_reservations_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Các ràng buộc cho bảng `transactions`
+-- Constraints for table `transactions`
 --
 ALTER TABLE `transactions`
   ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Các ràng buộc cho bảng `users`
+-- Constraints for table `users`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Các ràng buộc cho bảng `user_roles`
+-- Constraints for table `user_roles`
 --
 ALTER TABLE `user_roles`
   ADD CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
 
 --
--- Các ràng buộc cho bảng `watch_history`
+-- Constraints for table `watch_history`
 --
 ALTER TABLE `watch_history`
   ADD CONSTRAINT `watch_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,

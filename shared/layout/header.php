@@ -155,7 +155,7 @@
                     <a href="http://localhost/DuAn1/?route=profile/index" class="sign-in-btn">
                         <i class="fas fa-user"></i>
                         <span><?php echo htmlspecialchars($user['name']); ?></span>
-                        <i class="fas fa-chevron-down"></i>
+                        <!-- <i class="fas fa-chevron-down"></i> -->
                     </a>
                 <?php else: ?>
                     <a href="#" class="sign-in-btn" onclick="event.preventDefault(); openAuthModal('login');">

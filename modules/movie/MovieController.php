@@ -18,9 +18,19 @@ class MovieController extends Controller {
         $type = $_GET['type'] ?? null;
         $min_rating = isset($_GET['min_rating']) && $_GET['min_rating'] !== '' ? floatval($_GET['min_rating']) : null;
         
+        // Phân trang
+        $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+        $perPage = 12; // Số phim mỗi trang
+        $offset = ($page - 1) * $perPage;
+        
+        $total = 0;
+        $movies = [];
+        
         if ($search) {
-            $movies = $movieModel->search($search, $category_id, $status, $country, $min_rating, $type);
+            $total = $movieModel->countSearch($search, $category_id, $status, $country, $min_rating, $type);
+            $movies = $movieModel->search($search, $category_id, $status, $country, $min_rating, $type, $perPage, $offset);
         } elseif ($category_id) {
+            $total = $movieModel->countByCategory($category_id, $status, $type);
             $sql = "SELECT m.*, c.name as category_name FROM movies m 
                     LEFT JOIN categories c ON m.category_id = c.id 
                     WHERE m.category_id = ?";
@@ -41,11 +51,13 @@ class MovieController extends Controller {
                 $params[] = $type;
             }
             
-            $sql .= " ORDER BY m.rating DESC, m.created_at DESC";
+            $sql .= " ORDER BY m.rating DESC, m.created_at DESC LIMIT $perPage OFFSET $offset";
             $movies = $movieModel->getDb()->fetchAll($sql, $params);
         } elseif ($country) {
-            $movies = $movieModel->getByCountry($country, $type);
+            $total = $movieModel->countByCountry($country, $type);
+            $movies = $movieModel->getByCountry($country, $type, $perPage, $offset);
         } else {
+            $total = $movieModel->countAll($status, $type, $min_rating);
             $sql = "SELECT m.*, c.name as category_name FROM movies m 
                     LEFT JOIN categories c ON m.category_id = c.id 
                     WHERE 1=1";
@@ -71,9 +83,11 @@ class MovieController extends Controller {
                 $params[] = $min_rating;
             }
             
-            $sql .= " ORDER BY m.created_at DESC";
+            $sql .= " ORDER BY m.created_at DESC LIMIT $perPage OFFSET $offset";
             $movies = $movieModel->getDb()->fetchAll($sql, $params);
         }
+        
+        $totalPages = ceil($total / $perPage);
         
         $categories = $categoryModel->getAll();
         
@@ -109,7 +123,11 @@ class MovieController extends Controller {
             'type' => $type,
             'min_rating' => $min_rating,
             'user' => $user,
-            'favorites' => $favorites
+            'favorites' => $favorites,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'total' => $total,
+            'perPage' => $perPage
         ]);
     }
     

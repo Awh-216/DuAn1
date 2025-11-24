@@ -102,84 +102,76 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                         <p class="booking-subtitle">Chọn phim, rạp, ngày giờ và ghế ngồi của bạn</p>
                     </header>
                     
-                    <!-- Movie Selection -->
+                    <!-- Movies List - chỉ hiển thị khi chưa chọn phim -->
                     <?php if (empty($selected_movie)): ?>
                         <div class="booking-step mb-4">
-                            <label class="booking-label" for="movie-select">
-                                <i class="fas fa-film me-2"></i>Chọn phim
+                            <label class="booking-label">
+                                <i class="fas fa-film me-2"></i>Danh sách phim đang chiếu
                             </label>
-                            <?php if (empty($movies)): ?>
+                            <?php if (empty($allMovies)): ?>
                                 <div class="alert alert-warning">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
                                     Hiện tại chưa có phim nào đang chiếu rạp. Vui lòng quay lại sau!
                                 </div>
                             <?php else: ?>
-                                <form method="GET" class="movie-select-form" aria-label="Chọn phim để đặt vé">
-                                    <input type="hidden" name="route" value="booking/index">
-                                    <select name="movie" 
-                                            id="movie-select"
-                                            class="form-select-booking" 
-                                            onchange="this.form.submit()" 
-                                            required
-                                            aria-label="Chọn phim từ danh sách">
-                                        <option value="">-- Chọn phim --</option>
-                                        <?php foreach ($movies as $m): ?>
-                                            <option value="<?php echo $m['id']; ?>"><?php echo htmlspecialchars($m['title']); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </form>
-                            <?php endif; ?>
-                        </div>
-                    <?php else: ?>
-                        <!-- Theater Selection -->
-                        <div class="booking-step mb-4">
-                            <div class="row align-items-center mb-3">
-                                <div class="col-md-6 col-12">
-                                    <label class="booking-label mb-0">
-                                        <i class="fas fa-building me-2"></i>Chọn rạp
-                                    </label>
-                                </div>
-                                <div class="col-md-6 col-12 text-md-end text-start mt-md-0 mt-2">
-                                    <button type="button" 
-                                            class="btn btn-location-detect" 
-                                            id="location-detect-btn"
-                                            onclick="detectUserLocation()"
-                                            aria-label="Xác định vị trí của bạn">
-                                        <i class="fas fa-crosshairs me-2"></i>
-                                        <span id="location-btn-text">Xác định vị trí</span>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Location Info -->
-                            <div class="location-info" id="location-info" style="display: none;">
-                                <div class="location-display">
-                                    <!-- <i class="fas fa-map-marker-alt text-primary me-2"></i> -->
-                                    <span id="location-text">Đang xác định vị trí...</span>
-                                </div>
-                            </div>
-                            
-                            <?php if (empty($theaters)): ?>
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>
-                                    Hiện tại chưa có rạp nào có suất chiếu phim này. Vui lòng liên hệ quản trị viên!
-                                </div>
-                            <?php else: ?>
-                                <div class="theaters-list" role="group" aria-label="Danh sách rạp chiếu phim">
-                                    <?php foreach ($theaters as $theater): ?>
-                                        <a href="?route=booking/index&movie=<?php echo $selected_movie; ?>&theater=<?php echo $theater['id']; ?>" 
-                                           class="theater-btn <?php echo $selected_theater == $theater['id'] ? 'active' : ''; ?>"
-                                           aria-pressed="<?php echo $selected_theater == $theater['id'] ? 'true' : 'false'; ?>">
-                                            <i class="fas fa-map-marker-alt me-2"></i>
-                                            <?php echo htmlspecialchars($theater['name']); ?>
-                                            <?php if (!empty($theater['location'])): ?>
-                                                <span class="theater-location"> - <?php echo htmlspecialchars($theater['location']); ?></span>
+                                <div class="movies-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;">
+                                    <?php foreach ($allMovies as $m): ?>
+                                        <a href="?route=booking/index&movie=<?php echo $m['id']; ?>" 
+                                           class="movie-card-booking"
+                                           style="display: block; text-decoration: none; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; transition: all 0.3s; background: white; cursor: pointer;">
+                                            <?php if ($m['thumbnail']): ?>
+                                                <img src="<?php echo htmlspecialchars($m['thumbnail']); ?>" 
+                                                     alt="<?php echo htmlspecialchars($m['title']); ?>" 
+                                                     style="width: 100%; height: 200px; object-fit: cover;">
+                                            <?php else: ?>
+                                                <div style="width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-film" style="font-size: 48px; color: #999;"></i>
+                                                </div>
                                             <?php endif; ?>
+                                            <div style="padding: 10px;">
+                                                <h4 style="margin: 0; font-size: 14px; color: #333; font-weight: bold; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                    <?php echo htmlspecialchars($m['title']); ?>
+                                                </h4>
+                                                <?php if ($m['rating']): ?>
+                                                    <div style="text-align: center; margin-top: 5px;">
+                                                        <i class="fas fa-star text-warning" style="font-size: 12px;"></i>
+                                                        <span style="font-size: 12px; color: #666;"><?php echo number_format($m['rating'], 1); ?></span>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
                                         </a>
                                     <?php endforeach; ?>
                                 </div>
                             <?php endif; ?>
                         </div>
+                    <?php else: ?>
+                        <!-- Theater Selection for selected movie -->
+                        <?php if (empty($theaters)): ?>
+                            <div class="alert alert-warning mb-4">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Hiện tại chưa có rạp nào có suất chiếu phim này. Vui lòng liên hệ quản trị viên!
+                            </div>
+                        <?php else: ?>
+                            <div class="booking-step mb-4">
+                                <label class="booking-label">
+                                    <i class="fas fa-building me-2"></i>Chọn rạp cho phim này
+                                </label>
+                                <div class="theaters-list" role="group" aria-label="Danh sách rạp chiếu phim" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
+                                    <?php foreach ($theaters as $theater): ?>
+                                        <a href="?route=booking/index&movie=<?php echo $selected_movie; ?>&theater=<?php echo $theater['id']; ?>" 
+                                           class="theater-btn <?php echo $selected_theater == $theater['id'] ? 'active' : ''; ?>"
+                                           aria-pressed="<?php echo $selected_theater == $theater['id'] ? 'true' : 'false'; ?>"
+                                           style="padding: 12px 20px; border: 2px solid <?php echo $selected_theater == $theater['id'] ? '#e50914' : '#ddd'; ?>; border-radius: 8px; text-decoration: none; color: <?php echo $selected_theater == $theater['id'] ? '#e50914' : '#333'; ?>; background: <?php echo $selected_theater == $theater['id'] ? '#fff5f5' : 'white'; ?>; transition: all 0.3s; font-weight: <?php echo $selected_theater == $theater['id'] ? 'bold' : 'normal'; ?>;">
+                                            <i class="fas fa-map-marker-alt me-2"></i>
+                                            <?php echo htmlspecialchars($theater['name']); ?>
+                                            <?php if (!empty($theater['location'])): ?>
+                                                <span style="font-size: 12px; color: #666;"> - <?php echo htmlspecialchars($theater['location']); ?></span>
+                                            <?php endif; ?>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                         
                         <!-- Date Selection - chỉ hiển thị khi đã chọn rạp -->
                         <?php if ($selected_theater): ?>

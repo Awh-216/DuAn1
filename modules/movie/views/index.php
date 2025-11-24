@@ -4,19 +4,14 @@ $title = 'Xem Phim';
 ?>
 
 <section class="section">
+    <br>
     <div class="container">
         <div class="filter-bar">
             <form method="GET" class="search-form" action="?route=movie/index">
                 <input type="hidden" name="route" value="movie/index">
-                <div class="search-box-wrapper mb-3">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" name="search" id="movie-search" placeholder="Tìm kiếm phim theo tên, đạo diễn, diễn viên..." value="<?php echo htmlspecialchars($search ?? ''); ?>" autocomplete="off">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Tìm kiếm
-                        </button>
-                    </div>
-                </div>
+                <?php if (isset($search) && $search): ?>
+                    <input type="hidden" name="search" value="<?php echo htmlspecialchars($search); ?>">
+                <?php endif; ?>
                 
                 <div class="filter-options">
                     <div class="row g-3">
@@ -207,6 +202,86 @@ $title = 'Xem Phim';
                 <?php endforeach; ?>
         </div>
         
+        <!-- Pagination -->
+        <?php if (isset($totalPages) && $totalPages > 1): ?>
+            <nav aria-label="Phân trang danh sách phim" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <?php
+                    // Tạo URL với các tham số hiện tại
+                    $queryParams = $_GET;
+                    unset($queryParams['page']);
+                    $baseUrl = '?route=movie/index';
+                    if (!empty($queryParams)) {
+                        $baseUrl .= '&' . http_build_query($queryParams);
+                    }
+                    ?>
+                    
+                    <!-- Previous Button -->
+                    <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="<?php echo $page > 1 ? $baseUrl . '&page=' . ($page - 1) : '#'; ?>" aria-label="Trang trước">
+                            <i class="fas fa-chevron-left"></i> Trước
+                        </a>
+                    </li>
+                    
+                    <?php
+                    // Hiển thị các trang
+                    $startPage = max(1, $page - 2);
+                    $endPage = min($totalPages, $page + 2);
+                    
+                    // Trang đầu
+                    if ($startPage > 1): ?>
+                        <li class="page-item">
+                            <a class="page-link" href="<?php echo $baseUrl . '&page=1'; ?>">1</a>
+                        </li>
+                        <?php if ($startPage > 2): ?>
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    
+                    <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                        <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
+                            <a class="page-link" href="<?php echo $baseUrl . '&page=' . $i; ?>">
+                                <?php echo $i; ?>
+                            </a>
+                        </li>
+                    <?php endfor; ?>
+                    
+                    <?php
+                    // Trang cuối
+                    if ($endPage < $totalPages): ?>
+                        <?php if ($endPage < $totalPages - 1): ?>
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        <?php endif; ?>
+                        <li class="page-item">
+                            <a class="page-link" href="<?php echo $baseUrl . '&page=' . $totalPages; ?>">
+                                <?php echo $totalPages; ?>
+                            </a>
+                        </li>
+                    <?php endif; ?>
+                    
+                    <!-- Next Button -->
+                    <li class="page-item <?php echo $page >= $totalPages ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="<?php echo $page < $totalPages ? $baseUrl . '&page=' . ($page + 1) : '#'; ?>" aria-label="Trang sau">
+                            Sau <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Pagination Info -->
+                <div class="text-center mt-3 text-muted">
+                    <small>
+                        Hiển thị <?php echo $offset + 1; ?> - <?php echo min($offset + $perPage, $total); ?> 
+                        trong tổng số <?php echo number_format($total); ?> phim
+                        (Trang <?php echo $page; ?>/<?php echo $totalPages; ?>)
+                    </small>
+                </div>
+            </nav>
+        <?php endif; ?>
+        
 <script>
 function toggleFavorite(btn, movieId) {
     <?php if (!isset($user) || !$user): ?>
@@ -266,18 +341,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let isFirstLoad = true;
         select.addEventListener('change', function() {
             if (!isFirstLoad && searchForm) {
-                // Preserve search value
-                const searchInput = document.getElementById('movie-search');
-                if (searchInput && searchInput.value) {
-                    let hiddenInput = searchForm.querySelector('input[name="search"][type="hidden"]');
-                    if (!hiddenInput) {
-                        hiddenInput = document.createElement('input');
-                        hiddenInput.type = 'hidden';
-                        hiddenInput.name = 'search';
-                        searchForm.appendChild(hiddenInput);
-                    }
-                    hiddenInput.value = searchInput.value;
-                }
+                // Search value đã được giữ trong hidden input nếu có
                 searchForm.submit();
             }
             isFirstLoad = false;

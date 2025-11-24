@@ -20,7 +20,9 @@ class BookingController extends Controller {
             $selected_time = $_GET['time'] ?? null;
             $selected_showtime_id = $_GET['showtime_id'] ?? null;
             
-            $movies = $movieModel->getTheaterMovies();
+            // Lấy tất cả phim đang chiếu rạp
+            $allMovies = $movieModel->getTheaterMovies();
+            
             $theaters = [];
             $showtimes = [];
             $movie = null;
@@ -119,7 +121,7 @@ class BookingController extends Controller {
             $user = $this->getCurrentUser();
             
             $this->view('booking/index', [
-                'movies' => $movies,
+                'allMovies' => $allMovies,
                 'theaters' => $theaters,
                 'showtimes' => $showtimes,
                 'movie' => $movie,
@@ -190,8 +192,10 @@ class BookingController extends Controller {
                 
                 $user = $this->getCurrentUser();
                 
+                $allMovies = $movieModel->getTheaterMovies();
+                
                 $this->view('booking/index', [
-                    'movies' => $movies,
+                    'allMovies' => $allMovies,
                     'theaters' => $theaters,
                     'showtimes' => $showtimes,
                     'movie' => $movie,

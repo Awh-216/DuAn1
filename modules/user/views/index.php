@@ -60,17 +60,17 @@ $title = 'Hồ Sơ';
                         </div>
                         
                         <!-- Menu -->
-                        <div class="list-group list-group-flush">
-                            <a href="#" class="list-group-item list-group-item-action border-0 px-0 py-3">
+                        <div id="profile_list" class="list-group list-group-flush">
+                            <a href="#" class="list-group-item list-group-item-action border-0 px-3 py-3">
                                 <i class="fas fa-list text-primary me-2"></i> Danh sách
                             </a>
-                            <a href="#history" class="list-group-item list-group-item-action border-0 px-0 py-3">
+                            <a href="#history" class="list-group-item list-group-item-action border-0 px-3 py-3">
                                 <i class="fas fa-history text-primary me-2"></i> Lịch sử
                             </a>
-                            <a href="#" class="list-group-item list-group-item-action border-0 px-0 py-3">
+                            <a href="#" class="list-group-item list-group-item-action border-0 px-3 py-3">
                                 <i class="fas fa-heart text-primary me-2"></i> Yêu thích
                             </a>
-                            <a href="?route=auth/logout" class="list-group-item list-group-item-action border-0 px-0 py-3 text-danger">
+                            <a href="?route=auth/logout" class="list-group-item list-group-item-action border-0 px-3 py-3 text-danger">
                                 <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
                             </a>
                         </div>
@@ -123,7 +123,7 @@ $title = 'Hồ Sơ';
                                     <div class="col-12">
                                         <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $item['movie_id']; ?>" class="text-decoration-none text-dark">
                                             <div class="card border h-100 hover-shadow">
-                                                <div class="card-body p-3">
+                                                <div id="watch_historyy" class="card-body p-3">
                                                     <div class="d-flex gap-3">
                                                         <?php if ($item['thumbnail']): ?>
                                                             <img src="<?php echo htmlspecialchars($item['thumbnail']); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>" class="rounded" style="width: 80px; height: 120px; object-fit: cover;">

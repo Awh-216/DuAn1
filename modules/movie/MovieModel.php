@@ -38,7 +38,7 @@ class MovieModel {
                                     ORDER BY m.rating DESC LIMIT $limit");
     }
     
-    public function search($keyword, $category_id = null, $status = null, $country = null, $min_rating = null, $type = null) {
+    public function search($keyword, $category_id = null, $status = null, $country = null, $min_rating = null, $type = null, $limit = null, $offset = 0) {
         // Loại bỏ các từ phổ biến nếu từ khóa quá ngắn (ít hơn 3 ký tự)
         $keyword = trim($keyword);
         if (strlen($keyword) < 3) {
@@ -115,7 +115,111 @@ class MovieModel {
         
         // Sắp xếp theo độ liên quan (relevance) trước, sau đó mới đến rating
         $sql .= " ORDER BY relevance DESC, m.rating DESC, m.created_at DESC";
+        
+        if ($limit) {
+            $limit = (int)$limit;
+            $offset = (int)$offset;
+            $sql .= " LIMIT $limit OFFSET $offset";
+        }
+        
         return $this->db->fetchAll($sql, $params);
+    }
+    
+    public function countSearch($keyword, $category_id = null, $status = null, $country = null, $min_rating = null, $type = null) {
+        $keyword = trim($keyword);
+        if (strlen($keyword) < 3) {
+            $sql = "SELECT COUNT(*) as count FROM movies m WHERE m.title LIKE ?";
+            $searchPattern = $keyword . "%";
+            $params = [$searchPattern];
+        } else {
+            $sql = "SELECT COUNT(*) as count FROM movies m 
+                    WHERE (m.title LIKE ? OR m.title LIKE ? OR m.director LIKE ? OR m.actors LIKE ? OR m.description LIKE ?)";
+            $exactMatch = $keyword;
+            $startsWith = $keyword . "%";
+            $contains = "%" . $keyword . "%";
+            $params = [$exactMatch, $startsWith, $contains, $contains, $contains];
+        }
+        
+        if (!$status) {
+            $sql .= " AND m.status != 'Chiếu rạp'";
+        }
+        
+        if ($category_id) {
+            $sql .= " AND m.category_id = ?";
+            $params[] = $category_id;
+        }
+        
+        if ($status) {
+            $sql .= " AND m.status = ?";
+            $params[] = $status;
+        }
+        
+        if ($country) {
+            $sql .= " AND m.country LIKE ?";
+            $params[] = "%$country%";
+        }
+        
+        if ($type) {
+            $sql .= " AND m.type = ?";
+            $params[] = $type;
+        }
+        
+        if ($min_rating !== null) {
+            $sql .= " AND m.rating >= ?";
+            $params[] = floatval($min_rating);
+        }
+        
+        $result = $this->db->fetch($sql, $params);
+        return $result['count'] ?? 0;
+    }
+    
+    public function countByCategory($category_id, $status = null, $type = null) {
+        $sql = "SELECT COUNT(*) as count FROM movies m WHERE m.category_id = ?";
+        $params = [$category_id];
+        
+        if (!$status) {
+            $sql .= " AND m.status != 'Chiếu rạp'";
+        }
+        
+        if ($status) {
+            $sql .= " AND m.status = ?";
+            $params[] = $status;
+        }
+        
+        if ($type) {
+            $sql .= " AND m.type = ?";
+            $params[] = $type;
+        }
+        
+        $result = $this->db->fetch($sql, $params);
+        return $result['count'] ?? 0;
+    }
+    
+    public function countAll($status = null, $type = null, $min_rating = null) {
+        $sql = "SELECT COUNT(*) as count FROM movies m WHERE 1=1";
+        $params = [];
+        
+        if (!$status) {
+            $sql .= " AND m.status != 'Chiếu rạp'";
+        }
+        
+        if ($status) {
+            $sql .= " AND m.status = ?";
+            $params[] = $status;
+        }
+        
+        if ($type) {
+            $sql .= " AND m.type = ?";
+            $params[] = $type;
+        }
+        
+        if ($min_rating !== null) {
+            $sql .= " AND m.rating >= ?";
+            $params[] = $min_rating;
+        }
+        
+        $result = $this->db->fetch($sql, $params);
+        return $result['count'] ?? 0;
     }
     
     public function getByCategory($category_id) {
@@ -135,7 +239,7 @@ class MovieModel {
                                     [$today]);
     }
     
-    public function getByCountry($country, $type = null) {
+    public function getByCountry($country, $type = null, $limit = null, $offset = 0) {
         $sql = "SELECT m.*, c.name as category_name FROM movies m 
                 LEFT JOIN categories c ON m.category_id = c.id 
                 WHERE m.country = ?
@@ -148,7 +252,27 @@ class MovieModel {
         }
         
         $sql .= " ORDER BY m.created_at DESC";
+        
+        if ($limit) {
+            $limit = (int)$limit;
+            $offset = (int)$offset;
+            $sql .= " LIMIT $limit OFFSET $offset";
+        }
+        
         return $this->db->fetchAll($sql, $params);
+    }
+    
+    public function countByCountry($country, $type = null) {
+        $sql = "SELECT COUNT(*) as count FROM movies m WHERE m.country = ? AND m.status != 'Chiếu rạp'";
+        $params = [$country];
+        
+        if ($type) {
+            $sql .= " AND m.type = ?";
+            $params[] = $type;
+        }
+        
+        $result = $this->db->fetch($sql, $params);
+        return $result['count'] ?? 0;
     }
 }
 ?>
