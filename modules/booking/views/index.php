@@ -118,6 +118,7 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                     <?php foreach ($allMovies as $m): ?>
                                         <a href="?route=booking/index&movie=<?php echo $m['id']; ?>" 
                                            class="movie-card-booking"
+                                           onclick="sessionStorage.setItem('bookingScrollPos', window.pageYOffset || document.documentElement.scrollTop);"
                                            style="display: block; text-decoration: none; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; transition: all 0.3s; background: white; cursor: pointer;">
                                             <?php if ($m['thumbnail']): ?>
                                                 <img src="<?php echo htmlspecialchars($m['thumbnail']); ?>" 
@@ -160,6 +161,7 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                     <?php foreach ($theaters as $theater): ?>
                                         <a href="?route=booking/index&movie=<?php echo $selected_movie; ?>&theater=<?php echo $theater['id']; ?>" 
                                            class="theater-btn <?php echo $selected_theater == $theater['id'] ? 'active' : ''; ?>"
+                                           onclick="sessionStorage.setItem('bookingScrollPos', window.pageYOffset || document.documentElement.scrollTop);"
                                            aria-pressed="<?php echo $selected_theater == $theater['id'] ? 'true' : 'false'; ?>"
                                            style="padding: 12px 20px; border: 2px solid <?php echo $selected_theater == $theater['id'] ? '#e50914' : '#ddd'; ?>; border-radius: 8px; text-decoration: none; color: <?php echo $selected_theater == $theater['id'] ? '#e50914' : '#333'; ?>; background: <?php echo $selected_theater == $theater['id'] ? '#fff5f5' : 'white'; ?>; transition: all 0.3s; font-weight: <?php echo $selected_theater == $theater['id'] ? 'bold' : 'normal'; ?>;">
                                             <i class="fas fa-map-marker-alt me-2"></i>
@@ -278,9 +280,10 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                 
                                 <!-- Seat Map -->
                                 <form method="POST" 
-                                      action="http://localhost/DuAn1/?route=booking/process-booking" 
+                                      action="?route=booking/process-booking" 
                                       id="booking-form"
-                                      aria-label="Form đặt vé xem phim">
+                                      aria-label="Form đặt vé xem phim"
+                                      onsubmit="return validateBookingForm(event);">
                                     <input type="hidden" name="showtime_id" value="<?php echo $selected_showtime_id; ?>">
                                     
                                     <div class="seat-map-container" role="group" aria-label="Bản đồ ghế ngồi trong rạp">
@@ -313,7 +316,7 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                                     if (!$isBooked) {
                                                         // Tạo checkbox cho cả 2 ghế trong ghế đôi
                                                         echo '<input type="checkbox" name="seats[]" value="' . $seat1 . '" class="seat-checkbox couple-seat-checkbox" data-couple-seat="' . $seat2 . '">';
-                                                        echo '<input type="checkbox" name="seats[]" value="' . $seat2 . '" class="seat-checkbox couple-seat-checkbox" data-couple-seat="' . $seat1 . '" style="display:none;">';
+                                                        echo '<input type="checkbox" name="seats[]" value="' . $seat2 . '" class="seat-checkbox couple-seat-checkbox" data-couple-seat="' . $seat1 . '">';
                                                     }
                                                     echo '<span class="seat-number">' . $i . '-' . ($i + 1) . '</span>';
                                                     echo '<span class="couple-icon"><i class="fas fa-heart"></i></span>';
@@ -511,6 +514,13 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Khôi phục scroll position sau khi reload
+    const savedScrollPos = sessionStorage.getItem('bookingScrollPos');
+    if (savedScrollPos) {
+        window.scrollTo(0, parseInt(savedScrollPos));
+        sessionStorage.removeItem('bookingScrollPos');
+    }
+    
     const checkboxes = document.querySelectorAll('.seat-checkbox');
     const totalAmountSpan = document.getElementById('total-amount');
     const totalSeatsSpan = document.getElementById('total-seats');
@@ -543,23 +553,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            // Xử lý ghế đôi: khi chọn 1 ghế trong cặp thì tự động chọn ghế còn lại
-            if (checkbox.classList.contains('couple-seat-checkbox')) {
-                const coupleSeatId = checkbox.getAttribute('data-couple-seat');
-                const coupleCheckbox = document.querySelector(`input[value="${coupleSeatId}"].couple-seat-checkbox`);
-                if (coupleCheckbox && checkbox.checked) {
-                    coupleCheckbox.checked = true;
-                } else if (coupleCheckbox && !checkbox.checked) {
-                    coupleCheckbox.checked = false;
+    // Sử dụng event delegation để xử lý tất cả checkbox (kể cả được thêm sau)
+    const seatMapContainer = document.querySelector('.seat-map-container');
+    if (seatMapContainer) {
+        seatMapContainer.addEventListener('change', function(e) {
+            if (e.target.classList.contains('seat-checkbox')) {
+                const checkbox = e.target;
+                
+                // Xử lý ghế đôi: khi chọn 1 ghế trong cặp thì tự động chọn ghế còn lại
+                if (checkbox.classList.contains('couple-seat-checkbox')) {
+                    const coupleSeatId = checkbox.getAttribute('data-couple-seat');
+                    const coupleCheckbox = document.querySelector(`input[value="${coupleSeatId}"].couple-seat-checkbox`);
+                    if (coupleCheckbox && checkbox.checked) {
+                        coupleCheckbox.checked = true;
+                    } else if (coupleCheckbox && !checkbox.checked) {
+                        coupleCheckbox.checked = false;
+                    }
                 }
+                
+                updateSelection();
             }
-            
-            updateSelection();
         });
-        
-        // Add keyboard support
+    }
+    
+    // Attach events cho checkbox hiện có (cho keyboard support)
+    checkboxes.forEach(checkbox => {
         const label = checkbox.closest('.seat-label');
         if (label && !label.classList.contains('booked')) {
             label.setAttribute('tabindex', '0');
@@ -570,22 +588,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     checkbox.checked = !checkbox.checked;
-                    checkbox.dispatchEvent(new Event('change'));
+                    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             });
         }
     });
     
+    // Gọi updateSelection lần đầu để cập nhật trạng thái ban đầu
+    updateSelection();
+    
     function updateSelection() {
-        const selected = Array.from(checkboxes)
+        // Lấy lại tất cả checkbox (có thể có checkbox mới được thêm vào)
+        const allCheckboxes = document.querySelectorAll('.seat-checkbox');
+        const selected = Array.from(allCheckboxes)
             .filter(cb => cb.checked)
             .map(cb => cb.value);
+        
+        // Loại bỏ duplicate (cho ghế đôi có thể có 2 checkbox cùng value)
+        const uniqueSelected = [...new Set(selected)];
         
         const emailContainer = document.getElementById('email-container');
         const emailInput = document.getElementById('customer_email');
         
         // Update visual
-        checkboxes.forEach(cb => {
+        allCheckboxes.forEach(cb => {
             const label = cb.closest('.seat-label');
             if (label) {
                 if (cb.checked) {
@@ -614,13 +640,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        if (selected.length > 0) {
-            const total = selected.length * pricePerSeat;
+        if (uniqueSelected.length > 0) {
+            const total = uniqueSelected.length * pricePerSeat;
             totalAmountSpan.textContent = total.toLocaleString('vi-VN') + '₫';
             totalAmountSpan.setAttribute('aria-label', 'Tổng tiền ' + total.toLocaleString('vi-VN') + ' đồng');
-            totalSeatsSpan.textContent = selected.length + ' ghế';
+            totalSeatsSpan.textContent = uniqueSelected.length + ' ghế';
             submitBtn.disabled = false;
-            submitBtn.setAttribute('aria-label', 'Xác nhận đặt ' + selected.length + ' vé');
+            submitBtn.setAttribute('aria-label', 'Xác nhận đặt ' + uniqueSelected.length + ' vé');
             
             // Hiển thị trường email
             if (emailContainer) {
@@ -640,6 +666,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 emailInput.value = '';
             }
         }
+        
+        // Return selected seats for use in override function
+        return uniqueSelected;
     }
     
     // Real-time seat reservation system
@@ -786,9 +815,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Override updateSelection to handle reservations
         const originalUpdateSelection = updateSelection;
         updateSelection = function() {
-            const newSelected = Array.from(checkboxes)
-                .filter(cb => cb.checked)
-                .map(cb => cb.value);
+            // Gọi function gốc để cập nhật UI và lấy danh sách ghế đã chọn
+            const newSelected = originalUpdateSelection();
             
             // Release seats that are no longer selected
             const toRelease = selectedSeats.filter(seat => !newSelected.includes(seat));
@@ -803,86 +831,100 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             selectedSeats = newSelected;
-            originalUpdateSelection();
         };
     }
     <?php endif; ?>
     
-    // Handle form submit - Mark seats as booked before submitting
-    const bookingForm = document.getElementById('booking-form');
-    if (bookingForm) {
-        bookingForm.addEventListener('submit', function(e) {
-            // Lấy các ghế đã chọn
-            const selectedCheckboxes = Array.from(document.querySelectorAll('.seat-checkbox:checked'));
-            const selectedSeatValues = selectedCheckboxes.map(cb => cb.value);
-            
-            if (selectedSeatValues.length > 0) {
-                // Đánh dấu ghế đã chọn thành "đã bán" ngay lập tức
-                selectedCheckboxes.forEach(checkbox => {
-                    const label = checkbox.closest('.seat-label');
-                    if (label) {
-                        // Remove selected class
-                        label.classList.remove('selected', 'available', 'reserved');
-                        // Add booked class
-                        label.classList.add('booked');
-                        
-                        // Remove checkbox
-                        checkbox.remove();
-                        
-                        // Disable seat interaction
-                        label.style.cursor = 'not-allowed';
-                        label.style.opacity = '0.6';
-                        
-                        // Update aria-checked
-                        label.setAttribute('aria-checked', 'false');
-                        label.setAttribute('aria-disabled', 'true');
-                    }
-                });
-                
-                // Release reservations của ghế đã chọn (vì đã được đặt rồi)
-                <?php if ($selected_showtime_id): ?>
-                if (typeof releaseSeats === 'function') {
-                    releaseSeats(selectedSeatValues);
-                }
-                if (reservationTimeout) {
-                    clearInterval(reservationTimeout);
-                    reservationTimeout = null;
-                }
-                // Stop polling vì đã đặt vé rồi
-                if (pollingInterval) {
-                    clearInterval(pollingInterval);
-                    pollingInterval = null;
-                }
-                <?php endif; ?>
-                
-                // Disable submit button để tránh double submit
-                const submitBtn = document.getElementById('submit-btn');
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    const originalBtnText = submitBtn.innerHTML;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
-                }
-                
-                // Update total info để hiển thị "Đã đặt"
-                const totalSeatsSpan = document.getElementById('total-seats');
-                if (totalSeatsSpan) {
-                    totalSeatsSpan.textContent = selectedSeatValues.length + ' ghế - Đang xử lý...';
-                }
-                
-                // Update selected seats display
-                const selectedSeatsSpan = document.getElementById('selected-seats');
-                if (selectedSeatsSpan) {
-                    selectedSeatsSpan.textContent = selectedSeatValues.join(', ') + ' (Đã đặt)';
-                    selectedSeatsSpan.style.color = '#dc3545';
-                }
-                
-                // Hide email input
-                const emailContainer = document.getElementById('email-container');
-                if (emailContainer) {
-                    emailContainer.style.display = 'none';
-                }
+    // Function validate và submit form
+    function validateBookingForm(e) {
+        // Lấy các ghế đã chọn (loại bỏ duplicate)
+        const selectedCheckboxes = Array.from(document.querySelectorAll('.seat-checkbox:checked'));
+        const selectedSeatValues = [...new Set(selectedCheckboxes.map(cb => cb.value))];
+        
+        // Debug log
+        console.log('Form submit - Selected seats:', selectedSeatValues);
+        console.log('Form submit - Checkboxes found:', selectedCheckboxes.length);
+        console.log('Form submit - All checkboxes in form:', document.querySelectorAll('#booking-form input[name="seats[]"]').length);
+        
+        // Validate: phải có ít nhất 1 ghế được chọn
+        if (selectedSeatValues.length === 0) {
+            e.preventDefault();
+            alert('Vui lòng chọn ít nhất một ghế!');
+            console.error('Validation failed: No seats selected');
+            return false;
+        }
+        
+        // Validate: phải có email
+        const emailInput = document.getElementById('customer_email');
+        if (emailInput && !emailInput.value.trim()) {
+            e.preventDefault();
+            alert('Vui lòng nhập email để nhận vé!');
+            emailInput.focus();
+            console.error('Validation failed: No email');
+            return false;
+        }
+        
+        // Đảm bảo tất cả checkbox được checked và có name="seats[]"
+        selectedCheckboxes.forEach(checkbox => {
+            if (!checkbox.checked) {
+                checkbox.checked = true;
             }
+            if (!checkbox.name || checkbox.name !== 'seats[]') {
+                checkbox.name = 'seats[]';
+            }
+            // Đảm bảo checkbox không bị disabled
+            checkbox.disabled = false;
         });
+        
+        // Verify lại trước khi submit - lấy từ form
+        const form = document.getElementById('booking-form');
+        const formSeats = Array.from(form.querySelectorAll('input[name="seats[]"]:checked'));
+        const finalSeats = [...new Set(formSeats.map(cb => cb.value))];
+        console.log('Final seats to submit (from form):', finalSeats);
+        console.log('Form data:', new FormData(form).getAll('seats[]'));
+        
+        if (finalSeats.length === 0) {
+            e.preventDefault();
+            alert('Lỗi: Không thể xác định ghế đã chọn. Vui lòng thử lại!');
+            console.error('Final validation failed: No seats found in form');
+            return false;
+        }
+        
+        // Disable submit button để tránh double submit
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+        }
+        
+        // Update total info để hiển thị "Đang xử lý"
+        const totalSeatsSpan = document.getElementById('total-seats');
+        if (totalSeatsSpan) {
+            totalSeatsSpan.textContent = finalSeats.length + ' ghế - Đang xử lý...';
+        }
+        
+        // Release reservations của ghế đã chọn (vì đã được đặt rồi)
+        <?php if ($selected_showtime_id): ?>
+        if (typeof releaseSeats === 'function') {
+            releaseSeats(selectedSeatValues);
+        }
+        if (typeof reservationTimeout !== 'undefined' && reservationTimeout) {
+            clearInterval(reservationTimeout);
+            reservationTimeout = null;
+        }
+        // Stop polling vì đã đặt vé rồi
+        if (typeof pollingInterval !== 'undefined' && pollingInterval) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+        }
+        <?php endif; ?>
+        
+        // KHÔNG remove checkbox hoặc thay đổi UI ở đây - để form submit với dữ liệu đúng
+        // Form sẽ tự động submit và redirect, sau đó server sẽ xử lý
+        
+        console.log('Form submitting with seats:', finalSeats);
+        console.log('Form action:', form.action);
+        return true; // Cho phép form submit
     }
 });
 

@@ -81,6 +81,13 @@ if (count($parts) >= 3) {
     $action = $parts[1] . $actionPart; // supportUpdateStatus
 } else {
     $action = $parts[1] ?? 'index';
+    // Convert kebab-case to camelCase cho action đơn giản (process-booking -> processBooking)
+    if (strpos($action, '-') !== false) {
+        $action = str_replace('-', ' ', $action);
+        $action = ucwords($action);
+        $action = str_replace(' ', '', $action);
+        $action = lcfirst($action); // processBooking
+    }
 }
 
 // Kiểm tra controller tồn tại
