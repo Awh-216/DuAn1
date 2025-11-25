@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th10 25, 2025 lúc 03:54 AM
+-- Thời gian đã tạo: Th10 25, 2025 lúc 03:59 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -251,7 +251,7 @@ INSERT INTO `movies` (`id`, `title`, `category_id`, `level`, `duration`, `descri
 (34, 'Series: Ai Là Hung Thủ (Mùa 1)', 1, 'Gold', 40, 'Series trinh thám điều tra các vụ án mạng phức tạp tại thành phố Hồ Chí Minh.', 'Lý Hải (Đóng vai trò sản xuất)', 'Trương Thế Vinh, Nhan Phúc Vinh', 'data/phim/phimbo/ai_la_hung_thu_s1', 'https://example.com/alht-trailer.mp4', 'data/img/ai_la_hung_thu_s1.jpg', 'Chiếu online', 7.9, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimbo'),
 (35, 'Phim lẻ: Cô Ba Sài Gòn', 2, 'Premium', 94, 'Phim lãng mạn, giả tưởng về thời trang áo dài và câu chuyện xuyên không giữa hai thế hệ.', 'Trần Bửu Lộc, Nguyễn Lê Minh', 'Ninh Dương Lan Ngọc, Diễm My 9x, Ngô Thanh Vân', 'data/phim/phimle/co_ba_sai_gon.mp4', 'https://example.com/cbsg-trailer.mp4', 'data/img/co_ba_sai_gon.jpg', 'Chiếu online', 7.6, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
 (36, 'Series: Tình Yêu và Tham Vọng', 7, 'Gold', 45, 'Phim thương trường với những cuộc chiến khốc liệt giữa các tập đoàn và câu chuyện tình yêu phức tạp.', 'Bùi Tiến Huy', 'Nhan Phúc Vinh, Diễm My 9x, Lã Thanh Huyền', 'data/phim/phimbo/tinh_yeu_va_tham_vong', 'https://example.com/tyvtc-trailer.mp4', 'data/img/tinh_yeu_va_tham_vong.jpg', 'Chiếu online', 7.8, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
-(37, 'Phim ngắn: Ngã Ba Đồng Lộc', 7, 'Free', 30, 'Phim tài liệu/chiến tranh về sự hy sinh anh dũng của 10 cô gái thanh niên xung phong.', 'Nguyễn Minh Chung', 'Nhiều diễn viên', 'data/phim/phimle/nga_ba_dong_loc.mp4', 'https://example.com/nbdl-trailer.mp4', 'data/img/nga_ba_dong_loc.jpg', 'Chiếu online', 8.2, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimle');
+(37, 'Phim ngắn: Ngã Ba Đồng Lộc', 7, 'Free', 30, 'Phim tài liệu/chiến tranh về sự hy sinh anh dũng của 10 cô gái thanh niên xung phong.', 'Nguyễn Minh Chung', 'Nhiều diễn viên', 'data/phim/phimle/nga_ba_dong_loc.mp4', 'https://example.com/nbdl-trailer.mp4', 'data/img/nga_ba_dong_loc_img.jpg', 'Chiếu online', 8.2, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/nga_ba_dong_loc.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimle');
 
 -- --------------------------------------------------------
 
