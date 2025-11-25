@@ -25,7 +25,7 @@ $title = 'Trang chủ';
                     <div class="hero-slide <?php echo $index === 0 ? 'active' : ''; ?>" data-slide="<?php echo $index; ?>">
                         <!-- Background Image -->
                         <?php if ($featuredMovie['thumbnail']): ?>
-                            <div class="hero-featured-bg" style="background-image: url('<?php echo htmlspecialchars($featuredMovie['thumbnail']); ?>');"></div>
+                            <div class="hero-featured-bg" style="background-image: url('<?php echo htmlspecialchars($featuredMovie['banner']); ?>');"></div>
                         <?php endif; ?>
                         
                         <!-- Content Overlay -->

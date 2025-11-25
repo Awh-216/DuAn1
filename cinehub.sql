@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1:3306
--- Generation Time: Nov 24, 2025 at 05:25 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Máy chủ: 127.0.0.1:3306
+-- Thời gian đã tạo: Th10 25, 2025 lúc 03:54 AM
+-- Phiên bản máy phục vụ: 10.4.32-MariaDB
+-- Phiên bản PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `cinehub`
+-- Cơ sở dữ liệu: `cinehub`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `admin_logs`
+-- Cấu trúc bảng cho bảng `admin_logs`
 --
 
 CREATE TABLE `admin_logs` (
@@ -42,7 +42,7 @@ CREATE TABLE `admin_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `admin_logs`
+-- Đang đổ dữ liệu cho bảng `admin_logs`
 --
 
 INSERT INTO `admin_logs` (`id`, `user_id`, `action`, `module`, `target_type`, `target_id`, `old_data`, `new_data`, `ip_address`, `user_agent`, `created_at`) VALUES
@@ -53,12 +53,14 @@ INSERT INTO `admin_logs` (`id`, `user_id`, `action`, `module`, `target_type`, `t
 (5, 3, 'update', 'theaters', 'theater', 1, NULL, NULL, '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', '2025-11-12 07:41:09'),
 (6, 2, 'view', 'analytics', NULL, NULL, NULL, NULL, '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', '2025-11-12 07:41:09'),
 (7, 3, 'Cập nhật điểm người dùng', 'User', 'user', 9, '{\"points\":0}', '{\"points\":100000,\"action\":\"add\",\"points_changed\":100000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-11-19 01:08:28'),
-(8, 3, 'Cập nhật điểm người dùng', 'User', 'user', 9, '{\"points\":100000}', '{\"points\":300000,\"action\":\"add\",\"points_changed\":200000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-11-19 01:08:44');
+(8, 3, 'Cập nhật điểm người dùng', 'User', 'user', 9, '{\"points\":100000}', '{\"points\":300000,\"action\":\"add\",\"points_changed\":200000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-11-19 01:08:44'),
+(9, 3, 'Cập nhật điểm người dùng', 'User', 'user', 12, '{\"points\":0}', '{\"points\":5000,\"action\":\"add\",\"points_changed\":5000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '2025-11-25 02:23:48'),
+(10, 3, 'Cập nhật điểm người dùng', 'User', 'user', 12, '{\"points\":5000}', '{\"points\":505000,\"action\":\"add\",\"points_changed\":500000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '2025-11-25 02:25:18');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `categories`
+-- Cấu trúc bảng cho bảng `categories`
 --
 
 CREATE TABLE `categories` (
@@ -68,7 +70,7 @@ CREATE TABLE `categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `categories`
+-- Đang đổ dữ liệu cho bảng `categories`
 --
 
 INSERT INTO `categories` (`id`, `name`, `parent_id`) VALUES
@@ -86,7 +88,7 @@ INSERT INTO `categories` (`id`, `name`, `parent_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `comments`
+-- Cấu trúc bảng cho bảng `comments`
 --
 
 CREATE TABLE `comments` (
@@ -101,7 +103,7 @@ CREATE TABLE `comments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `comments`
+-- Đang đổ dữ liệu cho bảng `comments`
 --
 
 INSERT INTO `comments` (`id`, `user_id`, `movie_id`, `parent_id`, `content`, `status`, `created_at`, `updated_at`) VALUES
@@ -116,7 +118,7 @@ INSERT INTO `comments` (`id`, `user_id`, `movie_id`, `parent_id`, `content`, `st
 -- --------------------------------------------------------
 
 --
--- Table structure for table `coupons`
+-- Cấu trúc bảng cho bảng `coupons`
 --
 
 CREATE TABLE `coupons` (
@@ -136,7 +138,7 @@ CREATE TABLE `coupons` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `coupons`
+-- Đang đổ dữ liệu cho bảng `coupons`
 --
 
 INSERT INTO `coupons` (`id`, `code`, `name`, `type`, `value`, `min_amount`, `max_discount`, `usage_limit`, `used_count`, `valid_from`, `valid_to`, `status`, `created_at`) VALUES
@@ -149,7 +151,7 @@ INSERT INTO `coupons` (`id`, `code`, `name`, `type`, `value`, `min_amount`, `max
 -- --------------------------------------------------------
 
 --
--- Table structure for table `episodes`
+-- Cấu trúc bảng cho bảng `episodes`
 --
 
 CREATE TABLE `episodes` (
@@ -166,7 +168,7 @@ CREATE TABLE `episodes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `episodes`
+-- Đang đổ dữ liệu cho bảng `episodes`
 --
 
 INSERT INTO `episodes` (`id`, `movie_id`, `episode_number`, `title`, `video_url`, `thumbnail`, `duration`, `description`, `created_at`, `updated_at`) VALUES
@@ -179,7 +181,7 @@ INSERT INTO `episodes` (`id`, `movie_id`, `episode_number`, `title`, `video_url`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `movies`
+-- Cấu trúc bảng cho bảng `movies`
 --
 
 CREATE TABLE `movies` (
@@ -209,7 +211,7 @@ CREATE TABLE `movies` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `movies`
+-- Đang đổ dữ liệu cho bảng `movies`
 --
 
 INSERT INTO `movies` (`id`, `title`, `category_id`, `level`, `duration`, `description`, `director`, `actors`, `video_url`, `trailer_url`, `thumbnail`, `status`, `rating`, `created_at`, `status_admin`, `publish_date`, `geo_restriction`, `drm_enabled`, `banner`, `country`, `language`, `age_rating`, `type`) VALUES
@@ -220,18 +222,18 @@ INSERT INTO `movies` (`id`, `title`, `category_id`, `level`, `duration`, `descri
 (5, 'Toy Story 4', 5, 'Free', 100, 'Cuộc phiêu lưu mới của Woody và Buzz', 'Josh Cooley', 'Tom Hanks, Tim Allen', 'https://example.com/toystory.mp4', 'https://example.com/toystory-trailer.mp4', 'toystory.jpg', 'Chiếu rạp', 8, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'G', 'phimle'),
 (6, 'Interstellar', 6, 'Premium', 169, 'Cuộc hành trình không gian để cứu nhân loại', 'Christopher Nolan', 'Matthew McConaughey, Anne Hathaway', 'data/phim/phimle/Interstellar\r\n.mp4', 'https://example.com/interstellar-trailer.mp4', 'data/img/interstellar.jpg', 'Chiếu online', 8.6, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle'),
 (7, 'Indiana Jones', 7, 'Gold', 122, 'Cuộc phiêu lưu tìm kiếm cổ vật', 'Steven Spielberg', 'Harrison Ford', 'https://example.com/indiana.mp4', 'https://example.com/indiana-trailer.mp4', 'indiana.jpg', 'Chiếu online', 8.2, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle'),
-(8, 'Game of Thrones', 7, 'Premium', 60, 'Cuộc chiến giành quyền lực giữa các dòng họ ở vùng đất Westeros. Bộ phim kể về cuộc đấu tranh của các gia đình quý tộc để giành lấy Ngai Sắt Sắt và cai trị bảy vương quốc.', 'David Benioff, D.B. Weiss', 'Emilia Clarke, Kit Harington, Peter Dinklage, Lena Headey', 'data/phim/phimbo/gameofthrones', 'https://example.com/got-trailer.mp4', 'data/img/game_of_thrones.jpg', 'Chiếu online', 9.3, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-MA', 'phimbo'),
-(9, 'Breaking Bad', 1, 'Gold', 47, 'Câu chuyện về giáo viên hóa học trung học Walter White, người bắt đầu sản xuất và bán methamphetamine sau khi được chẩn đoán ung thư phổi giai đoạn cuối.', 'Vince Gilligan', 'Bryan Cranston, Aaron Paul, Anna Gunn, Dean Norris', 'data/phim/phimbo/breaking_bad', 'https://example.com/breaking-bad-trailer.mp4', 'data/img/breaking_bad.jpg', 'Chiếu online', 9.5, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
+(8, 'Game of Thrones', 7, 'Premium', 60, 'Cuộc chiến giành quyền lực giữa các dòng họ ở vùng đất Westeros. Bộ phim kể về cuộc đấu tranh của các gia đình quý tộc để giành lấy Ngai Sắt Sắt và cai trị bảy vương quốc.', 'David Benioff, D.B. Weiss', 'Emilia Clarke, Kit Harington, Peter Dinklage, Lena Headey', 'data/phim/phimbo/gameofthrones', 'https://example.com/got-trailer.mp4', 'data/img/game_of_thrones_img.webp', 'Chiếu online', 9.3, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/game_of_thrones.jpg', 'Mỹ', 'Tiếng Anh', 'TV-MA', 'phimbo'),
+(9, 'Breaking Bad', 1, 'Gold', 47, 'Câu chuyện về giáo viên hóa học trung học Walter White, người bắt đầu sản xuất và bán methamphetamine sau khi được chẩn đoán ung thư phổi giai đoạn cuối.', 'Vince Gilligan', 'Bryan Cranston, Aaron Paul, Anna Gunn, Dean Norris', 'data/phim/phimbo/breaking_bad', 'https://example.com/breaking-bad-trailer.mp4', 'data/img/breaking_bad_img.jpg', 'Chiếu online', 9.5, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/breaking_bad.jpg', 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
 (10, 'The Walking Dead', 4, 'Gold', 45, 'Sheriff Deputy Rick Grimes tỉnh dậy sau một chấn thương và phát hiện ra thế giới đã bị tàn phá bởi đại dịch zombie. Anh phải dẫn dắt nhóm người sống sót tìm nơi trú ẩn.', 'Frank Darabont', 'Andrew Lincoln, Norman Reedus, Melissa McBride, Danai Gurira', 'data/phim/phimbo/the_walking_dead', 'https://example.com/walking-dead-trailer.mp4', 'data/img/the_walking_dead.jpg', 'Chiếu online', 8.2, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-MA', 'phimbo'),
 (11, 'Stranger Things', 6, 'Premium', 50, 'Khi một cậu bé 12 tuổi biến mất, một thị trấn nhỏ ở Indiana tiết lộ một bí mật liên quan đến thí nghiệm bí mật, siêu năng lực đáng sợ và một cô gái nhỏ lạ thường.', 'The Duffer Brothers', 'Millie Bobby Brown, Finn Wolfhard, Winona Ryder, David Harbour', 'data/phim/phimbo/stranger_things', 'https://example.com/stranger-things-trailer.mp4', 'data/img/stranger_things.jpg', 'Chiếu online', 8.7, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
-(12, 'House of Cards', 2, 'Gold', 58, 'Một chính trị gia khôn ngoan và không khoan nhượng làm bất cứ điều gì để giành quyền lực ở Washington D.C.', 'Beau Willimon', 'Kevin Spacey, Robin Wright, Kate Mara, Michael Kelly', 'data/phim/phimbo/house_of_cards', 'https://example.com/house-of-cards-trailer.mp4', 'data/img/house_of_cards.jpg', 'Chiếu online', 8.8, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-MA', 'phimbo'),
+(12, 'House of Cards', 2, 'Gold', 58, 'Một chính trị gia khôn ngoan và không khoan nhượng làm bất cứ điều gì để giành quyền lực ở Washington D.C.', 'Beau Willimon', 'Kevin Spacey, Robin Wright, Kate Mara, Michael Kelly', 'data/phim/phimbo/house_of_cards', 'https://example.com/house-of-cards-trailer.mp4', 'data/img/house_of_cards_img.png', 'Chiếu online', 8.8, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/house_of_cards.jpg', 'Mỹ', 'Tiếng Anh', 'TV-MA', 'phimbo'),
 (13, 'The Crown', 2, 'Premium', 58, 'Dòng thời gian về triều đại của Nữ hoàng Elizabeth II của Vương quốc Anh, từ những năm 1950 đến những năm 2000.', 'Peter Morgan', 'Claire Foy, Olivia Colman, Matt Smith, Tobias Menzies', 'data/phim/phimbo/the_crown', 'https://example.com/the-crown-trailer.mp4', 'data/img/the_crown.jpg', 'Chiếu online', 8.6, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Anh', 'Tiếng Anh', 'TV-MA', 'phimbo'),
-(14, 'Sherlock', 1, 'Gold', 90, 'Phiên bản hiện đại của các câu chuyện điều tra nổi tiếng của Sir Arthur Conan Doyle, với Sherlock Holmes và Dr. John Watson giải quyết các vụ án ở London thế kỷ 21.', 'Mark Gatiss, Steven Moffat', 'Benedict Cumberbatch, Martin Freeman, Rupert Graves, Mark Gatiss', 'data/phim/phimbo/sherlock', 'https://example.com/sherlock-trailer.mp4', 'data/img/sherlock.png', 'Chiếu online', 9.1, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Anh', 'Tiếng Anh', 'TV-14', 'phimbo'),
+(14, 'Sherlock', 1, 'Gold', 90, 'Phiên bản hiện đại của các câu chuyện điều tra nổi tiếng của Sir Arthur Conan Doyle, với Sherlock Holmes và Dr. John Watson giải quyết các vụ án ở London thế kỷ 21.', 'Mark Gatiss, Steven Moffat', 'Benedict Cumberbatch, Martin Freeman, Rupert Graves, Mark Gatiss', 'data/phim/phimbo/sherlock', 'https://example.com/sherlock-trailer.mp4', 'data/img/Sherlock_img.jpg', 'Chiếu online', 9.1, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/sherlock.png', 'Anh', 'Tiếng Anh', 'TV-14', 'phimbo'),
 (15, 'The Office', 3, 'Silver', 22, 'Một mockumentary về nhóm nhân viên văn phòng hàng ngày tại văn phòng chi nhánh Scranton của công ty giấy Dunder Mifflin.', 'Greg Daniels', 'Steve Carell, Rainn Wilson, John Krasinski, Jenna Fischer', 'data/phim/phimbo/the_office', 'https://example.com/the-office-trailer.mp4', 'data/img/the_office.png', 'Chiếu online', 8.9, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
 (16, 'Friends', 3, 'Silver', 22, 'Cuộc sống và tình yêu của sáu người bạn ở Manhattan, New York, khi họ cố gắng tìm ra con đường của mình trong cuộc sống.', 'David Crane, Marta Kauffman', 'Jennifer Aniston, Courteney Cox, Lisa Kudrow, Matt LeBlanc, Matthew Perry, David Schwimmer', 'data/phim/phimbo/friends', 'https://example.com/friends-trailer.mp4', 'data/img/friends.jpg', 'Chiếu online', 9, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
 (17, 'The Witcher', 7, 'Premium', 60, 'Geralt of Rivia, một thợ săn quái vật đột biến đi khắp đất liền để tìm nơi thuộc về mình trong một thế giới nơi con người thường tồi tệ hơn quái vật.', 'Lauren Schmidt Hissrich', 'Henry Cavill, Anya Chalotra, Freya Allan, Joey Batey', 'data/phim/phimbo/the_witcher', 'https://example.com/the-witcher-trailer.mp4', 'data/img/the_witcher.jpg', 'Chiếu online', 8.2, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ/ Ba Lan', 'Tiếng Anh', 'TV-MA', 'phimbo'),
 (18, 'Hai Phượng', 1, 'Premium', 98, 'Mẹ đơn thân từng là dân giang hồ phải chiến đấu với băng nhóm bắt cóc con gái mình.', 'Lê Văn Kiệt', 'Ngô Thanh Vân, Mai Cát Vi', 'data/phim/phimle/hai_phuong.mp4', 'https://example.com/hai-phuong-trailer.mp4', 'data/img/hai_phuong.jpg', 'Chiếu rạp', 7.5, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
-(19, 'Mắt Biếc', 2, 'Gold', 117, 'Câu chuyện tình đơn phương lãng mạn và đầy hoài niệm ở thập niên 70.', 'Victor Vũ', 'Trần Nghĩa, Trúc Anh, Trần Phong', 'data/phim/phimle/mat_biec.mp4', 'https://example.com/mat-biec-trailer.mp4', 'data/img/mat_biec.jpg', 'Chiếu rạp', 8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
+(19, 'Mắt Biếc', 2, 'Gold', 117, 'Câu chuyện tình đơn phương lãng mạn và đầy hoài niệm ở thập niên 70.', 'Victor Vũ', 'Trần Nghĩa, Trúc Anh, Trần Phong', 'data/phim/phimle/mat_biec.mp4', 'https://example.com/mat-biec-trailer.mp4', 'data/img/mat_biec_img.jpg', 'Chiếu rạp', 8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, 'data/img/mat_biec.webp', 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
 (20, 'Bố Già', 3, 'Premium', 128, 'Phim về tình cha con đầy cảm xúc và những mâu thuẫn trong gia đình.', 'Trấn Thành, Vũ Ngọc Đãng', 'Trấn Thành, Lê Giang, Tuấn Trần', 'data/phim/phimle/bo_gia.mp4', 'https://example.com/bo-gia-trailer.mp4', 'data/img/bo_gia.jpg', 'Chiếu rạp', 8.5, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
 (21, 'Tiệc Trăng Máu', 3, 'Gold', 100, 'Bảy người bạn cùng chơi một trò chơi công khai tin nhắn và cuộc gọi điện thoại, dẫn đến những bí mật bị phanh phui.', 'Nguyễn Quang Dũng', 'Thái Hòa, Thu Trang, Hồng Ánh, Hứa Vĩ Văn', 'data/phim/phimle/tiec_trang_mau.mp4', 'https://example.com/tiec-trang-mau-trailer.mp4', 'data/img/tiec_trang_mau.jpg', 'Chiếu rạp', 7.8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
 (22, 'Lật Mặt 4: Nhà Có Khách', 4, 'Silver', 90, 'Phim hài kinh dị với những tình huống dở khóc dở cười và yếu tố ma quái.', 'Lý Hải', 'Lý Hải, Katleen Phan Võ, Huy Khánh', 'data/phim/phimle/lat_mat_4.mp4', 'https://example.com/lat-mat-4-trailer.mp4', 'data/img/lat_mat_4.jpg', 'Chiếu rạp', 7, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
@@ -241,7 +243,7 @@ INSERT INTO `movies` (`id`, `title`, `category_id`, `level`, `duration`, `descri
 (26, 'Quỳnh Hoa Nhất Dạ', 7, 'Premium', 120, 'Phim cổ trang, dã sử về cuộc đời đầy sóng gió của Thái hậu Dương Vân Nga.', 'Lý Minh Thắng', 'Nhã Phương, Thuý Ngân, Lương Thế Thành', 'data/phim/phimle/quynh_hoa_nhat_da.mp4', 'https://example.com/quynh-hoa-nhat-da-trailer.mp4', 'data/img/quynh_hoa_nhat_da.jpg', 'Chiếu rạp', 7.7, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
 (27, 'Tấm Cám: Chuyện Chưa Kể', 5, 'Gold', 116, 'Phiên bản cải biên của truyện cổ tích Tấm Cám, kết hợp yếu tố giả tưởng và hành động.', 'Ngô Thanh Vân', 'Hạ Vi, Isaac, Ngô Thanh Vân', 'data/phim/phimle/tam_cam.mp4', 'https://example.com/tam-cam-trailer.mp4', 'data/img/tam_cam.jpg', 'Chiếu rạp', 7.1, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
 (28, 'Hương Vị Tình Thân (Phần 1)', 2, 'Free', 45, 'Phim truyền hình về cuộc đời đầy thử thách của Phương Nam, người luôn khát khao tình cảm gia đình.', 'Nguyễn Danh Dũng', 'Phương Oanh, Mạnh Trường, Công Lý', 'data/phim/phimbo/huong_vi_tinh_than_p1', 'https://example.com/hvtt-trailer.mp4', 'data/img/huong_vi_tinh_than_p1.jpg', 'Chiếu online', 8.4, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
-(29, 'Về Nhà Đi Con', 2, 'Gold', 45, 'Phim về tình cảm gia đình, đặc biệt là tình cha và ba cô con gái có tính cách khác nhau.', 'Nguyễn Danh Dũng', 'NSND Hoàng Dũng, Thu Quỳnh, Bảo Thanh, Bảo Hân', 'data/phim/phimbo/venhadicon', 'https://example.com/vndc-trailer.mp4', 'data/img/venhadicon.jpg', 'Chiếu online', 9, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
+(29, 'Về Nhà Đi Con', 2, 'Gold', 45, 'Phim về tình cảm gia đình, đặc biệt là tình cha và ba cô con gái có tính cách khác nhau.', 'Nguyễn Danh Dũng', 'NSND Hoàng Dũng, Thu Quỳnh, Bảo Thanh, Bảo Hân', 'data/phim/phimbo/venhadicon', 'https://example.com/vndc-trailer.mp4', 'data/img/venhadicon_img.webp', 'Chiếu online', 9, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/venhadicon.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
 (30, 'Người Phán Xử', 1, 'Premium', 45, 'Ông trùm Phan Quân và những cuộc chiến tranh giành quyền lực trong thế giới ngầm.', 'Nguyễn Mai Hiền, Nguyễn Khải Anh, Bùi Quốc Việt', 'NSND Hoàng Dũng, Việt Anh, Hồng Đăng', 'data/phim/phimbo/nguoi_phan_xu', 'https://example.com/npx-trailer.mp4', 'data/img/nguoi_phan_xu.jpg', 'Chiếu online', 8.7, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C18', 'phimbo'),
 (31, 'Sống Chung Với Mẹ Chồng', 2, 'Gold', 45, 'Những mâu thuẫn nảy sinh khi nàng dâu và mẹ chồng sống chung dưới một mái nhà.', 'Vũ Trường Khoa', 'NSND Lan Hương, Bảo Thanh, Anh Dũng', 'data/phim/phimbo/song_chung_voi_me_chong', 'https://example.com/scvmc-trailer.mp4', 'data/img/song_chung_voi_me_chong.jpg', 'Chiếu online', 8.1, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
 (32, 'Thương Ngày Nắng Về (Phần 2)', 2, 'Premium', 45, 'Câu chuyện về bà mẹ đơn thân cùng ba cô con gái, xoay quanh tình yêu, sự nghiệp và những mâu thuẫn.', 'Bùi Tiến Huy', 'NSƯT Thanh Quý, Phan Minh Huyền, Lan Phương', 'data/phim/phimbo/thuong_ngay_nang_ve_p2', 'https://example.com/tnnv-trailer.mp4', 'data/img/thuong_ngay_nang_ve_p2.jpg', 'Chiếu online', 8.5, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
@@ -254,7 +256,7 @@ INSERT INTO `movies` (`id`, `title`, `category_id`, `level`, `duration`, `descri
 -- --------------------------------------------------------
 
 --
--- Table structure for table `permissions`
+-- Cấu trúc bảng cho bảng `permissions`
 --
 
 CREATE TABLE `permissions` (
@@ -266,7 +268,7 @@ CREATE TABLE `permissions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `permissions`
+-- Đang đổ dữ liệu cho bảng `permissions`
 --
 
 INSERT INTO `permissions` (`id`, `name`, `description`, `module`, `created_at`) VALUES
@@ -301,7 +303,7 @@ INSERT INTO `permissions` (`id`, `name`, `description`, `module`, `created_at`) 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `promotions`
+-- Cấu trúc bảng cho bảng `promotions`
 --
 
 CREATE TABLE `promotions` (
@@ -318,7 +320,7 @@ CREATE TABLE `promotions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `promotions`
+-- Đang đổ dữ liệu cho bảng `promotions`
 --
 
 INSERT INTO `promotions` (`id`, `name`, `description`, `type`, `discount_value`, `start_date`, `end_date`, `status`, `target_audience`, `created_at`) VALUES
@@ -331,7 +333,7 @@ INSERT INTO `promotions` (`id`, `name`, `description`, `type`, `discount_value`,
 -- --------------------------------------------------------
 
 --
--- Table structure for table `reviews`
+-- Cấu trúc bảng cho bảng `reviews`
 --
 
 CREATE TABLE `reviews` (
@@ -345,7 +347,7 @@ CREATE TABLE `reviews` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `reviews`
+-- Đang đổ dữ liệu cho bảng `reviews`
 --
 
 INSERT INTO `reviews` (`id`, `user_id`, `movie_id`, `rating`, `comment`, `created_at`, `is_pinned`) VALUES
@@ -361,7 +363,7 @@ INSERT INTO `reviews` (`id`, `user_id`, `movie_id`, `rating`, `comment`, `create
 -- --------------------------------------------------------
 
 --
--- Table structure for table `roles`
+-- Cấu trúc bảng cho bảng `roles`
 --
 
 CREATE TABLE `roles` (
@@ -372,7 +374,7 @@ CREATE TABLE `roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `roles`
+-- Đang đổ dữ liệu cho bảng `roles`
 --
 
 INSERT INTO `roles` (`id`, `name`, `description`, `created_at`) VALUES
@@ -385,7 +387,7 @@ INSERT INTO `roles` (`id`, `name`, `description`, `created_at`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `role_permissions`
+-- Cấu trúc bảng cho bảng `role_permissions`
 --
 
 CREATE TABLE `role_permissions` (
@@ -396,7 +398,7 @@ CREATE TABLE `role_permissions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `role_permissions`
+-- Đang đổ dữ liệu cho bảng `role_permissions`
 --
 
 INSERT INTO `role_permissions` (`id`, `role_id`, `permission_id`, `created_at`) VALUES
@@ -431,7 +433,7 @@ INSERT INTO `role_permissions` (`id`, `role_id`, `permission_id`, `created_at`) 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `seat_reservations`
+-- Cấu trúc bảng cho bảng `seat_reservations`
 --
 
 CREATE TABLE `seat_reservations` (
@@ -447,7 +449,7 @@ CREATE TABLE `seat_reservations` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `showtimes`
+-- Cấu trúc bảng cho bảng `showtimes`
 --
 
 CREATE TABLE `showtimes` (
@@ -462,7 +464,7 @@ CREATE TABLE `showtimes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `showtimes`
+-- Đang đổ dữ liệu cho bảng `showtimes`
 --
 
 INSERT INTO `showtimes` (`id`, `movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `created_at`, `screen_id`) VALUES
@@ -694,7 +696,7 @@ INSERT INTO `showtimes` (`id`, `movie_id`, `theater_id`, `show_date`, `show_time
 -- --------------------------------------------------------
 
 --
--- Table structure for table `subscriptions`
+-- Cấu trúc bảng cho bảng `subscriptions`
 --
 
 CREATE TABLE `subscriptions` (
@@ -707,7 +709,7 @@ CREATE TABLE `subscriptions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `subscriptions`
+-- Đang đổ dữ liệu cho bảng `subscriptions`
 --
 
 INSERT INTO `subscriptions` (`id`, `name`, `price`, `description`, `benefits`, `created_at`) VALUES
@@ -720,7 +722,7 @@ INSERT INTO `subscriptions` (`id`, `name`, `price`, `description`, `benefits`, `
 -- --------------------------------------------------------
 
 --
--- Table structure for table `support_tickets`
+-- Cấu trúc bảng cho bảng `support_tickets`
 --
 
 CREATE TABLE `support_tickets` (
@@ -737,7 +739,7 @@ CREATE TABLE `support_tickets` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `support_tickets`
+-- Đang đổ dữ liệu cho bảng `support_tickets`
 --
 
 INSERT INTO `support_tickets` (`id`, `user_id`, `subject`, `message`, `status`, `priority`, `tags`, `assigned_to`, `created_at`, `updated_at`) VALUES
@@ -751,7 +753,7 @@ INSERT INTO `support_tickets` (`id`, `user_id`, `subject`, `message`, `status`, 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `system_config`
+-- Cấu trúc bảng cho bảng `system_config`
 --
 
 CREATE TABLE `system_config` (
@@ -764,7 +766,7 @@ CREATE TABLE `system_config` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `system_config`
+-- Đang đổ dữ liệu cho bảng `system_config`
 --
 
 INSERT INTO `system_config` (`id`, `config_key`, `config_value`, `description`, `updated_by`, `updated_at`) VALUES
@@ -777,7 +779,7 @@ INSERT INTO `system_config` (`id`, `config_key`, `config_value`, `description`, 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `theaters`
+-- Cấu trúc bảng cho bảng `theaters`
 --
 
 CREATE TABLE `theaters` (
@@ -792,7 +794,7 @@ CREATE TABLE `theaters` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `theaters`
+-- Đang đổ dữ liệu cho bảng `theaters`
 --
 
 INSERT INTO `theaters` (`id`, `name`, `location`, `phone`, `created_at`, `total_screens`, `address`, `is_active`) VALUES
@@ -805,7 +807,7 @@ INSERT INTO `theaters` (`id`, `name`, `location`, `phone`, `created_at`, `total_
 -- --------------------------------------------------------
 
 --
--- Table structure for table `theater_screens`
+-- Cấu trúc bảng cho bảng `theater_screens`
 --
 
 CREATE TABLE `theater_screens` (
@@ -820,7 +822,7 @@ CREATE TABLE `theater_screens` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `theater_screens`
+-- Đang đổ dữ liệu cho bảng `theater_screens`
 --
 
 INSERT INTO `theater_screens` (`id`, `theater_id`, `screen_name`, `total_seats`, `seat_layout`, `screen_type`, `is_active`, `created_at`) VALUES
@@ -836,7 +838,7 @@ INSERT INTO `theater_screens` (`id`, `theater_id`, `screen_name`, `total_seats`,
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tickets`
+-- Cấu trúc bảng cho bảng `tickets`
 --
 
 CREATE TABLE `tickets` (
@@ -851,7 +853,7 @@ CREATE TABLE `tickets` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tickets`
+-- Đang đổ dữ liệu cho bảng `tickets`
 --
 
 INSERT INTO `tickets` (`id`, `user_id`, `showtime_id`, `seat`, `qr_code`, `price`, `status`, `created_at`) VALUES
@@ -860,12 +862,28 @@ INSERT INTO `tickets` (`id`, `user_id`, `showtime_id`, `seat`, `qr_code`, `price
 (3, 2, 72, 'B10', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
 (4, 3, 73, 'C15', NULL, 100000.00, 'Đã đặt', '2025-11-12 07:41:09'),
 (5, 4, 74, 'D20', NULL, 110000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(6, 5, 75, 'E12', NULL, 115000.00, 'Đã đặt', '2025-11-12 07:41:09');
+(6, 5, 75, 'E12', NULL, 115000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(7, 9, 81, 'A6', 'TICKET_69240f4b89ccf_9_81_1763970891_A6', 120000.00, 'Đã đặt', '2025-11-24 07:54:51'),
+(8, 9, 81, 'G7', 'TICKET_69240f61d71ab_9_81_1763970913_G7', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
+(9, 9, 81, 'G8', 'TICKET_69240f61d7831_9_81_1763970913_G8', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
+(10, 9, 81, 'G9', 'TICKET_69240f61d7bcf_9_81_1763970913_G9', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
+(11, 9, 121, 'G4', 'TICKET_692506ab7cef0_9_121_1764034219_G4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(12, 9, 121, 'G5', 'TICKET_692506ab7d8a8_9_121_1764034219_G5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(13, 9, 121, 'H4', 'TICKET_692506ab7e237_9_121_1764034219_H4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(14, 9, 121, 'H5', 'TICKET_692506ab7ea13_9_121_1764034219_H5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(15, 9, 121, 'H6', 'TICKET_692506ab7f17a_9_121_1764034219_H6', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(16, 9, 121, 'H7', 'TICKET_692506ab7f857_9_121_1764034219_H7', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(17, 9, 121, 'I4', 'TICKET_692506ab7ff3e_9_121_1764034219_I4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(18, 9, 121, 'I5', 'TICKET_692506ab80651_9_121_1764034219_I5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(19, 9, 121, 'I6', 'TICKET_692506ab80dbd_9_121_1764034219_I6', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(20, 9, 121, 'I7', 'TICKET_692506ab81559_9_121_1764034219_I7', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(21, 9, 116, 'I5', 'TICKET_692512378240a_9_116_1764037175_I5', 130000.00, 'Đã đặt', '2025-11-25 02:19:35'),
+(22, 9, 116, 'I6', 'TICKET_6925123783725_9_116_1764037175_I6', 130000.00, 'Đã đặt', '2025-11-25 02:19:35');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `transactions`
+-- Cấu trúc bảng cho bảng `transactions`
 --
 
 CREATE TABLE `transactions` (
@@ -880,7 +898,7 @@ CREATE TABLE `transactions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `transactions`
+-- Đang đổ dữ liệu cho bảng `transactions`
 --
 
 INSERT INTO `transactions` (`id`, `user_id`, `type`, `related_id`, `amount`, `method`, `status`, `created_at`) VALUES
@@ -890,12 +908,14 @@ INSERT INTO `transactions` (`id`, `user_id`, `type`, `related_id`, `amount`, `me
 (4, 4, 'subscription', 4, 199000.00, 'Bank', 'Thành công', '2025-11-12 07:41:09'),
 (5, 5, 'ticket', 5, 110000.00, 'Momo', 'Thành công', '2025-11-12 07:41:09'),
 (6, 1, 'ticket', 2, 120000.00, 'ZaloPay', 'Thành công', '2025-11-12 07:41:09'),
-(7, 9, 'subscription', 4, 199000.00, '', 'Thành công', '2025-11-19 01:09:14');
+(7, 9, 'subscription', 4, 199000.00, '', 'Thành công', '2025-11-19 01:09:14'),
+(8, 12, 'subscription', 2, 79000.00, '', 'Thành công', '2025-11-25 02:26:14'),
+(9, 12, 'subscription', 3, 129000.00, '', 'Thành công', '2025-11-25 02:27:04');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Cấu trúc bảng cho bảng `users`
 --
 
 CREATE TABLE `users` (
@@ -918,7 +938,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `users`
+-- Đang đổ dữ liệu cho bảng `users`
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `avatar`, `birthdate`, `rank`, `points`, `subscription_id`, `status`, `email_verified`, `created_at`, `updated_at`, `role`, `is_active`, `last_login`) VALUES
@@ -931,12 +951,14 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `avatar`, `birthdate`, `
 (7, 'Phạm Thị D', 'phamthid@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Platinum', 2500, 4, 'active', 0, '2025-11-12 07:41:09', '2025-11-12 07:41:09', 'user', 1, NULL),
 (8, 'Hoàng Văn E', 'hoangvane@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Silver', 800, 2, 'active', 0, '2025-11-12 07:41:09', '2025-11-12 07:41:09', 'user', 1, NULL),
 (9, 'vanlinh', 'nguyenvanlinh25062006@gmail.com', '$2y$10$RfY4oVxCmmN5s57rhg2WzuD1eWIFh5MZUNhN.Sa3erAbC5Vt01mwC', NULL, NULL, 'Bronze', 101000, 4, 'active', 0, '2025-11-14 01:35:37', '2025-11-19 01:09:14', 'user', 1, NULL),
-(10, 'Tuan_awh', 'tuanawh@gmail.com', '$2y$10$5NwNHefnp5jwjr1Vls5HG.dnt4SWC1newqSkuV8X4QTcwZ0Ok1JQ.', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-14 01:45:51', '2025-11-14 01:45:51', 'user', 1, NULL);
+(10, 'Tuan_awh', 'tuanawh@gmail.com', '$2y$10$5NwNHefnp5jwjr1Vls5HG.dnt4SWC1newqSkuV8X4QTcwZ0Ok1JQ.', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-14 01:45:51', '2025-11-14 01:45:51', 'user', 1, NULL),
+(11, 'Hoang Son', 'hsson97805@gmail.com', '$2y$10$4OBk1HA71jEhbVPP7FA7VueQ8B30EgEy9eB9tAHRFmUvA8I7lwAPe', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-24 08:52:25', '2025-11-24 08:52:25', 'user', 1, NULL),
+(12, 'jack', 'jack@gmail.com', '$2y$10$4OPMx0NC7sXIg23/hWQt1u0t52jEDgc5grk/LZAOmmFw8a3DAy.BW', NULL, NULL, 'Bronze', 297000, 3, 'active', 0, '2025-11-25 02:20:46', '2025-11-25 02:27:04', 'user', 1, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_roles`
+-- Cấu trúc bảng cho bảng `user_roles`
 --
 
 CREATE TABLE `user_roles` (
@@ -947,7 +969,7 @@ CREATE TABLE `user_roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `user_roles`
+-- Đang đổ dữ liệu cho bảng `user_roles`
 --
 
 INSERT INTO `user_roles` (`id`, `user_id`, `role_id`, `created_at`) VALUES
@@ -960,7 +982,7 @@ INSERT INTO `user_roles` (`id`, `user_id`, `role_id`, `created_at`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `watch_history`
+-- Cấu trúc bảng cho bảng `watch_history`
 --
 
 CREATE TABLE `watch_history` (
@@ -974,7 +996,7 @@ CREATE TABLE `watch_history` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `watch_history`
+-- Đang đổ dữ liệu cho bảng `watch_history`
 --
 
 INSERT INTO `watch_history` (`id`, `user_id`, `movie_id`, `last_time`, `rating`, `favorite`, `created_at`) VALUES
@@ -991,16 +1013,19 @@ INSERT INTO `watch_history` (`id`, `user_id`, `movie_id`, `last_time`, `rating`,
 (11, 9, 12, 0, NULL, 1, '2025-11-19 01:16:38'),
 (12, 9, 1, 0, NULL, 1, '2025-11-19 01:17:46'),
 (14, 9, 14, 0, NULL, 0, '2025-11-19 02:24:15'),
-(15, 9, 8, 0, NULL, 0, '2025-11-19 03:15:50'),
+(15, 9, 8, 0, NULL, 0, '2025-11-25 00:57:55'),
 (27, 3, 8, 0, NULL, 0, '2025-11-19 01:47:02'),
-(61, 9, 29, 0, NULL, 0, '2025-11-24 03:28:50');
+(61, 9, 29, 0, NULL, 0, '2025-11-25 01:32:09'),
+(70, 11, 37, 0, NULL, 0, '2025-11-24 08:53:01'),
+(75, 12, 14, 0, NULL, 0, '2025-11-25 02:53:22'),
+(76, 12, 29, 0, NULL, 0, '2025-11-25 02:53:34');
 
 --
--- Indexes for dumped tables
+-- Chỉ mục cho các bảng đã đổ
 --
 
 --
--- Indexes for table `admin_logs`
+-- Chỉ mục cho bảng `admin_logs`
 --
 ALTER TABLE `admin_logs`
   ADD PRIMARY KEY (`id`),
@@ -1009,14 +1034,14 @@ ALTER TABLE `admin_logs`
   ADD KEY `idx_module` (`module`);
 
 --
--- Indexes for table `categories`
+-- Chỉ mục cho bảng `categories`
 --
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
   ADD KEY `parent_id` (`parent_id`);
 
 --
--- Indexes for table `comments`
+-- Chỉ mục cho bảng `comments`
 --
 ALTER TABLE `comments`
   ADD PRIMARY KEY (`id`),
@@ -1026,7 +1051,7 @@ ALTER TABLE `comments`
   ADD KEY `idx_status` (`status`);
 
 --
--- Indexes for table `coupons`
+-- Chỉ mục cho bảng `coupons`
 --
 ALTER TABLE `coupons`
   ADD PRIMARY KEY (`id`),
@@ -1035,7 +1060,7 @@ ALTER TABLE `coupons`
   ADD KEY `idx_status` (`status`);
 
 --
--- Indexes for table `episodes`
+-- Chỉ mục cho bảng `episodes`
 --
 ALTER TABLE `episodes`
   ADD PRIMARY KEY (`id`),
@@ -1043,27 +1068,27 @@ ALTER TABLE `episodes`
   ADD KEY `idx_movie_id` (`movie_id`);
 
 --
--- Indexes for table `movies`
+-- Chỉ mục cho bảng `movies`
 --
 ALTER TABLE `movies`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_category` (`category_id`);
 
 --
--- Indexes for table `permissions`
+-- Chỉ mục cho bảng `permissions`
 --
 ALTER TABLE `permissions`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
 
 --
--- Indexes for table `promotions`
+-- Chỉ mục cho bảng `promotions`
 --
 ALTER TABLE `promotions`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `reviews`
+-- Chỉ mục cho bảng `reviews`
 --
 ALTER TABLE `reviews`
   ADD PRIMARY KEY (`id`),
@@ -1071,14 +1096,14 @@ ALTER TABLE `reviews`
   ADD KEY `idx_rev_movie` (`movie_id`);
 
 --
--- Indexes for table `roles`
+-- Chỉ mục cho bảng `roles`
 --
 ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
 
 --
--- Indexes for table `role_permissions`
+-- Chỉ mục cho bảng `role_permissions`
 --
 ALTER TABLE `role_permissions`
   ADD PRIMARY KEY (`id`),
@@ -1086,7 +1111,7 @@ ALTER TABLE `role_permissions`
   ADD KEY `permission_id` (`permission_id`);
 
 --
--- Indexes for table `seat_reservations`
+-- Chỉ mục cho bảng `seat_reservations`
 --
 ALTER TABLE `seat_reservations`
   ADD PRIMARY KEY (`id`),
@@ -1097,7 +1122,7 @@ ALTER TABLE `seat_reservations`
   ADD KEY `idx_active_reservations` (`showtime_id`,`expires_at`);
 
 --
--- Indexes for table `showtimes`
+-- Chỉ mục cho bảng `showtimes`
 --
 ALTER TABLE `showtimes`
   ADD PRIMARY KEY (`id`),
@@ -1106,13 +1131,13 @@ ALTER TABLE `showtimes`
   ADD KEY `screen_id` (`screen_id`);
 
 --
--- Indexes for table `subscriptions`
+-- Chỉ mục cho bảng `subscriptions`
 --
 ALTER TABLE `subscriptions`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `support_tickets`
+-- Chỉ mục cho bảng `support_tickets`
 --
 ALTER TABLE `support_tickets`
   ADD PRIMARY KEY (`id`),
@@ -1120,7 +1145,7 @@ ALTER TABLE `support_tickets`
   ADD KEY `assigned_to` (`assigned_to`);
 
 --
--- Indexes for table `system_config`
+-- Chỉ mục cho bảng `system_config`
 --
 ALTER TABLE `system_config`
   ADD PRIMARY KEY (`id`),
@@ -1128,20 +1153,20 @@ ALTER TABLE `system_config`
   ADD KEY `updated_by` (`updated_by`);
 
 --
--- Indexes for table `theaters`
+-- Chỉ mục cho bảng `theaters`
 --
 ALTER TABLE `theaters`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `theater_screens`
+-- Chỉ mục cho bảng `theater_screens`
 --
 ALTER TABLE `theater_screens`
   ADD PRIMARY KEY (`id`),
   ADD KEY `theater_id` (`theater_id`);
 
 --
--- Indexes for table `tickets`
+-- Chỉ mục cho bảng `tickets`
 --
 ALTER TABLE `tickets`
   ADD PRIMARY KEY (`id`),
@@ -1152,14 +1177,14 @@ ALTER TABLE `tickets`
   ADD KEY `idx_showtime_seat_status` (`showtime_id`,`seat`,`status`);
 
 --
--- Indexes for table `transactions`
+-- Chỉ mục cho bảng `transactions`
 --
 ALTER TABLE `transactions`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_tx_user` (`user_id`);
 
 --
--- Indexes for table `users`
+-- Chỉ mục cho bảng `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -1168,7 +1193,7 @@ ALTER TABLE `users`
   ADD KEY `idx_subscription` (`subscription_id`);
 
 --
--- Indexes for table `user_roles`
+-- Chỉ mục cho bảng `user_roles`
 --
 ALTER TABLE `user_roles`
   ADD PRIMARY KEY (`id`),
@@ -1176,7 +1201,7 @@ ALTER TABLE `user_roles`
   ADD KEY `role_id` (`role_id`);
 
 --
--- Indexes for table `watch_history`
+-- Chỉ mục cho bảng `watch_history`
 --
 ALTER TABLE `watch_history`
   ADD PRIMARY KEY (`id`),
@@ -1185,165 +1210,165 @@ ALTER TABLE `watch_history`
   ADD KEY `idx_wh_movie` (`movie_id`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT cho các bảng đã đổ
 --
 
 --
--- AUTO_INCREMENT for table `admin_logs`
+-- AUTO_INCREMENT cho bảng `admin_logs`
 --
 ALTER TABLE `admin_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `categories`
+-- AUTO_INCREMENT cho bảng `categories`
 --
 ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `comments`
+-- AUTO_INCREMENT cho bảng `comments`
 --
 ALTER TABLE `comments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT for table `coupons`
+-- AUTO_INCREMENT cho bảng `coupons`
 --
 ALTER TABLE `coupons`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `episodes`
+-- AUTO_INCREMENT cho bảng `episodes`
 --
 ALTER TABLE `episodes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `movies`
+-- AUTO_INCREMENT cho bảng `movies`
 --
 ALTER TABLE `movies`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
--- AUTO_INCREMENT for table `permissions`
+-- AUTO_INCREMENT cho bảng `permissions`
 --
 ALTER TABLE `permissions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
--- AUTO_INCREMENT for table `promotions`
+-- AUTO_INCREMENT cho bảng `promotions`
 --
 ALTER TABLE `promotions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `reviews`
+-- AUTO_INCREMENT cho bảng `reviews`
 --
 ALTER TABLE `reviews`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `roles`
+-- AUTO_INCREMENT cho bảng `roles`
 --
 ALTER TABLE `roles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `role_permissions`
+-- AUTO_INCREMENT cho bảng `role_permissions`
 --
 ALTER TABLE `role_permissions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
--- AUTO_INCREMENT for table `seat_reservations`
+-- AUTO_INCREMENT cho bảng `seat_reservations`
 --
 ALTER TABLE `seat_reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
--- AUTO_INCREMENT for table `showtimes`
+-- AUTO_INCREMENT cho bảng `showtimes`
 --
 ALTER TABLE `showtimes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=343;
 
 --
--- AUTO_INCREMENT for table `subscriptions`
+-- AUTO_INCREMENT cho bảng `subscriptions`
 --
 ALTER TABLE `subscriptions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `support_tickets`
+-- AUTO_INCREMENT cho bảng `support_tickets`
 --
 ALTER TABLE `support_tickets`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `system_config`
+-- AUTO_INCREMENT cho bảng `system_config`
 --
 ALTER TABLE `system_config`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `theaters`
+-- AUTO_INCREMENT cho bảng `theaters`
 --
 ALTER TABLE `theaters`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `theater_screens`
+-- AUTO_INCREMENT cho bảng `theater_screens`
 --
 ALTER TABLE `theater_screens`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `tickets`
+-- AUTO_INCREMENT cho bảng `tickets`
 --
 ALTER TABLE `tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
--- AUTO_INCREMENT for table `transactions`
+-- AUTO_INCREMENT cho bảng `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT for table `users`
+-- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- AUTO_INCREMENT for table `user_roles`
+-- AUTO_INCREMENT cho bảng `user_roles`
 --
 ALTER TABLE `user_roles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `watch_history`
+-- AUTO_INCREMENT cho bảng `watch_history`
 --
 ALTER TABLE `watch_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
--- Constraints for dumped tables
+-- Các ràng buộc cho các bảng đã đổ
 --
 
 --
--- Constraints for table `admin_logs`
+-- Các ràng buộc cho bảng `admin_logs`
 --
 ALTER TABLE `admin_logs`
   ADD CONSTRAINT `admin_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `categories`
+-- Các ràng buộc cho bảng `categories`
 --
 ALTER TABLE `categories`
   ADD CONSTRAINT `categories_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `comments`
+-- Các ràng buộc cho bảng `comments`
 --
 ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
@@ -1351,40 +1376,40 @@ ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `episodes`
+-- Các ràng buộc cho bảng `episodes`
 --
 ALTER TABLE `episodes`
   ADD CONSTRAINT `fk_episodes_movie` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `movies`
+-- Các ràng buộc cho bảng `movies`
 --
 ALTER TABLE `movies`
   ADD CONSTRAINT `movies_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `reviews`
+-- Các ràng buộc cho bảng `reviews`
 --
 ALTER TABLE `reviews`
   ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `role_permissions`
+-- Các ràng buộc cho bảng `role_permissions`
 --
 ALTER TABLE `role_permissions`
   ADD CONSTRAINT `role_permissions_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `role_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `seat_reservations`
+-- Các ràng buộc cho bảng `seat_reservations`
 --
 ALTER TABLE `seat_reservations`
   ADD CONSTRAINT `fk_seat_reservations_showtime` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_seat_reservations_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `showtimes`
+-- Các ràng buộc cho bảng `showtimes`
 --
 ALTER TABLE `showtimes`
   ADD CONSTRAINT `showtimes_ibfk_1` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1395,52 +1420,52 @@ ALTER TABLE `showtimes`
   ADD CONSTRAINT `showtimes_ibfk_6` FOREIGN KEY (`screen_id`) REFERENCES `theater_screens` (`id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `support_tickets`
+-- Các ràng buộc cho bảng `support_tickets`
 --
 ALTER TABLE `support_tickets`
   ADD CONSTRAINT `support_tickets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `support_tickets_ibfk_2` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `system_config`
+-- Các ràng buộc cho bảng `system_config`
 --
 ALTER TABLE `system_config`
   ADD CONSTRAINT `system_config_ibfk_1` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `theater_screens`
+-- Các ràng buộc cho bảng `theater_screens`
 --
 ALTER TABLE `theater_screens`
   ADD CONSTRAINT `theater_screens_ibfk_1` FOREIGN KEY (`theater_id`) REFERENCES `theaters` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tickets`
+-- Các ràng buộc cho bảng `tickets`
 --
 ALTER TABLE `tickets`
   ADD CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `tickets_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `transactions`
+-- Các ràng buộc cho bảng `transactions`
 --
 ALTER TABLE `transactions`
   ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `users`
+-- Các ràng buộc cho bảng `users`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `user_roles`
+-- Các ràng buộc cho bảng `user_roles`
 --
 ALTER TABLE `user_roles`
   ADD CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `watch_history`
+-- Các ràng buộc cho bảng `watch_history`
 --
 ALTER TABLE `watch_history`
   ADD CONSTRAINT `watch_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
