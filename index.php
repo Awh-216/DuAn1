@@ -142,6 +142,7 @@ try {
         $controller = new $controllerName();
         $controller->index();
     } else {
+        print_r($e);
         die('Error: Controller not found');
     }
 }
