@@ -3600,25 +3600,32 @@ button.btn-location-detect span,
   pointer-events: auto;
 }
 
+/* Đảm bảo tất cả phần tử con của label (trừ checkbox) không chặn click */
+.seat-label > *:not(.seat-checkbox) {
+  pointer-events: none !important;
+}
+
 .seat-checkbox {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  z-index: 10;
-  margin: 0;
-  padding: 0;
-  pointer-events: auto;
+  position: absolute !important;
+  opacity: 0 !important;
+  cursor: pointer !important;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: auto !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .seat-number {
   font-size: 0.85rem;
   font-weight: 600;
   color: #ffffff;
-  pointer-events: none;
+  pointer-events: none !important;
   position: relative;
   z-index: 1;
 }
@@ -3647,15 +3654,22 @@ button.btn-location-detect span,
 }
 
 .seat-label.selected {
-  background-color: #28a745;
-  border-color: #28a745;
+  background-color: #28a745 !important;
+  border-color: #28a745 !important;
   transform: scale(1.1);
+  color: #fff !important;
 }
 
 .seat-label.selected.vip-seat {
   background-color: #28a745 !important;
   border-color: #28a745 !important;
   color: #fff !important;
+  transform: scale(1.1);
+}
+
+.seat-label.selected .seat-number {
+  color: #fff !important;
+  font-weight: bold;
 }
 
 .seat-label.selected.vip-seat .seat-number {
@@ -3780,7 +3794,7 @@ button.btn-location-detect span,
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
+  pointer-events: none !important;
   z-index: 1;
 }
 

@@ -271,6 +271,18 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                             </div>
                         <?php endif; ?>
                         
+                        <!-- Reservation Timer - Hiển thị ngay khi chọn showtime -->
+                        <?php if ($selected_showtime_id): ?>
+                            <div id="reservation-timer" class="reservation-timer mb-3" style="display: block;">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-clock me-2"></i>
+                                    <strong>Thời gian giữ ghế:</strong> 
+                                    <span id="timer-countdown">10:00</span>
+                                    <small class="ms-2">(Bạn có 10 phút để hoàn tất thanh toán)</small>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        
                         <!-- Seat Selection -->
                         <?php if ($selected_showtime_id): ?>
                             <?php 
@@ -506,16 +518,6 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                         ?>
                                     </div>
                                     
-                                    <!-- Reservation Timer -->
-                                    <div id="reservation-timer" class="reservation-timer mb-3" style="display: none;">
-                                        <div class="alert alert-warning">
-                                            <i class="fas fa-clock me-2"></i>
-                                            <strong>Thời gian giữ ghế:</strong> 
-                                            <span id="timer-countdown">10:00</span>
-                                            <small class="ms-2">(Bạn có 10 phút để hoàn tất thanh toán)</small>
-                                        </div>
-                                    </div>
-                                    
                                     <!-- Seat Legend -->
                                     <div class="seat-legend mt-3 mb-3" role="group" aria-label="Chú thích trạng thái ghế">
                                         <div class="legend-item">
@@ -725,6 +727,30 @@ document.addEventListener('DOMContentLoaded', function() {
         sessionStorage.removeItem('bookingScrollPos');
     }
     
+    // Kiểm tra xem có showtime được chọn từ URL không
+    const urlParams = new URLSearchParams(window.location.search);
+    const showtimeIdFromUrl = urlParams.get('showtime_id');
+    console.log('Showtime ID from URL:', showtimeIdFromUrl);
+    
+    if (showtimeIdFromUrl) {
+        // Nếu có showtime trong URL nhưng chưa có timer start time, tạo mới
+        if (!sessionStorage.getItem('showtimeStartTime')) {
+            sessionStorage.setItem('showtimeStartTime', Date.now().toString());
+            console.log('Created new timer start time for showtime:', showtimeIdFromUrl);
+        }
+        
+        // Đợi DOM load xong rồi khởi động timer
+        setTimeout(function() {
+            const timerElement = document.getElementById('reservation-timer');
+            if (timerElement) {
+                console.log('Timer element found, starting timer...');
+                startShowtimeTimer();
+            } else {
+                console.error('Timer element not found in DOM!');
+            }
+        }, 300);
+    }
+    
     const checkboxes = document.querySelectorAll('.seat-checkbox');
     const totalAmountSpan = document.getElementById('total-amount');
     const totalSeatsSpan = document.getElementById('total-seats');
@@ -781,17 +807,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Xử lý click vào label để trigger checkbox
         seatMapContainer.addEventListener('click', function(e) {
-            // Bỏ qua nếu click vào icon hoặc số ghế
-            if (e.target.classList.contains('seat-icon') || 
-                e.target.classList.contains('seat-number') ||
-                e.target.closest('.seat-icon') ||
-                e.target.closest('.seat-number')) {
-                return;
-            }
-            
             // Nếu click trực tiếp vào checkbox, để nó tự xử lý
-            if (e.target.type === 'checkbox') {
-                return;
+            if (e.target.type === 'checkbox' && e.target.classList.contains('seat-checkbox')) {
+                return; // Checkbox tự xử lý
             }
             
             // Tìm label gần nhất
@@ -806,6 +824,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Tìm checkbox trong label
             const checkbox = label.querySelector('.seat-checkbox');
             if (!checkbox || checkbox.disabled) return;
+            
+            // Ngăn chặn default behavior
+            e.preventDefault();
+            e.stopPropagation();
             
             // Toggle checkbox
             checkbox.checked = !checkbox.checked;
@@ -850,8 +872,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     const coupleCheckbox = document.querySelector('input[value="' + coupleSeatId + '"].couple-seat-checkbox');
                     if (coupleCheckbox && checkbox.checked) {
                         coupleCheckbox.checked = true;
+                        // Trigger change event cho ghế đôi
+                        const changeEvent = new Event('change', { bubbles: true });
+                        coupleCheckbox.dispatchEvent(changeEvent);
                     } else if (coupleCheckbox && !checkbox.checked) {
                         coupleCheckbox.checked = false;
+                        const changeEvent = new Event('change', { bubbles: true });
+                        coupleCheckbox.dispatchEvent(changeEvent);
                     }
                 }
                 
@@ -859,12 +886,49 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
+        // Thêm event listener trực tiếp cho checkbox để đảm bảo change event được trigger
+        seatMapContainer.addEventListener('change', function(e) {
+            if (e.target.classList.contains('seat-checkbox')) {
+                // Change event đã được trigger tự động, không cần làm gì thêm
+            }
+        });
+        
+        // Thêm event listener trực tiếp cho tất cả checkbox để đảm bảo chúng có thể click được
+        function attachCheckboxListeners() {
+            const allCheckboxes = document.querySelectorAll('.seat-checkbox');
+            allCheckboxes.forEach(function(checkbox) {
+                // Đảm bảo checkbox có thể click được
+                checkbox.style.pointerEvents = 'auto';
+                checkbox.style.cursor = 'pointer';
+                
+                // Thêm click listener trực tiếp
+                checkbox.addEventListener('click', function(e) {
+                    // Cho phép checkbox tự xử lý click
+                    e.stopPropagation();
+                }, true);
+            });
+        }
+        
+        // Gọi ngay lập tức
+        attachCheckboxListeners();
+        
+        // Gọi lại sau khi DOM được cập nhật
+        setTimeout(attachCheckboxListeners, 100);
+        setTimeout(attachCheckboxListeners, 500);
+        setTimeout(attachCheckboxListeners, 1000);
+        
         // Debug: Log số lượng checkbox
         setTimeout(function() {
             const allCheckboxes = document.querySelectorAll('.seat-checkbox');
             console.log('Total checkboxes found:', allCheckboxes.length);
             var availableCheckboxes = document.querySelectorAll('.seat-checkbox:not(:disabled)');
             console.log('Available checkboxes:', availableCheckboxes.length);
+            
+            // Kiểm tra pointer-events của checkbox
+            allCheckboxes.forEach(function(cb) {
+                const style = window.getComputedStyle(cb);
+                console.log('Checkbox pointer-events:', style.pointerEvents, 'z-index:', style.zIndex);
+            });
         }, 1000);
         
     } else {
@@ -924,14 +988,31 @@ document.addEventListener('DOMContentLoaded', function() {
             // Nếu chỉ có 1 ghế trong hàng, không cần validate
             if (cols.length <= 1) continue;
             
-            // Check for gaps (seats must be adjacent) - KHÔNG cho phép bỏ trống bất kỳ ghế nào ở giữa
+            // Khi chọn từ 2 ghế trở lên, các ghế phải liền kề nhau
+            // Không được bỏ trống ghế ở giữa, đặc biệt là ghế ngoài cùng bên trái
             for (let i = 0; i < cols.length - 1; i++) {
                 const gap = cols[i + 1] - cols[i];
                 if (gap > 1) {
-                    // Luôn báo lỗi nếu có gap, không cần kiểm tra ghế đã đặt
+                    // Tìm ghế bị bỏ trống
+                    const missingSeats = [];
+                    for (let j = cols[i] + 1; j < cols[i + 1]; j++) {
+                        missingSeats.push(row + j);
+                    }
+                    
+                    // Kiểm tra xem có phải ghế ngoài cùng bên trái bị bỏ trống không
+                    if (i === 0 && cols[0] > 1) {
+                        // Có ghế bên trái ghế đầu tiên bị bỏ trống
+                        return 'Khi chọn nhiều ghế, không được bỏ trống ghế ngoài cùng bên trái! Các ghế phải liền kề nhau. Vui lòng chọn các ghế liền kề từ đầu hàng.';
+                    }
+                    
+                    // Có gap ở giữa các ghế
                     return 'Không được bỏ trống ghế ở giữa! Các ghế phải liền kề nhau. Vui lòng chọn các ghế liền kề.';
                 }
             }
+            
+            // Kiểm tra thêm: Nếu chọn nhiều ghế, không được bỏ trống ghế ngoài cùng bên trái
+            // (Nghĩa là nếu chọn ghế 2, 3, 4 thì OK, nhưng nếu chọn 1, 3, 4 thì không OK vì bỏ trống ghế 2)
+            // Logic này đã được xử lý ở trên khi kiểm tra gap, nhưng cần làm rõ thông báo
         }
         
         return null;
@@ -994,22 +1075,22 @@ document.addEventListener('DOMContentLoaded', function() {
                         const coupleCheckbox = document.querySelector('input[value="' + coupleSeatId + '"].couple-seat-checkbox');
                         if (coupleCheckbox && !coupleCheckbox.checked) {
                             label.classList.remove('selected');
-                            if (!label.classList.contains('booked')) {
+                            if (!label.classList.contains('booked') && !label.classList.contains('reserved')) {
                                 label.classList.add('available');
                             }
+                            label.setAttribute('aria-checked', 'false');
                         }
                     } else {
                         label.classList.remove('selected');
-                        if (!label.classList.contains('booked')) {
+                        if (!label.classList.contains('booked') && !label.classList.contains('reserved')) {
                             label.classList.add('available');
                             // Đảm bảo giữ class vip-seat nếu có
                             if (label.classList.contains('vip-seat')) {
                                 // vip-seat class đã có, không cần làm gì
                             }
                         }
+                        label.setAttribute('aria-checked', 'false');
                     }
-                }
-                    label.setAttribute('aria-checked', 'false');
                 }
             }
         });
@@ -1109,15 +1190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Real-time seat reservation system
-    <?php if ($selected_showtime_id): ?>
-    const showtimeId = <?php echo $selected_showtime_id; ?>;
-    let selectedSeats = [];
-    let pollingInterval = null;
-    let reservationTimeout = null;
-    
-    // Start timer when showtime is selected (even without seats)
-    // This gives user 10 minutes to complete booking
+    // Timer system - Global để có thể sử dụng ở mọi nơi
     let showtimeTimer = null;
     let showtimeStartTime = Date.now();
     const SHOWTIME_DURATION = 10 * 60 * 1000; // 10 minutes
@@ -1126,10 +1199,43 @@ document.addEventListener('DOMContentLoaded', function() {
         const timerElement = document.getElementById('reservation-timer');
         const countdownElement = document.getElementById('timer-countdown');
         
-        if (!timerElement || !countdownElement) return;
+        console.log('=== Starting showtime timer ===');
+        console.log('Timer element:', timerElement);
+        console.log('Countdown element:', countdownElement);
         
-        showtimeStartTime = Date.now();
+        if (!timerElement || !countdownElement) {
+            console.error('Timer elements not found!');
+            console.log('Looking for #reservation-timer and #timer-countdown');
+            return;
+        }
+        
+        // Kiểm tra xem có thời gian bắt đầu đã lưu trong sessionStorage không
+        const savedStartTime = sessionStorage.getItem('showtimeStartTime');
+        if (savedStartTime) {
+            showtimeStartTime = parseInt(savedStartTime);
+            console.log('Using saved start time:', showtimeStartTime, 'Current time:', Date.now());
+        } else {
+            showtimeStartTime = Date.now();
+            sessionStorage.setItem('showtimeStartTime', showtimeStartTime.toString());
+            console.log('Using new start time:', showtimeStartTime);
+        }
+        
+        // Hiển thị timer element
         timerElement.style.display = 'block';
+        console.log('Timer element displayed');
+        
+        // Clear timer cũ nếu có
+        if (showtimeTimer) {
+            clearInterval(showtimeTimer);
+        }
+        
+        // Cập nhật ngay lập tức
+        const elapsed = Date.now() - showtimeStartTime;
+        const remaining = SHOWTIME_DURATION - elapsed;
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+        countdownElement.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+        console.log('Initial countdown:', minutes + ':' + (seconds < 10 ? '0' : '') + seconds);
         
         showtimeTimer = setInterval(function() {
             const elapsed = Date.now() - showtimeStartTime;
@@ -1137,7 +1243,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (remaining <= 0) {
                 clearInterval(showtimeTimer);
+                showtimeTimer = null;
                 alert('Thời gian đặt vé đã hết! Vui lòng chọn lại suất chiếu.');
+                // Xóa sessionStorage
+                sessionStorage.removeItem('selectedShowtimeId');
+                sessionStorage.removeItem('showtimeStartTime');
                 window.location.reload();
                 return;
             }
@@ -1146,11 +1256,106 @@ document.addEventListener('DOMContentLoaded', function() {
             const seconds = Math.floor((remaining % 60000) / 1000);
             countdownElement.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
         }, 1000);
+        
+        console.log('Timer started successfully');
     }
     
+    // Thêm event listener cho các time button để bắt đầu timer khi click
+    document.querySelectorAll('.time-btn').forEach(function(timeBtn) {
+        timeBtn.addEventListener('click', function(e) {
+            // Lưu scroll position trước khi chuyển trang
+            sessionStorage.setItem('bookingScrollPos', window.pageYOffset || document.documentElement.scrollTop);
+            
+            // Lấy showtime_id từ URL
+            const url = new URL(this.href);
+            const showtimeIdParam = url.searchParams.get('showtime_id');
+            
+            if (showtimeIdParam) {
+                // Lưu showtime_id và thời gian bắt đầu vào sessionStorage
+                sessionStorage.setItem('selectedShowtimeId', showtimeIdParam);
+                const startTime = Date.now();
+                sessionStorage.setItem('showtimeStartTime', startTime.toString());
+                console.log('Timer will start for showtime:', showtimeIdParam);
+                
+                // Hiển thị timer ngay lập tức (không cần đợi reload)
+                const timerElement = document.getElementById('reservation-timer');
+                const countdownElement = document.getElementById('timer-countdown');
+                
+                if (timerElement && countdownElement) {
+                    // Hiển thị timer element ngay
+                    timerElement.style.display = 'block';
+                    
+                    // Khởi động timer ngay lập tức
+                    showtimeStartTime = startTime;
+                    
+                    // Clear timer cũ nếu có
+                    if (showtimeTimer) {
+                        clearInterval(showtimeTimer);
+                    }
+                    
+                    // Cập nhật ngay lập tức
+                    const elapsed = Date.now() - showtimeStartTime;
+                    const remaining = SHOWTIME_DURATION - elapsed;
+                    const minutes = Math.floor(remaining / 60000);
+                    const seconds = Math.floor((remaining % 60000) / 1000);
+                    countdownElement.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                    
+                    // Bắt đầu đếm ngược
+                    showtimeTimer = setInterval(function() {
+                        const elapsed = Date.now() - showtimeStartTime;
+                        const remaining = SHOWTIME_DURATION - elapsed;
+                        
+                        if (remaining <= 0) {
+                            clearInterval(showtimeTimer);
+                            showtimeTimer = null;
+                            alert('Thời gian đặt vé đã hết! Vui lòng chọn lại suất chiếu.');
+                            sessionStorage.removeItem('selectedShowtimeId');
+                            sessionStorage.removeItem('showtimeStartTime');
+                            window.location.reload();
+                            return;
+                        }
+                        
+                        const minutes = Math.floor(remaining / 60000);
+                        const seconds = Math.floor((remaining % 60000) / 1000);
+                        countdownElement.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                    }, 1000);
+                    
+                    console.log('Timer started immediately for showtime:', showtimeIdParam);
+                } else {
+                    console.log('Timer elements not found, will start after page reload');
+                }
+            }
+        });
+    });
+    
+    // Real-time seat reservation system
+    <?php if ($selected_showtime_id): ?>
+    const showtimeId = <?php echo $selected_showtime_id; ?>;
+    let selectedSeats = [];
+    let pollingInterval = null;
+    let reservationTimeout = null;
+    
     // Start timer when page loads with showtime selected
+    console.log('=== Showtime ID from PHP:', showtimeId, '===');
     if (showtimeId) {
-        startShowtimeTimer();
+        // Đợi DOM load xong rồi khởi động timer
+        setTimeout(function() {
+            console.log('Attempting to start timer for showtime:', showtimeId);
+            const timerEl = document.getElementById('reservation-timer');
+            const countdownEl = document.getElementById('timer-countdown');
+            console.log('Timer element exists:', !!timerEl);
+            console.log('Countdown element exists:', !!countdownEl);
+            
+            if (timerEl && countdownEl) {
+                startShowtimeTimer();
+            } else {
+                console.error('Timer elements not found! Retrying...');
+                // Thử lại sau 500ms
+                setTimeout(function() {
+                    startShowtimeTimer();
+                }, 500);
+            }
+        }, 300);
     }
     
     // Reserve seats when selected
