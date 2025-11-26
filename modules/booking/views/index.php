@@ -28,7 +28,55 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                 </div>
                             <?php endif; ?>
                         </div>
+                        <div class="background_film_blur">
+                                <img  src="<?php echo htmlspecialchars($movie['thumbnail']); ?>" alt="">
+                        </div>
                         
+<style>
+.booking-movie-info {
+  position: relative; /* tạo vùng z-index */
+  z-index: 2;
+}
+
+.background_film_blur {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.background_film_blur img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(4px);
+  opacity: 0.5;
+}
+
+.movie-poster-large {
+  position: relative;
+  z-index: 2;
+}
+
+.movie-poster-large img {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.movie-title-booking,
+.movie-rating,
+.movie-description,
+.movie-categories,
+.btn-trailer {
+  position: relative;
+  z-index: 3; /* cao nhất */
+  color: white;
+}
+
+
+</style>
                         <!-- Movie Title -->
                         <h1 class="movie-title-booking mb-3" itemprop="name"><?php echo htmlspecialchars($movie['title']); ?></h1>
                         
@@ -93,6 +141,7 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                     </div>
                 <?php endif; ?>
             </div>
+
             
             <!-- Right Column: Booking Form -->
             <div class="col-lg-7">

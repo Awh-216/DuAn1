@@ -22,7 +22,7 @@
         .admin-main {
             margin-left: 250px;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: rgba(60, 60 ,60);
             min-height: 100vh;
         }
         

@@ -108,13 +108,13 @@
                             <td>
                                 <div class="btn-group btn-group-sm">
                                     <a href="?route=admin/movies/edit&id=<?php echo $m['id']; ?>" class="btn btn-outline-primary" title="Sửa">
-                                        <i class="fas fa-edit"></i>
+                                        <i class="col-b fas fa-edit"></i>
                                     </a>
                                     <a href="?route=movie/watch&id=<?php echo $m['id']; ?>" class="btn btn-outline-info" title="Xem" target="_blank">
-                                        <i class="fas fa-eye"></i>
+                                        <i class="col-b fas fa-eye"></i>
                                     </a>
                                     <a href="?route=admin/movies/delete&id=<?php echo $m['id']; ?>" class="btn btn-outline-danger" title="Xóa" onclick="return confirm('Bạn chắc chắn muốn xóa?')">
-                                        <i class="fas fa-trash"></i>
+                                        <i class="col-b fas fa-trash"></i>
                                     </a>
                                 </div>
                             </td>

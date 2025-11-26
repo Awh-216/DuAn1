@@ -2926,6 +2926,8 @@ body.dark-bg {
 }
 
 .booking-movie-info {
+  /* z-index: 2; */
+  position: relative;
   background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
   padding: 2rem;
   border-radius: 15px;
@@ -3020,13 +3022,6 @@ body.dark-bg {
   margin-bottom: 0;
 }
 
-.movie-poster-large img {
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
 .poster-placeholder {
   width: 100%;
   padding-top: 150%;
@@ -3036,13 +3031,6 @@ body.dark-bg {
   align-items: center;
   justify-content: center;
   color: #666;
-}
-
-.movie-title-booking {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #ffffff;
-  line-height: 1.2;
 }
 
 .movie-rating {
@@ -4402,3 +4390,12 @@ button.btn-location-detect span,
 /* #watch_historyy {
   transition: all 0.3s ease-in-out;
 } */
+.col-b {
+  background-color: black !important;
+  color: rgb(255, 255, 255);
+  padding: 5px;
+  border-radius: 4px;
+}
+.stat-card {
+  background-color: #000;
+}
