@@ -24,8 +24,12 @@ $title = 'Trang chủ';
                     ?>
                     <div class="hero-slide <?php echo $index === 0 ? 'active' : ''; ?>" data-slide="<?php echo $index; ?>">
                         <!-- Background Image -->
-                        <?php if ($featuredMovie['thumbnail']): ?>
-                            <div class="hero-featured-bg" style="background-image: url('<?php echo htmlspecialchars($featuredMovie['banner']); ?>');"></div>
+                        <?php 
+                        // Sử dụng banner nếu có, nếu không thì dùng thumbnail
+                        $bgImage = !empty($featuredMovie['banner']) ? $featuredMovie['banner'] : $featuredMovie['thumbnail'];
+                        if ($bgImage): 
+                        ?>
+                            <div class="hero-featured-bg" style="background-image: url('<?php echo htmlspecialchars($bgImage); ?>');"></div>
                         <?php endif; ?>
                         
                         <!-- Content Overlay -->

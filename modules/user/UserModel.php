@@ -102,6 +102,100 @@ class UserModel {
         }
         return false;
     }
+    
+    /**
+     * Tạo token mới cho user
+     * @param int $userId ID của user
+     * @param string $deviceInfo Thông tin thiết bị
+     * @param string $ipAddress IP address
+     * @return string Token string
+     */
+    public function createToken($userId, $deviceInfo = null, $ipAddress = null) {
+        require_once __DIR__ . '/../../core/TokenHelper.php';
+        
+        $token = TokenHelper::generateSecureToken();
+        $expiresAt = TokenHelper::getExpiryTime(30); // Token hết hạn sau 30 ngày
+        
+        $sql = "INSERT INTO user_tokens (user_id, token, device_info, ip_address, expires_at) VALUES (?, ?, ?, ?, ?)";
+        $this->db->execute($sql, [
+            $userId,
+            $token,
+            $deviceInfo,
+            $ipAddress,
+            $expiresAt
+        ]);
+        
+        return $token;
+    }
+    
+    /**
+     * Lấy thông tin token theo giá trị token
+     * @param string $token Token string
+     * @return array|null Token info và user info
+     */
+    public function getTokenByValue($token) {
+        $sql = "SELECT ut.*, u.* FROM user_tokens ut 
+                JOIN users u ON ut.user_id = u.id 
+                WHERE ut.token = ? AND ut.expires_at > NOW()";
+        return $this->db->fetch($sql, [$token]);
+    }
+    
+    /**
+     * Xóa token cụ thể (đăng xuất thiết bị hiện tại)
+     * @param string $token Token cần xóa
+     * @return bool Success
+     */
+    public function deleteToken($token) {
+        $sql = "DELETE FROM user_tokens WHERE token = ?";
+        $this->db->execute($sql, [$token]);
+        return true;
+    }
+    
+    /**
+     * Xóa tất cả token của user (đăng xuất khỏi tất cả thiết bị)
+     * @param int $userId ID của user
+     * @return bool Success
+     */
+    public function deleteAllUserTokens($userId) {
+        $sql = "DELETE FROM user_tokens WHERE user_id = ?";
+        $this->db->execute($sql, [$userId]);
+        return true;
+    }
+    
+    /**
+     * Kiểm tra token có hợp lệ không
+     * @param string $token Token cần kiểm tra
+     * @return bool True nếu hợp lệ
+     */
+    public function validateToken($token) {
+        $sql = "SELECT COUNT(*) as count FROM user_tokens WHERE token = ? AND expires_at > NOW()";
+        $result = $this->db->fetch($sql, [$token]);
+        return $result && $result['count'] > 0;
+    }
+    
+    /**
+     * Xóa các token đã hết hạn
+     * @return int Số lượng token đã xóa
+     */
+    public function cleanExpiredTokens() {
+        $sql = "DELETE FROM user_tokens WHERE expires_at <= NOW()";
+        $this->db->execute($sql);
+        return $this->db->rowCount();
+    }
+    
+    /**
+     * Lấy tất cả token của user (để hiển thị danh sách thiết bị)
+     * @param int $userId ID của user
+     * @return array Danh sách token
+     */
+    public function getUserTokens($userId) {
+        $sql = "SELECT id, device_info, ip_address, created_at, expires_at 
+                FROM user_tokens 
+                WHERE user_id = ? AND expires_at > NOW()
+                ORDER BY created_at DESC";
+        return $this->db->fetchAll($sql, [$userId]);
+    }
+
 }
 ?>
 

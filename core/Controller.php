@@ -45,7 +45,32 @@ class Controller {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        return isset($_SESSION['user_id']);
+        
+        // Kiểm tra session cơ bản
+        if (!isset($_SESSION['user_id'])) {
+            return false;
+        }
+        
+        // Kiểm tra token trong database (nếu có)
+        if (isset($_SESSION['auth_token'])) {
+            try {
+                require_once __DIR__ . '/../modules/user/UserModel.php';
+                $userModel = new UserModel();
+                
+                // Validate token trong database
+                if (!$userModel->validateToken($_SESSION['auth_token'])) {
+                    // Token không hợp lệ hoặc đã bị xóa, xóa session
+                    session_unset();
+                    session_destroy();
+                    return false;
+                }
+            } catch (Exception $e) {
+                // Nếu có lỗi (ví dụ: bảng chưa tồn tại), vẫn cho phép đăng nhập bằng session
+                error_log("Token validation error: " . $e->getMessage());
+            }
+        }
+        
+        return true;
     }
     
     protected function getCurrentUser() {

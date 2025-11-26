@@ -25,6 +25,15 @@ class AuthController extends Controller {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_name'] = $user['name'];
                 
+                // Tạo token cho user
+                require_once __DIR__ . '/../../core/TokenHelper.php';
+                $deviceInfo = TokenHelper::getDeviceInfo();
+                $ipAddress = TokenHelper::getClientIp();
+                $token = $userModel->createToken($user['id'], $deviceInfo, $ipAddress);
+                
+                // Lưu token vào session
+                $_SESSION['auth_token'] = $token;
+                
                 // Kiểm tra nếu là admin thì redirect đến admin panel
                 $isAdmin = false;
                 if (isset($user['role']) && $user['role'] === 'admin') {
@@ -137,6 +146,15 @@ class AuthController extends Controller {
             $_SESSION['user_id'] = $user_id;
             $_SESSION['user_name'] = $name;
             
+            // Tạo token cho user mới đăng ký
+            require_once __DIR__ . '/../../core/TokenHelper.php';
+            $deviceInfo = TokenHelper::getDeviceInfo();
+            $ipAddress = TokenHelper::getClientIp();
+            $token = $userModel->createToken($user_id, $deviceInfo, $ipAddress);
+            
+            // Lưu token vào session
+            $_SESSION['auth_token'] = $token;
+            
             if ($this->isAjaxRequest()) {
                 header('Content-Type: application/json');
                 echo json_encode(['success' => true, 'redirect' => '']);
@@ -154,8 +172,64 @@ class AuthController extends Controller {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        session_unset();
+        
+        // Xóa token khỏi database nếu có
+        if (isset($_SESSION['auth_token'])) {
+            $userModel = new UserModel();
+            $userModel->deleteToken($_SESSION['auth_token']);
+        }
+        
+        // Xóa session hoàn toàn
+        $_SESSION = array(); // Xóa tất cả session variables
+        
+        // Xóa session cookie
+        if (isset($_COOKIE[session_name()])) {
+            setcookie(session_name(), '', time() - 3600, '/');
+        }
+        
+        // Destroy session
         session_destroy();
+        
+        // Ngăn cache để không thể quay lại trang cũ
+        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+        header("Cache-Control: post-check=0, pre-check=0", false);
+        header("Pragma: no-cache");
+        header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Ngày trong quá khứ
+        
+        $this->redirect('?route=home/index');
+    }
+    
+    /**
+     * Đăng xuất khỏi tất cả thiết bị
+     */
+    public function logoutAll() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        // Xóa tất cả token của user
+        if (isset($_SESSION['user_id'])) {
+            $userModel = new UserModel();
+            $userModel->deleteAllUserTokens($_SESSION['user_id']);
+        }
+        
+        // Xóa session hoàn toàn
+        $_SESSION = array();
+        
+        // Xóa session cookie
+        if (isset($_COOKIE[session_name()])) {
+            setcookie(session_name(), '', time() - 3600, '/');
+        }
+        
+        // Destroy session
+        session_destroy();
+        
+        // Ngăn cache
+        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+        header("Cache-Control: post-check=0, pre-check=0", false);
+        header("Pragma: no-cache");
+        header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
+        
         $this->redirect('?route=home/index');
     }
 }

@@ -7,17 +7,19 @@ class HomeController extends Controller {
     public function index() {
         $movieModel = new MovieModel();
         
-        // Lấy slider phim nổi bật - mix cả phim lẻ và phim bộ
-        // Ưu tiên phim có rating cao và thumbnail đẹp
+        // Lấy slider phim nổi bật - ưu tiên phim có banner
+        // Mix cả phim lẻ và phim bộ, ưu tiên phim có rating cao và có banner
         $sliderMovies = $movieModel->getDb()->fetchAll("
             SELECT m.*, c.name as category_name 
             FROM movies m 
             LEFT JOIN categories c ON m.category_id = c.id 
             WHERE m.status = 'Chiếu online' 
             AND m.status_admin = 'published'
-            AND m.thumbnail IS NOT NULL 
-            AND m.thumbnail != ''
-            ORDER BY m.rating DESC, RAND()
+            AND (m.banner IS NOT NULL AND m.banner != '' OR m.thumbnail IS NOT NULL AND m.thumbnail != '')
+            ORDER BY 
+                CASE WHEN m.banner IS NOT NULL AND m.banner != '' THEN 1 ELSE 2 END,
+                m.rating DESC, 
+                RAND()
             LIMIT 5
         ");
         
