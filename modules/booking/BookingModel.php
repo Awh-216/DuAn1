@@ -41,7 +41,7 @@ class BookingModel {
         
         // Nếu là ngày hôm nay, chỉ lấy các suất chiếu chưa bắt đầu
         if ($date === $today) {
-            return $this->db->fetchAll("SELECT s.*, t.name as theater_name FROM showtimes s 
+            return $this->db->fetchAll("SELECT s.*, t.name as theater_name, s.screen_id FROM showtimes s 
                                         JOIN theaters t ON s.theater_id = t.id 
                                         WHERE s.movie_id = ? AND s.theater_id = ? AND s.show_date = ? 
                                         AND s.show_time >= ?
@@ -49,7 +49,7 @@ class BookingModel {
                                         [$movie_id, $theater_id, $date, $currentTime]);
         } else {
             // Nếu là ngày tương lai, lấy tất cả suất chiếu
-            return $this->db->fetchAll("SELECT s.*, t.name as theater_name FROM showtimes s 
+            return $this->db->fetchAll("SELECT s.*, t.name as theater_name, s.screen_id FROM showtimes s 
                                         JOIN theaters t ON s.theater_id = t.id 
                                         WHERE s.movie_id = ? AND s.theater_id = ? AND s.show_date = ? 
                                         ORDER BY s.show_time", 
@@ -58,7 +58,7 @@ class BookingModel {
     }
     
     public function getShowtimeById($id) {
-        return $this->db->fetch("SELECT s.*, m.title as movie_title, t.name as theater_name, t.location 
+        return $this->db->fetch("SELECT s.*, m.title as movie_title, t.name as theater_name, t.location, s.screen_id 
                                  FROM showtimes s 
                                  JOIN movies m ON s.movie_id = m.id 
                                  JOIN theaters t ON s.theater_id = t.id 
@@ -141,6 +141,7 @@ class BookingModel {
     public function createTicket($data) {
         // Đảm bảo status luôn là 'Đã đặt' khi tạo vé
         $status = $data['status'] ?? 'Đã đặt';
+        $seat_type = $data['seat_type'] ?? 'normal';
         
         // Kiểm tra xem ghế đã được đặt chưa (double check trước khi insert)
         $existing = $this->db->fetch(
@@ -153,11 +154,12 @@ class BookingModel {
             return false; // Ghế đã được đặt
         }
         
-        $sql = "INSERT INTO tickets (user_id, showtime_id, seat, price, qr_code, status) VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO tickets (user_id, showtime_id, seat, seat_type, price, qr_code, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $this->db->execute($sql, [
             $data['user_id'],
             $data['showtime_id'],
             $data['seat'],
+            $seat_type,
             $data['price'],
             $data['qr_code'] ?? null,
             $status
@@ -165,7 +167,7 @@ class BookingModel {
         $ticket_id = $this->db->lastInsertId();
         
         // Log để debug
-        error_log("Created ticket ID: $ticket_id, user_id: {$data['user_id']}, showtime_id: {$data['showtime_id']}, seat: {$data['seat']}, price: {$data['price']}, status: $status");
+        error_log("Created ticket ID: $ticket_id, user_id: {$data['user_id']}, showtime_id: {$data['showtime_id']}, seat: {$data['seat']}, seat_type: $seat_type, price: {$data['price']}, status: $status");
         
         return $ticket_id;
     }
@@ -196,7 +198,7 @@ class BookingModel {
     }
     
     // Seat Reservation Methods
-    public function reserveSeats($showtime_id, $seats, $user_id, $session_id, $duration_minutes = 5) {
+    public function reserveSeats($showtime_id, $seats, $user_id, $session_id, $duration_minutes = 10) {
         try {
             // Kiểm tra bảng có tồn tại không
             $tableExists = $this->db->fetch("SHOW TABLES LIKE 'seat_reservations'");
@@ -328,7 +330,7 @@ class BookingModel {
         }
     }
     
-    public function extendReservation($showtime_id, $seat, $user_id, $duration_minutes = 5) {
+    public function extendReservation($showtime_id, $seat, $user_id, $duration_minutes = 10) {
         try {
             // Kiểm tra bảng có tồn tại không
             $tableExists = $this->db->fetch("SHOW TABLES LIKE 'seat_reservations'");
@@ -345,6 +347,110 @@ class BookingModel {
             );
         } catch (Exception $e) {
             error_log("Error extending reservation: " . $e->getMessage());
+        }
+    }
+    
+    // Food Items Methods
+    public function getFoodItems() {
+        try {
+            return $this->db->fetchAll("SELECT * FROM food_items WHERE is_active = 1 ORDER BY type, name");
+        } catch (Exception $e) {
+            error_log("Error getting food items: " . $e->getMessage());
+            return [];
+        }
+    }
+    
+    public function getFoodItemById($id) {
+        try {
+            return $this->db->fetch("SELECT * FROM food_items WHERE id = ? AND is_active = 1", [$id]);
+        } catch (Exception $e) {
+            error_log("Error getting food item: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    public function createBookingFoodItem($ticket_id, $food_item_id, $quantity, $price) {
+        try {
+            $sql = "INSERT INTO booking_food_items (ticket_id, food_item_id, quantity, price) VALUES (?, ?, ?, ?)";
+            $this->db->execute($sql, [$ticket_id, $food_item_id, $quantity, $price]);
+            return $this->db->lastInsertId();
+        } catch (Exception $e) {
+            error_log("Error creating booking food item: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    // Seat Layout Methods
+    public function getScreenSeatLayout($screen_id) {
+        try {
+            $screen = $this->db->fetch("SELECT seat_layout_config FROM theater_screens WHERE id = ?", [$screen_id]);
+            if ($screen && $screen['seat_layout_config']) {
+                return json_decode($screen['seat_layout_config'], true);
+            }
+            // Default layout: 3 hàng đầu = thường, từ hàng 4 (D) trở xuống = VIP, cuối = ghế đôi
+            $defaultRows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+            return [
+                'rows' => $defaultRows,
+                'cols' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                'vip_rows' => array_slice($defaultRows, 3, -1), // D, E, F, G, H, I, J, K (từ hàng 4 trở xuống)
+                'couple_rows' => [end($defaultRows)], // L
+                'normal_price' => 120000,
+                'vip_price' => 180000,
+                'couple_price' => 240000,
+                'layout_type' => 'standard'
+            ];
+        } catch (Exception $e) {
+            error_log("Error getting seat layout: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    public function getSeatType($seat, $layout) {
+        if (!$layout) {
+            return 'normal';
+        }
+        
+        $row = substr($seat, 0, 1);
+        $vip_rows = $layout['vip_rows'] ?? [];
+        $couple_rows = $layout['couple_rows'] ?? [];
+        
+        if (in_array($row, $couple_rows)) {
+            return 'couple';
+        } elseif (in_array($row, $vip_rows)) {
+            return 'vip';
+        }
+        return 'normal';
+    }
+    
+    public function getSeatPrice($seat, $layout, $base_price) {
+        if (!$layout) {
+            return $base_price;
+        }
+        
+        $seat_type = $this->getSeatType($seat, $layout);
+        
+        switch ($seat_type) {
+            case 'vip':
+                return $layout['vip_price'] ?? ($base_price * 1.5);
+            case 'couple':
+                return $layout['couple_price'] ?? ($base_price * 2);
+            default:
+                return $layout['normal_price'] ?? $base_price;
+        }
+    }
+    
+    public function getShowtimeWithScreen($showtime_id) {
+        try {
+            return $this->db->fetch("SELECT s.*, m.title as movie_title, t.name as theater_name, t.location, 
+                                    sc.id as screen_id, sc.seat_layout_config
+                                    FROM showtimes s 
+                                    JOIN movies m ON s.movie_id = m.id 
+                                    JOIN theaters t ON s.theater_id = t.id 
+                                    LEFT JOIN theater_screens sc ON s.screen_id = sc.id
+                                    WHERE s.id = ?", [$showtime_id]);
+        } catch (Exception $e) {
+            error_log("Error getting showtime with screen: " . $e->getMessage());
+            return null;
         }
     }
 }

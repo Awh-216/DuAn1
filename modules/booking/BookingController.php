@@ -62,8 +62,37 @@ class BookingController extends Controller {
                 $showtimes = $bookingModel->getShowtimes($selected_movie_id, $selected_theater, $selected_date);
             }
             
+            $seatLayout = null;
+            // Lấy food items luôn (không cần showtime)
+            $foodItems = [];
+            try {
+                $foodItems = $bookingModel->getFoodItems();
+            } catch (Exception $e) {
+                error_log("Error getting food items: " . $e->getMessage());
+                $foodItems = [];
+            }
+            
             if ($selected_showtime_id) {
                 try {
+                    // Lấy thông tin showtime với screen layout
+                    // Tìm showtime trong mảng showtimes để lấy screen_id
+                    $showtimeWithScreen = null;
+                    foreach ($showtimes as $st) {
+                        if ($st['id'] == $selected_showtime_id) {
+                            $showtimeWithScreen = $st;
+                            break;
+                        }
+                    }
+                    
+                    // Nếu không tìm thấy trong showtimes, lấy trực tiếp từ database
+                    if (!$showtimeWithScreen) {
+                        $showtimeWithScreen = $bookingModel->getShowtimeById($selected_showtime_id);
+                    }
+                    
+                    if ($showtimeWithScreen && isset($showtimeWithScreen['screen_id'])) {
+                        $seatLayout = $bookingModel->getScreenSeatLayout($showtimeWithScreen['screen_id']);
+                    }
+                    
                     // Lấy cả ghế đã đặt và đang được reserve
                     $bookedAndReserved = $bookingModel->getBookedAndReservedSeats($selected_showtime_id);
                     $bookedSeats = [];
@@ -133,6 +162,11 @@ class BookingController extends Controller {
                 'dates' => $dates,
                 'bookedSeats' => $bookedSeats,
                 'reservedSeats' => $reservedSeats,
+                'seatLayout' => $seatLayout,
+                'normalPrice' => $seatLayout['normal_price'] ?? 120000,
+                'vipPrice' => $seatLayout['vip_price'] ?? 180000,
+                'couplePrice' => $seatLayout['couple_price'] ?? 240000,
+                'foodItems' => $foodItems,
                 'user' => $user
             ]);
         } catch (Exception $e) {
@@ -194,21 +228,25 @@ class BookingController extends Controller {
                 
                 $allMovies = $movieModel->getTheaterMovies();
                 
-                $this->view('booking/index', [
-                    'allMovies' => $allMovies,
-                    'theaters' => $theaters,
-                    'showtimes' => $showtimes,
-                    'movie' => $movie,
-                    'selected_movie' => $selected_movie_id,
-                    'selected_theater' => $selected_theater,
-                    'selected_date' => $selected_date,
-                    'selected_time' => $selected_time,
-                    'selected_showtime_id' => $selected_showtime_id,
-                    'dates' => $dates,
-                    'bookedSeats' => $bookedSeats,
-                    'reservedSeats' => $reservedSeats,
-                    'user' => $user
-                ]);
+            $this->view('booking/index', [
+                'allMovies' => $allMovies,
+                'theaters' => $theaters,
+                'showtimes' => $showtimes,
+                'movie' => $movie,
+                'selected_movie' => $selected_movie_id,
+                'selected_theater' => $selected_theater,
+                'selected_date' => $selected_date,
+                'selected_time' => $selected_time,
+                'selected_showtime_id' => $selected_showtime_id,
+                'dates' => $dates,
+                'bookedSeats' => $bookedSeats,
+                'reservedSeats' => $reservedSeats,
+                'seatLayout' => $seatLayout,
+                'normalPrice' => $normalPrice,
+                'vipPrice' => $vipPrice,
+                'couplePrice' => $couplePrice,
+                'user' => $user
+            ]);
             } catch (Exception $e2) {
                 // Nếu vẫn lỗi, redirect về booking nhưng giữ nguyên parameters
                 error_log("Error in fallback view: " . $e2->getMessage());
@@ -226,6 +264,55 @@ class BookingController extends Controller {
     private function getDayName($day) {
         $days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
         return $days[$day] ?? '';
+    }
+    
+    /**
+     * Validate seat selection rules:
+     * 1. Không đặt cách 1 ghế (phải liền kề)
+     * 2. Không bỏ trống ghế ở giữa (kể cả ghế đã được đặt)
+     */
+    private function validateSeatSelection($seats, $showtime_id = null) {
+        if (empty($seats) || count($seats) == 1) {
+            return null; // 1 ghế hoặc không có ghế thì không cần validate
+        }
+        
+        // Lấy danh sách ghế đã được đặt nếu có showtime_id
+        $bookedSeats = [];
+        if ($showtime_id) {
+            $bookingModel = new BookingModel();
+            $bookedSeatsData = $bookingModel->getBookedSeats($showtime_id);
+            $bookedSeats = array_column($bookedSeatsData, 'seat');
+        }
+        
+        // Sắp xếp ghế theo hàng và cột
+        $seatsByRow = [];
+        foreach ($seats as $seat) {
+            $row = substr($seat, 0, 1);
+            $col = (int)substr($seat, 1);
+            if (!isset($seatsByRow[$row])) {
+                $seatsByRow[$row] = [];
+            }
+            $seatsByRow[$row][] = $col;
+        }
+        
+        // Kiểm tra từng hàng
+        foreach ($seatsByRow as $row => $cols) {
+            sort($cols);
+            
+            // Nếu chỉ có 1 ghế trong hàng, không cần validate
+            if (count($cols) <= 1) continue;
+            
+            // Kiểm tra không bỏ trống ghế ở giữa - KHÔNG cho phép gap
+            for ($i = 0; $i < count($cols) - 1; $i++) {
+                $gap = $cols[$i + 1] - $cols[$i];
+                if ($gap > 1) {
+                    // Luôn báo lỗi nếu có gap, không cần kiểm tra ghế đã đặt
+                    return "Không được bỏ trống ghế ở giữa! Các ghế phải liền kề nhau. Vui lòng chọn các ghế liền kề.";
+                }
+            }
+        }
+        
+        return null; // Valid
     }
     
     public function selectSeat() {
@@ -276,6 +363,7 @@ class BookingController extends Controller {
         $showtime_id = $_POST['showtime_id'] ?? null;
         $seats = $_POST['seats'] ?? [];
         $customer_email = trim($_POST['customer_email'] ?? '');
+        $food_items = $_POST['food_items'] ?? []; // Array of [food_item_id => quantity]
         
         // Validate showtime và seats
         if (!$showtime_id || empty($seats)) {
@@ -284,6 +372,23 @@ class BookingController extends Controller {
             if ($showtime_id) {
                 $redirectUrl .= '&showtime_id=' . urlencode($showtime_id);
             }
+            $this->redirect($redirectUrl);
+            return;
+        }
+        
+        // Validate: Giới hạn 8 vé/lần
+        if (count($seats) > 8) {
+            $_SESSION['error'] = 'Bạn chỉ có thể đặt tối đa 8 vé một lần!';
+            $redirectUrl = '?route=booking/index&showtime_id=' . urlencode($showtime_id);
+            $this->redirect($redirectUrl);
+            return;
+        }
+        
+        // Validate: Không đặt cách 1 ghế và không bỏ trống ghế ở giữa
+        $validationError = $this->validateSeatSelection($seats, $showtime_id);
+        if ($validationError) {
+            $_SESSION['error'] = $validationError;
+            $redirectUrl = '?route=booking/index&showtime_id=' . urlencode($showtime_id);
             $this->redirect($redirectUrl);
             return;
         }
@@ -302,11 +407,17 @@ class BookingController extends Controller {
         }
         
         $bookingModel = new BookingModel();
-        $showtime = $bookingModel->getShowtimeById($showtime_id);
+        $showtime = $bookingModel->getShowtimeWithScreen($showtime_id);
         
         if (!$showtime) {
             $this->redirect('booking');
             return;
+        }
+        
+        // Lấy seat layout để tính giá
+        $seatLayout = null;
+        if (isset($showtime['screen_id']) && $showtime['screen_id']) {
+            $seatLayout = $bookingModel->getScreenSeatLayout($showtime['screen_id']);
         }
         
         // Kiểm tra xem showtime đã qua chưa
@@ -361,13 +472,18 @@ class BookingController extends Controller {
                     throw new Exception("Ghế $seat đã được đặt bởi người khác!");
                 }
                 
+                // Xác định loại ghế và giá
+                $seat_type = $bookingModel->getSeatType($seat, $seatLayout);
+                $seat_price = $bookingModel->getSeatPrice($seat, $seatLayout, $showtime['price']);
+                
                 $qr_code = uniqid('TICKET_') . '_' . $user['id'] . '_' . $showtime_id . '_' . time() . '_' . $seat;
                 
                 $ticket_id = $bookingModel->createTicket([
                     'user_id' => $user['id'],
                     'showtime_id' => $showtime_id,
                     'seat' => $seat,
-                    'price' => $showtime['price'],
+                    'seat_type' => $seat_type,
+                    'price' => $seat_price,
                     'qr_code' => $qr_code
                 ]);
                 
@@ -375,11 +491,29 @@ class BookingController extends Controller {
                     throw new Exception("Không thể tạo vé cho ghế $seat!");
                 }
                 
+                // Thêm food items cho vé này (nếu có)
+                if (!empty($food_items)) {
+                    foreach ($food_items as $food_item_id => $quantity) {
+                        if ($quantity > 0) {
+                            $foodItem = $bookingModel->getFoodItemById($food_item_id);
+                            if ($foodItem) {
+                                $bookingModel->createBookingFoodItem(
+                                    $ticket_id,
+                                    $food_item_id,
+                                    $quantity,
+                                    $foodItem['price']
+                                );
+                            }
+                        }
+                    }
+                }
+                
                 $createdTickets[] = [
                     'id' => $ticket_id,
                     'seat' => $seat,
+                    'seat_type' => $seat_type,
                     'qr_code' => $qr_code,
-                    'price' => $showtime['price']
+                    'price' => $seat_price
                 ];
                 
                 // Thêm ghế vừa tạo vào danh sách để tránh duplicate trong cùng một transaction
@@ -660,8 +794,8 @@ class BookingController extends Controller {
         $bookingModel = new BookingModel();
         $session_id = session_id();
         
-        // Reserve seats
-        $reserved = $bookingModel->reserveSeats($showtime_id, $seats, $user['id'], $session_id, 5);
+        // Reserve seats (10 minutes)
+        $reserved = $bookingModel->reserveSeats($showtime_id, $seats, $user['id'], $session_id, 10);
         
         echo json_encode([
             'success' => true,
@@ -758,7 +892,7 @@ class BookingController extends Controller {
         $bookingModel = new BookingModel();
         
         foreach ($seats as $seat) {
-            $bookingModel->extendReservation($showtime_id, $seat, $user['id'], 5);
+            $bookingModel->extendReservation($showtime_id, $seat, $user['id'], 10);
         }
         
         echo json_encode(['success' => true]);

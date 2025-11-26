@@ -23,7 +23,7 @@
     <meta property="og:site_name" content="CineHub">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="http://localhost/DuAn1/style.css">
+    <link rel="stylesheet" href="http://localhost/DuAn1/style.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>

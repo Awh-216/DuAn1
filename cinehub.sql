@@ -816,6 +816,7 @@ CREATE TABLE `theater_screens` (
   `screen_name` varchar(100) NOT NULL,
   `total_seats` int(11) NOT NULL,
   `seat_layout` text DEFAULT NULL,
+  `seat_layout_config` text DEFAULT NULL COMMENT 'JSON config for seat layout: rows, cols, vip_rows, couple_rows, etc.',
   `screen_type` enum('2D','3D','IMAX','4DX') DEFAULT '2D',
   `is_active` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -825,15 +826,48 @@ CREATE TABLE `theater_screens` (
 -- Đang đổ dữ liệu cho bảng `theater_screens`
 --
 
-INSERT INTO `theater_screens` (`id`, `theater_id`, `screen_name`, `total_seats`, `seat_layout`, `screen_type`, `is_active`, `created_at`) VALUES
-(1, 1, 'Phòng 1', 120, NULL, '2D', 1, '2025-11-12 07:41:09'),
-(2, 1, 'Phòng 2', 150, NULL, '3D', 1, '2025-11-12 07:41:09'),
-(3, 2, 'Phòng 1', 100, NULL, '2D', 1, '2025-11-12 07:41:09'),
-(4, 2, 'Phòng 2', 120, NULL, 'IMAX', 1, '2025-11-12 07:41:09'),
-(5, 3, 'Phòng 1', 200, NULL, '4DX', 1, '2025-11-12 07:41:09'),
-(6, 3, 'Phòng 2', 180, NULL, '3D', 1, '2025-11-12 07:41:09'),
-(7, 4, 'Phòng 1', 110, NULL, '2D', 1, '2025-11-12 07:41:09'),
-(8, 5, 'Phòng 1', 130, NULL, '3D', 1, '2025-11-12 07:41:09');
+INSERT INTO `theater_screens` (`id`, `theater_id`, `screen_name`, `total_seats`, `seat_layout`, `seat_layout_config`, `screen_type`, `is_active`, `created_at`) VALUES
+(1, 1, 'Phòng 1', 120, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K","L"],"cols":[1,2,3,4,5,6,7,8,9,10,11,12],"vip_rows":["D","E","F","G","H","I","J","K"],"couple_rows":["L"],"normal_price":120000,"vip_price":180000,"couple_price":240000,"layout_type":"standard"}', '2D', 1, '2025-11-12 07:41:09'),
+(2, 1, 'Phòng 2', 150, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K","L","M"],"cols":[1,2,3,4,5,6,7,8,9,10,11,12,13,14],"vip_rows":["D","E","F","G","H","I","J","K","L"],"couple_rows":["M"],"normal_price":130000,"vip_price":200000,"couple_price":260000,"layout_type":"standard"}', '3D', 1, '2025-11-12 07:41:09'),
+(3, 2, 'Phòng 1', 100, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J"],"cols":[1,2,3,4,5,6,7,8,9,10],"vip_rows":["D","E","F","G","H","I"],"couple_rows":["J"],"normal_price":110000,"vip_price":170000,"couple_price":220000,"layout_type":"standard"}', '2D', 1, '2025-11-12 07:41:09'),
+(4, 2, 'Phòng 2', 120, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K","L"],"cols":[1,2,3,4,5,6,7,8,9,10],"vip_rows":["D","E","F","G","H","I","J","K"],"couple_rows":["L"],"normal_price":150000,"vip_price":220000,"couple_price":300000,"layout_type":"imax"}', 'IMAX', 1, '2025-11-12 07:41:09'),
+(5, 3, 'Phòng 1', 200, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K","L","M","N"],"cols":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],"vip_rows":["D","E","F","G","H","I","J","K","L","M"],"couple_rows":["N"],"normal_price":140000,"vip_price":210000,"couple_price":280000,"layout_type":"4dx"}', '4DX', 1, '2025-11-12 07:41:09'),
+(6, 3, 'Phòng 2', 180, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K","L","M"],"cols":[1,2,3,4,5,6,7,8,9,10,11,12,13,14],"vip_rows":["D","E","F","G","H","I","J","K","L"],"couple_rows":["M"],"normal_price":130000,"vip_price":200000,"couple_price":260000,"layout_type":"standard"}', '3D', 1, '2025-11-12 07:41:09'),
+(7, 4, 'Phòng 1', 110, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K"],"cols":[1,2,3,4,5,6,7,8,9,10],"vip_rows":["D","E","F","G","H","I","J"],"couple_rows":["K"],"normal_price":115000,"vip_price":175000,"couple_price":230000,"layout_type":"standard"}', '2D', 1, '2025-11-12 07:41:09'),
+(8, 5, 'Phòng 1', 130, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K","L"],"cols":[1,2,3,4,5,6,7,8,9,10,11],"vip_rows":["D","E","F","G","H","I","J","K"],"couple_rows":["L"],"normal_price":125000,"vip_price":190000,"couple_price":250000,"layout_type":"standard"}', '3D', 1, '2025-11-12 07:41:09'),
+(9, 1, 'Phòng 3', 200, NULL, '{"rows":["A","B","C","D","E","F","G","H","I"],"cols":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"vip_rows":["D","E","F","G","H","I"],"couple_rows":[],"normal_price":120000,"vip_price":180000,"couple_price":240000,"layout_type":"complex","seat_groups":[{"rows":["A","B","C","D","E","F","G","H","I"],"cols":[1,2]},{"rows":["A","B","C","D","E","F","G","H","I"],"cols":[3,4,5,6,7,8,9,10,11,12,13,14,15]},{"rows":["H","I"],"cols":[16,17]}]}', 'IMAX', 1, '2025-11-12 07:41:09');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `food_items`
+--
+
+CREATE TABLE `food_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `type` enum('combo','snack','drink') DEFAULT 'combo',
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `food_items`
+--
+
+INSERT INTO `food_items` (`id`, `name`, `description`, `price`, `type`, `is_active`) VALUES
+(1, 'Combo 1 - Bỏng + Nước', '1 bỏng ngô lớn + 1 nước ngọt lớn', 85000.00, 'combo', 1),
+(2, 'Combo 2 - Bỏng + Nước + Snack', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack', 120000.00, 'combo', 1),
+(3, 'Combo 3 - Đôi', '2 bỏng ngô lớn + 2 nước ngọt lớn', 150000.00, 'combo', 1),
+(4, 'Bỏng ngô lớn', 'Bỏng ngô size lớn', 55000.00, 'snack', 1),
+(5, 'Bỏng ngô vừa', 'Bỏng ngô size vừa', 40000.00, 'snack', 1),
+(6, 'Nước ngọt lớn', 'Nước ngọt size lớn', 35000.00, 'drink', 1),
+(7, 'Nước ngọt vừa', 'Nước ngọt size vừa', 25000.00, 'drink', 1),
+(8, 'Snack mix', 'Hỗn hợp snack', 45000.00, 'snack', 1);
 
 -- --------------------------------------------------------
 
@@ -842,44 +876,66 @@ INSERT INTO `theater_screens` (`id`, `theater_id`, `screen_name`, `total_seats`,
 --
 
 CREATE TABLE `tickets` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `showtime_id` int(11) NOT NULL,
   `seat` varchar(10) NOT NULL,
+  `seat_type` enum('normal','vip','couple') DEFAULT 'normal',
   `qr_code` varchar(255) DEFAULT NULL,
   `price` decimal(10,2) DEFAULT NULL,
   `status` enum('Đã đặt','Đã hủy') DEFAULT 'Đã đặt',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `tickets`
 --
 
-INSERT INTO `tickets` (`id`, `user_id`, `showtime_id`, `seat`, `qr_code`, `price`, `status`, `created_at`) VALUES
-(1, 1, 71, 'A5', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(2, 1, 71, 'A6', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(3, 2, 72, 'B10', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(4, 3, 73, 'C15', NULL, 100000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(5, 4, 74, 'D20', NULL, 110000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(6, 5, 75, 'E12', NULL, 115000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(7, 9, 81, 'A6', 'TICKET_69240f4b89ccf_9_81_1763970891_A6', 120000.00, 'Đã đặt', '2025-11-24 07:54:51'),
-(8, 9, 81, 'G7', 'TICKET_69240f61d71ab_9_81_1763970913_G7', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
-(9, 9, 81, 'G8', 'TICKET_69240f61d7831_9_81_1763970913_G8', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
-(10, 9, 81, 'G9', 'TICKET_69240f61d7bcf_9_81_1763970913_G9', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
-(11, 9, 121, 'G4', 'TICKET_692506ab7cef0_9_121_1764034219_G4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(12, 9, 121, 'G5', 'TICKET_692506ab7d8a8_9_121_1764034219_G5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(13, 9, 121, 'H4', 'TICKET_692506ab7e237_9_121_1764034219_H4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(14, 9, 121, 'H5', 'TICKET_692506ab7ea13_9_121_1764034219_H5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(15, 9, 121, 'H6', 'TICKET_692506ab7f17a_9_121_1764034219_H6', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(16, 9, 121, 'H7', 'TICKET_692506ab7f857_9_121_1764034219_H7', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(17, 9, 121, 'I4', 'TICKET_692506ab7ff3e_9_121_1764034219_I4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(18, 9, 121, 'I5', 'TICKET_692506ab80651_9_121_1764034219_I5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(19, 9, 121, 'I6', 'TICKET_692506ab80dbd_9_121_1764034219_I6', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(20, 9, 121, 'I7', 'TICKET_692506ab81559_9_121_1764034219_I7', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(21, 9, 116, 'I5', 'TICKET_692512378240a_9_116_1764037175_I5', 130000.00, 'Đã đặt', '2025-11-25 02:19:35'),
-(22, 9, 116, 'I6', 'TICKET_6925123783725_9_116_1764037175_I6', 130000.00, 'Đã đặt', '2025-11-25 02:19:35'),
-(23, 9, 151, 'K5', 'TICKET_69266a0629905_9_151_1764125190_K5', 120000.00, 'Đã đặt', '2025-11-26 02:46:30');
+INSERT INTO `tickets` (`id`, `user_id`, `showtime_id`, `seat`, `seat_type`, `qr_code`, `price`, `status`, `created_at`) VALUES
+(1, 1, 71, 'A5', 'normal', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(2, 1, 71, 'A6', 'normal', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(3, 2, 72, 'B10', 'normal', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(4, 3, 73, 'C15', 'normal', NULL, 100000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(5, 4, 74, 'D20', 'normal', NULL, 110000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(6, 5, 75, 'E12', 'normal', NULL, 115000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(7, 9, 81, 'A6', 'normal', 'TICKET_69240f4b89ccf_9_81_1763970891_A6', 120000.00, 'Đã đặt', '2025-11-24 07:54:51'),
+(8, 9, 81, 'G7', 'normal', 'TICKET_69240f61d71ab_9_81_1763970913_G7', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
+(9, 9, 81, 'G8', 'normal', 'TICKET_69240f61d7831_9_81_1763970913_G8', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
+(10, 9, 81, 'G9', 'normal', 'TICKET_69240f61d7bcf_9_81_1763970913_G9', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
+(11, 9, 121, 'G4', 'normal', 'TICKET_692506ab7cef0_9_121_1764034219_G4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(12, 9, 121, 'G5', 'normal', 'TICKET_692506ab7d8a8_9_121_1764034219_G5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(13, 9, 121, 'H4', 'normal', 'TICKET_692506ab7e237_9_121_1764034219_H4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(14, 9, 121, 'H5', 'normal', 'TICKET_692506ab7ea13_9_121_1764034219_H5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(15, 9, 121, 'H6', 'normal', 'TICKET_692506ab7f17a_9_121_1764034219_H6', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(16, 9, 121, 'H7', 'normal', 'TICKET_692506ab7f857_9_121_1764034219_H7', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(17, 9, 121, 'I4', 'normal', 'TICKET_692506ab7ff3e_9_121_1764034219_I4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(18, 9, 121, 'I5', 'normal', 'TICKET_692506ab80651_9_121_1764034219_I5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(19, 9, 121, 'I6', 'normal', 'TICKET_692506ab80dbd_9_121_1764034219_I6', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(20, 9, 121, 'I7', 'normal', 'TICKET_692506ab81559_9_121_1764034219_I7', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(21, 9, 116, 'I5', 'normal', 'TICKET_692512378240a_9_116_1764037175_I5', 130000.00, 'Đã đặt', '2025-11-25 02:19:35'),
+(22, 9, 116, 'I6', 'normal', 'TICKET_6925123783725_9_116_1764037175_I6', 130000.00, 'Đã đặt', '2025-11-25 02:19:35'),
+(23, 9, 151, 'K5', 'normal', 'TICKET_69266a0629905_9_151_1764125190_K5', 120000.00, 'Đã đặt', '2025-11-26 02:46:30');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `booking_food_items`
+--
+
+CREATE TABLE `booking_food_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `food_item_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `price` decimal(10,2) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `ticket_id` (`ticket_id`),
+  KEY `food_item_id` (`food_item_id`),
+  CONSTRAINT `fk_booking_food_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_booking_food_item` FOREIGN KEY (`food_item_id`) REFERENCES `food_items` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -1205,7 +1261,6 @@ ALTER TABLE `theater_screens`
 -- Chỉ mục cho bảng `tickets`
 --
 ALTER TABLE `tickets`
-  ADD PRIMARY KEY (`id`),
   ADD KEY `idx_user` (`user_id`),
   ADD KEY `idx_showtime` (`showtime_id`),
   ADD KEY `idx_showtime_status` (`showtime_id`,`status`),
@@ -1359,6 +1414,18 @@ ALTER TABLE `system_config`
 --
 ALTER TABLE `theaters`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT cho bảng `food_items`
+--
+ALTER TABLE `food_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT cho bảng `booking_food_items`
+--
+ALTER TABLE `booking_food_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `theater_screens`

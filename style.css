@@ -3559,6 +3559,8 @@ button.btn-location-detect span,
   padding: 1.5rem;
   border-radius: 10px;
   margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
 }
 
 .seat-row {
@@ -3593,18 +3595,32 @@ button.btn-location-detect span,
   align-items: center;
   justify-content: center;
   transition: all 0.3s;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: auto;
 }
 
 .seat-checkbox {
   position: absolute;
   opacity: 0;
   cursor: pointer;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  margin: 0;
+  padding: 0;
+  pointer-events: auto;
 }
 
 .seat-number {
   font-size: 0.85rem;
   font-weight: 600;
   color: #ffffff;
+  pointer-events: none;
+  position: relative;
+  z-index: 1;
 }
 
 .seat-label.available {
@@ -3612,8 +3628,21 @@ button.btn-location-detect span,
   border: 1px solid #888;
 }
 
+/* VIP seats - simple style */
+.seat-label.available.vip-seat {
+  background-color: #d4af37 !important;
+  border: 2px solid #b8941f !important;
+}
+
 .seat-label.available:hover {
   background-color: #777;
+  transform: scale(1.1);
+}
+
+.seat-label.available.vip-seat:hover {
+  background: linear-gradient(135deg, #a0522d, #cd853f) !important;
+  border-color: #ffd700 !important;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.7);
   transform: scale(1.1);
 }
 
@@ -3621,6 +3650,21 @@ button.btn-location-detect span,
   background-color: #28a745;
   border-color: #28a745;
   transform: scale(1.1);
+}
+
+.seat-label.selected.vip-seat {
+  background-color: #28a745 !important;
+  border-color: #28a745 !important;
+  color: #fff !important;
+}
+
+.seat-label.selected.vip-seat .seat-number {
+  color: #fff !important;
+  font-weight: bold;
+}
+
+.seat-label.selected.vip-seat .seat-icon.vip-icon {
+  color: #fff !important;
 }
 
 .seat-label.booked {
@@ -3707,6 +3751,8 @@ button.btn-location-detect span,
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .couple-seat.selected .couple-icon {
@@ -3723,6 +3769,90 @@ button.btn-location-detect span,
   height: 25px;
   background: linear-gradient(135deg, #7b2cbf, #9d4edd);
   border: 2px solid #e0aaff;
+}
+
+/* VIP Seat Icon */
+.seat-icon {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.seat-icon.vip-icon {
+  color: #ffd700;
+  text-shadow: 0 0 3px rgba(255, 215, 0, 0.8);
+}
+
+.seat-icon.vip-icon i {
+  font-size: 0.7rem;
+}
+
+.seat-icon.normal-icon {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.5rem;
+}
+
+.seat-label.selected .seat-icon.normal-icon {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.seat-label.vip-seat {
+  background-color: #d4af37 !important;
+  border: 2px solid #b8941f !important;
+}
+
+.seat-label.vip-seat.available:hover {
+  background-color: #e5c158 !important;
+  border-color: #b8941f !important;
+}
+
+.seat-label.vip-seat.selected {
+  background-color: #28a745 !important;
+  border-color: #28a745 !important;
+  color: #fff !important;
+}
+
+.seat-label.vip-seat.selected .seat-number {
+  color: #fff !important;
+  font-weight: bold;
+}
+
+.seat-label.vip-seat.selected .seat-icon.vip-icon {
+  color: #fff !important;
+}
+
+/* VIP Row Label */
+.seat-row.vip-row .row-label {
+  color: #d4af37 !important;
+  font-weight: bold;
+}
+
+.seat-label.vip-seat.selected .seat-icon.vip-icon {
+  color: #8b4513;
+}
+
+/* Legend cho ghế VIP */
+.legend-seat.vip-seat {
+  background: linear-gradient(135deg, #8b4513, #a0522d);
+  border: 2px solid #ffd700;
+  position: relative;
+}
+
+.legend-seat.vip-seat::after {
+  content: '\f521';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 0.6rem;
+  color: #ffd700;
 }
 
 /* Seat Legend */

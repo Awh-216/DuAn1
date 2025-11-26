@@ -337,51 +337,142 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                     
                                     <div class="seat-map-container" role="group" aria-label="Bản đồ ghế ngồi trong rạp">
                                         <?php
-                                        $rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
-                                        $cols = range(1, 12);
-                                        $lastRow = end($rows); // Hàng cuối (L)
+                                        // Lấy seat layout từ config hoặc dùng default
+                                        $layout = $seatLayout ?? [
+                                            'rows' => ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'],
+                                            'cols' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                                            'vip_rows' => ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'], // Từ hàng D (hàng 4) trở xuống là VIP
+                                            'couple_rows' => ['L'], // Hàng cuối là ghế đôi
+                                            'normal_price' => 120000,
+                                            'vip_price' => 180000,
+                                            'couple_price' => 240000
+                                        ];
                                         
-                                        foreach ($rows as $row) {
-                                            echo '<div class="seat-row ' . ($row === $lastRow ? 'couple-seat-row' : '') . '">';
+                                        $rows = $layout['rows'] ?? ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+                                        $cols = $layout['cols'] ?? range(1, 12);
+                                        $vip_rows = $layout['vip_rows'] ?? [];
+                                        $couple_rows = $layout['couple_rows'] ?? [];
+                                        
+                                        // Nếu không có config, tự động phân loại: 3 hàng đầu = thường, từ hàng 4 (D) trở xuống = VIP, cuối = ghế đôi
+                                        if (empty($vip_rows) && empty($couple_rows) && count($rows) > 3) {
+                                            // 3 hàng đầu (A-C) = thường
+                                            // Từ hàng 4 (D) đến hàng trước cuối = VIP
+                                            // Hàng cuối = ghế đôi
+                                            $normalRows = array_slice($rows, 0, 3); // A, B, C
+                                            $vip_rows = array_slice($rows, 3, -1); // D, E, F, G, H, I, J, K (từ hàng 4 trở xuống)
+                                            $couple_rows = [end($rows)]; // L
+                                        }
+                                        
+                                        require_once __DIR__ . '/../BookingModel.php';
+                                        $bookingModel = new BookingModel();
+                                        
+                                        // Kiểm tra xem có layout phức tạp không (có seat_groups)
+                                        $layout_type = $layout['layout_type'] ?? 'standard';
+                                        $seat_groups = $layout['seat_groups'] ?? null;
+                                        
+                                        // Nếu có seat_groups, render theo layout phức tạp
+                                        if ($seat_groups && is_array($seat_groups)) {
+                                            // Render từng nhóm ghế
+                                            foreach ($seat_groups as $groupIndex => $group) {
+                                                $groupRows = $group['rows'] ?? [];
+                                                $groupCols = $group['cols'] ?? [];
+                                                
+                                                foreach ($groupRows as $row) {
+                                                    $isVipRow = in_array($row, $vip_rows);
+                                                    $isCoupleRow = in_array($row, $couple_rows);
+                                                    
+                                                    echo '<div class="seat-row ' . ($isCoupleRow ? 'couple-seat-row' : '') . ($isVipRow ? ' vip-row' : '') . '">';
+                                                    echo '<span class="row-label">' . $row . '</span>';
+                                                    echo '<div class="seats-in-row">';
+                                                    
+                                                    // Chỉ render các cột trong nhóm này
+                                                    foreach ($groupCols as $col) {
+                                                        $seat = $row . $col;
+                                                        $isBooked = in_array($seat, $bookedSeats ?? []);
+                                                        $isReserved = in_array($seat, $reservedSeats ?? []);
+                                                        
+                                                        $seatClass = 'available';
+                                                        if ($isBooked) {
+                                                            $seatClass = 'booked';
+                                                        } elseif ($isReserved) {
+                                                            $seatClass = 'reserved';
+                                                        }
+                                                        
+                                                        if ($isVipRow) {
+                                                            $seatClass .= ' vip-seat';
+                                                        }
+                                                        
+                                                        echo '<label class="seat-label ' . $seatClass . '" data-seat="' . $seat . '" data-seat-type="' . ($isVipRow ? 'vip' : 'normal') . '">';
+                                                        if (!$isBooked && !$isReserved) {
+                                                            echo '<input type="checkbox" name="seats[]" value="' . $seat . '" class="seat-checkbox" data-seat-type="' . ($isVipRow ? 'vip' : 'normal') . '">';
+                                                        }
+                                                        echo '<span class="seat-number">' . $col . '</span>';
+                                                        if ($isVipRow) {
+                                                            echo '<span class="seat-icon vip-icon" title="Ghế VIP"><i class="fas fa-crown"></i></span>';
+                                                        } else {
+                                                            echo '<span class="seat-icon normal-icon" title="Ghế thường"><i class="fas fa-chair"></i></span>';
+                                                        }
+                                                        echo '</label>';
+                                                    }
+                                                    
+                                                    echo '</div>';
+                                                    echo '</div>';
+                                                }
+                                                
+                                                // Thêm khoảng cách giữa các nhóm (trừ nhóm cuối)
+                                                if ($groupIndex < count($seat_groups) - 1) {
+                                                    echo '<div style="width: 30px; display: inline-block;"></div>';
+                                                }
+                                            }
+                                        } else {
+                                            // Layout tiêu chuẩn
+                                            foreach ($rows as $row) {
+                                            $isVipRow = in_array($row, $vip_rows);
+                                            $isCoupleRow = in_array($row, $couple_rows);
+                                            
+                                            echo '<div class="seat-row ' . ($isCoupleRow ? 'couple-seat-row' : '') . ($isVipRow ? ' vip-row' : '') . '">';
                                             echo '<span class="row-label">' . $row . '</span>';
                                             echo '<div class="seats-in-row">';
                                             
-                                            // Nếu là hàng cuối (L), tạo ghế đôi
-                                            if ($row === $lastRow) {
-                                                // Tạo 6 ghế đôi từ 12 ghế (mỗi ghế đôi gồm 2 ghế liên tiếp)
-                                                for ($i = 1; $i <= 12; $i += 2) {
-                                                    $seat1 = $row . $i;
-                                                    $seat2 = $row . ($i + 1);
-                                                    $isBooked1 = in_array($seat1, $bookedSeats ?? []);
-                                                    $isBooked2 = in_array($seat2, $bookedSeats ?? []);
-                                                    $isBooked = $isBooked1 || $isBooked2;
-                                                    
-                                                    // Debug: Log couple seat status
-                                                    if ($isBooked) {
-                                                        error_log("Couple seat $seat1-$seat2 is BOOKED - showtime: $selected_showtime_id");
+                                            // Nếu là hàng ghế đôi
+                                            if ($isCoupleRow) {
+                                                // Tạo ghế đôi từ các ghế liên tiếp
+                                                for ($i = 0; $i < count($cols); $i += 2) {
+                                                    if ($i + 1 < count($cols)) {
+                                                        $col1 = $cols[$i];
+                                                        $col2 = $cols[$i + 1];
+                                                        $seat1 = $row . $col1;
+                                                        $seat2 = $row . $col2;
+                                                        $isBooked1 = in_array($seat1, $bookedSeats ?? []);
+                                                        $isBooked2 = in_array($seat2, $bookedSeats ?? []);
+                                                        $isReserved1 = in_array($seat1, $reservedSeats ?? []);
+                                                        $isReserved2 = in_array($seat2, $reservedSeats ?? []);
+                                                        $isBooked = $isBooked1 || $isBooked2;
+                                                        $isReserved = $isReserved1 || $isReserved2;
+                                                        
+                                                        $seatClass = 'available';
+                                                        if ($isBooked) {
+                                                            $seatClass = 'booked';
+                                                        } elseif ($isReserved) {
+                                                            $seatClass = 'reserved';
+                                                        }
+                                                        
+                                                        echo '<label class="seat-label couple-seat ' . $seatClass . '" data-seat="' . $seat1 . '" title="Ghế đôi ' . $col1 . '-' . $col2 . '">';
+                                                        if (!$isBooked && !$isReserved) {
+                                                            echo '<input type="checkbox" name="seats[]" value="' . $seat1 . '" class="seat-checkbox couple-seat-checkbox" data-couple-seat="' . $seat2 . '">';
+                                                            echo '<input type="checkbox" name="seats[]" value="' . $seat2 . '" class="seat-checkbox couple-seat-checkbox" data-couple-seat="' . $seat1 . '">';
+                                                        }
+                                                        echo '<span class="seat-number">' . $col1 . '-' . $col2 . '</span>';
+                                                        echo '<span class="couple-icon"><i class="fas fa-heart"></i></span>';
+                                                        echo '</label>';
                                                     }
-                                                    
-                                                    echo '<label class="seat-label couple-seat ' . ($isBooked ? 'booked' : 'available') . '" title="Ghế đôi ' . $i . '-' . ($i + 1) . '">';
-                                                    if (!$isBooked) {
-                                                        // Tạo checkbox cho cả 2 ghế trong ghế đôi
-                                                        echo '<input type="checkbox" name="seats[]" value="' . $seat1 . '" class="seat-checkbox couple-seat-checkbox" data-couple-seat="' . $seat2 . '">';
-                                                        echo '<input type="checkbox" name="seats[]" value="' . $seat2 . '" class="seat-checkbox couple-seat-checkbox" data-couple-seat="' . $seat1 . '">';
-                                                    }
-                                                    echo '<span class="seat-number">' . $i . '-' . ($i + 1) . '</span>';
-                                                    echo '<span class="couple-icon"><i class="fas fa-heart"></i></span>';
-                                                    echo '</label>';
                                                 }
                                             } else {
-                                                // Các hàng khác vẫn là ghế đơn
+                                                // Các hàng ghế đơn
                                                 foreach ($cols as $col) {
                                                     $seat = $row . $col;
                                                     $isBooked = in_array($seat, $bookedSeats ?? []);
                                                     $isReserved = in_array($seat, $reservedSeats ?? []);
-                                                    
-                                                    // Debug: Log seat status
-                                                    if ($isBooked) {
-                                                        error_log("Seat $seat is BOOKED - showtime: $selected_showtime_id");
-                                                    }
                                                     
                                                     $seatClass = 'available';
                                                     if ($isBooked) {
@@ -390,19 +481,39 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                                         $seatClass = 'reserved';
                                                     }
                                                     
-                                                    echo '<label class="seat-label ' . $seatClass . '" data-seat="' . $seat . '">';
+                                                    if ($isVipRow) {
+                                                        $seatClass .= ' vip-seat';
+                                                    }
+                                                    
+                                                    echo '<label class="seat-label ' . $seatClass . '" data-seat="' . $seat . '" data-seat-type="' . ($isVipRow ? 'vip' : 'normal') . '">';
                                                     if (!$isBooked && !$isReserved) {
-                                                        echo '<input type="checkbox" name="seats[]" value="' . $seat . '" class="seat-checkbox">';
+                                                        echo '<input type="checkbox" name="seats[]" value="' . $seat . '" class="seat-checkbox" data-seat-type="' . ($isVipRow ? 'vip' : 'normal') . '">';
                                                     }
                                                     echo '<span class="seat-number">' . $col . '</span>';
+                                                    if ($isVipRow) {
+                                                        echo '<span class="seat-icon vip-icon" title="Ghế VIP"><i class="fas fa-crown"></i></span>';
+                                                    } else {
+                                                        echo '<span class="seat-icon normal-icon" title="Ghế thường"><i class="fas fa-chair"></i></span>';
+                                                    }
                                                     echo '</label>';
                                                 }
                                             }
                                             
                                             echo '</div>';
                                             echo '</div>';
+                                            }
                                         }
                                         ?>
+                                    </div>
+                                    
+                                    <!-- Reservation Timer -->
+                                    <div id="reservation-timer" class="reservation-timer mb-3" style="display: none;">
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-clock me-2"></i>
+                                            <strong>Thời gian giữ ghế:</strong> 
+                                            <span id="timer-countdown">10:00</span>
+                                            <small class="ms-2">(Bạn có 10 phút để hoàn tất thanh toán)</small>
+                                        </div>
                                     </div>
                                     
                                     <!-- Seat Legend -->
@@ -424,10 +535,54 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                             <span>Ghế đã bán</span>
                                         </div>
                                         <div class="legend-item">
+                                            <span class="legend-seat vip-seat" aria-label="Ghế VIP"></span>
+                                            <span>Ghế VIP <i class="fas fa-crown" style="color: #ffd700; margin-left: 5px;"></i></span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <span class="legend-seat available" aria-label="Ghế thường"></span>
+                                            <span>Ghế thường <i class="fas fa-chair" style="color: #666; margin-left: 5px;"></i></span>
+                                        </div>
+                                        <div class="legend-item">
                                             <span class="legend-seat couple-seat" aria-label="Ghế đôi"></span>
-                                            <span>Ghế đôi (hàng L)</span>
+                                            <span>Ghế đôi</span>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Food Items / Combo Section -->
+                                    <?php if (!empty($foodItems)): ?>
+                                    <div class="food-items-section mb-4">
+                                        <label class="booking-label">
+                                            <i class="fas fa-utensils me-2"></i>Combo & Đồ ăn
+                                        </label>
+                                        <div class="food-items-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                                            <?php foreach ($foodItems as $item): ?>
+                                            <div class="food-item-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: white;">
+                                                <div class="food-item-header" style="margin-bottom: 10px;">
+                                                    <h5 style="margin: 0; font-size: 16px; color: #333;"><?php echo htmlspecialchars($item['name']); ?></h5>
+                                                    <?php if ($item['description']): ?>
+                                                    <small class="text-muted" style="font-size: 12px;"><?php echo htmlspecialchars($item['description']); ?></small>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="food-item-price" style="font-size: 18px; font-weight: bold; color: #e50914; margin-bottom: 10px;">
+                                                    <?php echo number_format($item['price']); ?>₫
+                                                </div>
+                                                <div class="food-item-quantity">
+                                                    <label style="font-size: 14px; margin-bottom: 5px; display: block;">Số lượng:</label>
+                                                    <input type="number" 
+                                                           name="food_items[<?php echo $item['id']; ?>]" 
+                                                           value="0" 
+                                                           min="0" 
+                                                           max="10"
+                                                           class="food-quantity-input form-control"
+                                                           data-price="<?php echo $item['price']; ?>"
+                                                           data-item-id="<?php echo $item['id']; ?>"
+                                                           style="width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                                                </div>
+                                            </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                    <?php endif; ?>
                                     
                                     <!-- Total Price -->
                                     <div class="total-price-section mb-4" role="status" aria-live="polite">
@@ -574,7 +729,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalAmountSpan = document.getElementById('total-amount');
     const totalSeatsSpan = document.getElementById('total-seats');
     const submitBtn = document.getElementById('submit-btn');
-    const pricePerSeat = <?php echo isset($showtime) && $showtime ? $showtime['price'] : 0; ?>;
+    const pricePerSeat = <?php echo (isset($showtime) && $showtime && isset($showtime['price'])) ? (int)$showtime['price'] : 0; ?>;
+    
+    // Seat layout config from PHP
+    const seatLayout = <?php 
+        if (isset($seatLayout) && $seatLayout !== null) {
+            echo json_encode($seatLayout, JSON_HEX_APOS | JSON_HEX_QUOT);
+        } else {
+            echo 'null';
+        }
+    ?>;
+    const normalPrice = (seatLayout && seatLayout.normal_price) ? seatLayout.normal_price : pricePerSeat;
+    const vipPrice = (seatLayout && seatLayout.vip_price) ? seatLayout.vip_price : (pricePerSeat * 1.5);
+    const couplePrice = (seatLayout && seatLayout.couple_price) ? seatLayout.couple_price : (pricePerSeat * 2);
+    
+    // Reservation timer
+    let reservationTimer = null;
+    let reservationStartTime = null;
+    const RESERVATION_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
     
     // Kiểm tra vị trí đã lưu khi trang load
     const savedLocation = localStorage.getItem('userLocation');
@@ -605,14 +777,77 @@ document.addEventListener('DOMContentLoaded', function() {
     // Sử dụng event delegation để xử lý tất cả checkbox (kể cả được thêm sau)
     const seatMapContainer = document.querySelector('.seat-map-container');
     if (seatMapContainer) {
+        console.log('Seat map container found, attaching event listeners...');
+        
+        // Xử lý click vào label để trigger checkbox
+        seatMapContainer.addEventListener('click', function(e) {
+            // Bỏ qua nếu click vào icon hoặc số ghế
+            if (e.target.classList.contains('seat-icon') || 
+                e.target.classList.contains('seat-number') ||
+                e.target.closest('.seat-icon') ||
+                e.target.closest('.seat-number')) {
+                return;
+            }
+            
+            // Nếu click trực tiếp vào checkbox, để nó tự xử lý
+            if (e.target.type === 'checkbox') {
+                return;
+            }
+            
+            // Tìm label gần nhất
+            const label = e.target.closest('.seat-label');
+            if (!label) return;
+            
+            // Bỏ qua nếu ghế đã được đặt
+            if (label.classList.contains('booked') || label.classList.contains('reserved')) {
+                return;
+            }
+            
+            // Tìm checkbox trong label
+            const checkbox = label.querySelector('.seat-checkbox');
+            if (!checkbox || checkbox.disabled) return;
+            
+            // Toggle checkbox
+            checkbox.checked = !checkbox.checked;
+            
+            // Trigger change event
+            const changeEvent = new Event('change', { bubbles: true });
+            checkbox.dispatchEvent(changeEvent);
+        });
+        
+        // Xử lý change event để validate sau khi checkbox được checked/unchecked
         seatMapContainer.addEventListener('change', function(e) {
             if (e.target.classList.contains('seat-checkbox')) {
                 const checkbox = e.target;
+                console.log('Checkbox changed:', checkbox.value, 'checked:', checkbox.checked);
+                
+                // Nếu đang check
+                if (checkbox.checked) {
+                    const selectedSeats = getSelectedSeats();
+                    console.log('Selected seats:', selectedSeats);
+                    
+                    // Kiểm tra giới hạn 8 vé
+                    if (selectedSeats.length > 8) {
+                        checkbox.checked = false;
+                        alert('Bạn chỉ có thể đặt tối đa 8 vé một lần!');
+                        updateSelection();
+                        return;
+                    }
+                    
+                    // Validate seat selection rules
+                    const validationError = validateSeatSelection(selectedSeats);
+                    if (validationError) {
+                        checkbox.checked = false;
+                        alert(validationError);
+                        updateSelection();
+                        return;
+                    }
+                }
                 
                 // Xử lý ghế đôi: khi chọn 1 ghế trong cặp thì tự động chọn ghế còn lại
                 if (checkbox.classList.contains('couple-seat-checkbox')) {
                     const coupleSeatId = checkbox.getAttribute('data-couple-seat');
-                    const coupleCheckbox = document.querySelector(`input[value="${coupleSeatId}"].couple-seat-checkbox`);
+                    const coupleCheckbox = document.querySelector('input[value="' + coupleSeatId + '"].couple-seat-checkbox');
                     if (coupleCheckbox && checkbox.checked) {
                         coupleCheckbox.checked = true;
                     } else if (coupleCheckbox && !checkbox.checked) {
@@ -623,10 +858,87 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateSelection();
             }
         });
+        
+        // Debug: Log số lượng checkbox
+        setTimeout(function() {
+            const allCheckboxes = document.querySelectorAll('.seat-checkbox');
+            console.log('Total checkboxes found:', allCheckboxes.length);
+            var availableCheckboxes = document.querySelectorAll('.seat-checkbox:not(:disabled)');
+            console.log('Available checkboxes:', availableCheckboxes.length);
+        }, 1000);
+        
+    } else {
+        console.error('Seat map container not found!');
+    }
+    
+    // Food items quantity change handler
+    document.querySelectorAll('.food-quantity-input').forEach(function(input) {
+        input.addEventListener('change', function() {
+            updateSelection();
+        });
+    });
+    
+    // Helper functions
+    function getSelectedSeats() {
+        const allCheckboxes = document.querySelectorAll('.seat-checkbox:checked');
+        var values = Array.from(allCheckboxes).map(function(cb) { return cb.value; });
+        var uniqueValues = [];
+        for (var i = 0; i < values.length; i++) {
+            if (uniqueValues.indexOf(values[i]) === -1) {
+                uniqueValues.push(values[i]);
+            }
+        }
+        return uniqueValues;
+    }
+    
+    function getSeatPrice(seat) {
+        const label = document.querySelector('.seat-label[data-seat="' + seat + '"]');
+        if (!label) return normalPrice;
+        
+        if (label.classList.contains('couple-seat')) {
+            return couplePrice;
+        } else if (label.classList.contains('vip-seat')) {
+            return vipPrice;
+        }
+        return normalPrice;
+    }
+    
+    function validateSeatSelection(seats) {
+        if (seats.length <= 1) return null;
+        
+        // Group seats by row
+        const seatsByRow = {};
+        seats.forEach(function(seat) {
+            const row = seat.charAt(0);
+            const col = parseInt(seat.substring(1));
+            if (!seatsByRow[row]) {
+                seatsByRow[row] = [];
+            }
+            seatsByRow[row].push(col);
+        });
+        
+        // Validate each row
+        for (const row in seatsByRow) {
+            const cols = seatsByRow[row].sort((a, b) => a - b);
+            
+            // Nếu chỉ có 1 ghế trong hàng, không cần validate
+            if (cols.length <= 1) continue;
+            
+            // Check for gaps (seats must be adjacent) - KHÔNG cho phép bỏ trống bất kỳ ghế nào ở giữa
+            for (let i = 0; i < cols.length - 1; i++) {
+                const gap = cols[i + 1] - cols[i];
+                if (gap > 1) {
+                    // Luôn báo lỗi nếu có gap, không cần kiểm tra ghế đã đặt
+                    return 'Không được bỏ trống ghế ở giữa! Các ghế phải liền kề nhau. Vui lòng chọn các ghế liền kề.';
+                }
+            }
+        }
+        
+        return null;
     }
     
     // Attach events cho checkbox hiện có (cho keyboard support)
-    checkboxes.forEach(checkbox => {
+    checkboxes.forEach(function(checkbox) {
         const label = checkbox.closest('.seat-label');
         if (label && !label.classList.contains('booked')) {
             label.setAttribute('tabindex', '0');
@@ -649,29 +961,37 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateSelection() {
         // Lấy lại tất cả checkbox (có thể có checkbox mới được thêm vào)
         const allCheckboxes = document.querySelectorAll('.seat-checkbox');
-        const selected = Array.from(allCheckboxes)
-            .filter(cb => cb.checked)
-            .map(cb => cb.value);
+        var checkedBoxes = Array.from(allCheckboxes).filter(function(cb) { return cb.checked; });
+        var selected = checkedBoxes.map(function(cb) { return cb.value; });
         
         // Loại bỏ duplicate (cho ghế đôi có thể có 2 checkbox cùng value)
-        const uniqueSelected = [...new Set(selected)];
+        var uniqueSelected = [];
+        for (var i = 0; i < selected.length; i++) {
+            if (uniqueSelected.indexOf(selected[i]) === -1) {
+                uniqueSelected.push(selected[i]);
+            }
+        }
         
         const emailContainer = document.getElementById('email-container');
         const emailInput = document.getElementById('customer_email');
         
         // Update visual
-        allCheckboxes.forEach(cb => {
+        allCheckboxes.forEach(function(cb) {
             const label = cb.closest('.seat-label');
             if (label) {
                 if (cb.checked) {
                     label.classList.add('selected');
                     label.classList.remove('available');
                     label.setAttribute('aria-checked', 'true');
+                    // Đảm bảo giữ class vip-seat nếu có
+                    if (label.classList.contains('vip-seat')) {
+                        // vip-seat class đã có, không cần làm gì
+                    }
                 } else {
                     // Chỉ xóa selected nếu cả 2 ghế trong cặp đều không được chọn (cho ghế đôi)
                     if (label.classList.contains('couple-seat')) {
                         const coupleSeatId = cb.getAttribute('data-couple-seat');
-                        const coupleCheckbox = document.querySelector(`input[value="${coupleSeatId}"].couple-seat-checkbox`);
+                        const coupleCheckbox = document.querySelector('input[value="' + coupleSeatId + '"].couple-seat-checkbox');
                         if (coupleCheckbox && !coupleCheckbox.checked) {
                             label.classList.remove('selected');
                             if (!label.classList.contains('booked')) {
@@ -682,18 +1002,38 @@ document.addEventListener('DOMContentLoaded', function() {
                         label.classList.remove('selected');
                         if (!label.classList.contains('booked')) {
                             label.classList.add('available');
+                            // Đảm bảo giữ class vip-seat nếu có
+                            if (label.classList.contains('vip-seat')) {
+                                // vip-seat class đã có, không cần làm gì
+                            }
                         }
                     }
+                }
                     label.setAttribute('aria-checked', 'false');
                 }
             }
         });
         
+        // Calculate total price
+        let seatTotal = 0;
+        uniqueSelected.forEach(function(seat) {
+            seatTotal += getSeatPrice(seat);
+        });
+        
+        // Calculate food items total
+        let foodTotal = 0;
+        document.querySelectorAll('.food-quantity-input').forEach(function(input) {
+            const quantity = parseInt(input.value) || 0;
+            const price = parseFloat(input.getAttribute('data-price')) || 0;
+            foodTotal += quantity * price;
+        });
+        
+        const grandTotal = seatTotal + foodTotal;
+        
         if (uniqueSelected.length > 0) {
-            const total = uniqueSelected.length * pricePerSeat;
-            totalAmountSpan.textContent = total.toLocaleString('vi-VN') + '₫';
-            totalAmountSpan.setAttribute('aria-label', 'Tổng tiền ' + total.toLocaleString('vi-VN') + ' đồng');
-            totalSeatsSpan.textContent = uniqueSelected.length + ' ghế';
+            totalAmountSpan.textContent = grandTotal.toLocaleString('vi-VN') + '₫';
+            totalAmountSpan.setAttribute('aria-label', 'Tổng tiền ' + grandTotal.toLocaleString('vi-VN') + ' đồng');
+            totalSeatsSpan.textContent = uniqueSelected.length + ' ghế' + (foodTotal > 0 ? ' + đồ ăn' : '');
             submitBtn.disabled = false;
             submitBtn.setAttribute('aria-label', 'Xác nhận đặt ' + uniqueSelected.length + ' vé');
             
@@ -701,11 +1041,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (emailContainer) {
                 emailContainer.style.display = 'block';
             }
+            
+            // Start reservation timer if not already started
+            if (!reservationTimer && uniqueSelected.length > 0) {
+                startReservationTimer();
+            }
         } else {
             totalAmountSpan.textContent = '0₫';
             totalAmountSpan.setAttribute('aria-label', 'Chưa chọn ghế nào');
             totalSeatsSpan.textContent = '0 ghế';
             submitBtn.disabled = true;
+            
+            // Stop reservation timer
+            stopReservationTimer();
             
             // Ẩn trường email và xóa giá trị
             if (emailContainer) {
@@ -720,12 +1068,90 @@ document.addEventListener('DOMContentLoaded', function() {
         return uniqueSelected;
     }
     
+    function startReservationTimer() {
+        const timerElement = document.getElementById('reservation-timer');
+        const countdownElement = document.getElementById('timer-countdown');
+        
+        if (!timerElement || !countdownElement) return;
+        
+        reservationStartTime = Date.now();
+        timerElement.style.display = 'block';
+        
+        reservationTimer = setInterval(function() {
+            const elapsed = Date.now() - reservationStartTime;
+            const remaining = RESERVATION_DURATION - elapsed;
+            
+            if (remaining <= 0) {
+                stopReservationTimer();
+                alert('Thời gian giữ ghế đã hết! Vui lòng chọn lại ghế.');
+                // Uncheck all seats
+                document.querySelectorAll('.seat-checkbox:checked').forEach(function(cb) {
+                    cb.checked = false;
+                });
+                updateSelection();
+                return;
+            }
+            
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            countdownElement.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+        }, 1000);
+    }
+    
+    function stopReservationTimer() {
+        if (reservationTimer) {
+            clearInterval(reservationTimer);
+            reservationTimer = null;
+        }
+        const timerElement = document.getElementById('reservation-timer');
+        if (timerElement) {
+            timerElement.style.display = 'none';
+        }
+    }
+    
     // Real-time seat reservation system
     <?php if ($selected_showtime_id): ?>
     const showtimeId = <?php echo $selected_showtime_id; ?>;
     let selectedSeats = [];
     let pollingInterval = null;
     let reservationTimeout = null;
+    
+    // Start timer when showtime is selected (even without seats)
+    // This gives user 10 minutes to complete booking
+    let showtimeTimer = null;
+    let showtimeStartTime = Date.now();
+    const SHOWTIME_DURATION = 10 * 60 * 1000; // 10 minutes
+    
+    function startShowtimeTimer() {
+        const timerElement = document.getElementById('reservation-timer');
+        const countdownElement = document.getElementById('timer-countdown');
+        
+        if (!timerElement || !countdownElement) return;
+        
+        showtimeStartTime = Date.now();
+        timerElement.style.display = 'block';
+        
+        showtimeTimer = setInterval(function() {
+            const elapsed = Date.now() - showtimeStartTime;
+            const remaining = SHOWTIME_DURATION - elapsed;
+            
+            if (remaining <= 0) {
+                clearInterval(showtimeTimer);
+                alert('Thời gian đặt vé đã hết! Vui lòng chọn lại suất chiếu.');
+                window.location.reload();
+                return;
+            }
+            
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            countdownElement.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+        }, 1000);
+    }
+    
+    // Start timer when page loads with showtime selected
+    if (showtimeId) {
+        startShowtimeTimer();
+    }
     
     // Reserve seats when selected
     function reserveSeats(seats) {
@@ -741,16 +1167,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 seats: seats
             })
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (data.success) {
-                // Extend reservation every 4 minutes (before 5 minutes expire)
-                reservationTimeout = setInterval(() => {
+                // Extend reservation every 9 minutes (before 10 minutes expire)
+                reservationTimeout = setInterval(function() {
                     extendReservations(seats);
-                }, 4 * 60 * 1000);
+                }, 9 * 60 * 1000);
             }
         })
-        .catch(error => console.error('Error reserving seats:', error));
+        .catch(function(error) { console.error('Error reserving seats:', error); });
     }
     
     // Release seats when deselected
@@ -772,7 +1198,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 seats: seats
             })
         })
-        .catch(error => console.error('Error releasing seats:', error));
+        .catch(function(error) { console.error('Error releasing seats:', error); });
     }
     
     // Extend reservations
@@ -789,19 +1215,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 seats: seats
             })
         })
-        .catch(error => console.error('Error extending reservations:', error));
+        .catch(function(error) { console.error('Error extending reservations:', error); });
     }
     
     // Check seat status real-time
     function checkSeatStatus() {
-        fetch(`?route=booking/get-seat-status-api&showtime_id=${showtimeId}`)
-            .then(response => response.json())
-            .then(data => {
+        fetch('?route=booking/get-seat-status-api&showtime_id=' + showtimeId)
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
                 if (data.success) {
                     updateSeatStatus(data.booked_seats, data.reserved_seats);
                 }
             })
-            .catch(error => console.error('Error checking seat status:', error));
+            .catch(function(error) { console.error('Error checking seat status:', error); });
     }
     
     // Update seat visual status
@@ -868,13 +1294,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const newSelected = originalUpdateSelection();
             
             // Release seats that are no longer selected
-            const toRelease = selectedSeats.filter(seat => !newSelected.includes(seat));
+            var toRelease = selectedSeats.filter(function(seat) { return newSelected.indexOf(seat) === -1; });
             if (toRelease.length > 0) {
                 releaseSeats(toRelease);
             }
             
             // Reserve newly selected seats
-            const toReserve = newSelected.filter(seat => !selectedSeats.includes(seat));
+            var toReserve = newSelected.filter(function(seat) { return selectedSeats.indexOf(seat) === -1; });
             if (toReserve.length > 0) {
                 reserveSeats(toReserve);
             }
@@ -888,18 +1314,40 @@ document.addEventListener('DOMContentLoaded', function() {
     function validateBookingForm(e) {
         // Lấy các ghế đã chọn (loại bỏ duplicate)
         const selectedCheckboxes = Array.from(document.querySelectorAll('.seat-checkbox:checked'));
-        const selectedSeatValues = [...new Set(selectedCheckboxes.map(cb => cb.value))];
+        var seatValues = selectedCheckboxes.map(function(cb) { return cb.value; });
+        var selectedSeatValues = [];
+        for (var i = 0; i < seatValues.length; i++) {
+            if (selectedSeatValues.indexOf(seatValues[i]) === -1) {
+                selectedSeatValues.push(seatValues[i]);
+            }
+        }
         
         // Debug log
         console.log('Form submit - Selected seats:', selectedSeatValues);
         console.log('Form submit - Checkboxes found:', selectedCheckboxes.length);
-        console.log('Form submit - All checkboxes in form:', document.querySelectorAll('#booking-form input[name="seats[]"]').length);
+        var allFormCheckboxes = document.querySelectorAll('#booking-form input[name="seats[]"]');
+        console.log('Form submit - All checkboxes in form:', allFormCheckboxes ? allFormCheckboxes.length : 0);
         
         // Validate: phải có ít nhất 1 ghế được chọn
         if (selectedSeatValues.length === 0) {
             e.preventDefault();
             alert('Vui lòng chọn ít nhất một ghế!');
             console.error('Validation failed: No seats selected');
+            return false;
+        }
+        
+        // Validate: Giới hạn 8 vé
+        if (selectedSeatValues.length > 8) {
+            e.preventDefault();
+            alert('Bạn chỉ có thể đặt tối đa 8 vé một lần!');
+            return false;
+        }
+        
+        // Validate seat selection rules
+        const validationError = validateSeatSelection(selectedSeatValues);
+        if (validationError) {
+            e.preventDefault();
+            alert(validationError);
             return false;
         }
         
@@ -914,7 +1362,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Đảm bảo tất cả checkbox được checked và có name="seats[]"
-        selectedCheckboxes.forEach(checkbox => {
+        selectedCheckboxes.forEach(function(checkbox) {
             if (!checkbox.checked) {
                 checkbox.checked = true;
             }
@@ -928,9 +1376,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // Verify lại trước khi submit - lấy từ form
         const form = document.getElementById('booking-form');
         const formSeats = Array.from(form.querySelectorAll('input[name="seats[]"]:checked'));
-        const finalSeats = [...new Set(formSeats.map(cb => cb.value))];
+        var seatValues = formSeats.map(function(cb) { return cb.value; });
+        var finalSeats = [];
+        for (var i = 0; i < seatValues.length; i++) {
+            if (finalSeats.indexOf(seatValues[i]) === -1) {
+                finalSeats.push(seatValues[i]);
+            }
+        }
         console.log('Final seats to submit (from form):', finalSeats);
-        console.log('Form data:', new FormData(form).getAll('seats[]'));
+        var formDataObj = new FormData(form);
+        console.log('Form data:', formDataObj.getAll('seats[]'));
         
         if (finalSeats.length === 0) {
             e.preventDefault();
@@ -1055,7 +1510,7 @@ function detectUserLocation() {
                     errorMessage += 'Đã xảy ra lỗi không xác định.';
                     break;
             }
-            locationText.innerHTML = `<span class="text-warning"><i class="fas fa-exclamation-triangle me-2"></i>${errorMessage}</span>`;
+            locationText.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle me-2"></i>' + errorMessage + '</span>';
             locationBtn.disabled = false;
             locationBtnText.innerHTML = '<i class="fas fa-crosshairs me-2"></i>Xác định vị trí';
         },
@@ -1070,12 +1525,12 @@ function detectUserLocation() {
 // Reverse Geocoding - Lấy địa chỉ từ tọa độ
 function getAddressFromCoordinates(lat, lng) {
     // Sử dụng Nominatim API (OpenStreetMap) để reverse geocoding
-    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
-        .then(response => response.json())
-        .then(data => {
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1')
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (data && data.address) {
                 const address = data.address;
-                let addressString = '';
+                var addressString = '';
                 
                 if (address.road) addressString += address.road + ', ';
                 if (address.suburb || address.village) addressString += (address.suburb || address.village) + ', ';
@@ -1084,16 +1539,12 @@ function getAddressFromCoordinates(lat, lng) {
                 
                 if (addressString) {
                     const locationText = document.getElementById('location-text');
-                    locationText.innerHTML = `
-                        <span class="text-success">
-                            <i class="fas fa-check-circle me-2"></i>
-                            Vị trí: ${addressString.trim().replace(/,\s*$/, '')}
-                        </span>
-                    `;
+                    var cleanAddress = addressString.trim().replace(/,\s*$/, '');
+                    locationText.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-2"></i>Vị trí: ' + cleanAddress + '</span>';
                 }
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             console.log('Reverse geocoding failed:', error);
         });
 }
@@ -1104,7 +1555,7 @@ function sortTheatersByDistance(userLat, userLng) {
     const theatersArray = Array.from(theaters);
     
     // Tính khoảng cách và sắp xếp
-    theatersArray.forEach(theater => {
+    theatersArray.forEach(function(theater) {
         const locationSpan = theater.querySelector('.theater-location');
         // Có thể thêm logic tính khoảng cách nếu có tọa độ rạp trong database
         // Hiện tại chỉ hiển thị thông tin
