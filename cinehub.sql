@@ -1020,6 +1020,22 @@ INSERT INTO `watch_history` (`id`, `user_id`, `movie_id`, `last_time`, `rating`,
 (75, 12, 14, 0, NULL, 0, '2025-11-25 02:53:22'),
 (76, 12, 29, 0, NULL, 0, '2025-11-25 02:53:34');
 
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `user_tokens`
+--
+
+CREATE TABLE `user_tokens` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `device_info` varchar(500) DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `expires_at` timestamp NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Chỉ mục cho các bảng đã đổ
 --
@@ -1199,6 +1215,15 @@ ALTER TABLE `user_roles`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_user_role` (`user_id`,`role_id`),
   ADD KEY `role_id` (`role_id`);
+
+--
+-- Chỉ mục cho bảng `user_tokens`
+--
+ALTER TABLE `user_tokens`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `token` (`token`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `expires_at` (`expires_at`);
 
 --
 -- Chỉ mục cho bảng `watch_history`
@@ -1463,6 +1488,12 @@ ALTER TABLE `users`
 ALTER TABLE `user_roles`
   ADD CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `user_tokens`
+--
+ALTER TABLE `user_tokens`
+  ADD CONSTRAINT `user_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `watch_history`
