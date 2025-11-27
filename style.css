@@ -3556,7 +3556,7 @@ button.btn-location-detect span,
 /* Seat Map */
 .seat-map-container {
   background-color: #1a1a1a;
-  padding: 1.5rem;
+  padding: 10px;
   border-radius: 10px;
   margin-bottom: 1rem;
   position: relative;

@@ -300,15 +300,84 @@ class BookingController extends Controller {
     }
     
     /**
+     * Kiểm tra validation khi đặt 1 vé
+     */
+    private function validateSingleSeat($row, $selectedCol, $groupCols, $minColInGroup, $maxColInGroup, $bookedSeats) {
+        // Quy tắc 1: Không được chọn ghế ngay sát ghế ngoài cùng (ghế thứ 2 từ đầu hoặc từ cuối)
+        if ($selectedCol == $minColInGroup + 1 || $selectedCol == $maxColInGroup - 1) {
+            error_log("Row $row: Validation FAILED - Không được chọn ghế ngay sát ghế ngoài cùng (ghế $selectedCol, minCol=$minColInGroup, maxCol=$maxColInGroup)");
+            return "Không được chọn ghế ngay sát ghế ngoài cùng! Vui lòng chọn ghế ngoài cùng hoặc ghế khác.";
+        }
+        
+        // Quy tắc 2: Nếu giữa 2 ghế đã đặt có >= 3 ghế trống, không được đặt ghế ở giữa (cách cả 2 ghế đã đặt ít nhất 1 ghế)
+        // Tìm ghế đã đặt gần nhất bên trái
+        $nearestBookedLeft = null;
+        for ($checkCol = $selectedCol - 1; $checkCol >= $minColInGroup; $checkCol--) {
+            if (!in_array($checkCol, $groupCols)) continue;
+            $checkSeat = $row . $checkCol;
+            if (in_array($checkSeat, $bookedSeats)) {
+                $nearestBookedLeft = $checkCol;
+                break;
+            }
+        }
+        
+        // Tìm ghế đã đặt gần nhất bên phải
+        $nearestBookedRight = null;
+        for ($checkCol = $selectedCol + 1; $checkCol <= $maxColInGroup; $checkCol++) {
+            if (!in_array($checkCol, $groupCols)) continue;
+            $checkSeat = $row . $checkCol;
+            if (in_array($checkSeat, $bookedSeats)) {
+                $nearestBookedRight = $checkCol;
+                break;
+            }
+        }
+        
+        // Nếu có cả 2 ghế đã đặt ở 2 bên
+        if ($nearestBookedLeft !== null && $nearestBookedRight !== null) {
+            // Tính khoảng cách giữa 2 ghế đã đặt (số ghế trống)
+            $gapBetweenBooked = $nearestBookedRight - $nearestBookedLeft - 1;
+            
+            // Nếu khoảng cách >= 3 ghế trống
+            if ($gapBetweenBooked >= 3) {
+                // Kiểm tra xem ghế được chọn có cách cả 2 ghế đã đặt ít nhất 1 ghế không
+                $distanceFromLeft = $selectedCol - $nearestBookedLeft;
+                $distanceFromRight = $nearestBookedRight - $selectedCol;
+                
+                // Nếu ghế được chọn cách cả 2 ghế đã đặt ít nhất 1 ghế (không phải ghế ngay sát)
+                if ($distanceFromLeft > 1 && $distanceFromRight > 1) {
+                    error_log("Row $row: Validation FAILED - Đặt 1 vé (ghế $selectedCol) giữa 2 ghế đã đặt (ghế $nearestBookedLeft và $nearestBookedRight) có $gapBetweenBooked ghế trống, cách cả 2 ghế đã đặt ít nhất 1 ghế");
+                    return "Không được đặt ghế ở giữa khi giữa 2 ghế đã đặt có 3 ghế trống trở lên! Vui lòng chọn ghế ngay sát một trong hai ghế đã đặt hoặc chọn ghế khác.";
+                }
+            }
+        }
+        
+        return null; // OK
+    }
+    
+    /**
      * Validate seat selection rules:
-     * 1. Không đặt cách 1 ghế (phải liền kề)
-     * 2. Không bỏ trống ghế ở giữa (kể cả ghế đã được đặt)
-     * 3. Khi hàng có >= 4 cột và đặt từ 2 ghế trở lên, không được bỏ trống ghế ngoài cùng bên trái hoặc phải
+     * 1. Nếu đặt 1 ghế: có thể đặt ở đâu cũng được
+     * 2. Nếu đặt từ 2 ghế trở lên:
+     *    - Không đặt cách 1 ghế (phải liền kề)
+     *    - Không bỏ trống ghế ở giữa các ghế đã chọn
+     *    - Bắt buộc phải chọn ít nhất 1 trong 2 ghế ngoài cùng của nhóm
+     *    Ví dụ: Hàng C có ghế 1,2,3,4
+     *    - Chọn ghế 1,2 → OK (có ghế 1 - ghế ngoài cùng)
+     *    - Chọn ghế 3,4 → OK (có ghế 4 - ghế ngoài cùng)
+     *    - Chọn ghế 2,3 → Không OK (không có ghế 1 hoặc 4)
+     * 3. Nếu đặt từ 3 ghế trở lên:
+     *    - Phải để lại ít nhất 2 ghế kể từ ghế ngoài cùng (đầu trái HOẶC đầu phải)
+     *    Ví dụ hợp lệ: Chọn ghế 3-5, để lại 1,2 (2 ghế) → OK
+     *                  Chọn ghế 9-11, để lại 12,13 (2 ghế) → OK
+     *    Ví dụ không hợp lệ: Chọn ghế 3-5, để lại 1 (1 ghế) và 6 (1 ghế) → Không OK
      */
     private function validateSeatSelection($seats, $showtime_id = null) {
-        if (empty($seats) || count($seats) == 1) {
-            return null; // 1 ghế hoặc không có ghế thì không cần validate
+        if (empty($seats)) {
+            return null; // Không có ghế thì không cần validate
         }
+        
+        $seatCount = count($seats);
+        // Áp dụng validation cho cả trường hợp đặt 1 ghế
         
         // Lấy danh sách ghế đã được đặt nếu có showtime_id
         $bookedSeats = [];
@@ -340,77 +409,251 @@ class BookingController extends Controller {
         foreach ($seatsByRow as $row => $cols) {
             sort($cols);
             
-            // Nếu chỉ có 1 ghế trong hàng, không cần validate
-            if (count($cols) <= 1) continue;
-            
-            // Kiểm tra không bỏ trống ghế ở giữa - KHÔNG cho phép gap
-            for ($i = 0; $i < count($cols) - 1; $i++) {
-                $gap = $cols[$i + 1] - $cols[$i];
-                if ($gap > 1) {
-                    // Luôn báo lỗi nếu có gap, không cần kiểm tra ghế đã đặt
-                    return "Không được bỏ trống ghế ở giữa! Các ghế phải liền kề nhau. Vui lòng chọn các ghế liền kề.";
+            // Kiểm tra không bỏ trống ghế ở giữa - KHÔNG cho phép gap giữa các ghế đã chọn (chỉ khi có >= 2 ghế)
+            if (count($cols) > 1) {
+                for ($i = 0; $i < count($cols) - 1; $i++) {
+                    $gap = $cols[$i + 1] - $cols[$i];
+                    if ($gap > 1) {
+                        // Luôn báo lỗi nếu có gap giữa các ghế đã chọn
+                        return "Không được bỏ trống ghế ở giữa! Các ghế phải liền kề nhau. Vui lòng chọn các ghế liền kề.";
+                    }
                 }
             }
             
-            // Kiểm tra quy tắc: Khi hàng có >= 4 cột và đặt từ 2 ghế trở lên, không được bỏ trống ghế ngoài cùng
-            // NHƯNG bỏ qua quy tắc này nếu các ghế được chọn nằm trong nhóm chỉ có 3 cột
-            if (count($cols) >= 2) {
-                // Lấy danh sách tất cả các cột có thể có trong hàng này
+            // Lấy danh sách các nhóm ghế trong hàng này
+            $seatGroupsInRow = $this->getSeatGroupsInRow($row, $seatLayout);
+            
+            if (empty($seatGroupsInRow)) {
+                // Nếu không có seat groups, sử dụng toàn bộ hàng như một nhóm
                 $allColsInRow = $this->getAllColumnsInRow($row, $seatLayout);
+                if (!empty($allColsInRow)) {
+                    $seatGroupsInRow = [['cols' => $allColsInRow]];
+                }
+            }
+            
+            // Kiểm tra từng nhóm ghế trong hàng
+            foreach ($seatGroupsInRow as $group) {
+                $groupCols = $group['cols'] ?? [];
+                if (empty($groupCols)) continue;
                 
-                if (count($allColsInRow) >= 4) {
-                    // Kiểm tra xem các ghế được chọn có nằm trong nhóm 3 cột không
-                    $isInThreeColumnGroup = $this->isSeatsInThreeColumnGroup($row, $cols, $seatLayout);
+                sort($groupCols);
+                
+                // Lọc các ghế được chọn thuộc nhóm này
+                $selectedColsInGroup = array_intersect($cols, $groupCols);
+                if (empty($selectedColsInGroup)) continue; // Không có ghế nào được chọn trong nhóm này
+                
+                $selectedColsInGroup = array_values($selectedColsInGroup);
+                sort($selectedColsInGroup);
+                $selectedSeatCountInGroup = count($selectedColsInGroup);
+                
+                // Áp dụng validation cho cả trường hợp đặt 1 ghế
+                
+                $minColInGroup = min($groupCols);
+                $maxColInGroup = max($groupCols);
+                $selectedMinCol = min($selectedColsInGroup);
+                $selectedMaxCol = max($selectedColsInGroup);
+                
+                error_log("Row $row, Group [" . implode(',', $groupCols) . "]: selectedCols=" . implode(',', $selectedColsInGroup) . ", selectedSeatCount=$selectedSeatCountInGroup");
+                
+                // Đếm tổng số ghế AVAILABLE trong nhóm (chưa bị đặt) - cần đếm trước để áp dụng quy tắc
+                $totalAvailableInGroup = 0;
+                foreach ($groupCols as $col) {
+                    $checkSeat = $row . $col;
+                    if (!in_array($checkSeat, $bookedSeats)) {
+                        $totalAvailableInGroup++;
+                    }
+                }
+                
+                // Kiểm tra xem có chọn ít nhất 1 trong 2 ghế ngoài cùng của nhóm không
+                $hasFirstSeat = in_array($minColInGroup, $selectedColsInGroup);
+                $hasLastSeat = in_array($maxColInGroup, $selectedColsInGroup);
+                
+                error_log("Row $row, Group: minCol=$minColInGroup, maxCol=$maxColInGroup, hasFirstSeat=$hasFirstSeat, hasLastSeat=$hasLastSeat, totalAvailableInGroup=$totalAvailableInGroup");
+                
+                // Tìm ghế đã đặt gần nhất bên trái của selectedMinCol (hoặc ghế ngoài cùng nếu không có)
+                $nearestBookedSeatLeft = null;
+                for ($checkCol = $selectedMinCol - 1; $checkCol >= $minColInGroup; $checkCol--) {
+                    if (!in_array($checkCol, $groupCols)) continue;
+                    $checkSeat = $row . $checkCol;
+                    if (in_array($checkSeat, $bookedSeats)) {
+                        $nearestBookedSeatLeft = $checkCol;
+                        break;
+                    }
+                }
+                $startPoint = ($nearestBookedSeatLeft !== null) ? $nearestBookedSeatLeft : $minColInGroup;
+                
+                // Đếm số ghế AVAILABLE từ điểm đầu (ghế đã đặt gần nhất hoặc ghế ngoài cùng) đến ghế được chọn đầu tiên
+                // Lưu ý: Trong khoảng này phải không có ghế nào đã đặt
+                $availableSeatsAtStart = 0;
+                // Nếu startPoint là ghế đã đặt, bắt đầu đếm từ ghế tiếp theo
+                $countStart = ($nearestBookedSeatLeft !== null) ? $nearestBookedSeatLeft + 1 : $minColInGroup;
+                error_log("Row $row, Group: Đếm availableSeatsAtStart từ $countStart đến " . ($selectedMinCol - 1) . " (selectedMinCol=$selectedMinCol)");
+                for ($checkCol = $countStart; $checkCol < $selectedMinCol; $checkCol++) {
+                    if (!in_array($checkCol, $groupCols)) continue;
+                    $checkSeat = $row . $checkCol;
+                    // Nếu gặp ghế đã đặt trong khoảng này, dừng đếm
+                    if (in_array($checkSeat, $bookedSeats)) {
+                        error_log("Row $row, Group: Gặp ghế đã đặt $checkSeat, dừng đếm availableSeatsAtStart");
+                        break;
+                    }
+                    // Chỉ đếm nếu ghế này available
+                    $availableSeatsAtStart++;
+                    error_log("Row $row, Group: Found available seat at start: $checkSeat (từ điểm đầu $startPoint đến ghế được chọn $selectedMinCol), availableSeatsAtStart=$availableSeatsAtStart");
+                }
+                
+                // Tìm ghế đã đặt gần nhất bên phải của selectedMaxCol (hoặc ghế ngoài cùng nếu không có)
+                $nearestBookedSeatRight = null;
+                for ($checkCol = $selectedMaxCol + 1; $checkCol <= $maxColInGroup; $checkCol++) {
+                    if (!in_array($checkCol, $groupCols)) continue;
+                    $checkSeat = $row . $checkCol;
+                    if (in_array($checkSeat, $bookedSeats)) {
+                        $nearestBookedSeatRight = $checkCol;
+                        break;
+                    }
+                }
+                $endPoint = ($nearestBookedSeatRight !== null) ? $nearestBookedSeatRight : $maxColInGroup;
+                
+                // Đếm số ghế AVAILABLE từ ghế được chọn cuối cùng đến điểm cuối (ghế đã đặt gần nhất hoặc ghế ngoài cùng)
+                // Lưu ý: Trong khoảng này phải không có ghế nào đã đặt
+                $availableSeatsAtEnd = 0;
+                // Nếu endPoint là ghế đã đặt, kết thúc đếm trước ghế đó
+                $countEnd = ($nearestBookedSeatRight !== null) ? $nearestBookedSeatRight - 1 : $maxColInGroup;
+                for ($checkCol = $selectedMaxCol + 1; $checkCol <= $countEnd; $checkCol++) {
+                    if (!in_array($checkCol, $groupCols)) continue;
+                    $checkSeat = $row . $checkCol;
+                    // Nếu gặp ghế đã đặt trong khoảng này, dừng đếm
+                    if (in_array($checkSeat, $bookedSeats)) {
+                        break;
+                    }
+                    // Chỉ đếm nếu ghế này available
+                    $availableSeatsAtEnd++;
+                    error_log("Row $row, Group: Found available seat at end: $checkSeat (từ ghế được chọn $selectedMaxCol đến điểm cuối $endPoint)");
+                }
+                
+                // Debug log
+                error_log("Row $row, Group: totalColsInGroup=" . count($groupCols) . ", totalAvailableInGroup=$totalAvailableInGroup, selectedSeatCount=$selectedSeatCountInGroup");
+                error_log("Row $row, Group: nearestBookedSeatLeft=" . ($nearestBookedSeatLeft !== null ? $nearestBookedSeatLeft : 'null') . ", nearestBookedSeatRight=" . ($nearestBookedSeatRight !== null ? $nearestBookedSeatRight : 'null'));
+                error_log("Row $row, Group: availableSeatsAtStart=$availableSeatsAtStart, availableSeatsAtEnd=$availableSeatsAtEnd");
+                
+                // QUY TẮC: Công thức tổng quát cho nhóm có X ghế available
+                // - Nếu một trong hai điểm bắt đầu có ghế đã đặt, thì có thể đặt ngay sau ghế đó (bỏ qua kiểm tra)
+                // - Nếu đặt số ghế >= X/2 và không có ghế đã đặt ở hai đầu: Bắt buộc phải đặt từ đầu hàng
+                // - Nếu đặt số ghế < X/2 và không đặt từ đầu hàng: Phải để lại >= 2 ghế ở đầu trái HOẶC đầu phải
+                
+                $halfOfAvailable = floor($totalAvailableInGroup / 2);
+                
+                // Kiểm tra nếu đặt từ đầu hàng (chọn ít nhất 1 trong 2 ghế ngoài cùng) - OK
+                if ($hasFirstSeat || $hasLastSeat) {
+                    error_log("Row $row, Group: Validation OK - Đặt từ đầu hàng (hasFirstSeat=$hasFirstSeat, hasLastSeat=$hasLastSeat)");
+                    continue; // Bỏ qua validation cho nhóm này
+                }
+                
+                // Kiểm tra riêng cho trường hợp đặt 1 vé
+                if ($selectedSeatCountInGroup == 1) {
+                    $singleSeatError = $this->validateSingleSeat($row, $selectedMinCol, $groupCols, $minColInGroup, $maxColInGroup, $bookedSeats);
+                    if ($singleSeatError) {
+                        return $singleSeatError;
+                    }
+                    // Nếu pass validation cho 1 vé, tiếp tục kiểm tra các quy tắc khác
+                }
+                
+                // Không đặt từ đầu hàng, kiểm tra các trường hợp khác (áp dụng cho cả 1 ghế)
+                // Nếu có ghế đã đặt ở một trong hai đầu, chỉ cho phép đặt NGAY SAU ghế đó (không có ghế ở giữa)
+                $isAdjacentToBookedLeft = ($nearestBookedSeatLeft !== null && $selectedMinCol == $nearestBookedSeatLeft + 1);
+                $isAdjacentToBookedRight = ($nearestBookedSeatRight !== null && $selectedMaxCol == $nearestBookedSeatRight - 1);
+                
+                if ($isAdjacentToBookedLeft || $isAdjacentToBookedRight) {
+                    error_log("Row $row, Group: Validation OK - Đặt ngay sau ghế đã đặt (trái: " . ($isAdjacentToBookedLeft ? "ghế $nearestBookedSeatLeft" : 'no') . ", phải: " . ($isAdjacentToBookedRight ? "ghế $nearestBookedSeatRight" : 'no') . ")");
+                    continue; // Bỏ qua validation cho nhóm này
+                }
+                
+                // Kiểm tra khi đặt 2 ghế: Không được đặt nếu có ghế đã đặt cách 2 ô (bên trái hoặc phải)
+                // Trừ khi bên cạnh ghế được chọn đã có ghế đặt rồi (đã xử lý ở trên)
+                if ($selectedSeatCountInGroup == 2) {
+                    // Kiểm tra ghế đã đặt cách 2 ô về bên trái (từ ghế được chọn đầu tiên)
+                    $seatTwoAwayLeft = $selectedMinCol - 2;
+                    if ($seatTwoAwayLeft >= $minColInGroup && in_array($seatTwoAwayLeft, $groupCols)) {
+                        $checkSeatLeft = $row . $seatTwoAwayLeft;
+                        if (in_array($checkSeatLeft, $bookedSeats)) {
+                            // Kiểm tra xem bên cạnh ghế được chọn có ghế đã đặt không
+                            $seatAdjacentLeft = $selectedMinCol - 1;
+                            if ($seatAdjacentLeft >= $minColInGroup && in_array($seatAdjacentLeft, $groupCols)) {
+                                $checkSeatAdjacentLeft = $row . $seatAdjacentLeft;
+                                // Nếu bên cạnh không có ghế đã đặt, thì không được đặt
+                                if (!in_array($checkSeatAdjacentLeft, $bookedSeats)) {
+                                    error_log("Row $row, Group: Validation FAILED - Đặt 2 ghế nhưng có ghế đã đặt cách 2 ô về bên trái (ghế $checkSeatLeft) và bên cạnh không có ghế đã đặt");
+                                    return "Không được đặt ghế khi có ghế đã đặt cách 2 ô! Vui lòng chọn ghế khác.";
+                                }
+                            }
+                        }
+                    }
                     
-                    // Chỉ áp dụng quy tắc nếu KHÔNG nằm trong nhóm 3 cột
-                    if (!$isInThreeColumnGroup) {
-                        // Tìm cột nhỏ nhất và lớn nhất trong hàng
-                        $minCol = min($allColsInRow);
-                        $maxCol = max($allColsInRow);
-                        
-                        // Tìm cột nhỏ nhất và lớn nhất trong các ghế đã chọn
-                        $selectedMinCol = min($cols);
-                        $selectedMaxCol = max($cols);
-                        
-                        // Kiểm tra nếu bỏ trống ghế ngoài cùng bên trái
-                        if ($selectedMinCol > $minCol) {
-                            // Có ghế bên trái chưa được chọn, kiểm tra xem có ghế nào có thể chọn được không (không bị đặt)
-                            $hasAvailableLeftSeat = false;
-                            for ($checkCol = $minCol; $checkCol < $selectedMinCol; $checkCol++) {
-                                $checkSeat = $row . $checkCol;
-                                // Nếu ghế này không bị đặt và nằm trong danh sách cột hợp lệ
-                                if (!in_array($checkSeat, $bookedSeats) && in_array($checkCol, $allColsInRow)) {
-                                    $hasAvailableLeftSeat = true;
-                                    break;
+                    // Kiểm tra ghế đã đặt cách 2 ô về bên phải (từ ghế được chọn cuối cùng)
+                    $seatTwoAwayRight = $selectedMaxCol + 2;
+                    if ($seatTwoAwayRight <= $maxColInGroup && in_array($seatTwoAwayRight, $groupCols)) {
+                        $checkSeatRight = $row . $seatTwoAwayRight;
+                        if (in_array($checkSeatRight, $bookedSeats)) {
+                            // Kiểm tra xem bên cạnh ghế được chọn có ghế đã đặt không
+                            $seatAdjacentRight = $selectedMaxCol + 1;
+                            if ($seatAdjacentRight <= $maxColInGroup && in_array($seatAdjacentRight, $groupCols)) {
+                                $checkSeatAdjacentRight = $row . $seatAdjacentRight;
+                                // Nếu bên cạnh không có ghế đã đặt, thì không được đặt
+                                if (!in_array($checkSeatAdjacentRight, $bookedSeats)) {
+                                    error_log("Row $row, Group: Validation FAILED - Đặt 2 ghế nhưng có ghế đã đặt cách 2 ô về bên phải (ghế $checkSeatRight) và bên cạnh không có ghế đã đặt");
+                                    return "Không được đặt ghế khi có ghế đã đặt cách 2 ô! Vui lòng chọn ghế khác.";
                                 }
                             }
-                            if ($hasAvailableLeftSeat) {
-                                return "Không được bỏ trống ghế ngoài cùng bên trái! Vui lòng chọn các ghế từ đầu hàng.";
-                            }
                         }
-                        
-                        // Kiểm tra nếu bỏ trống ghế ngoài cùng bên phải
-                        if ($selectedMaxCol < $maxCol) {
-                            // Có ghế bên phải chưa được chọn, kiểm tra xem có ghế nào có thể chọn được không (không bị đặt)
-                            $hasAvailableRightSeat = false;
-                            for ($checkCol = $selectedMaxCol + 1; $checkCol <= $maxCol; $checkCol++) {
-                                $checkSeat = $row . $checkCol;
-                                // Nếu ghế này không bị đặt và nằm trong danh sách cột hợp lệ
-                                if (!in_array($checkSeat, $bookedSeats) && in_array($checkCol, $allColsInRow)) {
-                                    $hasAvailableRightSeat = true;
-                                    break;
-                                }
-                            }
-                            if ($hasAvailableRightSeat) {
-                                return "Không được bỏ trống ghế ngoài cùng bên phải! Vui lòng chọn các ghế đến cuối hàng.";
-                            }
-                        }
+                    }
+                }
+                
+                // Không đặt từ đầu hàng và không đặt ngay sau ghế đã đặt, áp dụng quy tắc bình thường
+                if ($selectedSeatCountInGroup >= $halfOfAvailable) {
+                    // Đặt >= X/2 ghế: Bắt buộc phải đặt từ đầu hàng
+                    error_log("Row $row, Group: Validation FAILED - Nhóm có $totalAvailableInGroup ghế available, đặt $selectedSeatCountInGroup vé (>= $halfOfAvailable) nhưng không đặt từ đầu hàng");
+                    return "Khi đặt từ $halfOfAvailable vé trở lên trong nhóm có $totalAvailableInGroup ghế trống, bắt buộc phải đặt từ đầu hàng (chọn ít nhất 1 trong 2 ghế ngoài cùng)!";
+                } else {
+                    // Đặt < X/2 ghế (bao gồm cả 1 ghế): Phải để lại >= 2 ghế ở cả hai đầu (nếu không đặt ngay sau ghế đã đặt)
+                    error_log("Row $row, Group: Kiểm tra quy tắc 'để lại >= 2 ghế ở cả hai đầu': availableSeatsAtStart=$availableSeatsAtStart, availableSeatsAtEnd=$availableSeatsAtEnd");
+                    if ($availableSeatsAtStart < 2 || $availableSeatsAtEnd < 2) {
+                        error_log("Row $row, Group: Validation FAILED - Nhóm có $totalAvailableInGroup ghế available, đặt $selectedSeatCountInGroup vé (< $halfOfAvailable) nhưng không đặt từ đầu hàng và không để lại ít nhất 2 ghế ở cả hai đầu (đầu trái: $availableSeatsAtStart, đầu phải: $availableSeatsAtEnd)");
+                        return "Khi đặt $selectedSeatCountInGroup vé trong nhóm có $totalAvailableInGroup ghế trống mà không đặt từ đầu hàng, phải để lại ít nhất 2 ghế kể từ ghế ngoài cùng ở cả hai đầu hàng!";
+                    } else {
+                        error_log("Row $row, Group: Validation OK - Đã để lại >= 2 ghế ở cả hai đầu (đầu trái: $availableSeatsAtStart, đầu phải: $availableSeatsAtEnd)");
                     }
                 }
             }
         }
         
         return null; // Valid
+    }
+    
+    /**
+     * Lấy danh sách các nhóm ghế trong một hàng từ seat layout
+     */
+    private function getSeatGroupsInRow($row, $seatLayout) {
+        if (!$seatLayout) {
+            return [];
+        }
+        
+        $groups = [];
+        
+        // Nếu có seat_groups (layout phức tạp)
+        if (isset($seatLayout['seat_groups']) && is_array($seatLayout['seat_groups'])) {
+            foreach ($seatLayout['seat_groups'] as $group) {
+                $groupRows = $group['rows'] ?? [];
+                $groupCols = $group['cols'] ?? [];
+                
+                if (in_array($row, $groupRows) && !empty($groupCols)) {
+                    $groups[] = ['cols' => $groupCols];
+                }
+            }
+        } elseif (isset($seatLayout['cols']) && is_array($seatLayout['cols'])) {
+            // Layout tiêu chuẩn - coi toàn bộ hàng là một nhóm
+            $groups[] = ['cols' => $seatLayout['cols']];
+        }
+        
+        return $groups;
     }
     
     /**
@@ -604,7 +847,12 @@ class BookingController extends Controller {
         }
         
         // Validate: Không đặt cách 1 ghế và không bỏ trống ghế ở giữa
+        error_log("=== VALIDATION START ===");
+        error_log("Seats to validate: " . implode(', ', $seats));
+        error_log("Showtime ID: " . $showtime_id);
         $validationError = $this->validateSeatSelection($seats, $showtime_id);
+        error_log("Validation result: " . ($validationError ? $validationError : "PASSED"));
+        error_log("=== VALIDATION END ===");
         if ($validationError) {
             $_SESSION['error'] = $validationError;
             $redirectUrl = '?route=booking/index&showtime_id=' . urlencode($showtime_id);

@@ -44,6 +44,9 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
   width: 100%;
   height: 100%;
   z-index: 0;
+  background-color: black;
+  border:2px solid white;
+  border-radius: 14px;
 }
 
 .background_film_blur img {
@@ -865,8 +868,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Lấy chiều rộng container (trừ padding và row-label)
         const containerWidth = seatMapContainer.offsetWidth - 60; // 60px cho padding và row-label
-        const gap = 0.4; // 0.4rem gap giữa các ghế
-        const separatorWidth = 1.5; // 1.5rem cho mỗi separator
+        const gap = 0.25; // Giảm gap xuống 0.25rem để tiết kiệm không gian
+        const separatorWidth = 1.0; // Giảm separator xuống 1.0rem để tiết kiệm không gian
         
         // Đếm số separators (ước tính dựa trên số nhóm)
         const firstRow = seatMapContainer.querySelector('.seat-row');
@@ -879,27 +882,28 @@ document.addEventListener('DOMContentLoaded', function() {
             const totalGapWidth = (seatCount - 1) * gap * 16; // Convert rem to px (1rem = 16px)
             const totalSeparatorWidth = separatorCount * separatorWidth * 16;
             const availableWidth = containerWidth - totalGapWidth - totalSeparatorWidth;
-            const seatSize = Math.max(14, Math.min(26, availableWidth / seatCount));
+            // Giảm kích thước tối đa xuống 15px để ghế nhỏ hơn, có thể xem hết ghế trong rạp
+            const seatSize = Math.max(9, Math.min(15, availableWidth / seatCount));
             
             // Áp dụng kích thước
             const seatLabels = seatMapContainer.querySelectorAll('.seat-label');
             seatLabels.forEach(label => {
                 label.style.width = seatSize + 'px';
                 label.style.height = seatSize + 'px';
-                label.style.minWidth = Math.max(14, seatSize * 0.7) + 'px';
-                label.style.minHeight = Math.max(14, seatSize * 0.7) + 'px';
+                label.style.minWidth = Math.max(9, seatSize * 0.7) + 'px';
+                label.style.minHeight = Math.max(9, seatSize * 0.7) + 'px';
             });
             
             // Điều chỉnh font size của số ghế
             const seatNumbers = seatMapContainer.querySelectorAll('.seat-number');
-            const fontSize = Math.max(8, Math.min(11, seatSize * 0.4));
+            const fontSize = Math.max(5, Math.min(8, seatSize * 0.45));
             seatNumbers.forEach(num => {
                 num.style.fontSize = fontSize + 'px';
             });
             
             // Điều chỉnh icon size
             const seatIcons = seatMapContainer.querySelectorAll('.seat-icon');
-            const iconSize = Math.max(6, Math.min(9, seatSize * 0.3));
+            const iconSize = Math.max(3, Math.min(6, seatSize * 0.3));
             seatIcons.forEach(icon => {
                 icon.style.fontSize = iconSize + 'px';
             });
@@ -945,24 +949,33 @@ document.addEventListener('DOMContentLoaded', function() {
     // Kiểm tra xem có showtime được chọn từ URL không
     const urlParams = new URLSearchParams(window.location.search);
     const showtimeIdFromUrl = urlParams.get('showtime_id');
+    const theaterIdFromUrl = urlParams.get('theater');
     console.log('Showtime ID from URL:', showtimeIdFromUrl);
+    console.log('Theater ID from URL:', theaterIdFromUrl);
     
     if (showtimeIdFromUrl) {
-        // Lưu showtime_id vào sessionStorage
-        sessionStorage.setItem('selectedShowtimeId', showtimeIdFromUrl);
-        
-        // Kiểm tra xem có thời gian bắt đầu đã lưu không
+        // Kiểm tra xem có thời gian bắt đầu đã lưu không (TRƯỚC KHI set mới)
         const savedStartTime = sessionStorage.getItem('showtimeStartTime');
         const savedShowtimeId = sessionStorage.getItem('selectedShowtimeId');
+        const savedTheaterId = sessionStorage.getItem('selectedTheaterId');
         
-        // Nếu showtime_id thay đổi hoặc chưa có timer, tạo mới
-        if (!savedStartTime || savedShowtimeId !== showtimeIdFromUrl) {
+        // Tạo key duy nhất cho showtime + theater để tránh reset khi chuyển phòng và quay lại
+        const currentKey = showtimeIdFromUrl + '_' + (theaterIdFromUrl || '');
+        const savedKey = savedShowtimeId + '_' + (savedTheaterId || '');
+        
+        // Nếu showtime_id hoặc theater_id thay đổi hoặc chưa có timer, tạo mới
+        if (!savedStartTime || currentKey !== savedKey) {
             showtimeStartTime = Date.now();
             sessionStorage.setItem('showtimeStartTime', showtimeStartTime.toString());
-            console.log('Created new timer start time for showtime:', showtimeIdFromUrl);
+            sessionStorage.setItem('selectedShowtimeId', showtimeIdFromUrl);
+            if (theaterIdFromUrl) {
+                sessionStorage.setItem('selectedTheaterId', theaterIdFromUrl);
+            }
+            console.log('Created new timer start time for showtime:', showtimeIdFromUrl, 'theater:', theaterIdFromUrl);
         } else {
+            // Sử dụng timer hiện có, KHÔNG reset
             showtimeStartTime = parseInt(savedStartTime);
-            console.log('Using existing timer for showtime:', showtimeIdFromUrl);
+            console.log('Using existing timer for showtime:', showtimeIdFromUrl, 'theater:', theaterIdFromUrl);
         }
         
         // Đợi DOM load xong rồi khởi động timer NGAY
@@ -1034,34 +1047,38 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Xử lý click vào label để trigger checkbox
         seatMapContainer.addEventListener('click', function(e) {
-            // Nếu click trực tiếp vào checkbox, để nó tự xử lý
-            if (e.target.type === 'checkbox' && e.target.classList.contains('seat-checkbox')) {
-                return; // Checkbox tự xử lý
+            try {
+                // Nếu click trực tiếp vào checkbox, để nó tự xử lý
+                if (e.target.type === 'checkbox' && e.target.classList.contains('seat-checkbox')) {
+                    return; // Checkbox tự xử lý
+                }
+                
+                // Tìm label gần nhất
+                const label = e.target.closest('.seat-label');
+                if (!label) return;
+                
+                // Bỏ qua nếu ghế đã được đặt
+                if (label.classList.contains('booked') || label.classList.contains('reserved')) {
+                    return;
+                }
+                
+                // Tìm checkbox trong label
+                const checkbox = label.querySelector('.seat-checkbox');
+                if (!checkbox || checkbox.disabled) return;
+                
+                // Ngăn chặn default behavior
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Toggle checkbox
+                checkbox.checked = !checkbox.checked;
+                
+                // Trigger change event
+                const changeEvent = new Event('change', { bubbles: true });
+                checkbox.dispatchEvent(changeEvent);
+            } catch (error) {
+                console.error('Error handling seat click:', error);
             }
-            
-            // Tìm label gần nhất
-            const label = e.target.closest('.seat-label');
-            if (!label) return;
-            
-            // Bỏ qua nếu ghế đã được đặt
-            if (label.classList.contains('booked') || label.classList.contains('reserved')) {
-                return;
-            }
-            
-            // Tìm checkbox trong label
-            const checkbox = label.querySelector('.seat-checkbox');
-            if (!checkbox || checkbox.disabled) return;
-            
-            // Ngăn chặn default behavior
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Toggle checkbox
-            checkbox.checked = !checkbox.checked;
-            
-            // Trigger change event
-            const changeEvent = new Event('change', { bubbles: true });
-            checkbox.dispatchEvent(changeEvent);
         });
         
         // Xử lý change event để validate sau khi checkbox được checked/unchecked
@@ -1075,19 +1092,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     const selectedSeats = getSelectedSeats();
                     console.log('Selected seats:', selectedSeats);
                     
-                    // Kiểm tra giới hạn 8 vé
+                    // Chỉ kiểm tra giới hạn 8 vé khi chọn ghế
+                    // Validation về quy tắc chọn ghế sẽ được kiểm tra khi nhấn nút thanh toán
                     if (selectedSeats.length > 8) {
                         checkbox.checked = false;
                         alert('Bạn chỉ có thể đặt tối đa 8 vé một lần!');
-                        updateSelection();
-                        return;
-                    }
-                    
-                    // Validate seat selection rules
-                    const validationError = validateSeatSelection(selectedSeats);
-                    if (validationError) {
-                        checkbox.checked = false;
-                        alert(validationError);
                         updateSelection();
                         return;
                     }
@@ -1175,8 +1184,39 @@ document.addEventListener('DOMContentLoaded', function() {
         return normalPrice;
     }
     
+    // Hàm xác định các nhóm ghế trong một hàng dựa vào khoảng cách giữa các ghế
+    function getSeatGroupsInRow(row, rowSeats) {
+        if (rowSeats.length === 0) return [];
+        
+        const sortedSeats = rowSeats.sort((a, b) => a - b);
+        const groups = [];
+        let currentGroup = [sortedSeats[0]];
+        
+        // Tìm khoảng cách lớn (>= 2) để phân chia nhóm
+        for (let i = 1; i < sortedSeats.length; i++) {
+            const gap = sortedSeats[i] - sortedSeats[i - 1];
+            if (gap >= 2) {
+                // Khoảng cách lớn, bắt đầu nhóm mới
+                groups.push({cols: currentGroup});
+                currentGroup = [sortedSeats[i]];
+            } else {
+                currentGroup.push(sortedSeats[i]);
+            }
+        }
+        
+        // Thêm nhóm cuối cùng
+        if (currentGroup.length > 0) {
+            groups.push({cols: currentGroup});
+        }
+        
+        return groups;
+    }
+    
     function validateSeatSelection(seats) {
-        if (seats.length <= 1) return null;
+        if (seats.length === 0) return null;
+        // Áp dụng validation cho cả trường hợp đặt 1 ghế
+        
+        const totalSeatCount = seats.length;
         
         // Group seats by row
         const seatsByRow = {};
@@ -1193,34 +1233,284 @@ document.addEventListener('DOMContentLoaded', function() {
         for (const row in seatsByRow) {
             const cols = seatsByRow[row].sort((a, b) => a - b);
             
-            // Nếu chỉ có 1 ghế trong hàng, không cần validate
-            if (cols.length <= 1) continue;
-            
-            // Khi chọn từ 2 ghế trở lên, các ghế phải liền kề nhau
-            // Không được bỏ trống ghế ở giữa, đặc biệt là ghế ngoài cùng bên trái
-            for (let i = 0; i < cols.length - 1; i++) {
-                const gap = cols[i + 1] - cols[i];
-                if (gap > 1) {
-                    // Tìm ghế bị bỏ trống
-                    const missingSeats = [];
-                    for (let j = cols[i] + 1; j < cols[i + 1]; j++) {
-                        missingSeats.push(row + j);
+            // Kiểm tra không bỏ trống ghế ở giữa - KHÔNG cho phép gap giữa các ghế đã chọn (chỉ khi có >= 2 ghế)
+            if (cols.length > 1) {
+                for (let i = 0; i < cols.length - 1; i++) {
+                    const gap = cols[i + 1] - cols[i];
+                    if (gap > 1) {
+                        // Có gap ở giữa các ghế đã chọn
+                        return 'Không được bỏ trống ghế ở giữa! Các ghế phải liền kề nhau. Vui lòng chọn các ghế liền kề.';
                     }
-                    
-                    // Kiểm tra xem có phải ghế ngoài cùng bên trái bị bỏ trống không
-                    if (i === 0 && cols[0] > 1) {
-                        // Có ghế bên trái ghế đầu tiên bị bỏ trống
-                        return 'Khi chọn nhiều ghế, không được bỏ trống ghế ngoài cùng bên trái! Các ghế phải liền kề nhau. Vui lòng chọn các ghế liền kề từ đầu hàng.';
-                    }
-                    
-                    // Có gap ở giữa các ghế
-                    return 'Không được bỏ trống ghế ở giữa! Các ghế phải liền kề nhau. Vui lòng chọn các ghế liền kề.';
                 }
             }
             
-            // Kiểm tra thêm: Nếu chọn nhiều ghế, không được bỏ trống ghế ngoài cùng bên trái
-            // (Nghĩa là nếu chọn ghế 2, 3, 4 thì OK, nhưng nếu chọn 1, 3, 4 thì không OK vì bỏ trống ghế 2)
-            // Logic này đã được xử lý ở trên khi kiểm tra gap, nhưng cần làm rõ thông báo
+            // Lấy danh sách tất cả các ghế trong hàng từ DOM để xác định các nhóm
+            const rowSeats = [];
+            const seatLabels = document.querySelectorAll(`.seat-label[data-seat^="${row}"]`);
+            seatLabels.forEach(function(label) {
+                const seatValue = label.getAttribute('data-seat');
+                if (seatValue && seatValue.startsWith(row)) {
+                    const col = parseInt(seatValue.substring(1));
+                    if (!isNaN(col)) {
+                        rowSeats.push(col);
+                    }
+                }
+            });
+            
+            if (rowSeats.length === 0) continue;
+            
+            // Xác định các nhóm ghế từ DOM (dựa vào khoảng cách giữa các ghế)
+            const seatGroups = getSeatGroupsInRow(row, rowSeats);
+            
+            if (seatGroups.length === 0) {
+                // Nếu không xác định được nhóm, coi toàn bộ hàng là một nhóm
+                seatGroups.push({cols: rowSeats.sort((a, b) => a - b)});
+            }
+            
+            // Kiểm tra từng nhóm ghế trong hàng
+            for (let g = 0; g < seatGroups.length; g++) {
+                const group = seatGroups[g];
+                const groupCols = group.cols.sort((a, b) => a - b);
+                
+                // Lọc các ghế được chọn thuộc nhóm này
+                const selectedColsInGroup = cols.filter(col => groupCols.indexOf(col) !== -1);
+                if (selectedColsInGroup.length === 0) continue; // Không có ghế nào được chọn trong nhóm này
+                
+                const selectedSeatCountInGroup = selectedColsInGroup.length;
+                
+                // Áp dụng validation cho cả trường hợp đặt 1 ghế
+                
+                const minColInGroup = Math.min(...groupCols);
+                const maxColInGroup = Math.max(...groupCols);
+                const selectedMinCol = Math.min(...selectedColsInGroup);
+                const selectedMaxCol = Math.max(...selectedColsInGroup);
+                
+                console.log(`Row ${row}, Group [${groupCols.join(',')}]: selectedCols=[${selectedColsInGroup.join(',')}], selectedSeatCount=${selectedSeatCountInGroup}`);
+                
+                // Đếm tổng số ghế AVAILABLE trong nhóm (chưa bị đặt) - cần đếm trước để áp dụng quy tắc
+                let totalAvailableInGroup = 0;
+                groupCols.forEach(function(col) {
+                    const checkSeat = row + col;
+                    const seatLabel = document.querySelector(`.seat-label[data-seat="${checkSeat}"]`);
+                    if (seatLabel && !seatLabel.classList.contains('booked') && !seatLabel.classList.contains('reserved')) {
+                        totalAvailableInGroup++;
+                    }
+                });
+                
+                // Nếu không có ghế available trong nhóm, bỏ qua
+                if (totalAvailableInGroup === 0) continue;
+                
+                // Kiểm tra xem có chọn ít nhất 1 trong 2 ghế ngoài cùng của nhóm không
+                const hasFirstSeat = selectedColsInGroup.indexOf(minColInGroup) !== -1;
+                const hasLastSeat = selectedColsInGroup.indexOf(maxColInGroup) !== -1;
+                
+                console.log(`Row ${row}, Group: minCol=${minColInGroup}, maxCol=${maxColInGroup}, hasFirstSeat=${hasFirstSeat}, hasLastSeat=${hasLastSeat}, totalAvailableInGroup=${totalAvailableInGroup}`);
+                
+                // Tìm ghế đã đặt gần nhất bên trái của selectedMinCol (hoặc ghế ngoài cùng nếu không có)
+                let nearestBookedSeatLeft = null;
+                for (let checkCol = selectedMinCol - 1; checkCol >= minColInGroup; checkCol--) {
+                    if (groupCols.indexOf(checkCol) === -1) continue;
+                    const checkSeat = row + checkCol;
+                    const seatLabel = document.querySelector(`.seat-label[data-seat="${checkSeat}"]`);
+                    if (seatLabel && (seatLabel.classList.contains('booked') || seatLabel.classList.contains('reserved'))) {
+                        nearestBookedSeatLeft = checkCol;
+                        break;
+                    }
+                }
+                const startPoint = (nearestBookedSeatLeft !== null) ? nearestBookedSeatLeft : minColInGroup;
+                
+                // Đếm số ghế AVAILABLE từ điểm đầu (ghế đã đặt gần nhất hoặc ghế ngoài cùng) đến ghế được chọn đầu tiên
+                // Lưu ý: Trong khoảng này phải không có ghế nào đã đặt
+                let availableSeatsAtStart = 0;
+                // Nếu startPoint là ghế đã đặt, bắt đầu đếm từ ghế tiếp theo
+                const countStart = (nearestBookedSeatLeft !== null) ? nearestBookedSeatLeft + 1 : minColInGroup;
+                for (let checkCol = countStart; checkCol < selectedMinCol; checkCol++) {
+                    if (groupCols.indexOf(checkCol) === -1) continue;
+                    const checkSeat = row + checkCol;
+                    const seatLabel = document.querySelector(`.seat-label[data-seat="${checkSeat}"]`);
+                    // Nếu gặp ghế đã đặt trong khoảng này, dừng đếm
+                    if (seatLabel && (seatLabel.classList.contains('booked') || seatLabel.classList.contains('reserved'))) {
+                        break;
+                    }
+                    // Chỉ đếm nếu ghế này available
+                    if (seatLabel) {
+                        availableSeatsAtStart++;
+                        console.log(`Row ${row}, Group: Found available seat at start: ${checkSeat} (từ điểm đầu ${startPoint} đến ghế được chọn ${selectedMinCol})`);
+                    }
+                }
+                
+                // Tìm ghế đã đặt gần nhất bên phải của selectedMaxCol (hoặc ghế ngoài cùng nếu không có)
+                let nearestBookedSeatRight = null;
+                for (let checkCol = selectedMaxCol + 1; checkCol <= maxColInGroup; checkCol++) {
+                    if (groupCols.indexOf(checkCol) === -1) continue;
+                    const checkSeat = row + checkCol;
+                    const seatLabel = document.querySelector(`.seat-label[data-seat="${checkSeat}"]`);
+                    if (seatLabel && (seatLabel.classList.contains('booked') || seatLabel.classList.contains('reserved'))) {
+                        nearestBookedSeatRight = checkCol;
+                        break;
+                    }
+                }
+                const endPoint = (nearestBookedSeatRight !== null) ? nearestBookedSeatRight : maxColInGroup;
+                
+                // Đếm số ghế AVAILABLE từ ghế được chọn cuối cùng đến điểm cuối (ghế đã đặt gần nhất hoặc ghế ngoài cùng)
+                // Lưu ý: Trong khoảng này phải không có ghế nào đã đặt
+                let availableSeatsAtEnd = 0;
+                // Nếu endPoint là ghế đã đặt, kết thúc đếm trước ghế đó
+                const countEnd = (nearestBookedSeatRight !== null) ? nearestBookedSeatRight - 1 : maxColInGroup;
+                for (let checkCol = selectedMaxCol + 1; checkCol <= countEnd; checkCol++) {
+                    if (groupCols.indexOf(checkCol) === -1) continue;
+                    const checkSeat = row + checkCol;
+                    const seatLabel = document.querySelector(`.seat-label[data-seat="${checkSeat}"]`);
+                    // Nếu gặp ghế đã đặt trong khoảng này, dừng đếm
+                    if (seatLabel && (seatLabel.classList.contains('booked') || seatLabel.classList.contains('reserved'))) {
+                        break;
+                    }
+                    // Chỉ đếm nếu ghế này available
+                    if (seatLabel) {
+                        availableSeatsAtEnd++;
+                        console.log(`Row ${row}, Group: Found available seat at end: ${checkSeat} (từ ghế được chọn ${selectedMaxCol} đến điểm cuối ${endPoint})`);
+                    }
+                }
+                
+                // Debug log
+                console.log(`Row ${row}, Group: totalColsInGroup=${groupCols.length}, totalAvailableInGroup=${totalAvailableInGroup}, selectedSeatCount=${selectedSeatCountInGroup}`);
+                console.log(`Row ${row}, Group: nearestBookedSeatLeft=${nearestBookedSeatLeft !== null ? nearestBookedSeatLeft : 'null'}, nearestBookedSeatRight=${nearestBookedSeatRight !== null ? nearestBookedSeatRight : 'null'}`);
+                console.log(`Row ${row}, Group: availableSeatsAtStart=${availableSeatsAtStart}, availableSeatsAtEnd=${availableSeatsAtEnd}`);
+                
+                
+                // QUY TẮC: Công thức tổng quát cho nhóm có X ghế available
+                // - Nếu một trong hai điểm bắt đầu có ghế đã đặt, thì có thể đặt ngay sau ghế đó (bỏ qua kiểm tra)
+                // - Nếu đặt số ghế >= X/2 và không có ghế đã đặt ở hai đầu: Bắt buộc phải đặt từ đầu hàng
+                // - Nếu đặt số ghế < X/2 và không đặt từ đầu hàng: Phải để lại >= 2 ghế ở đầu trái HOẶC đầu phải
+                
+                const halfOfAvailable = Math.floor(totalAvailableInGroup / 2);
+                
+                // Kiểm tra nếu đặt từ đầu hàng (chọn ít nhất 1 trong 2 ghế ngoài cùng) - OK
+                if (hasFirstSeat || hasLastSeat) {
+                    console.log(`Row ${row}, Group: Validation OK - Đặt từ đầu hàng (hasFirstSeat=${hasFirstSeat}, hasLastSeat=${hasLastSeat})`);
+                    continue; // Bỏ qua validation cho nhóm này
+                }
+                
+                // Kiểm tra riêng cho trường hợp đặt 1 vé
+                if (selectedSeatCountInGroup === 1) {
+                    // Quy tắc 1: Không được chọn ghế ngay sát ghế ngoài cùng (ghế thứ 2 từ đầu hoặc từ cuối)
+                    if (selectedMinCol === minColInGroup + 1 || selectedMinCol === maxColInGroup - 1) {
+                        console.log(`Row ${row}: Validation FAILED - Không được chọn ghế ngay sát ghế ngoài cùng (ghế ${selectedMinCol}, minCol=${minColInGroup}, maxCol=${maxColInGroup})`);
+                        return `Không được chọn ghế ngay sát ghế ngoài cùng! Vui lòng chọn ghế ngoài cùng hoặc ghế khác.`;
+                    }
+                    
+                    // Quy tắc 2: Nếu giữa 2 ghế đã đặt có >= 3 ghế trống, không được đặt ghế ở giữa (cách cả 2 ghế đã đặt ít nhất 1 ghế)
+                    // Tìm ghế đã đặt gần nhất bên trái
+                    let nearestBookedLeft = null;
+                    for (let checkCol = selectedMinCol - 1; checkCol >= minColInGroup; checkCol--) {
+                        if (groupCols.indexOf(checkCol) === -1) continue;
+                        const checkSeat = row + checkCol;
+                        const seatLabel = document.querySelector(`.seat-label[data-seat="${checkSeat}"]`);
+                        if (seatLabel && (seatLabel.classList.contains('booked') || seatLabel.classList.contains('reserved'))) {
+                            nearestBookedLeft = checkCol;
+                            break;
+                        }
+                    }
+                    
+                    // Tìm ghế đã đặt gần nhất bên phải
+                    let nearestBookedRight = null;
+                    for (let checkCol = selectedMinCol + 1; checkCol <= maxColInGroup; checkCol++) {
+                        if (groupCols.indexOf(checkCol) === -1) continue;
+                        const checkSeat = row + checkCol;
+                        const seatLabel = document.querySelector(`.seat-label[data-seat="${checkSeat}"]`);
+                        if (seatLabel && (seatLabel.classList.contains('booked') || seatLabel.classList.contains('reserved'))) {
+                            nearestBookedRight = checkCol;
+                            break;
+                        }
+                    }
+                    
+                    // Nếu có cả 2 ghế đã đặt ở 2 bên
+                    if (nearestBookedLeft !== null && nearestBookedRight !== null) {
+                        // Tính khoảng cách giữa 2 ghế đã đặt (số ghế trống)
+                        const gapBetweenBooked = nearestBookedRight - nearestBookedLeft - 1;
+                        
+                        // Nếu khoảng cách >= 3 ghế trống
+                        if (gapBetweenBooked >= 3) {
+                            // Kiểm tra xem ghế được chọn có cách cả 2 ghế đã đặt ít nhất 1 ghế không
+                            const distanceFromLeft = selectedMinCol - nearestBookedLeft;
+                            const distanceFromRight = nearestBookedRight - selectedMinCol;
+                            
+                            // Nếu ghế được chọn cách cả 2 ghế đã đặt ít nhất 1 ghế (không phải ghế ngay sát)
+                            if (distanceFromLeft > 1 && distanceFromRight > 1) {
+                                console.log(`Row ${row}: Validation FAILED - Đặt 1 vé (ghế ${selectedMinCol}) giữa 2 ghế đã đặt (ghế ${nearestBookedLeft} và ${nearestBookedRight}) có ${gapBetweenBooked} ghế trống, cách cả 2 ghế đã đặt ít nhất 1 ghế`);
+                                return `Không được đặt ghế ở giữa khi giữa 2 ghế đã đặt có 3 ghế trống trở lên! Vui lòng chọn ghế ngay sát một trong hai ghế đã đặt hoặc chọn ghế khác.`;
+                            }
+                        }
+                    }
+                }
+                
+                // Không đặt từ đầu hàng, kiểm tra các trường hợp khác (áp dụng cho cả 1 ghế)
+                // Nếu có ghế đã đặt ở một trong hai đầu, chỉ cho phép đặt NGAY SAU ghế đó (không có ghế ở giữa)
+                const isAdjacentToBookedLeft = (nearestBookedSeatLeft !== null && selectedMinCol === nearestBookedSeatLeft + 1);
+                const isAdjacentToBookedRight = (nearestBookedSeatRight !== null && selectedMaxCol === nearestBookedSeatRight - 1);
+                
+                if (isAdjacentToBookedLeft || isAdjacentToBookedRight) {
+                    console.log(`Row ${row}, Group: Validation OK - Đặt ngay sau ghế đã đặt (trái: ${isAdjacentToBookedLeft ? 'ghế ' + nearestBookedSeatLeft : 'no'}, phải: ${isAdjacentToBookedRight ? 'ghế ' + nearestBookedSeatRight : 'no'})`);
+                    continue; // Bỏ qua validation cho nhóm này
+                }
+                
+                // Kiểm tra khi đặt 2 ghế: Không được đặt nếu có ghế đã đặt cách 2 ô (bên trái hoặc phải)
+                // Trừ khi bên cạnh ghế được chọn đã có ghế đặt rồi (đã xử lý ở trên)
+                if (selectedSeatCountInGroup === 2) {
+                    // Kiểm tra ghế đã đặt cách 2 ô về bên trái (từ ghế được chọn đầu tiên)
+                    const seatTwoAwayLeft = selectedMinCol - 2;
+                    if (seatTwoAwayLeft >= minColInGroup && groupCols.indexOf(seatTwoAwayLeft) !== -1) {
+                        const checkSeatLeft = row + seatTwoAwayLeft;
+                        const seatLabelLeft = document.querySelector(`.seat-label[data-seat="${checkSeatLeft}"]`);
+                        if (seatLabelLeft && (seatLabelLeft.classList.contains('booked') || seatLabelLeft.classList.contains('reserved'))) {
+                            // Kiểm tra xem bên cạnh ghế được chọn có ghế đã đặt không
+                            const seatAdjacentLeft = selectedMinCol - 1;
+                            if (seatAdjacentLeft >= minColInGroup && groupCols.indexOf(seatAdjacentLeft) !== -1) {
+                                const checkSeatAdjacentLeft = row + seatAdjacentLeft;
+                                const seatLabelAdjacentLeft = document.querySelector(`.seat-label[data-seat="${checkSeatAdjacentLeft}"]`);
+                                // Nếu bên cạnh không có ghế đã đặt, thì không được đặt
+                                if (!seatLabelAdjacentLeft || (!seatLabelAdjacentLeft.classList.contains('booked') && !seatLabelAdjacentLeft.classList.contains('reserved'))) {
+                                    console.log(`Row ${row}, Group: Validation FAILED - Đặt 2 ghế nhưng có ghế đã đặt cách 2 ô về bên trái (ghế ${checkSeatLeft}) và bên cạnh không có ghế đã đặt`);
+                                    return `Không được đặt ghế khi có ghế đã đặt cách 2 ô! Vui lòng chọn ghế khác.`;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Kiểm tra ghế đã đặt cách 2 ô về bên phải (từ ghế được chọn cuối cùng)
+                    const seatTwoAwayRight = selectedMaxCol + 2;
+                    if (seatTwoAwayRight <= maxColInGroup && groupCols.indexOf(seatTwoAwayRight) !== -1) {
+                        const checkSeatRight = row + seatTwoAwayRight;
+                        const seatLabelRight = document.querySelector(`.seat-label[data-seat="${checkSeatRight}"]`);
+                        if (seatLabelRight && (seatLabelRight.classList.contains('booked') || seatLabelRight.classList.contains('reserved'))) {
+                            // Kiểm tra xem bên cạnh ghế được chọn có ghế đã đặt không
+                            const seatAdjacentRight = selectedMaxCol + 1;
+                            if (seatAdjacentRight <= maxColInGroup && groupCols.indexOf(seatAdjacentRight) !== -1) {
+                                const checkSeatAdjacentRight = row + seatAdjacentRight;
+                                const seatLabelAdjacentRight = document.querySelector(`.seat-label[data-seat="${checkSeatAdjacentRight}"]`);
+                                // Nếu bên cạnh không có ghế đã đặt, thì không được đặt
+                                if (!seatLabelAdjacentRight || (!seatLabelAdjacentRight.classList.contains('booked') && !seatLabelAdjacentRight.classList.contains('reserved'))) {
+                                    console.log(`Row ${row}, Group: Validation FAILED - Đặt 2 ghế nhưng có ghế đã đặt cách 2 ô về bên phải (ghế ${checkSeatRight}) và bên cạnh không có ghế đã đặt`);
+                                    return `Không được đặt ghế khi có ghế đã đặt cách 2 ô! Vui lòng chọn ghế khác.`;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Không đặt từ đầu hàng và không đặt ngay sau ghế đã đặt, áp dụng quy tắc bình thường
+                if (selectedSeatCountInGroup >= halfOfAvailable) {
+                    // Đặt >= X/2 ghế: Bắt buộc phải đặt từ đầu hàng
+                    console.log(`Row ${row}, Group: Validation FAILED - Nhóm có ${totalAvailableInGroup} ghế available, đặt ${selectedSeatCountInGroup} vé (>= ${halfOfAvailable}) nhưng không đặt từ đầu hàng`);
+                    return `Khi đặt từ ${halfOfAvailable} vé trở lên trong nhóm có ${totalAvailableInGroup} ghế trống, bắt buộc phải đặt từ đầu hàng (chọn ít nhất 1 trong 2 ghế ngoài cùng)!`;
+                } else {
+                    // Đặt < X/2 ghế (bao gồm cả 1 ghế): Phải để lại >= 2 ghế ở cả hai đầu (nếu không đặt ngay sau ghế đã đặt)
+                    if (availableSeatsAtStart < 2 || availableSeatsAtEnd < 2) {
+                        console.log(`Row ${row}, Group: Validation FAILED - Nhóm có ${totalAvailableInGroup} ghế available, đặt ${selectedSeatCountInGroup} vé (< ${halfOfAvailable}) nhưng không đặt từ đầu hàng và không để lại ít nhất 2 ghế ở cả hai đầu (đầu trái: ${availableSeatsAtStart}, đầu phải: ${availableSeatsAtEnd})`);
+                        return `Khi đặt ${selectedSeatCountInGroup} vé trong nhóm có ${totalAvailableInGroup} ghế trống mà không đặt từ đầu hàng, phải để lại ít nhất 2 ghế kể từ ghế ngoài cùng ở cả hai đầu hàng!`;
+                    }
+                }
+            }
         }
         
         return null;
@@ -1365,28 +1655,42 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Lấy showtime_id hiện tại từ URL
+        // Lấy showtime_id và theater_id hiện tại từ URL
         const urlParams = new URLSearchParams(window.location.search);
         const showtimeIdFromUrl = urlParams.get('showtime_id');
+        const theaterIdFromUrl = urlParams.get('theater');
         const currentShowtimeId = showtimeIdFromUrl || '';
+        const currentTheaterId = theaterIdFromUrl || '';
         
         // Kiểm tra xem có thời gian bắt đầu đã lưu trong sessionStorage không
         const savedStartTime = sessionStorage.getItem('showtimeStartTime');
         const savedShowtimeId = sessionStorage.getItem('selectedShowtimeId');
+        const savedTheaterId = sessionStorage.getItem('selectedTheaterId');
+        
+        // Tạo key duy nhất cho showtime + theater
+        const currentKey = currentShowtimeId + '_' + currentTheaterId;
+        const savedKey = (savedShowtimeId || '') + '_' + (savedTheaterId || '');
         
         // Chỉ tạo timer mới nếu:
         // 1. Chưa có timer nào đang chạy
-        // 2. Hoặc showtime_id đã thay đổi (chọn showtime mới)
-        if (savedStartTime && savedShowtimeId === currentShowtimeId && showtimeTimer) {
-            // Timer đã tồn tại và đang chạy cho cùng showtime, không reset
+        // 2. Hoặc showtime_id hoặc theater_id đã thay đổi (chọn showtime/theater mới)
+        if (savedStartTime && currentKey === savedKey && showtimeTimer) {
+            // Timer đã tồn tại và đang chạy cho cùng showtime và theater, không reset
             showtimeStartTime = parseInt(savedStartTime);
-            console.log('Using existing timer for showtime:', currentShowtimeId);
+            console.log('Using existing timer for showtime:', currentShowtimeId, 'theater:', currentTheaterId);
+        } else if (savedStartTime && currentKey === savedKey) {
+            // Có timer đã lưu nhưng chưa chạy, sử dụng lại
+            showtimeStartTime = parseInt(savedStartTime);
+            console.log('Resuming existing timer for showtime:', currentShowtimeId, 'theater:', currentTheaterId);
         } else {
-            // Tạo timer mới hoặc reset khi chọn showtime mới
+            // Tạo timer mới hoặc reset khi chọn showtime/theater mới
             showtimeStartTime = Date.now();
             sessionStorage.setItem('showtimeStartTime', showtimeStartTime.toString());
-            sessionStorage.setItem('selectedShowtimeId', currentShowtimeId || '');
-            console.log('Starting new timer for showtime:', currentShowtimeId);
+            sessionStorage.setItem('selectedShowtimeId', currentShowtimeId);
+            if (currentTheaterId) {
+                sessionStorage.setItem('selectedTheaterId', currentTheaterId);
+            }
+            console.log('Starting new timer for showtime:', currentShowtimeId, 'theater:', currentTheaterId);
         }
         
         // Hiển thị timer element
@@ -1440,19 +1744,29 @@ document.addEventListener('DOMContentLoaded', function() {
             const showtimeIdParam = url.searchParams.get('showtime_id');
             
             if (showtimeIdParam) {
-                // Kiểm tra xem có phải showtime mới không
+                // Lấy theater_id từ URL
+                const theaterIdParam = url.searchParams.get('theater') || '';
+                
+                // Kiểm tra xem có phải showtime/theater mới không
                 const savedShowtimeId = sessionStorage.getItem('selectedShowtimeId');
-                if (savedShowtimeId && savedShowtimeId != showtimeIdParam) {
-                    // Showtime đã thay đổi, reset timer
-                    console.log('Showtime changed from', savedShowtimeId, 'to', showtimeIdParam, '- Resetting timer');
+                const savedTheaterId = sessionStorage.getItem('selectedTheaterId');
+                const currentKey = showtimeIdParam + '_' + theaterIdParam;
+                const savedKey = (savedShowtimeId || '') + '_' + (savedTheaterId || '');
+                
+                if (savedShowtimeId && currentKey !== savedKey) {
+                    // Showtime hoặc theater đã thay đổi, reset timer
+                    console.log('Showtime/theater changed from', savedKey, 'to', currentKey, '- Resetting timer');
                     sessionStorage.removeItem('showtimeStartTime');
                 }
                 
-                // Lưu showtime_id và thời gian bắt đầu mới vào sessionStorage
+                // Lưu showtime_id, theater_id và thời gian bắt đầu mới vào sessionStorage
                 sessionStorage.setItem('selectedShowtimeId', showtimeIdParam);
+                if (theaterIdParam) {
+                    sessionStorage.setItem('selectedTheaterId', theaterIdParam);
+                }
                 const startTime = Date.now();
                 sessionStorage.setItem('showtimeStartTime', startTime.toString());
-                console.log('Timer will start for showtime:', showtimeIdParam);
+                console.log('Timer will start for showtime:', showtimeIdParam, 'theater:', theaterIdParam);
                 
                 // Hiển thị timer ngay lập tức (không cần đợi reload)
                 const timerElement = document.getElementById('reservation-timer');
@@ -1742,10 +2056,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Validate seat selection rules
+        console.log('=== VALIDATION START (JavaScript) ===');
+        console.log('Selected seats:', selectedSeatValues);
         const validationError = validateSeatSelection(selectedSeatValues);
+        console.log('Validation result:', validationError || 'PASSED');
+        console.log('=== VALIDATION END (JavaScript) ===');
         if (validationError) {
             e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
             alert(validationError);
+            console.error('Validation FAILED - Form submission prevented');
+            // Re-enable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+            }
             return false;
         }
         
