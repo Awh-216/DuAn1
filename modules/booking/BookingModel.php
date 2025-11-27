@@ -453,6 +453,24 @@ class BookingModel {
             return null;
         }
     }
+    
+    public function getScreenInfo($screen_id) {
+        try {
+            return $this->db->fetch("SELECT id, screen_name, theater_id FROM theater_screens WHERE id = ?", [$screen_id]);
+        } catch (Exception $e) {
+            error_log("Error getting screen info: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    public function getTheaterInfo($theater_id) {
+        try {
+            return $this->db->fetch("SELECT id, name, location FROM theaters WHERE id = ?", [$theater_id]);
+        } catch (Exception $e) {
+            error_log("Error getting theater info: " . $e->getMessage());
+            return null;
+        }
+    }
 }
 ?>
 

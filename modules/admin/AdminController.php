@@ -216,6 +216,149 @@ class AdminController extends Controller {
         }
     }
     
+    /**
+     * Cập nhật vai trò của user
+     */
+    public function usersUpdateRole() {
+        try {
+            $user = AdminMiddleware::checkAdmin();
+            
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $_SESSION['error'] = 'Phương thức không hợp lệ!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            $userId = $_POST['user_id'] ?? null;
+            $newRole = $_POST['role'] ?? null;
+            
+            if (!$userId || !$newRole) {
+                $_SESSION['error'] = 'Thiếu thông tin!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            // Không cho phép tự thay đổi role của chính mình
+            if ($userId == $user['id']) {
+                $_SESSION['error'] = 'Bạn không thể thay đổi vai trò của chính mình!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            $validRoles = ['user', 'moderator', 'admin'];
+            if (!in_array($newRole, $validRoles)) {
+                $_SESSION['error'] = 'Vai trò không hợp lệ!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            require_once __DIR__ . '/../user/UserModel.php';
+            $userModel = new UserModel();
+            
+            $targetUser = $userModel->getById($userId);
+            if (!$targetUser) {
+                $_SESSION['error'] = 'Người dùng không tồn tại!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            $oldRole = $targetUser['role'] ?? 'user';
+            
+            // Cập nhật role
+            $db = Database::getInstance();
+            $db->execute("UPDATE users SET role = ? WHERE id = ?", [$newRole, $userId]);
+            
+            // Log action
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Cập nhật vai trò người dùng',
+                'User',
+                'user',
+                $userId,
+                ['role' => $oldRole],
+                ['role' => $newRole]
+            );
+            
+            $_SESSION['success'] = 'Cập nhật vai trò thành công!';
+            $this->redirect('admin/users');
+        } catch (Exception $e) {
+            error_log("Error updating role: " . $e->getMessage());
+            $_SESSION['error'] = 'Có lỗi xảy ra khi cập nhật vai trò: ' . $e->getMessage();
+            $this->redirect('admin/users');
+        }
+    }
+    
+    /**
+     * Toggle trạng thái active/ban của user
+     */
+    public function usersToggleStatus() {
+        try {
+            $user = AdminMiddleware::checkAdmin();
+            
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $_SESSION['error'] = 'Phương thức không hợp lệ!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            $userId = $_POST['user_id'] ?? null;
+            $isActive = intval($_POST['is_active'] ?? 0);
+            
+            if (!$userId) {
+                $_SESSION['error'] = 'Thiếu thông tin user ID!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            // Không cho phép tự khóa chính mình
+            if ($userId == $user['id']) {
+                $_SESSION['error'] = 'Bạn không thể khóa tài khoản của chính mình!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            require_once __DIR__ . '/../user/UserModel.php';
+            $userModel = new UserModel();
+            
+            $targetUser = $userModel->getById($userId);
+            if (!$targetUser) {
+                $_SESSION['error'] = 'Người dùng không tồn tại!';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            $oldStatus = $targetUser['is_active'] ?? 1;
+            $newStatus = $isActive;
+            $statusText = $newStatus ? 'mở khóa' : 'khóa';
+            
+            // Cập nhật status
+            $db = Database::getInstance();
+            $db->execute("UPDATE users SET is_active = ?, status = ? WHERE id = ?", [
+                $newStatus,
+                $newStatus ? 'active' : 'banned',
+                $userId
+            ]);
+            
+            // Log action
+            AdminMiddleware::logAction(
+                $user['id'],
+                "Đã $statusText tài khoản người dùng",
+                'User',
+                'user',
+                $userId,
+                ['is_active' => $oldStatus],
+                ['is_active' => $newStatus]
+            );
+            
+            $_SESSION['success'] = ucfirst($statusText) . ' tài khoản thành công!';
+            $this->redirect('admin/users');
+        } catch (Exception $e) {
+            error_log("Error toggling user status: " . $e->getMessage());
+            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+            $this->redirect('admin/users');
+        }
+    }
+    
     // Movies Management
     public function movies() {
         $db = Database::getInstance();

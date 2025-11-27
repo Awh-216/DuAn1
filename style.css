@@ -3561,6 +3561,8 @@ button.btn-location-detect span,
   margin-bottom: 1rem;
   position: relative;
   z-index: 1;
+  width: 100%;
+  max-width: 100%;
 }
 
 .seat-row {
@@ -3568,7 +3570,9 @@ button.btn-location-detect span,
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
-  justify-content: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 100%;
 }
 
 .row-label {
@@ -3577,19 +3581,32 @@ button.btn-location-detect span,
   font-weight: bold;
   color: #ffffff;
   font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
 .seats-in-row {
   display: flex;
   gap: 0.4rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.seat-group-separator {
+  width: 1.5rem;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 .seat-label {
   position: relative;
-  width: 35px;
-  height: 35px;
-  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  min-width: 18px;
+  max-width: 26px;
+  border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -3598,6 +3615,42 @@ button.btn-location-detect span,
   user-select: none;
   -webkit-user-select: none;
   pointer-events: auto;
+  flex-shrink: 1;
+  flex-grow: 0;
+}
+
+/* Tự động giảm kích thước ghế khi có nhiều ghế */
+.seat-map-container[data-seats-per-row="19"] .seat-label,
+.seat-map-container[data-seats-per-row="20"] .seat-label,
+.seat-map-container[data-seats-per-row="21"] .seat-label,
+.seat-map-container[data-seats-per-row="22"] .seat-label,
+.seat-map-container[data-seats-per-row="23"] .seat-label,
+.seat-map-container[data-seats-per-row="24"] .seat-label,
+.seat-map-container[data-seats-per-row="25"] .seat-label,
+.seat-map-container[data-seats-per-row="26"] .seat-label,
+.seat-map-container[data-seats-per-row="27"] .seat-label,
+.seat-map-container[data-seats-per-row="28"] .seat-label,
+.seat-map-container[data-seats-per-row="29"] .seat-label,
+.seat-map-container[data-seats-per-row="30"] .seat-label {
+  width: calc((100% - (var(--seat-gap, 0.4rem) * (var(--seats-count, 25) - 1)) - 2rem) / var(--seats-count, 25));
+  max-width: 24px;
+  min-width: 16px;
+  height: calc((100% - (var(--seat-gap, 0.4rem) * (var(--seats-count, 25) - 1)) - 2rem) / var(--seats-count, 25));
+  max-height: 24px;
+  min-height: 16px;
+}
+
+.seat-map-container[data-seats-per-row="31"] .seat-label,
+.seat-map-container[data-seats-per-row="32"] .seat-label,
+.seat-map-container[data-seats-per-row="33"] .seat-label,
+.seat-map-container[data-seats-per-row="34"] .seat-label,
+.seat-map-container[data-seats-per-row="35"] .seat-label {
+  width: calc((100% - (var(--seat-gap, 0.4rem) * (var(--seats-count, 32) - 1)) - 2rem) / var(--seats-count, 32));
+  max-width: 22px;
+  min-width: 14px;
+  height: calc((100% - (var(--seat-gap, 0.4rem) * (var(--seats-count, 32) - 1)) - 2rem) / var(--seats-count, 32));
+  max-height: 22px;
+  min-height: 14px;
 }
 
 /* Đảm bảo tất cả phần tử con của label (trừ checkbox) không chặn click */
@@ -3790,7 +3843,7 @@ button.btn-location-detect span,
   position: absolute;
   top: 2px;
   right: 3px;
-  font-size: 0.6rem;
+  font-size: 0.45rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3804,12 +3857,12 @@ button.btn-location-detect span,
 }
 
 .seat-icon.vip-icon i {
-  font-size: 0.7rem;
+  font-size: 0.5rem;
 }
 
 .seat-icon.normal-icon {
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.5rem;
+  font-size: 0.4rem;
 }
 
 .seat-label.selected .seat-icon.normal-icon {

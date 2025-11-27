@@ -382,7 +382,8 @@ INSERT INTO `roles` (`id`, `name`, `description`, `created_at`) VALUES
 (2, 'Admin', 'Quản trị viên, quản lý nội dung và người dùng', '2025-11-10 16:41:17'),
 (3, 'Moderator', 'Điều hành viên, quản lý bình luận và hỗ trợ', '2025-11-10 16:41:17'),
 (4, 'Content Manager', 'Quản lý nội dung phim', '2025-11-10 16:41:17'),
-(5, 'Support Staff', 'Nhân viên hỗ trợ khách hàng', '2025-11-10 16:41:17');
+(5, 'Support Staff', 'Nhân viên hỗ trợ khách hàng', '2025-11-10 16:41:17'),
+(6, 'Theater Manager', 'Quản lý rạp, quản lý lịch chiếu, bán vé và phim của rạp', '2025-11-10 16:41:17');
 
 -- --------------------------------------------------------
 
@@ -989,7 +990,7 @@ CREATE TABLE `users` (
   `email_verified` tinyint(1) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `role` enum('user','admin','moderator') DEFAULT 'user',
+  `role` enum('user','admin','moderator','manager') DEFAULT 'user',
   `is_active` tinyint(1) DEFAULT 1,
   `last_login` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -1060,6 +1061,83 @@ CREATE TABLE `user_tokens` (
 
 INSERT INTO `user_tokens` (`id`, `user_id`, `token`, `device_info`, `ip_address`, `expires_at`, `created_at`) VALUES
 (0, 14, '7b32aadef21999c3720213862d37bc018ae475e3e822f3e22b4dab43af082cd6', 'Google Chrome on Windows', '::1', '2025-12-25 22:03:42', '2025-11-26 04:03:42');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `seat_selection_logs`
+-- Bảng này dùng để track việc chọn ghế để phát hiện spam
+--
+CREATE TABLE `seat_selection_logs` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `showtime_id` int(11) NOT NULL,
+  `seat_count` int(11) NOT NULL,
+  `seats` text DEFAULT NULL,
+  `is_spam` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `seat_selection_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `showtime_id` (`showtime_id`),
+  ADD KEY `created_at` (`created_at`),
+  ADD KEY `is_spam` (`is_spam`);
+
+ALTER TABLE `seat_selection_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `theater_managers`
+-- Bảng này lưu thông tin manager được phân quyền quản lý rạp
+--
+CREATE TABLE `theater_managers` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `theater_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `theater_managers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_user_theater` (`user_id`, `theater_id`),
+  ADD KEY `theater_id` (`theater_id`);
+
+ALTER TABLE `theater_managers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `booking_session_tracking`
+-- Bảng này track thời gian người dùng ở trong phòng đặt vé
+--
+CREATE TABLE `booking_session_tracking` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `showtime_id` int(11) NOT NULL,
+  `screen_id` int(11) NOT NULL,
+  `session_start` datetime NOT NULL,
+  `session_end` datetime DEFAULT NULL,
+  `total_duration_seconds` int(11) DEFAULT 0,
+  `violation_count` int(11) DEFAULT 0,
+  `is_banned` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `booking_session_tracking`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `showtime_id` (`showtime_id`),
+  ADD KEY `screen_id` (`screen_id`),
+  ADD KEY `session_start` (`session_start`),
+  ADD KEY `is_banned` (`is_banned`);
+
+ALTER TABLE `booking_session_tracking`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 -- --------------------------------------------------------
 
@@ -1389,7 +1467,7 @@ ALTER TABLE `seat_reservations`
 -- AUTO_INCREMENT cho bảng `showtimes`
 --
 ALTER TABLE `showtimes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=343;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=351;
 
 --
 -- AUTO_INCREMENT cho bảng `subscriptions`
@@ -1431,7 +1509,7 @@ ALTER TABLE `booking_food_items`
 -- AUTO_INCREMENT cho bảng `theater_screens`
 --
 ALTER TABLE `theater_screens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT cho bảng `tickets`
@@ -1588,6 +1666,187 @@ ALTER TABLE `user_tokens`
 ALTER TABLE `watch_history`
   ADD CONSTRAINT `watch_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `watch_history_ibfk_2` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `seat_selection_logs`
+--
+ALTER TABLE `seat_selection_logs`
+  ADD CONSTRAINT `seat_selection_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `seat_selection_logs_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `theater_managers`
+--
+ALTER TABLE `theater_managers`
+  ADD CONSTRAINT `theater_managers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `theater_managers_ibfk_2` FOREIGN KEY (`theater_id`) REFERENCES `theaters` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `booking_session_tracking`
+--
+ALTER TABLE `booking_session_tracking`
+  ADD CONSTRAINT `booking_session_tracking_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `booking_session_tracking_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `booking_session_tracking_ibfk_3` FOREIGN KEY (`screen_id`) REFERENCES `theater_screens` (`id`) ON DELETE CASCADE;
+
+-- --------------------------------------------------------
+
+--
+-- Thêm 2 mô hình ghế mới vào database
+-- Mô hình 1: Layout 3 khối (Trái, Giữa, Phải) - Dựa trên hình ảnh mô tả
+-- Mô hình 2: Layout 3 khối với số ghế khác
+--
+
+-- Mô hình 1: Layout 3 khối với 9 hàng (A-I) và 14 cột
+-- Khối trái: cột 1-4, Khối giữa: cột 5-8, Khối phải: cột 9-12, Ghế riêng lẻ: cột 13-14
+INSERT INTO `theater_screens` (`theater_id`, `screen_name`, `total_seats`, `seat_layout`, `seat_layout_config`, `screen_type`, `is_active`, `created_at`) VALUES
+(3, 'Phòng 3', 180, NULL, '{
+  "layout_type": "grouped",
+  "rows": ["A", "B", "C", "D", "E", "F", "G", "H", "I"],
+  "seat_groups": [
+    {
+      "name": "Khối trái",
+      "rows": ["A", "B", "C", "D", "E", "F", "G", "H", "I"],
+      "cols": [1, 2, 3, 4]
+    },
+    {
+      "name": "Khối giữa",
+      "rows": ["A", "B", "C", "D", "E", "F", "G", "H", "I"],
+      "cols": [5, 6, 7, 8]
+    },
+    {
+      "name": "Khối phải",
+      "rows": ["A", "B", "C", "D", "E", "F", "G", "H", "I"],
+      "cols": [9, 10, 11, 12]
+    },
+    {
+      "name": "Ghế riêng lẻ",
+      "rows": ["H", "I"],
+      "cols": [13, 14]
+    }
+  ],
+  "vip_rows": ["D", "E", "F", "G", "H"],
+  "couple_rows": [],
+  "normal_price": 120000,
+  "vip_price": 180000,
+  "couple_price": 240000
+}', '2D', 1, NOW());
+
+-- Mô hình 2: Layout 4 khối với 7 hàng (A-G) 
+-- Thứ tự từ trái sang phải: 20-25, 7-16, 17-19, 1-6
+-- 4 hàng đầu (A-D): ghế thường
+-- 3 hàng cuối (E-G): ghế VIP
+INSERT INTO `theater_screens` (`theater_id`, `screen_name`, `total_seats`, `seat_layout`, `seat_layout_config`, `screen_type`, `is_active`, `created_at`) VALUES
+(3, 'Phòng 4', 224, NULL, '{
+  "layout_type": "grouped",
+  "rows": ["A", "B", "C", "D", "E", "F", "G"],
+  "seat_groups": [
+    {
+      "name": "Khối 1",
+      "rows": ["A", "B", "C", "D", "E", "F", "G"],
+      "cols": [20, 21, 22, 23, 24, 25]
+    },
+    {
+      "name": "Khối 2",
+      "rows": ["A", "B", "C", "D", "E", "F", "G"],
+      "cols": [7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    },
+    {
+      "name": "Khối 3",
+      "rows": ["A", "B", "C", "D", "E", "F", "G"],
+      "cols": [17, 18, 19]
+    },
+    {
+      "name": "Khối 4",
+      "rows": ["A", "B", "C", "D", "E", "F", "G"],
+      "cols": [1, 2, 3, 4, 5, 6]
+    }
+  ],
+  "vip_rows": ["E", "F", "G"],
+  "couple_rows": [],
+  "normal_price": 130000,
+  "vip_price": 200000,
+  "couple_price": 260000
+}', '3D', 1, NOW());
+
+-- Thêm showtime cho phòng mới để test
+-- Lấy movie_id và theater_id từ database hiện có
+-- Giả sử có movie_id = 18 và theater_id = 3 (Lotte Cinema)
+
+-- Thêm showtime cho Phòng 3 (screen_id sẽ là ID của phòng 3 vừa tạo)
+-- Lấy ID mới nhất của theater_screens với screen_name = 'Phòng 3' và theater_id = 3
+INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
+SELECT 
+    18 as movie_id,  -- Thay đổi movie_id theo phim bạn muốn test
+    3 as theater_id, -- Lotte Cinema
+    DATE_ADD(CURDATE(), INTERVAL 1 DAY) as show_date, -- Ngày mai
+    '14:00:00' as show_time,
+    120000 as price,
+    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 3' ORDER BY id DESC LIMIT 1) as screen_id,
+    NOW() as created_at;
+
+INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
+SELECT 
+    18 as movie_id,
+    3 as theater_id,
+    DATE_ADD(CURDATE(), INTERVAL 1 DAY) as show_date,
+    '17:00:00' as show_time,
+    120000 as price,
+    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 3' ORDER BY id DESC LIMIT 1) as screen_id,
+    NOW() as created_at;
+
+INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
+SELECT 
+    18 as movie_id,
+    3 as theater_id,
+    DATE_ADD(CURDATE(), INTERVAL 1 DAY) as show_date,
+    '20:00:00' as show_time,
+    120000 as price,
+    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 3' ORDER BY id DESC LIMIT 1) as screen_id,
+    NOW() as created_at;
+
+-- Thêm showtime cho Phòng 4 (screen_id sẽ là ID của phòng 4 vừa tạo)
+INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
+SELECT 
+    18 as movie_id,
+    3 as theater_id,
+    DATE_ADD(CURDATE(), INTERVAL 1 DAY) as show_date,
+    '15:30:00' as show_time,
+    130000 as price,
+    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 4' ORDER BY id DESC LIMIT 1) as screen_id,
+    NOW() as created_at;
+
+INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
+SELECT 
+    18 as movie_id,
+    3 as theater_id,
+    DATE_ADD(CURDATE(), INTERVAL 1 DAY) as show_date,
+    '19:00:00' as show_time,
+    130000 as price,
+    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 4' ORDER BY id DESC LIMIT 1) as screen_id,
+    NOW() as created_at;
+
+-- Thêm showtime cho ngày hôm nay để test ngay
+INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
+SELECT 
+    18 as movie_id,
+    3 as theater_id,
+    CURDATE() as show_date,
+    DATE_FORMAT(DATE_ADD(NOW(), INTERVAL 2 HOUR), '%H:00:00') as show_time,
+    120000 as price,
+    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 3' ORDER BY id DESC LIMIT 1) as screen_id,
+    NOW() as created_at;
+
+INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
+SELECT 
+    18 as movie_id,
+    3 as theater_id,
+    CURDATE() as show_date,
+    DATE_FORMAT(DATE_ADD(NOW(), INTERVAL 3 HOUR), '%H:00:00') as show_time,
+    130000 as price,
+    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 4' ORDER BY id DESC LIMIT 1) as screen_id,
+    NOW() as created_at;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

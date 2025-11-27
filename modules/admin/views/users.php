@@ -85,10 +85,13 @@
                                     <button onclick="openPointsModal(<?php echo $u['id']; ?>, '<?php echo htmlspecialchars($u['name']); ?>', <?php echo $u['points'] ?? 0; ?>)" class="btn btn-outline-success" title="Quản lý điểm">
                                         <i class="fas fa-coins"></i>
                                     </button>
+                                    <button onclick="openRoleModal(<?php echo $u['id']; ?>, '<?php echo htmlspecialchars($u['name']); ?>', '<?php echo htmlspecialchars($u['role'] ?? 'user'); ?>')" class="btn btn-outline-secondary" title="Nâng cấp vai trò">
+                                        <i class="fas fa-user-shield"></i>
+                                    </button>
                                     <?php if ($u['id'] != $user['id']): ?>
-                                        <a href="?route=admin/users/block&id=<?php echo $u['id']; ?>" class="btn btn-outline-warning" title="Chặn/Mở khóa">
-                                            <i class="fas fa-ban"></i>
-                                        </a>
+                                        <button onclick="toggleUserStatus(<?php echo $u['id']; ?>, <?php echo ($u['is_active'] ?? 1) ? 0 : 1; ?>)" class="btn btn-outline-<?php echo ($u['is_active'] ?? 1) ? 'danger' : 'success'; ?>" title="<?php echo ($u['is_active'] ?? 1) ? 'Khóa tài khoản' : 'Mở khóa tài khoản'; ?>">
+                                            <i class="fas fa-<?php echo ($u['is_active'] ?? 1) ? 'lock' : 'unlock'; ?>"></i>
+                                        </button>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -152,6 +155,39 @@
     </div>
 </div>
 
+<!-- Role Management Modal -->
+<div class="modal fade" id="roleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nâng cấp vai trò - <span id="roleUserName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="roleForm" method="POST" action="?route=admin/users/updateRole">
+                <div class="modal-body">
+                    <input type="hidden" id="roleUserId" name="user_id">
+                    <div class="mb-3">
+                        <label class="form-label">Vai trò hiện tại</label>
+                        <input type="text" id="currentRole" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Vai trò mới</label>
+                        <select name="role" id="newRole" class="form-select" required>
+                            <option value="user">User</option>
+                            <option value="moderator">Moderator</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 function openPointsModal(userId, userName, currentPoints) {
     document.getElementById('pointsUserId').value = userId;
@@ -162,6 +198,39 @@ function openPointsModal(userId, userName, currentPoints) {
     
     const modal = new bootstrap.Modal(document.getElementById('pointsModal'));
     modal.show();
+}
+
+function openRoleModal(userId, userName, currentRole) {
+    document.getElementById('roleUserId').value = userId;
+    document.getElementById('roleUserName').textContent = userName;
+    document.getElementById('currentRole').value = currentRole;
+    document.getElementById('newRole').value = currentRole;
+    
+    const modal = new bootstrap.Modal(document.getElementById('roleModal'));
+    modal.show();
+}
+
+function toggleUserStatus(userId, newStatus) {
+    if (confirm(newStatus == 0 ? 'Bạn có chắc chắn muốn khóa tài khoản này?' : 'Bạn có chắc chắn muốn mở khóa tài khoản này?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '?route=admin/users/toggleStatus';
+        
+        const userIdInput = document.createElement('input');
+        userIdInput.type = 'hidden';
+        userIdInput.name = 'user_id';
+        userIdInput.value = userId;
+        
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'is_active';
+        statusInput.value = newStatus;
+        
+        form.appendChild(userIdInput);
+        form.appendChild(statusInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
 </script>
 

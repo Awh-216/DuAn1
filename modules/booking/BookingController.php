@@ -31,6 +31,18 @@ class BookingController extends Controller {
             
             // Nếu có showtime_id, lấy thông tin showtime để đảm bảo có đầy đủ thông tin
             if ($selected_showtime_id) {
+                $user = $this->getCurrentUser();
+                
+                // Kiểm tra xem người dùng có bị cấm đặt vé phòng này không
+                if ($this->isUserBannedFromScreen($user['id'], $selected_showtime_id)) {
+                    $_SESSION['error'] = 'Bạn đã bị cấm đặt vé phòng này do vi phạm quy định thời gian đặt vé!';
+                    $this->redirect('booking');
+                    return;
+                }
+                
+                // Bắt đầu tracking session
+                $this->startBookingSession($user['id'], $selected_showtime_id);
+                
                 $showtime = $bookingModel->getShowtimeById($selected_showtime_id);
                 if ($showtime) {
                     // Tự động lấy lại selected_movie_id, selected_theater, selected_date từ showtime
@@ -63,6 +75,9 @@ class BookingController extends Controller {
             }
             
             $seatLayout = null;
+            $screenInfo = null;
+            $theaterInfo = null;
+            
             // Lấy food items luôn (không cần showtime)
             $foodItems = [];
             try {
@@ -89,8 +104,24 @@ class BookingController extends Controller {
                         $showtimeWithScreen = $bookingModel->getShowtimeById($selected_showtime_id);
                     }
                     
-                    if ($showtimeWithScreen && isset($showtimeWithScreen['screen_id'])) {
-                        $seatLayout = $bookingModel->getScreenSeatLayout($showtimeWithScreen['screen_id']);
+                    if ($showtimeWithScreen) {
+                        // Lấy thông tin screen (số phòng) và theater (tên rạp)
+                        if (isset($showtimeWithScreen['screen_id']) && $showtimeWithScreen['screen_id']) {
+                            $seatLayout = $bookingModel->getScreenSeatLayout($showtimeWithScreen['screen_id']);
+                            $screenInfo = $bookingModel->getScreenInfo($showtimeWithScreen['screen_id']);
+                        }
+                        
+                        // Lấy thông tin theater
+                        if (isset($showtimeWithScreen['theater_id']) && $showtimeWithScreen['theater_id']) {
+                            $theaterInfo = $bookingModel->getTheaterInfo($showtimeWithScreen['theater_id']);
+                        } elseif (isset($showtimeWithScreen['theater_name'])) {
+                            // Nếu đã có theater_name trong showtime, tạo array tương ứng
+                            $theaterInfo = [
+                                'id' => $showtimeWithScreen['theater_id'] ?? $selected_theater,
+                                'name' => $showtimeWithScreen['theater_name'],
+                                'location' => $showtimeWithScreen['location'] ?? null
+                            ];
+                        }
                     }
                     
                     // Lấy cả ghế đã đặt và đang được reserve
@@ -167,7 +198,9 @@ class BookingController extends Controller {
                 'vipPrice' => $seatLayout['vip_price'] ?? 180000,
                 'couplePrice' => $seatLayout['couple_price'] ?? 240000,
                 'foodItems' => $foodItems,
-                'user' => $user
+                'user' => $user,
+                'screenInfo' => $screenInfo ?? null,
+                'theaterInfo' => $theaterInfo ?? null
             ]);
         } catch (Exception $e) {
             // Log lỗi để debug
@@ -270,6 +303,7 @@ class BookingController extends Controller {
      * Validate seat selection rules:
      * 1. Không đặt cách 1 ghế (phải liền kề)
      * 2. Không bỏ trống ghế ở giữa (kể cả ghế đã được đặt)
+     * 3. Khi hàng có >= 4 cột và đặt từ 2 ghế trở lên, không được bỏ trống ghế ngoài cùng bên trái hoặc phải
      */
     private function validateSeatSelection($seats, $showtime_id = null) {
         if (empty($seats) || count($seats) == 1) {
@@ -278,10 +312,17 @@ class BookingController extends Controller {
         
         // Lấy danh sách ghế đã được đặt nếu có showtime_id
         $bookedSeats = [];
+        $seatLayout = null;
         if ($showtime_id) {
             $bookingModel = new BookingModel();
             $bookedSeatsData = $bookingModel->getBookedSeats($showtime_id);
             $bookedSeats = array_column($bookedSeatsData, 'seat');
+            
+            // Lấy seat layout để biết số cột trong mỗi hàng
+            $showtime = $bookingModel->getShowtimeById($showtime_id);
+            if ($showtime && isset($showtime['screen_id']) && $showtime['screen_id']) {
+                $seatLayout = $bookingModel->getScreenSeatLayout($showtime['screen_id']);
+            }
         }
         
         // Sắp xếp ghế theo hàng và cột
@@ -310,9 +351,132 @@ class BookingController extends Controller {
                     return "Không được bỏ trống ghế ở giữa! Các ghế phải liền kề nhau. Vui lòng chọn các ghế liền kề.";
                 }
             }
+            
+            // Kiểm tra quy tắc: Khi hàng có >= 4 cột và đặt từ 2 ghế trở lên, không được bỏ trống ghế ngoài cùng
+            // NHƯNG bỏ qua quy tắc này nếu các ghế được chọn nằm trong nhóm chỉ có 3 cột
+            if (count($cols) >= 2) {
+                // Lấy danh sách tất cả các cột có thể có trong hàng này
+                $allColsInRow = $this->getAllColumnsInRow($row, $seatLayout);
+                
+                if (count($allColsInRow) >= 4) {
+                    // Kiểm tra xem các ghế được chọn có nằm trong nhóm 3 cột không
+                    $isInThreeColumnGroup = $this->isSeatsInThreeColumnGroup($row, $cols, $seatLayout);
+                    
+                    // Chỉ áp dụng quy tắc nếu KHÔNG nằm trong nhóm 3 cột
+                    if (!$isInThreeColumnGroup) {
+                        // Tìm cột nhỏ nhất và lớn nhất trong hàng
+                        $minCol = min($allColsInRow);
+                        $maxCol = max($allColsInRow);
+                        
+                        // Tìm cột nhỏ nhất và lớn nhất trong các ghế đã chọn
+                        $selectedMinCol = min($cols);
+                        $selectedMaxCol = max($cols);
+                        
+                        // Kiểm tra nếu bỏ trống ghế ngoài cùng bên trái
+                        if ($selectedMinCol > $minCol) {
+                            // Có ghế bên trái chưa được chọn, kiểm tra xem có ghế nào có thể chọn được không (không bị đặt)
+                            $hasAvailableLeftSeat = false;
+                            for ($checkCol = $minCol; $checkCol < $selectedMinCol; $checkCol++) {
+                                $checkSeat = $row . $checkCol;
+                                // Nếu ghế này không bị đặt và nằm trong danh sách cột hợp lệ
+                                if (!in_array($checkSeat, $bookedSeats) && in_array($checkCol, $allColsInRow)) {
+                                    $hasAvailableLeftSeat = true;
+                                    break;
+                                }
+                            }
+                            if ($hasAvailableLeftSeat) {
+                                return "Không được bỏ trống ghế ngoài cùng bên trái! Vui lòng chọn các ghế từ đầu hàng.";
+                            }
+                        }
+                        
+                        // Kiểm tra nếu bỏ trống ghế ngoài cùng bên phải
+                        if ($selectedMaxCol < $maxCol) {
+                            // Có ghế bên phải chưa được chọn, kiểm tra xem có ghế nào có thể chọn được không (không bị đặt)
+                            $hasAvailableRightSeat = false;
+                            for ($checkCol = $selectedMaxCol + 1; $checkCol <= $maxCol; $checkCol++) {
+                                $checkSeat = $row . $checkCol;
+                                // Nếu ghế này không bị đặt và nằm trong danh sách cột hợp lệ
+                                if (!in_array($checkSeat, $bookedSeats) && in_array($checkCol, $allColsInRow)) {
+                                    $hasAvailableRightSeat = true;
+                                    break;
+                                }
+                            }
+                            if ($hasAvailableRightSeat) {
+                                return "Không được bỏ trống ghế ngoài cùng bên phải! Vui lòng chọn các ghế đến cuối hàng.";
+                            }
+                        }
+                    }
+                }
+            }
         }
         
         return null; // Valid
+    }
+    
+    /**
+     * Lấy danh sách tất cả các cột trong một hàng từ seat layout
+     */
+    private function getAllColumnsInRow($row, $seatLayout) {
+        if (!$seatLayout) {
+            return [];
+        }
+        
+        $allCols = [];
+        
+        // Nếu có seat_groups (layout phức tạp)
+        if (isset($seatLayout['seat_groups']) && is_array($seatLayout['seat_groups'])) {
+            foreach ($seatLayout['seat_groups'] as $group) {
+                $groupRows = $group['rows'] ?? [];
+                $groupCols = $group['cols'] ?? [];
+                
+                if (in_array($row, $groupRows)) {
+                    foreach ($groupCols as $col) {
+                        if (!in_array($col, $allCols)) {
+                            $allCols[] = $col;
+                        }
+                    }
+                }
+            }
+        } elseif (isset($seatLayout['cols']) && is_array($seatLayout['cols'])) {
+            // Layout tiêu chuẩn
+            $allCols = $seatLayout['cols'];
+        }
+        
+        sort($allCols);
+        return $allCols;
+    }
+    
+    /**
+     * Kiểm tra xem các ghế được chọn có nằm trong nhóm chỉ có 3 cột không
+     */
+    private function isSeatsInThreeColumnGroup($row, $selectedCols, $seatLayout) {
+        if (!$seatLayout || !isset($seatLayout['seat_groups']) || !is_array($seatLayout['seat_groups'])) {
+            return false;
+        }
+        
+        // Kiểm tra từng nhóm
+        foreach ($seatLayout['seat_groups'] as $group) {
+            $groupRows = $group['rows'] ?? [];
+            $groupCols = $group['cols'] ?? [];
+            
+            // Nếu nhóm này có đúng 3 cột và hàng này nằm trong nhóm
+            if (count($groupCols) == 3 && in_array($row, $groupRows)) {
+                // Kiểm tra xem tất cả các ghế được chọn có nằm trong nhóm này không
+                $allSeatsInGroup = true;
+                foreach ($selectedCols as $col) {
+                    if (!in_array($col, $groupCols)) {
+                        $allSeatsInGroup = false;
+                        break;
+                    }
+                }
+                
+                if ($allSeatsInGroup) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
     }
     
     public function selectSeat() {
@@ -376,12 +540,48 @@ class BookingController extends Controller {
             return;
         }
         
+        // Kiểm tra thời gian thực và vi phạm
+        $timeCheck = $this->checkBookingTimeAndViolations($user['id'], $showtime_id);
+        if (!$timeCheck['allowed']) {
+            $_SESSION['error'] = $timeCheck['message'];
+            $redirectUrl = '?route=booking/index';
+            if ($showtime_id) {
+                $redirectUrl .= '&showtime_id=' . urlencode($showtime_id);
+            }
+            $this->redirect($redirectUrl);
+            return;
+        }
+        
         // Validate: Giới hạn 8 vé/lần
         if (count($seats) > 8) {
             $_SESSION['error'] = 'Bạn chỉ có thể đặt tối đa 8 vé một lần!';
             $redirectUrl = '?route=booking/index&showtime_id=' . urlencode($showtime_id);
             $this->redirect($redirectUrl);
             return;
+        }
+        
+        // Kiểm tra spam: Nếu chọn >8 ghế, log lại
+        $seatCount = count($seats);
+        $isSpamAttempt = ($seatCount > 8);
+        
+        // Log việc chọn ghế
+        $this->logSeatSelection($user['id'], $showtime_id, $seatCount, $seats, $isSpamAttempt);
+        
+        // Kiểm tra số lần spam trong ngày
+        if ($isSpamAttempt) {
+            $spamCount = $this->getSpamCountToday($user['id']);
+            if ($spamCount >= 3) {
+                // Cấm tài khoản
+                $this->banUser($user['id'], 'Spam chọn ghế quá 3 lần trong ngày');
+                $_SESSION['error'] = 'Tài khoản của bạn đã bị khóa do vi phạm quy định đặt vé!';
+                $this->redirect('auth/logout');
+                return;
+            } else {
+                $_SESSION['error'] = 'Bạn chỉ có thể đặt tối đa 8 vé một lần! Lần vi phạm: ' . ($spamCount + 1) . '/3';
+                $redirectUrl = '?route=booking/index&showtime_id=' . urlencode($showtime_id);
+                $this->redirect($redirectUrl);
+                return;
+            }
         }
         
         // Validate: Không đặt cách 1 ghế và không bỏ trống ghế ở giữa
@@ -896,6 +1096,215 @@ class BookingController extends Controller {
         }
         
         echo json_encode(['success' => true]);
+    }
+    
+    /**
+     * Log việc chọn ghế để phát hiện spam
+     */
+    private function logSeatSelection($user_id, $showtime_id, $seat_count, $seats, $is_spam = false) {
+        $db = Database::getInstance();
+        $db->execute("
+            INSERT INTO seat_selection_logs (user_id, showtime_id, seat_count, seats, is_spam, created_at)
+            VALUES (?, ?, ?, ?, ?, NOW())
+        ", [
+            $user_id,
+            $showtime_id,
+            $seat_count,
+            json_encode($seats),
+            $is_spam ? 1 : 0
+        ]);
+    }
+    
+    /**
+     * Đếm số lần spam trong ngày
+     */
+    private function getSpamCountToday($user_id) {
+        $db = Database::getInstance();
+        $result = $db->fetch("
+            SELECT COUNT(*) as count
+            FROM seat_selection_logs
+            WHERE user_id = ?
+            AND is_spam = 1
+            AND DATE(created_at) = CURDATE()
+        ", [$user_id]);
+        return $result['count'] ?? 0;
+    }
+    
+    /**
+     * Cấm tài khoản người dùng
+     */
+    private function banUser($user_id, $reason = '') {
+        $db = Database::getInstance();
+        $db->execute("
+            UPDATE users
+            SET is_active = 0, status = 'banned'
+            WHERE id = ?
+        ", [$user_id]);
+        
+        // Log vào bảng logs nếu có
+        try {
+            $db->execute("
+                INSERT INTO activity_logs (user_id, action, entity_type, entity_id, description, ip_address, created_at)
+                VALUES (?, 'ban_user', 'users', ?, ?, ?, NOW())
+            ", [
+                $_SESSION['user_id'] ?? null,
+                $user_id,
+                'User banned: ' . $reason,
+                $_SERVER['REMOTE_ADDR'] ?? null
+            ]);
+        } catch (Exception $e) {
+            // Ignore nếu bảng logs không tồn tại
+        }
+    }
+    
+    /**
+     * Bắt đầu tracking session khi người dùng vào phòng đặt vé
+     */
+    private function startBookingSession($user_id, $showtime_id) {
+        $db = Database::getInstance();
+        $bookingModel = new BookingModel();
+        
+        // Lấy screen_id từ showtime
+        $showtime = $bookingModel->getShowtimeById($showtime_id);
+        if (!$showtime || !isset($showtime['screen_id'])) {
+            return;
+        }
+        
+        $screen_id = $showtime['screen_id'];
+        
+        // Kiểm tra xem đã có session đang mở chưa
+        $existingSession = $db->fetch("
+            SELECT id FROM booking_session_tracking
+            WHERE user_id = ? AND showtime_id = ? AND screen_id = ? AND session_end IS NULL
+            ORDER BY session_start DESC
+            LIMIT 1
+        ", [$user_id, $showtime_id, $screen_id]);
+        
+        if (!$existingSession) {
+            // Tạo session mới
+            $db->execute("
+                INSERT INTO booking_session_tracking (user_id, showtime_id, screen_id, session_start, created_at)
+                VALUES (?, ?, ?, NOW(), NOW())
+            ", [$user_id, $showtime_id, $screen_id]);
+        }
+    }
+    
+    /**
+     * Kiểm tra thời gian thực và vi phạm
+     * Trả về ['allowed' => bool, 'message' => string]
+     */
+    private function checkBookingTimeAndViolations($user_id, $showtime_id) {
+        $db = Database::getInstance();
+        $bookingModel = new BookingModel();
+        
+        // Lấy screen_id từ showtime
+        $showtime = $bookingModel->getShowtimeById($showtime_id);
+        if (!$showtime || !isset($showtime['screen_id'])) {
+            return ['allowed' => true, 'message' => ''];
+        }
+        
+        $screen_id = $showtime['screen_id'];
+        
+        // Lấy session hiện tại
+        $session = $db->fetch("
+            SELECT id, session_start, violation_count, is_banned
+            FROM booking_session_tracking
+            WHERE user_id = ? AND showtime_id = ? AND screen_id = ? AND session_end IS NULL
+            ORDER BY session_start DESC
+            LIMIT 1
+        ", [$user_id, $showtime_id, $screen_id]);
+        
+        if (!$session) {
+            return ['allowed' => true, 'message' => ''];
+        }
+        
+        // Tính thời gian thực (giây)
+        $sessionStart = strtotime($session['session_start']);
+        $currentTime = time();
+        $durationSeconds = $currentTime - $sessionStart;
+        
+        // Giới hạn 15 phút = 900 giây
+        $maxDuration = 15 * 60;
+        
+        if ($durationSeconds > $maxDuration) {
+            // Đã vượt quá 15 phút
+            $this->endBookingSession($session['id'], $durationSeconds);
+            return [
+                'allowed' => false,
+                'message' => 'Thời gian đặt vé đã hết! Bạn chỉ có 15 phút để đặt vé cho mỗi suất chiếu.'
+            ];
+        }
+        
+        // Kiểm tra vi phạm: quá 10 phút lần 1, quá 5 phút lần 2
+        $violationCount = $session['violation_count'] ?? 0;
+        
+        if ($violationCount == 0 && $durationSeconds > 10 * 60) {
+            // Vi phạm lần 1: quá 10 phút
+            $db->execute("
+                UPDATE booking_session_tracking
+                SET violation_count = 1
+                WHERE id = ?
+            ", [$session['id']]);
+            
+            return [
+                'allowed' => true,
+                'message' => 'Cảnh báo: Bạn đã ở quá 10 phút. Lần vi phạm thứ nhất.'
+            ];
+        } elseif ($violationCount == 1 && $durationSeconds > 5 * 60) {
+            // Vi phạm lần 2: quá 5 phút
+            $db->execute("
+                UPDATE booking_session_tracking
+                SET violation_count = 2, is_banned = 1
+                WHERE id = ?
+            ", [$session['id']]);
+            
+            $this->endBookingSession($session['id'], $durationSeconds);
+            
+            return [
+                'allowed' => false,
+                'message' => 'Bạn đã bị cấm đặt vé phòng này do vi phạm quy định thời gian đặt vé (quá 5 phút lần thứ 2)!'
+            ];
+        }
+        
+        return ['allowed' => true, 'message' => ''];
+    }
+    
+    /**
+     * Kết thúc session tracking
+     */
+    private function endBookingSession($session_id, $duration_seconds) {
+        $db = Database::getInstance();
+        $db->execute("
+            UPDATE booking_session_tracking
+            SET session_end = NOW(), total_duration_seconds = ?
+            WHERE id = ?
+        ", [$duration_seconds, $session_id]);
+    }
+    
+    /**
+     * Kiểm tra xem người dùng có bị cấm đặt vé phòng này không
+     */
+    private function isUserBannedFromScreen($user_id, $showtime_id) {
+        $db = Database::getInstance();
+        $bookingModel = new BookingModel();
+        
+        // Lấy screen_id từ showtime
+        $showtime = $bookingModel->getShowtimeById($showtime_id);
+        if (!$showtime || !isset($showtime['screen_id'])) {
+            return false;
+        }
+        
+        $screen_id = $showtime['screen_id'];
+        
+        // Kiểm tra xem có bị cấm không
+        $banned = $db->fetch("
+            SELECT COUNT(*) as count
+            FROM booking_session_tracking
+            WHERE user_id = ? AND screen_id = ? AND is_banned = 1
+            LIMIT 1
+        ", [$user_id, $screen_id]);
+        
+        return ($banned['count'] ?? 0) > 0;
     }
 }
 ?>
