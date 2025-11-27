@@ -3619,7 +3619,101 @@ button.btn-location-detect span,
   flex-grow: 0;
 }
 
-/* Tự động giảm kích thước ghế khi có nhiều ghế */
+/* Đảm bảo ghế đôi không bị ảnh hưởng bởi rules trên */
+.seat-label.couple-seat {
+  width: 70px !important;
+  height: 40px !important;
+  min-width: 70px !important;
+  max-width: 70px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+}
+
+/* Tăng kích thước ghế khi <= 15 ghế (1.3 lần) - loại trừ ghế đôi */
+.seat-map-container[data-seats-per-row="13"] .seat-label:not(.couple-seat),
+.seat-map-container[data-seats-per-row="14"] .seat-label:not(.couple-seat),
+.seat-map-container[data-seats-per-row="15"] .seat-label:not(.couple-seat) {
+  width: 33.8px !important; /* 26px * 1.3 */
+  height: 33.8px !important;
+  min-width: 33.8px !important;
+  max-width: 33.8px !important;
+  min-height: 33.8px !important;
+  max-height: 33.8px !important;
+}
+
+.seat-map-container[data-seats-per-row="13"] .seat-number,
+.seat-map-container[data-seats-per-row="14"] .seat-number,
+.seat-map-container[data-seats-per-row="15"] .seat-number {
+  font-size: 0.95rem !important; /* Tăng font size tương ứng */
+}
+
+/* Tăng kích thước ghế khi < 12 ghế (1.7 lần) và căn giữa */
+.seat-map-container[data-seats-per-row="1"] .seat-row,
+.seat-map-container[data-seats-per-row="2"] .seat-row,
+.seat-map-container[data-seats-per-row="3"] .seat-row,
+.seat-map-container[data-seats-per-row="4"] .seat-row,
+.seat-map-container[data-seats-per-row="5"] .seat-row,
+.seat-map-container[data-seats-per-row="6"] .seat-row,
+.seat-map-container[data-seats-per-row="7"] .seat-row,
+.seat-map-container[data-seats-per-row="8"] .seat-row,
+.seat-map-container[data-seats-per-row="9"] .seat-row,
+.seat-map-container[data-seats-per-row="10"] .seat-row,
+.seat-map-container[data-seats-per-row="11"] .seat-row {
+  justify-content: center !important; /* Căn giữa hàng ghế */
+}
+
+.seat-map-container[data-seats-per-row="1"] .seats-in-row,
+.seat-map-container[data-seats-per-row="2"] .seats-in-row,
+.seat-map-container[data-seats-per-row="3"] .seats-in-row,
+.seat-map-container[data-seats-per-row="4"] .seats-in-row,
+.seat-map-container[data-seats-per-row="5"] .seats-in-row,
+.seat-map-container[data-seats-per-row="6"] .seats-in-row,
+.seat-map-container[data-seats-per-row="7"] .seats-in-row,
+.seat-map-container[data-seats-per-row="8"] .seats-in-row,
+.seat-map-container[data-seats-per-row="9"] .seats-in-row,
+.seat-map-container[data-seats-per-row="10"] .seats-in-row,
+.seat-map-container[data-seats-per-row="11"] .seats-in-row {
+  justify-content: center !important; /* Căn giữa các ghế trong hàng */
+  flex: 0 1 auto !important; /* Không chiếm toàn bộ chiều rộng */
+}
+
+.seat-map-container[data-seats-per-row="1"] .seat-label:not(.couple-seat),
+.seat-map-container[data-seats-per-row="2"] .seat-label:not(.couple-seat),
+.seat-map-container[data-seats-per-row="3"] .seat-label:not(.couple-seat),
+.seat-map-container[data-seats-per-row="4"] .seat-label:not(.couple-seat),
+.seat-map-container[data-seats-per-row="5"] .seat-label:not(.couple-seat),
+.seat-map-container[data-seats-per-row="6"] .seat-label:not(.couple-seat),
+.seat-map-container[data-seats-per-row="7"] .seat-label:not(.couple-seat),
+.seat-map-container[data-seats-per-row="8"] .seat-label:not(.couple-seat),
+.seat-map-container[data-seats-per-row="9"] .seat-label:not(.couple-seat),
+.seat-map-container[data-seats-per-row="10"] .seat-label:not(.couple-seat),
+.seat-map-container[data-seats-per-row="11"] .seat-label:not(.couple-seat) {
+  width: 44.2px !important; /* 26px * 1.7 */
+  height: 44.2px !important;
+  min-width: 44.2px !important;
+  max-width: 44.2px !important;
+  min-height: 44.2px !important;
+  max-height: 44.2px !important;
+}
+
+.seat-map-container[data-seats-per-row="1"] .seat-number,
+.seat-map-container[data-seats-per-row="2"] .seat-number,
+.seat-map-container[data-seats-per-row="3"] .seat-number,
+.seat-map-container[data-seats-per-row="4"] .seat-number,
+.seat-map-container[data-seats-per-row="5"] .seat-number,
+.seat-map-container[data-seats-per-row="6"] .seat-number,
+.seat-map-container[data-seats-per-row="7"] .seat-number,
+.seat-map-container[data-seats-per-row="8"] .seat-number,
+.seat-map-container[data-seats-per-row="9"] .seat-number,
+.seat-map-container[data-seats-per-row="10"] .seat-number,
+.seat-map-container[data-seats-per-row="11"] .seat-number {
+  font-size: 1.1rem !important; /* Tăng font size tương ứng */
+}
+
+/* Tự động giảm kích thước ghế khi có nhiều ghế (> 15) */
+.seat-map-container[data-seats-per-row="16"] .seat-label,
+.seat-map-container[data-seats-per-row="17"] .seat-label,
+.seat-map-container[data-seats-per-row="18"] .seat-label,
 .seat-map-container[data-seats-per-row="19"] .seat-label,
 .seat-map-container[data-seats-per-row="20"] .seat-label,
 .seat-map-container[data-seats-per-row="21"] .seat-label,

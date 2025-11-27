@@ -1789,7 +1789,7 @@ INSERT INTO `theater_screens` (`theater_id`, `screen_name`, `total_seats`, `seat
 }', '2D', 1, NOW());
 
 -- Mô hình 2: Layout 4 khối với 7 hàng (A-G) 
--- Thứ tự từ trái sang phải: 20-25, 7-16, 17-19, 1-6
+-- Thứ tự từ trái sang phải: 1-6, 7-16, 17-19, 20-25
 -- 4 hàng đầu (A-D): ghế thường
 -- 3 hàng cuối (E-G): ghế VIP
 INSERT INTO `theater_screens` (`theater_id`, `screen_name`, `total_seats`, `seat_layout`, `seat_layout_config`, `screen_type`, `is_active`, `created_at`) VALUES
@@ -1800,7 +1800,7 @@ INSERT INTO `theater_screens` (`theater_id`, `screen_name`, `total_seats`, `seat
     {
       "name": "Khối 1",
       "rows": ["A", "B", "C", "D", "E", "F", "G"],
-      "cols": [20, 21, 22, 23, 24, 25]
+      "cols": [1, 2, 3, 4, 5, 6]
     },
     {
       "name": "Khối 2",
@@ -1815,7 +1815,7 @@ INSERT INTO `theater_screens` (`theater_id`, `screen_name`, `total_seats`, `seat
     {
       "name": "Khối 4",
       "rows": ["A", "B", "C", "D", "E", "F", "G"],
-      "cols": [1, 2, 3, 4, 5, 6]
+      "cols": [20, 21, 22, 23, 24, 25]
     }
   ],
   "vip_rows": ["E", "F", "G"],

@@ -18,7 +18,7 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                         <!-- Movie Poster -->
                         <div class="movie-poster-large mb-4">
                             <?php if ($movie['thumbnail']): ?>
-                                <img src="<?php echo htmlspecialchars($movie['thumbnail']); ?>" 
+                                <img id="img-moviee" src="<?php echo htmlspecialchars($movie['thumbnail']); ?>" 
                                      alt="<?php echo htmlspecialchars($movie['title']); ?>" 
                                      class="img-fluid rounded"
                                      itemprop="image">
@@ -33,6 +33,12 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                         </div>
                         
 <style>
+#img-moviee{
+    img{
+        border: 2px solid white;
+    }
+}
+
 .booking-movie-info {
   position: relative; /* tạo vùng z-index */
   z-index: 2;
@@ -54,7 +60,7 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
   height: 100%;
   object-fit: cover;
   filter: blur(4px);
-  opacity: 0.5;
+  opacity: 0.3;
 }
 
 .movie-poster-large {
@@ -63,6 +69,7 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
 }
 
 .movie-poster-large img {
+    border: 2px solid white;
   width: 100%;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -866,7 +873,46 @@ document.addEventListener('DOMContentLoaded', function() {
         const seatsPerRow = parseInt(seatMapContainer.getAttribute('data-seats-per-row')) || 0;
         if (seatsPerRow === 0) return;
         
-        // Lấy chiều rộng container (trừ padding và row-label)
+        // QUAN TRỌNG: Xóa tất cả inline styles width/height trước để CSS có thể áp dụng
+        const seatLabels = seatMapContainer.querySelectorAll('.seat-label:not(.couple-seat)');
+        
+        // Nếu <= 15 ghế, CSS đã xử lý, chỉ cần điều chỉnh font size và icon, KHÔNG override width/height
+        if (seatsPerRow <= 15) {
+            // Xóa inline styles để CSS có thể áp dụng
+            seatLabels.forEach(label => {
+                label.style.width = '';
+                label.style.height = '';
+                label.style.minWidth = '';
+                label.style.minHeight = '';
+                label.style.maxWidth = '';
+                label.style.maxHeight = '';
+            });
+            
+            const seatNumbers = seatMapContainer.querySelectorAll('.seat-number');
+            const seatIcons = seatMapContainer.querySelectorAll('.seat-icon');
+            
+            if (seatsPerRow < 12) {
+                // < 12 ghế: font size lớn hơn
+                seatNumbers.forEach(num => {
+                    num.style.fontSize = '1.1rem';
+                });
+                seatIcons.forEach(icon => {
+                    icon.style.fontSize = '0.6rem';
+                });
+            } else {
+                // <= 15 ghế: font size vừa
+                seatNumbers.forEach(num => {
+                    num.style.fontSize = '0.95rem';
+                });
+                seatIcons.forEach(icon => {
+                    icon.style.fontSize = '0.55rem';
+                });
+            }
+            
+            return; // CSS đã xử lý kích thước, không cần tính toán thêm
+        }
+        
+        // Với > 15 ghế, tính toán động như cũ
         const containerWidth = seatMapContainer.offsetWidth - 60; // 60px cho padding và row-label
         const gap = 0.25; // Giảm gap xuống 0.25rem để tiết kiệm không gian
         const separatorWidth = 1.0; // Giảm separator xuống 1.0rem để tiết kiệm không gian
@@ -885,8 +931,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Giảm kích thước tối đa xuống 15px để ghế nhỏ hơn, có thể xem hết ghế trong rạp
             const seatSize = Math.max(9, Math.min(15, availableWidth / seatCount));
             
-            // Áp dụng kích thước
-            const seatLabels = seatMapContainer.querySelectorAll('.seat-label');
+            // Áp dụng kích thước (chỉ cho ghế thường, không phải ghế đôi)
+            const seatLabels = seatMapContainer.querySelectorAll('.seat-label:not(.couple-seat)');
             seatLabels.forEach(label => {
                 label.style.width = seatSize + 'px';
                 label.style.height = seatSize + 'px';
