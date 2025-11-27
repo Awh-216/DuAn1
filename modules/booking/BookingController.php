@@ -540,6 +540,19 @@ class BookingController extends Controller {
             return;
         }
         
+        // Kiểm tra IP spam
+        require_once __DIR__ . '/../../core/IPSpamChecker.php';
+        $ipCheck = IPSpamChecker::checkIPSpam(null, 'booking');
+        if (!$ipCheck['allowed']) {
+            $_SESSION['error'] = $ipCheck['message'];
+            $redirectUrl = '?route=booking/index';
+            if ($showtime_id) {
+                $redirectUrl .= '&showtime_id=' . urlencode($showtime_id);
+            }
+            $this->redirect($redirectUrl);
+            return;
+        }
+        
         // Kiểm tra thời gian thực và vi phạm
         $timeCheck = $this->checkBookingTimeAndViolations($user['id'], $showtime_id);
         if (!$timeCheck['allowed']) {
@@ -566,6 +579,12 @@ class BookingController extends Controller {
         
         // Log việc chọn ghế
         $this->logSeatSelection($user['id'], $showtime_id, $seatCount, $seats, $isSpamAttempt);
+        
+        // Log IP action nếu là spam
+        if ($isSpamAttempt) {
+            require_once __DIR__ . '/../../core/IPSpamChecker.php';
+            IPSpamChecker::logIPAction(null, 'booking', true, "Chọn $seatCount ghế (vượt quá 8)", $user['id']);
+        }
         
         // Kiểm tra số lần spam trong ngày
         if ($isSpamAttempt) {
@@ -725,6 +744,10 @@ class BookingController extends Controller {
             
             // Log thành công
             error_log("Successfully created " . count($createdTickets) . " tickets for user " . $user['id'] . " on showtime " . $showtime_id);
+            
+            // Log IP action thành công (không phải spam)
+            require_once __DIR__ . '/../../core/IPSpamChecker.php';
+            IPSpamChecker::logIPAction(null, 'booking', false, "Đặt vé thành công: " . count($createdTickets) . " vé", $user['id']);
             
         } catch (Exception $e) {
             // Rollback nếu có lỗi
@@ -1103,16 +1126,35 @@ class BookingController extends Controller {
      */
     private function logSeatSelection($user_id, $showtime_id, $seat_count, $seats, $is_spam = false) {
         $db = Database::getInstance();
-        $db->execute("
-            INSERT INTO seat_selection_logs (user_id, showtime_id, seat_count, seats, is_spam, created_at)
-            VALUES (?, ?, ?, ?, ?, NOW())
-        ", [
-            $user_id,
-            $showtime_id,
-            $seat_count,
-            json_encode($seats),
-            $is_spam ? 1 : 0
-        ]);
+        require_once __DIR__ . '/../../core/TokenHelper.php';
+        $ipAddress = TokenHelper::getClientIp();
+        
+        // Kiểm tra xem cột ip_address có tồn tại không
+        try {
+            $db->execute("
+                INSERT INTO seat_selection_logs (user_id, ip_address, showtime_id, seat_count, seats, is_spam, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, NOW())
+            ", [
+                $user_id,
+                $ipAddress,
+                $showtime_id,
+                $seat_count,
+                json_encode($seats),
+                $is_spam ? 1 : 0
+            ]);
+        } catch (Exception $e) {
+            // Nếu cột ip_address chưa tồn tại, insert không có IP
+            $db->execute("
+                INSERT INTO seat_selection_logs (user_id, showtime_id, seat_count, seats, is_spam, created_at)
+                VALUES (?, ?, ?, ?, ?, NOW())
+            ", [
+                $user_id,
+                $showtime_id,
+                $seat_count,
+                json_encode($seats),
+                $is_spam ? 1 : 0
+            ]);
+        }
     }
     
     /**

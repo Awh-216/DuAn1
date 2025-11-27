@@ -1071,6 +1071,7 @@ INSERT INTO `user_tokens` (`id`, `user_id`, `token`, `device_info`, `ip_address`
 CREATE TABLE `seat_selection_logs` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
   `showtime_id` int(11) NOT NULL,
   `seat_count` int(11) NOT NULL,
   `seats` text DEFAULT NULL,
@@ -1081,6 +1082,7 @@ CREATE TABLE `seat_selection_logs` (
 ALTER TABLE `seat_selection_logs`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`),
+  ADD KEY `idx_ip_address_seat_logs` (`ip_address`),
   ADD KEY `showtime_id` (`showtime_id`),
   ADD KEY `created_at` (`created_at`),
   ADD KEY `is_spam` (`is_spam`);
@@ -1138,6 +1140,48 @@ ALTER TABLE `booking_session_tracking`
 
 ALTER TABLE `booking_session_tracking`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `ip_spam_logs`
+-- Bảng này lưu log các hành động của IP để tracking và phát hiện spam
+--
+CREATE TABLE `ip_spam_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip_address` varchar(45) NOT NULL,
+  `action_type` varchar(50) NOT NULL DEFAULT 'general',
+  `is_spam` tinyint(1) DEFAULT 0,
+  `details` text DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_ip_address` (`ip_address`),
+  KEY `idx_action_type` (`action_type`),
+  KEY `idx_is_spam` (`is_spam`),
+  KEY `idx_created_at` (`created_at`),
+  KEY `idx_ip_action_spam` (`ip_address`, `action_type`, `is_spam`),
+  KEY `idx_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `ip_blocks`
+-- Bảng này lưu danh sách IP bị chặn
+--
+CREATE TABLE `ip_blocks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip_address` varchar(45) NOT NULL,
+  `expires_at` datetime DEFAULT NULL COMMENT 'NULL = chặn vĩnh viễn',
+  `reason` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_ip` (`ip_address`),
+  KEY `idx_expires_at` (`expires_at`),
+  KEY `idx_ip_expires` (`ip_address`, `expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -1534,6 +1578,18 @@ ALTER TABLE `users`
 --
 ALTER TABLE `user_roles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT cho bảng `ip_spam_logs`
+--
+ALTER TABLE `ip_spam_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `ip_blocks`
+--
+ALTER TABLE `ip_blocks`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `watch_history`

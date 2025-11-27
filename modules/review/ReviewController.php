@@ -22,6 +22,31 @@ class ReviewController extends Controller {
             $this->redirect('?route=movie/watch&id=' . $movie_id . '#reviews');
         }
         
+        // Kiểm tra IP spam
+        require_once __DIR__ . '/../../core/IPSpamChecker.php';
+        $ipCheck = IPSpamChecker::checkIPSpam(null, 'review');
+        if (!$ipCheck['allowed']) {
+            $_SESSION['error'] = $ipCheck['message'];
+            $this->redirect('?route=movie/watch&id=' . $movie_id . '#reviews');
+            return;
+        }
+        
+        // Kiểm tra spam: comment quá ngắn hoặc chỉ có ký tự đặc biệt
+        $commentTrimmed = trim($comment);
+        $isSpam = false;
+        $spamReason = '';
+        
+        if (strlen($commentTrimmed) < 3) {
+            $isSpam = true;
+            $spamReason = 'Comment quá ngắn';
+        } elseif (preg_match('/^[^a-zA-Z0-9\s]+$/', $commentTrimmed)) {
+            $isSpam = true;
+            $spamReason = 'Comment chỉ chứa ký tự đặc biệt';
+        } elseif (strlen($commentTrimmed) > 1000) {
+            $isSpam = true;
+            $spamReason = 'Comment quá dài';
+        }
+        
         $reviewModel = new ReviewModel();
         $review_id = $reviewModel->create([
             'user_id' => $user['id'],
@@ -29,6 +54,9 @@ class ReviewController extends Controller {
             'rating' => $rating,
             'comment' => $comment
         ]);
+        
+        // Log IP action
+        IPSpamChecker::logIPAction(null, 'review', $isSpam, $isSpam ? $spamReason : "Review movie_id: $movie_id, rating: $rating", $user['id']);
         
         // Log activity nếu là admin
         if ($this->isAdmin()) {

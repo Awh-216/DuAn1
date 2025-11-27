@@ -15,6 +15,21 @@ class AuthController extends Controller {
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Kiểm tra IP spam
+            require_once __DIR__ . '/../../core/IPSpamChecker.php';
+            $ipCheck = IPSpamChecker::checkIPSpam(null, 'login');
+            if (!$ipCheck['allowed']) {
+                $error = $ipCheck['message'];
+                if ($this->isAjaxRequest()) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'error' => $error]);
+                    return;
+                }
+                $_SESSION['error'] = $error;
+                $this->redirect('');
+                return;
+            }
+            
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
             
@@ -57,6 +72,9 @@ class AuthController extends Controller {
                     return;
                 }
                 
+                // Log IP action thành công
+                IPSpamChecker::logIPAction(null, 'login', false, "Đăng nhập thành công: $email", $user['id']);
+                
                 if ($isAdmin) {
                     $this->redirect('?route=admin/index');
                 } else {
@@ -64,6 +82,10 @@ class AuthController extends Controller {
                 }
             } else {
                 $error = 'Email hoặc mật khẩu không đúng!';
+                
+                // Log IP action thất bại (có thể là spam)
+                $isSpam = !empty($email) && !empty($password); // Nếu có cả email và password nhưng sai
+                IPSpamChecker::logIPAction(null, 'login', $isSpam, "Đăng nhập thất bại: $email", null);
                 
                 if ($this->isAjaxRequest()) {
                     header('Content-Type: application/json');
@@ -98,12 +120,43 @@ class AuthController extends Controller {
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Kiểm tra IP spam
+            require_once __DIR__ . '/../../core/IPSpamChecker.php';
+            $ipCheck = IPSpamChecker::checkIPSpam(null, 'register');
+            if (!$ipCheck['allowed']) {
+                $error = $ipCheck['message'];
+                if ($this->isAjaxRequest()) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'error' => $error]);
+                    return;
+                }
+                $_SESSION['error'] = $error;
+                $this->redirect('');
+                return;
+            }
+            
             $name = $_POST['name'] ?? '';
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
             $confirm_password = $_POST['confirm_password'] ?? '';
             
             if ($password !== $confirm_password) {
+                // Log IP action (lỗi validation)
+                IPSpamChecker::logIPAction(null, 'register', false, "Lỗi xác nhận mật khẩu: $email", null);
+                
+                $error = 'Mật khẩu xác nhận không khớp!';
+                
+                if ($this->isAjaxRequest()) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'error' => $error]);
+                    return;
+                }
+                
+                // Nếu không phải AJAX, redirect về trang chủ với modal register
+                $_SESSION['error'] = $error;
+                $this->redirect('');
+                return;
+            }
                 $error = 'Mật khẩu xác nhận không khớp!';
                 
                 if ($this->isAjaxRequest()) {
@@ -122,6 +175,9 @@ class AuthController extends Controller {
             $existingUser = $userModel->getByEmail($email);
             
             if ($existingUser) {
+                // Log IP action (email đã tồn tại - có thể là spam)
+                IPSpamChecker::logIPAction(null, 'register', true, "Email đã tồn tại: $email", null);
+                
                 $error = 'Email đã được sử dụng!';
                 
                 if ($this->isAjaxRequest()) {
@@ -154,6 +210,9 @@ class AuthController extends Controller {
             
             // Lưu token vào session
             $_SESSION['auth_token'] = $token;
+            
+            // Log IP action thành công
+            IPSpamChecker::logIPAction(null, 'register', false, "Đăng ký thành công: $email", $user_id);
             
             if ($this->isAjaxRequest()) {
                 header('Content-Type: application/json');
