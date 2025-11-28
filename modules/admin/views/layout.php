@@ -79,6 +79,12 @@
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .stat-card h5,
+        .stat-card h6 {
+            color: #333 !important;
         }
         
         .stat-card .stat-icon {
@@ -101,6 +107,255 @@
         .stat-card .stat-label {
             color: #666;
             font-size: 0.9rem;
+        }
+        
+        /* Phần nền tối - chữ sáng */
+        .admin-main {
+            color: #fff;
+        }
+        
+        /* Các phần tử trực tiếp trong admin-main (không nằm trong card trắng) */
+        .admin-main > h4,
+        .admin-main > h5,
+        .admin-main > h6,
+        .admin-main > p {
+            color: #fff;
+        }
+        
+        /* Card trắng - chữ tối */
+        .stat-card,
+        .admin-header {
+            color: #333;
+        }
+        
+        .stat-card h4,
+        .stat-card h5,
+        .stat-card h6,
+        .admin-header h4,
+        .admin-header h5,
+        .admin-header h6 {
+            color: #333 !important;
+        }
+        
+        /* Table trong card trắng - chữ tối */
+        .stat-card .table,
+        .admin-header .table {
+            color: #333;
+        }
+        
+        .stat-card .table th {
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .stat-card .table td {
+            color: #333;
+        }
+        
+        /* Form trong card trắng - chữ tối */
+        .stat-card .form-control,
+        .admin-header .form-control {
+            color: #333;
+            background-color: #fff;
+        }
+        
+        .stat-card .form-control::placeholder,
+        .admin-header .form-control::placeholder {
+            color: #999;
+        }
+        
+        /* Text muted trong card trắng */
+        .stat-card .text-muted,
+        .admin-header .text-muted {
+            color: #666 !important;
+            
+        }
+        
+        /* List trong card trắng */
+        .stat-card .list-unstyled li,
+        .admin-header .list-unstyled li {
+            color: #333;
+        }
+        
+        .stat-card .list-unstyled li span,
+        .admin-header .list-unstyled li span {
+            color: #333;
+        }
+        
+        /* Bold text trong card trắng */
+        .stat-card .fw-bold,
+        .admin-header .fw-bold {
+            color: #333;
+        }
+        
+        /* Small text trong card trắng */
+        .stat-card small,
+        .admin-header small {
+            color: #666;
+        }
+        
+        /* Paragraph trong card trắng */
+        .stat-card p,
+        .admin-header p {
+            color: #333;
+        }
+        
+        /* Buttons - giữ nguyên */
+        .admin-main .btn {
+            color: #fff;
+        }
+        
+        /* Outline buttons trong card trắng */
+        .stat-card .btn-outline-primary,
+        .stat-card .btn-outline-secondary,
+        .stat-card .btn-outline-info,
+        .stat-card .btn-outline-success,
+        .stat-card .btn-outline-danger,
+        .admin-header .btn-outline-primary,
+        .admin-header .btn-outline-secondary,
+        .admin-header .btn-outline-info,
+        .admin-header .btn-outline-success,
+        .admin-header .btn-outline-danger {
+            color: #333;
+        }
+        
+        /* Admin header - nền trắng nên chữ tối */
+        .admin-header {
+            color: #333;
+        }
+        
+        .admin-header h4 {
+            color: #333;
+        }
+        
+        .admin-header span {
+            color: #333;
+        }
+        
+        /* Các phần tử ngoài card (trên nền tối) - chữ sáng */
+        .admin-main > .d-flex h5,
+        .admin-main > .d-flex h6,
+        .admin-main > .row h5,
+        .admin-main > .row h6,
+        .admin-main > form h5,
+        .admin-main > form h6,
+        .admin-main > .mb-4 h5,
+        .admin-main > .mb-3 h5 {
+            color: #fff !important;
+        }
+        
+        /* Form elements ngoài card (trên nền tối) */
+        .admin-main > form .form-control,
+        .admin-main > form .form-select {
+            color: #333;
+            background-color: #fff;
+        }
+        
+        .admin-main > form .form-control::placeholder {
+            color: #999;
+        }
+        
+        /* Text ngoài card */
+        .admin-main > .text-muted {
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+        
+        .admin-main > p {
+            color: #fff;
+        }
+        
+        .admin-main > small {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Stat info trong tickets - trong card trắng nên chữ tối */
+        .stat-card .stat-info {
+            color: #333;
+        }
+        
+        .stat-card .stat-info .stat-label {
+            color: #666;
+        }
+        
+        .stat-card .stat-info .stat-value {
+            color: #333;
+        }
+        
+        /* Badge - giữ màu trắng cho text */
+        .admin-main .badge {
+            color: #fff !important;
+        }
+        
+        /* Select dropdown - trong card trắng */
+        .stat-card .form-select,
+        .admin-header .form-select {
+            color: #333;
+            background-color: #fff;
+        }
+        
+        /* Links - trong card trắng */
+        .stat-card a,
+        .admin-header a {
+            color: #0d6efd;
+        }
+        
+        .stat-card a:hover,
+        .admin-header a:hover {
+            color: #0a58ca;
+        }
+        
+        /* Links ngoài card (trên nền tối) - màu sáng */
+        .admin-main > a {
+            color: #4da6ff;
+        }
+        
+        .admin-main > a:hover {
+            color: #66b3ff;
+        }
+        
+        /* Chart text - trong card trắng */
+        .stat-card canvas {
+            color: #333;
+        }
+        
+        /* Modal - nền trắng nên chữ tối */
+        .admin-main .modal-content {
+            color: #333;
+            background-color: #fff;
+        }
+        
+        .admin-main .modal-header,
+        .admin-main .modal-body,
+        .admin-main .modal-footer {
+            color: #333;
+        }
+        
+        /* Alert messages - giữ màu mặc định của Bootstrap */
+        .admin-main .alert {
+            color: inherit;
+        }
+        
+        .admin-main .alert-success {
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+            color: #0f5132;
+        }
+        
+        .admin-main .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+            color: #842029;
+        }
+        
+        /* Pagination - trong card trắng */
+        .stat-card .pagination .page-link {
+            color: #0d6efd;
+        }
+        
+        .stat-card .pagination .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: #fff;
         }
     </style>
 </head>

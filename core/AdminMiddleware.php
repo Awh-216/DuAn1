@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/../modules/user/UserModel.php';
+
 class AdminMiddleware {
     
     public static function checkAdmin() {
@@ -22,29 +25,131 @@ class AdminMiddleware {
         
         // Kiểm tra role (hỗ trợ cả cột role cũ và bảng roles mới)
         $isAdmin = false;
+        $isModerator = false;
         
         // Kiểm tra cột role cũ (nếu có)
-        if (isset($user['role']) && $user['role'] === 'admin') {
-            $isAdmin = true;
-        }
-        
-        // Kiểm tra role trong bảng roles (nếu có)
-        if (!$isAdmin) {
-            try {
-                $isAdmin = self::hasRole($user['id'], 'Super Admin') || self::hasRole($user['id'], 'Admin');
-            } catch (Exception $e) {
-                // Nếu bảng chưa tồn tại, chỉ kiểm tra cột role
-                $isAdmin = isset($user['role']) && $user['role'] === 'admin';
+        if (isset($user['role'])) {
+            if ($user['role'] === 'admin') {
+                $isAdmin = true;
+            } elseif ($user['role'] === 'moderator') {
+                $isModerator = true;
             }
         }
         
-        if (!$isAdmin) {
+        // Kiểm tra role trong bảng roles (nếu có)
+        if (!$isAdmin && !$isModerator) {
+            try {
+                $isAdmin = self::hasRole($user['id'], 'Super Admin') || self::hasRole($user['id'], 'Admin');
+                if (!$isAdmin) {
+                    $isModerator = self::hasRole($user['id'], 'Moderator');
+                }
+            } catch (Exception $e) {
+                // Nếu bảng chưa tồn tại, chỉ kiểm tra cột role
+                if (isset($user['role'])) {
+                    if ($user['role'] === 'admin') {
+                        $isAdmin = true;
+                    } elseif ($user['role'] === 'moderator') {
+                        $isModerator = true;
+                    }
+                }
+            }
+        }
+        
+        if (!$isAdmin && !$isModerator) {
             $_SESSION['error'] = 'Bạn không có quyền truy cập trang này!';
             header('Location: http://localhost/DuAn1/');
             exit;
         }
         
         return $user;
+    }
+    
+    /**
+     * Kiểm tra xem user có phải là moderator và có quyền quản lý theater này không
+     */
+    public static function checkModeratorTheaterAccess($userId, $theaterId) {
+        $userModel = new UserModel();
+        $user = $userModel->getById($userId);
+        
+        if (!$user) {
+            return false;
+        }
+        
+        // Admin có quyền truy cập tất cả
+        if (isset($user['role']) && $user['role'] === 'admin') {
+            return true;
+        }
+        
+        // Kiểm tra role trong bảng roles
+        try {
+            $db = Database::getInstance();
+            $isAdmin = self::hasRole($userId, 'Super Admin') || self::hasRole($userId, 'Admin');
+            if ($isAdmin) {
+                return true;
+            }
+        } catch (Exception $e) {
+            // Bảng chưa tồn tại
+        }
+        
+        // Moderator chỉ có quyền quản lý rạp được gán
+        if (isset($user['role']) && $user['role'] === 'moderator') {
+            // Kiểm tra theater_id được gán cho moderator
+            if (isset($user['theater_id']) && $user['theater_id'] == $theaterId) {
+                return true;
+            }
+        }
+        
+        // Kiểm tra role trong bảng roles
+        try {
+            $isModerator = self::hasRole($userId, 'Moderator');
+            if ($isModerator) {
+                $db = Database::getInstance();
+                $userTheater = $db->fetch("SELECT theater_id FROM users WHERE id = ?", [$userId]);
+                if ($userTheater && isset($userTheater['theater_id']) && $userTheater['theater_id'] == $theaterId) {
+                    return true;
+                }
+            }
+        } catch (Exception $e) {
+            // Bảng chưa tồn tại
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Kiểm tra xem user có phải là moderator không
+     */
+    public static function isModerator($userId) {
+        $userModel = new UserModel();
+        $user = $userModel->getById($userId);
+        
+        if (!$user) {
+            return false;
+        }
+        
+        if (isset($user['role']) && $user['role'] === 'moderator') {
+            return true;
+        }
+        
+        try {
+            return self::hasRole($userId, 'Moderator');
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Lấy theater_id được gán cho moderator
+     */
+    public static function getModeratorTheater($userId) {
+        $userModel = new UserModel();
+        $user = $userModel->getById($userId);
+        
+        if (!$user) {
+            return null;
+        }
+        
+        return $user['theater_id'] ?? null;
     }
     
     public static function hasPermission($userId, $permission) {

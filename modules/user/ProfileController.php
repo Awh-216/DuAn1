@@ -24,10 +24,46 @@ class ProfileController extends Controller {
             $subscription = $db->fetch("SELECT * FROM subscriptions WHERE id = ?", [$user['subscription_id']]);
         }
         
-        // Xác định role
+        // Xác định role từ bảng roles hoặc cột role
         $userRole = 'Thành viên';
-        if (stripos($user['email'], 'admin') !== false) {
-            $userRole = 'Admin tối cao';
+        
+        // Kiểm tra role từ bảng roles (ưu tiên)
+        if (isset($user['roles']) && !empty($user['roles'])) {
+            // Lấy role đầu tiên (thường là role cao nhất)
+            $role = $user['roles'][0];
+            $roleName = $role['name'] ?? '';
+            
+            // Map tên role sang tiếng Việt
+            $roleMap = [
+                'Super Admin' => 'Super Admin',
+                'Admin' => 'Admin',
+                'Moderator' => 'Quản lý rạp',
+                'Content Manager' => 'Quản lý nội dung',
+                'Support Staff' => 'Nhân viên hỗ trợ',
+                'Theater Manager' => 'Quản lý rạp'
+            ];
+            
+            if (isset($roleMap[$roleName])) {
+                $userRole = $roleMap[$roleName];
+            } else {
+                $userRole = $roleName;
+            }
+        } else {
+            // Kiểm tra role từ cột role cũ
+            $role = $user['role'] ?? 'user';
+            
+            $roleMap = [
+                'user' => 'Thành viên',
+                'admin' => 'Admin',
+                'moderator' => 'Quản lý rạp',
+                'manager' => 'Quản lý'
+            ];
+            
+            if (isset($roleMap[$role])) {
+                $userRole = $roleMap[$role];
+            } else {
+                $userRole = ucfirst($role);
+            }
         }
         
         // Số dư = điểm (1 VND = 1 điểm)
@@ -36,6 +72,30 @@ class ProfileController extends Controller {
         // Lấy tất cả các gói subscription để hiển thị
         $allSubscriptions = $db->fetchAll("SELECT * FROM subscriptions ORDER BY price ASC");
         
+        // Kiểm tra xem user có phải moderator không
+        require_once __DIR__ . '/../../core/AdminMiddleware.php';
+        $isModerator = false;
+        
+        // Kiểm tra role từ cột role cũ
+        if (isset($user['role']) && $user['role'] === 'moderator') {
+            $isModerator = true;
+        }
+        
+        // Kiểm tra role từ bảng roles mới
+        if (!$isModerator && !empty($user['roles'])) {
+            foreach ($user['roles'] as $role) {
+                if (isset($role['name']) && ($role['name'] === 'Moderator' || $role['name'] === 'Theater Manager')) {
+                    $isModerator = true;
+                    break;
+                }
+            }
+        }
+        
+        // Nếu vẫn chưa tìm thấy, dùng method của AdminMiddleware
+        if (!$isModerator) {
+            $isModerator = AdminMiddleware::isModerator($user['id']);
+        }
+        
         $this->view('profile/index', [
             'user' => $user,
             'history' => $history,
@@ -43,7 +103,8 @@ class ProfileController extends Controller {
             'subscription' => $subscription,
             'allSubscriptions' => $allSubscriptions,
             'userRole' => $userRole,
-            'balance' => $balance
+            'balance' => $balance,
+            'isModerator' => $isModerator
         ]);
     }
     

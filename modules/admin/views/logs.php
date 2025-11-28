@@ -1,6 +1,6 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h5><i class="fas fa-history"></i> Lịch sử hoạt động</h5>
-    <small class="text-muted">Xem lịch sử thêm, xóa, cập nhật phim, rạp, bình luận</small>
+    <small style="color: #fff;">Xem lịch sử thêm, xóa, cập nhật phim, rạp, bình luận</small>
 </div>
 
 <!-- Filters -->

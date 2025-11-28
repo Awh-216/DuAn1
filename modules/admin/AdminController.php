@@ -113,10 +113,19 @@ class AdminController extends Controller {
         
         $users = $db->fetchAll($sql, $params);
         
+        // Lấy danh sách rạp để gán cho moderator
+        $theaters = [];
+        try {
+            $theaters = $db->fetchAll("SELECT * FROM theaters WHERE is_active = 1 ORDER BY name");
+        } catch (Exception $e) {
+            // Bảng theaters chưa tồn tại
+        }
+        
         $this->adminView('users', [
             'users' => $users,
             'search' => $search,
             'status' => $status,
+            'theaters' => $theaters,
             'user' => $user,
             'title' => 'Quản lý người dùng',
             'current_page' => 'users'
@@ -221,6 +230,7 @@ class AdminController extends Controller {
      */
     public function usersUpdateRole() {
         try {
+            $db = Database::getInstance();
             $user = AdminMiddleware::checkAdmin();
             
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -264,19 +274,67 @@ class AdminController extends Controller {
             
             $oldRole = $targetUser['role'] ?? 'user';
             
-            // Cập nhật role
-            $db = Database::getInstance();
-            $db->execute("UPDATE users SET role = ? WHERE id = ?", [$newRole, $userId]);
+            // Nếu set role là moderator, cần gán theater_id
+            $theaterId = null;
+            if ($newRole === 'moderator') {
+                $theaterId = $_POST['theater_id'] ?? null;
+                if (!$theaterId) {
+                    $_SESSION['error'] = 'Vui lòng chọn rạp để gán cho moderator!';
+                    $this->redirect('admin/users');
+                    return;
+                }
+                
+                // Kiểm tra theater có tồn tại không
+                $theater = $db->fetch("SELECT id FROM theaters WHERE id = ?", [$theaterId]);
+                if (!$theater) {
+                    $_SESSION['error'] = 'Rạp không tồn tại!';
+                    $this->redirect('admin/users');
+                    return;
+                }
+            }
+            
+            // Cập nhật role và theater_id
+            if ($newRole === 'moderator' && $theaterId) {
+                // Kiểm tra xem cột theater_id có tồn tại không
+                try {
+                    $db->execute("UPDATE users SET role = ?, theater_id = ? WHERE id = ?", [$newRole, $theaterId, $userId]);
+                } catch (Exception $e) {
+                    // Nếu cột theater_id chưa tồn tại, chỉ cập nhật role
+                    error_log("theater_id column may not exist: " . $e->getMessage());
+                    $db->execute("UPDATE users SET role = ? WHERE id = ?", [$newRole, $userId]);
+                    // Thử thêm cột theater_id
+                    try {
+                        $db->execute("ALTER TABLE users ADD COLUMN theater_id INT(11) NULL DEFAULT NULL");
+                        $db->execute("UPDATE users SET theater_id = ? WHERE id = ?", [$theaterId, $userId]);
+                    } catch (Exception $e2) {
+                        error_log("Cannot add theater_id column: " . $e2->getMessage());
+                    }
+                }
+            } else {
+                // Nếu không phải moderator, xóa theater_id
+                try {
+                    $db->execute("UPDATE users SET role = ?, theater_id = NULL WHERE id = ?", [$newRole, $userId]);
+                } catch (Exception $e) {
+                    // Nếu cột theater_id chưa tồn tại, chỉ cập nhật role
+                    $db->execute("UPDATE users SET role = ? WHERE id = ?", [$newRole, $userId]);
+                }
+            }
             
             // Log action
+            $logData = ['role' => $oldRole];
+            $newLogData = ['role' => $newRole];
+            if ($newRole === 'moderator' && $theaterId) {
+                $newLogData['theater_id'] = $theaterId;
+            }
+            
             AdminMiddleware::logAction(
                 $user['id'],
                 'Cập nhật vai trò người dùng',
                 'User',
                 'user',
                 $userId,
-                ['role' => $oldRole],
-                ['role' => $newRole]
+                $logData,
+                $newLogData
             );
             
             $_SESSION['success'] = 'Cập nhật vai trò thành công!';
@@ -1393,7 +1451,19 @@ class AdminController extends Controller {
         $db = Database::getInstance();
         $user = AdminMiddleware::checkAdmin();
         
-        $theaters = $db->fetchAll("SELECT * FROM theaters ORDER BY name");
+        // Nếu là moderator, chỉ hiển thị rạp được gán
+        if (AdminMiddleware::isModerator($user['id'])) {
+            $theaterId = AdminMiddleware::getModeratorTheater($user['id']);
+            if ($theaterId) {
+                $theaters = $db->fetchAll("SELECT * FROM theaters WHERE id = ? ORDER BY name", [$theaterId]);
+            } else {
+                $theaters = [];
+                $_SESSION['error'] = 'Bạn chưa được gán quản lý rạp nào!';
+            }
+        } else {
+            // Admin xem tất cả rạp
+            $theaters = $db->fetchAll("SELECT * FROM theaters ORDER BY name");
+        }
         
         $this->adminView('theaters', [
             'theaters' => $theaters,
@@ -1407,6 +1477,13 @@ class AdminController extends Controller {
     public function theatersCreate() {
         $user = AdminMiddleware::checkAdmin();
         
+        // Moderator không thể tạo rạp mới
+        if (AdminMiddleware::isModerator($user['id'])) {
+            $_SESSION['error'] = 'Bạn không có quyền tạo rạp mới!';
+            $this->redirect('admin/theaters');
+            return;
+        }
+        
         $this->adminView('theaters/create', [
             'user' => $user,
             'title' => 'Thêm rạp mới',
@@ -1418,6 +1495,13 @@ class AdminController extends Controller {
     public function theatersStore() {
         $db = Database::getInstance();
         $user = AdminMiddleware::checkAdmin();
+        
+        // Moderator không thể tạo rạp mới
+        if (AdminMiddleware::isModerator($user['id'])) {
+            $_SESSION['error'] = 'Bạn không có quyền tạo rạp mới!';
+            $this->redirect('admin/theaters');
+            return;
+        }
         
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('admin/theaters');
@@ -1471,6 +1555,15 @@ class AdminController extends Controller {
             $this->redirect('admin/theaters');
         }
         
+        // Kiểm tra quyền moderator
+        if (AdminMiddleware::isModerator($user['id'])) {
+            if (!AdminMiddleware::checkModeratorTheaterAccess($user['id'], $id)) {
+                $_SESSION['error'] = 'Bạn không có quyền quản lý rạp này!';
+                $this->redirect('admin/theaters');
+                return;
+            }
+        }
+        
         $theater = $db->fetch("SELECT * FROM theaters WHERE id = ?", [$id]);
         if (!$theater) {
             $_SESSION['error'] = 'Không tìm thấy rạp!';
@@ -1497,6 +1590,15 @@ class AdminController extends Controller {
         $id = $_POST['id'] ?? null;
         if (!$id) {
             $this->redirect('admin/theaters');
+        }
+        
+        // Kiểm tra quyền moderator
+        if (AdminMiddleware::isModerator($user['id'])) {
+            if (!AdminMiddleware::checkModeratorTheaterAccess($user['id'], $id)) {
+                $_SESSION['error'] = 'Bạn không có quyền quản lý rạp này!';
+                $this->redirect('admin/theaters');
+                return;
+            }
         }
         
         $name = $_POST['name'] ?? '';
@@ -1544,6 +1646,13 @@ class AdminController extends Controller {
     public function theatersDelete() {
         $db = Database::getInstance();
         $user = AdminMiddleware::checkAdmin();
+        
+        // Moderator không thể xóa rạp
+        if (AdminMiddleware::isModerator($user['id'])) {
+            $_SESSION['error'] = 'Bạn không có quyền xóa rạp!';
+            $this->redirect('admin/theaters');
+            return;
+        }
         
         $id = $_GET['id'] ?? null;
         if (!$id) {

@@ -145,11 +145,45 @@
                             // Bảng chưa tồn tại, bỏ qua
                         }
                     }
+                    
+                    // Kiểm tra nếu là moderator
+                    $isModerator = false;
+                    if (isset($user['role']) && $user['role'] === 'moderator') {
+                        $isModerator = true;
+                    } elseif (isset($user['theater_id']) && !empty($user['theater_id'])) {
+                        // Nếu có theater_id được gán, có thể là moderator
+                        $isModerator = true;
+                    } else {
+                        try {
+                            if (!isset($isAdmin) || !$isAdmin) {
+                                require_once __DIR__ . '/../../core/AdminMiddleware.php';
+                                $isModerator = AdminMiddleware::hasRole($user['id'], 'Moderator') || 
+                                             AdminMiddleware::hasRole($user['id'], 'Theater Manager');
+                            }
+                        } catch (Exception $e) {
+                            // Bảng chưa tồn tại, bỏ qua
+                        }
+                    }
+                    
+                    // Kiểm tra từ bảng roles nếu có
+                    if (!$isModerator && !$isAdmin && isset($user['roles']) && !empty($user['roles'])) {
+                        foreach ($user['roles'] as $role) {
+                            if (isset($role['name']) && ($role['name'] === 'Moderator' || $role['name'] === 'Theater Manager')) {
+                                $isModerator = true;
+                                break;
+                            }
+                        }
+                    }
                     ?>
                     <?php if ($isAdmin): ?>
                         <a href="http://localhost/DuAn1/?route=admin/index" class="sign-in-btn" style="background-color: #FFFFFF37; margin-right: 10px;">
                             <i class="fas fa-cog"></i>
                             <span>Admin Panel</span>
+                        </a>
+                    <?php elseif ($isModerator): ?>
+                        <a href="http://localhost/DuAn1/?route=moderator/index" class="sign-in-btn" style="background-color: #FFFFFF37; margin-right: 10px;">
+                            <i class="fas fa-building"></i>
+                            <span>Quản lý rạp</span>
                         </a>
                     <?php endif; ?>
                     <a href="http://localhost/DuAn1/?route=profile/index" class="sign-in-btn">

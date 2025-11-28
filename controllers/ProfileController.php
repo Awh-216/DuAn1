@@ -18,10 +18,46 @@ class ProfileController extends Controller {
             $subscription = $db->fetch("SELECT * FROM subscriptions WHERE id = ?", [$user['subscription_id']]);
         }
         
-        // Xác định role (tạm thời: nếu email chứa "admin" hoặc có thể thêm trường role vào DB)
+        // Xác định role từ bảng roles hoặc cột role
         $userRole = 'Thành viên';
-        if (stripos($user['email'], 'admin') !== false) {
-            $userRole = 'Admin tối cao';
+        
+        // Kiểm tra role từ bảng roles (ưu tiên)
+        if (isset($user['roles']) && !empty($user['roles'])) {
+            // Lấy role đầu tiên (thường là role cao nhất)
+            $role = $user['roles'][0];
+            $roleName = $role['name'] ?? '';
+            
+            // Map tên role sang tiếng Việt
+            $roleMap = [
+                'Super Admin' => 'Super Admin',
+                'Admin' => 'Admin',
+                'Moderator' => 'Quản lý rạp',
+                'Content Manager' => 'Quản lý nội dung',
+                'Support Staff' => 'Nhân viên hỗ trợ',
+                'Theater Manager' => 'Quản lý rạp'
+            ];
+            
+            if (isset($roleMap[$roleName])) {
+                $userRole = $roleMap[$roleName];
+            } else {
+                $userRole = $roleName;
+            }
+        } else {
+            // Kiểm tra role từ cột role cũ
+            $role = $user['role'] ?? 'user';
+            
+            $roleMap = [
+                'user' => 'Thành viên',
+                'admin' => 'Admin',
+                'moderator' => 'Quản lý rạp',
+                'manager' => 'Quản lý'
+            ];
+            
+            if (isset($roleMap[$role])) {
+                $userRole = $roleMap[$role];
+            } else {
+                $userRole = ucfirst($role);
+            }
         }
         
         // Số dư (tạm thời để 0, có thể thêm trường balance vào DB sau)

@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/../../../core/Database.php';
+$db = Database::getInstance();
+?>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h5>Quản lý người dùng</h5>
     <a href="?route=admin/users/create" class="btn btn-primary">
@@ -172,11 +176,27 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Vai trò mới</label>
-                        <select name="role" id="newRole" class="form-select" required>
+                        <select name="role" id="newRole" class="form-select" required onchange="toggleTheaterSelect()">
                             <option value="user">User</option>
                             <option value="moderator">Moderator</option>
                             <option value="admin">Admin</option>
                         </select>
+                    </div>
+                    <div class="mb-3" id="theaterSelectContainer" style="display: none;">
+                        <label class="form-label">Chọn rạp quản lý <span class="text-danger">*</span></label>
+                        <select name="theater_id" id="theaterSelect" class="form-select">
+                            <option value="">-- Chọn rạp --</option>
+                            <?php
+                            if (isset($theaters) && !empty($theaters)):
+                                foreach ($theaters as $theater):
+                            ?>
+                                <option value="<?php echo $theater['id']; ?>"><?php echo htmlspecialchars($theater['name']); ?> - <?php echo htmlspecialchars($theater['location'] ?? ''); ?></option>
+                            <?php 
+                                endforeach;
+                            endif;
+                            ?>
+                        </select>
+                        <small class="text-muted">Moderator chỉ có thể quản lý rạp được gán</small>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -205,9 +225,26 @@ function openRoleModal(userId, userName, currentRole) {
     document.getElementById('roleUserName').textContent = userName;
     document.getElementById('currentRole').value = currentRole;
     document.getElementById('newRole').value = currentRole;
+    document.getElementById('theaterSelect').value = '';
+    toggleTheaterSelect();
     
     const modal = new bootstrap.Modal(document.getElementById('roleModal'));
     modal.show();
+}
+
+function toggleTheaterSelect() {
+    const roleSelect = document.getElementById('newRole');
+    const theaterContainer = document.getElementById('theaterSelectContainer');
+    const theaterSelect = document.getElementById('theaterSelect');
+    
+    if (roleSelect.value === 'moderator') {
+        theaterContainer.style.display = 'block';
+        theaterSelect.required = true;
+    } else {
+        theaterContainer.style.display = 'none';
+        theaterSelect.required = false;
+        theaterSelect.value = '';
+    }
 }
 
 function toggleUserStatus(userId, newStatus) {

@@ -540,7 +540,7 @@ CREATE TABLE `roles` (
 INSERT INTO `roles` (`id`, `name`, `description`, `created_at`) VALUES
 (1, 'Super Admin', 'Quyền cao nhất, toàn quyền hệ thống', '2025-11-10 16:41:17'),
 (2, 'Admin', 'Quản trị viên, quản lý nội dung và người dùng', '2025-11-10 16:41:17'),
-(3, 'Moderator', 'Điều hành viên, quản lý bình luận và hỗ trợ', '2025-11-10 16:41:17'),
+(3, 'Moderator', 'Quản lý từng rạp, quản lý lịch chiếu và vé của rạp được gán', '2025-11-10 16:41:17'),
 (4, 'Content Manager', 'Quản lý nội dung phim', '2025-11-10 16:41:17'),
 (5, 'Support Staff', 'Nhân viên hỗ trợ khách hàng', '2025-11-10 16:41:17'),
 (6, 'Theater Manager', 'Quản lý rạp, quản lý lịch chiếu, bán vé và phim của rạp', '2025-11-10 16:41:17');
@@ -1210,6 +1210,7 @@ CREATE TABLE `users` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `role` enum('user','admin','moderator','manager') DEFAULT 'user',
+  `theater_id` int(11) DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT 1,
   `last_login` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -1939,6 +1940,12 @@ ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
+-- Thêm index cho theater_id trong bảng users (cho moderator)
+--
+ALTER TABLE `users`
+  ADD INDEX `idx_theater_id` (`theater_id`);
+
+--
 -- Các ràng buộc cho bảng `user_roles`
 --
 ALTER TABLE `user_roles`
@@ -1957,6 +1964,14 @@ ALTER TABLE `user_tokens`
 ALTER TABLE `watch_history`
   ADD CONSTRAINT `watch_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `watch_history_ibfk_2` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Cập nhật mô tả role Moderator (nếu đã có dữ liệu)
+--
+UPDATE `roles` 
+SET `description` = 'Quản lý từng rạp, quản lý lịch chiếu và vé của rạp được gán' 
+WHERE `name` = 'Moderator' AND `description` = 'Điều hành viên, quản lý bình luận và hỗ trợ';
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

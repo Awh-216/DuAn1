@@ -50,7 +50,8 @@ if (empty($route) || $route === '/' || (count($parts) === 1 && empty($parts[0]))
 // Map các route đặc biệt cho controller name
 $controllerMap = [
     'auth' => 'AuthController',  // auth -> AuthController trong user module
-    'profile' => 'ProfileController'  // profile -> ProfileController trong user module
+    'profile' => 'ProfileController',  // profile -> ProfileController trong user module
+    'moderator' => 'ModeratorController'  // moderator -> ModeratorController trong admin module
 ];
 
 $firstPart = $parts[0];
@@ -94,7 +95,11 @@ if (count($parts) >= 3) {
 if (!class_exists($controllerName)) {
     // Nếu controller được map từ route đặc biệt, thử load từ module
     if (isset($controllerMap[$firstPart])) {
+        // Xác định module dựa trên controller
         $moduleForMap = 'user';
+        if ($controllerName === 'ModeratorController') {
+            $moduleForMap = 'admin';
+        }
         $controllerPath = __DIR__ . '/modules/' . $moduleForMap . '/' . $controllerName . '.php';
         if (file_exists($controllerPath)) {
             require_once $controllerPath;

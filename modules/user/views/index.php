@@ -272,24 +272,24 @@ $title = 'Hồ Sơ';
 }
 
 .card-luxury {
-    background: #ffffff;
+    background: #1f1f1f;
     border-radius: 24px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     margin-bottom: 2rem;
     overflow: hidden;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .card-header-luxury {
     padding: 2rem 2.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
 }
 
 .card-header-luxury h3 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #ffffff;
     margin: 0;
     letter-spacing: -0.5px;
     display: flex;
@@ -314,7 +314,7 @@ $title = 'Hồ Sơ';
     display: block;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #4a4a4a;
+    color: rgba(255, 255, 255, 0.8);
     margin-bottom: 0.75rem;
     letter-spacing: 0.3px;
     text-transform: uppercase;
@@ -323,11 +323,11 @@ $title = 'Hồ Sơ';
 .form-control-luxury {
     width: 100%;
     padding: 1rem 1.25rem;
-    border: 2px solid rgba(0, 0, 0, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     font-size: 1rem;
-    color: #1a1a1a;
-    background: #ffffff;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
     transition: all 0.3s ease;
     font-family: inherit;
 }
@@ -335,7 +335,12 @@ $title = 'Hồ Sơ';
 .form-control-luxury:focus {
     outline: none;
     border-color: #d4af37;
-    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.form-control-luxury::placeholder {
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .btn-update-luxury {
@@ -365,14 +370,15 @@ $title = 'Hồ Sơ';
     transition: all 0.3s ease;
     text-decoration: none;
     color: inherit;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .history-item-luxury:hover {
-    background: #fafafa;
+    background: rgba(255, 255, 255, 0.08);
     transform: translateX(5px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     text-decoration: none;
     color: inherit;
 }
@@ -389,13 +395,13 @@ $title = 'Hồ Sơ';
 .history-content-luxury h6 {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #ffffff;
     margin-bottom: 0.5rem;
     letter-spacing: -0.3px;
 }
 
 .history-time-luxury {
-    color: rgba(0, 0, 0, 0.5);
+    color: rgba(255, 255, 255, 0.6);
     font-size: 0.9rem;
     display: flex;
     align-items: center;
@@ -405,26 +411,28 @@ $title = 'Hồ Sơ';
 .empty-state-luxury {
     text-align: center;
     padding: 4rem 2rem;
-    color: rgba(0, 0, 0, 0.4);
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .empty-state-luxury i {
     font-size: 4rem;
     margin-bottom: 1rem;
-    opacity: 0.3;
+    opacity: 0.4;
 }
 
 .ticket-item-luxury {
     padding: 1.5rem;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     margin-bottom: 1rem;
     transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .ticket-item-luxury:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .ticket-header-luxury {
@@ -437,7 +445,7 @@ $title = 'Hồ Sơ';
 .ticket-title-luxury {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #ffffff;
     margin: 0;
 }
 
@@ -468,7 +476,7 @@ $title = 'Hồ Sơ';
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 0.75rem;
-    color: rgba(0, 0, 0, 0.6);
+    color: rgba(255, 255, 255, 0.7);
     font-size: 0.9rem;
 }
 
@@ -490,7 +498,7 @@ $title = 'Hồ Sơ';
 }
 </style>
 
-<section class="section py-4" style="background: #f5f5f5; min-height: 100vh;">
+<section class="section py-4" style="background: rgb(60, 60, 60); min-height: 100vh;">
     <div class="profile-luxury-container">
         <div class="row g-4">
             <!-- Sidebar -->
@@ -553,6 +561,31 @@ $title = 'Hồ Sơ';
                             <i class="fas fa-user-circle"></i>
                             <span>Đổi ảnh đại diện</span>
                         </a>
+                        <?php 
+                        // Debug: Hiển thị link nếu user có role moderator hoặc có theater_id
+                        $showModeratorLink = false;
+                        if (isset($isModerator) && $isModerator) {
+                            $showModeratorLink = true;
+                        } elseif (isset($user['theater_id']) && !empty($user['theater_id'])) {
+                            // Nếu user có theater_id được gán, cũng hiển thị link
+                            $showModeratorLink = true;
+                        } elseif (isset($user['role']) && $user['role'] === 'moderator') {
+                            $showModeratorLink = true;
+                        } elseif (isset($user['roles']) && !empty($user['roles'])) {
+                            foreach ($user['roles'] as $role) {
+                                if (isset($role['name']) && ($role['name'] === 'Moderator' || $role['name'] === 'Theater Manager')) {
+                                    $showModeratorLink = true;
+                                    break;
+                                }
+                            }
+                        }
+                        ?>
+                        <?php if ($showModeratorLink): ?>
+                            <a href="?route=moderator/index" class="menu-item-luxury">
+                                <i class="fas fa-building"></i>
+                                <span>Quản lý rạp</span>
+                            </a>
+                        <?php endif; ?>
                         <a href="#" class="menu-item-luxury">
                             <i class="fas fa-list"></i>
                             <span>Danh sách</span>

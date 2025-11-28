@@ -1,8 +1,10 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h5>Quản lý rạp chiếu</h5>
-    <a href="?route=admin/theaters/create" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Thêm rạp mới
-    </a>
+    <?php if (!isset($user['role']) || $user['role'] !== 'moderator'): ?>
+        <a href="?route=admin/theaters/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Thêm rạp mới
+        </a>
+    <?php endif; ?>
 </div>
 
 <div class="row">
@@ -29,9 +31,11 @@
                         <a href="?route=admin/theaters/edit&id=<?php echo $theater['id']; ?>" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-edit"></i> Sửa
                         </a>
-                        <a href="?route=admin/theaters/delete&id=<?php echo $theater['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn chắc chắn muốn xóa?')">
-                            <i class="fas fa-trash"></i> Xóa
-                        </a>
+                        <?php if (!isset($user['role']) || $user['role'] !== 'moderator'): ?>
+                            <a href="?route=admin/theaters/delete&id=<?php echo $theater['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn chắc chắn muốn xóa?')">
+                                <i class="fas fa-trash"></i> Xóa
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
