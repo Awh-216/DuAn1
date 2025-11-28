@@ -133,10 +133,60 @@ class ProfileController extends Controller {
             $user = $this->getCurrentUser();
             $userModel = new UserModel();
             
+            $avatarPath = $user['avatar'] ?? null;
+            
+            // Xử lý upload avatar
+            if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../../data/avatars/';
+                
+                // Tạo thư mục nếu chưa tồn tại
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                
+                // Kiểm tra loại file
+                $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                $fileType = $_FILES['avatar']['type'];
+                
+                if (!in_array($fileType, $allowedTypes)) {
+                    $_SESSION['error'] = 'Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)!';
+                    $this->redirect('profile');
+                    return;
+                }
+                
+                // Kiểm tra kích thước file (tối đa 5MB)
+                $maxSize = 5 * 1024 * 1024; // 5MB
+                if ($_FILES['avatar']['size'] > $maxSize) {
+                    $_SESSION['error'] = 'Kích thước file quá lớn! Tối đa 5MB.';
+                    $this->redirect('profile');
+                    return;
+                }
+                
+                // Tạo tên file duy nhất
+                $fileExtension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+                $fileName = 'avatar_' . $user['id'] . '_' . time() . '.' . $fileExtension;
+                $uploadPath = $uploadDir . $fileName;
+                
+                // Upload file
+                if (move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadPath)) {
+                    // Xóa avatar cũ nếu có
+                    if ($avatarPath && file_exists(__DIR__ . '/../../' . $avatarPath)) {
+                        @unlink(__DIR__ . '/../../' . $avatarPath);
+                    }
+                    
+                    $avatarPath = 'data/avatars/' . $fileName;
+                } else {
+                    $_SESSION['error'] = 'Lỗi khi upload ảnh đại diện!';
+                    $this->redirect('profile');
+                    return;
+                }
+            }
+            
             $userModel->update($user['id'], [
                 'name' => $_POST['name'] ?? $user['name'],
                 'email' => $_POST['email'] ?? $user['email'],
-                'birthdate' => $_POST['birthdate'] ?? $user['birthdate']
+                'birthdate' => $_POST['birthdate'] ?? $user['birthdate'],
+                'avatar' => $avatarPath
             ]);
             
             $_SESSION['success'] = 'Cập nhật thông tin thành công!';
@@ -144,6 +194,84 @@ class ProfileController extends Controller {
         }
         
         $this->redirect('profile');
+    }
+    
+    /**
+     * Upload avatar riêng (AJAX)
+     */
+    public function uploadAvatar() {
+        $this->requireLogin();
+        
+        header('Content-Type: application/json');
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            return;
+        }
+        
+        $user = $this->getCurrentUser();
+        $userModel = new UserModel();
+        
+        if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+            echo json_encode(['success' => false, 'message' => 'Không có file được upload hoặc file bị lỗi!']);
+            return;
+        }
+        
+        $uploadDir = __DIR__ . '/../../data/avatars/';
+        
+        // Tạo thư mục nếu chưa tồn tại
+        if (!file_exists($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+        
+        // Kiểm tra loại file
+        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        $fileType = $_FILES['avatar']['type'];
+        
+        if (!in_array($fileType, $allowedTypes)) {
+            echo json_encode(['success' => false, 'message' => 'Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)!']);
+            return;
+        }
+        
+        // Kiểm tra kích thước file (tối đa 5MB)
+        $maxSize = 5 * 1024 * 1024; // 5MB
+        if ($_FILES['avatar']['size'] > $maxSize) {
+            echo json_encode(['success' => false, 'message' => 'Kích thước file quá lớn! Tối đa 5MB.']);
+            return;
+        }
+        
+        // Tạo tên file duy nhất
+        $fileExtension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+        $fileName = 'avatar_' . $user['id'] . '_' . time() . '.' . $fileExtension;
+        $uploadPath = $uploadDir . $fileName;
+        
+        // Upload file
+        if (move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadPath)) {
+            // Xóa avatar cũ nếu có
+            $oldAvatar = $user['avatar'] ?? null;
+            if ($oldAvatar && file_exists(__DIR__ . '/../../' . $oldAvatar)) {
+                @unlink(__DIR__ . '/../../' . $oldAvatar);
+            }
+            
+            $avatarPath = 'data/avatars/' . $fileName;
+            
+            // Cập nhật database
+            $userModel->update($user['id'], [
+                'name' => $user['name'],
+                'email' => $user['email'],
+                'birthdate' => $user['birthdate'],
+                'avatar' => $avatarPath
+            ]);
+            
+            $baseUrl = defined('BASE_URL') ? BASE_URL : 'http://localhost/DuAn1/';
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Cập nhật ảnh đại diện thành công!',
+                'avatar_url' => $baseUrl . $avatarPath
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Lỗi khi upload ảnh đại diện!']);
+        }
     }
 }
 ?>

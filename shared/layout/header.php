@@ -147,7 +147,7 @@
                     }
                     ?>
                     <?php if ($isAdmin): ?>
-                        <a href="http://localhost/DuAn1/?route=admin/index" class="sign-in-btn" style="background-color: #28a745; margin-right: 10px;">
+                        <a href="http://localhost/DuAn1/?route=admin/index" class="sign-in-btn" style="background-color: #FFFFFF37; margin-right: 10px;">
                             <i class="fas fa-cog"></i>
                             <span>Admin Panel</span>
                         </a>
