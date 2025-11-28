@@ -85,6 +85,83 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
   color: white;
 }
 
+/* Food Items Luxury Styles */
+.food-items-luxury-section {
+  position: relative;
+  z-index: 3;
+}
+
+.food-luxury-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.food-luxury-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.food-item-luxury-card {
+  position: relative;
+}
+
+.food-item-luxury-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(212, 175, 55, 0.5) !important;
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+}
+
+.food-item-luxury-card:hover .food-item-luxury-glow {
+  opacity: 1;
+}
+
+.food-toggle-luxury:hover {
+  background: rgba(212, 175, 55, 0.2) !important;
+  border-color: #d4af37 !important;
+  transform: scale(1.05);
+}
+
+.food-qty-btn:hover {
+  background: rgba(212, 175, 55, 0.3) !important;
+  border-color: #d4af37 !important;
+  transform: scale(1.1);
+}
+
+.food-qty-btn:active {
+  transform: scale(0.95);
+}
+
+.food-quantity-input-luxury:focus {
+  outline: none;
+  border-color: #d4af37 !important;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.food-items-luxury-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.food-items-luxury-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.food-items-luxury-grid::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.5);
+  border-radius: 10px;
+}
+
+.food-items-luxury-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.7);
+}
 
 </style>
                         <!-- Movie Title -->
@@ -123,6 +200,100 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                             </a>
                         <?php endif; ?>
                     </article>
+                    
+                    <!-- Combo & Đồ ăn Section - Luxury Design (Góc trái phía dưới) - Hidden, will show in modal -->
+                    <?php if ($selected_showtime_id && !empty($foodItems)): ?>
+                    <div class="food-items-luxury-section" style="display: none; margin-top: 3rem; position: relative; z-index: 3;">
+                        <div class="food-luxury-card" style="background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 20px; padding: 25px; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px);">
+                            <div class="food-luxury-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.2);">
+                                <h3 style="color: #d4af37; font-size: 1.5rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-utensils" style="color: #d4af37;"></i>
+                                    <span>Combo & Đồ ăn</span>
+                                </h3>
+                                <button type="button" class="food-toggle-luxury" id="foodToggleBtnLuxury" style="background: transparent; border: 1px solid rgba(212, 175, 55, 0.5); color: #d4af37; padding: 8px 15px; border-radius: 10px; cursor: pointer; transition: all 0.3s;">
+                                    <i class="fas fa-chevron-down" id="foodToggleIconLuxury"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="food-items-luxury-grid" id="foodItemsGridLuxury" style="display: none; grid-template-columns: 1fr; gap: 15px; max-height: 500px; overflow-y: auto; padding-right: 10px;">
+                                <?php foreach ($foodItems as $item): ?>
+                                <div class="food-item-luxury-card" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 20px; transition: all 0.3s; position: relative; overflow: hidden;">
+                                    <div class="food-item-luxury-glow" style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #d4af37, transparent); opacity: 0; transition: opacity 0.3s;"></div>
+                                    
+                                    <div class="food-item-luxury-content" style="display: flex; gap: 15px;">
+                                        <!-- Food Image -->
+                                        <div class="food-item-luxury-image" style="flex-shrink: 0;">
+                                            <?php if ($item['image']): ?>
+                                                <img src="<?php echo htmlspecialchars($item['image']); ?>" 
+                                                     alt="<?php echo htmlspecialchars($item['name']); ?>" 
+                                                     style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: 2px solid rgba(212, 175, 55, 0.3); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);">
+                                            <?php else: ?>
+                                                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1)); border-radius: 12px; border: 2px solid rgba(212, 175, 55, 0.3); display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-utensils" style="font-size: 2rem; color: rgba(212, 175, 55, 0.5);"></i>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        
+                                        <!-- Food Info -->
+                                        <div class="food-item-luxury-info" style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                                            <div>
+                                                <h4 style="color: #fff; font-size: 1.1rem; font-weight: 600; margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                                    <?php echo htmlspecialchars($item['name']); ?>
+                                                    <span class="food-type-badge" style="font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: <?php 
+                                                        echo $item['type'] === 'combo' ? 'rgba(212, 175, 55, 0.2)' : 
+                                                            ($item['type'] === 'snack' ? 'rgba(255, 193, 7, 0.2)' : 'rgba(23, 162, 184, 0.2)'); 
+                                                    ?>; color: <?php 
+                                                        echo $item['type'] === 'combo' ? '#d4af37' : 
+                                                            ($item['type'] === 'snack' ? '#ffc107' : '#17a2b8'); 
+                                                    ?>; border: 1px solid <?php 
+                                                        echo $item['type'] === 'combo' ? 'rgba(212, 175, 55, 0.5)' : 
+                                                            ($item['type'] === 'snack' ? 'rgba(255, 193, 7, 0.5)' : 'rgba(23, 162, 184, 0.5)'); 
+                                                    ?>;">
+                                                        <?php 
+                                                        echo $item['type'] === 'combo' ? 'Combo' : 
+                                                            ($item['type'] === 'snack' ? 'Snack' : 'Đồ uống'); 
+                                                        ?>
+                                                    </span>
+                                                </h4>
+                                                <?php if ($item['description']): ?>
+                                                <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin: 0 0 10px 0; line-height: 1.4;">
+                                                    <?php echo htmlspecialchars($item['description']); ?>
+                                                </p>
+                                                <?php endif; ?>
+                                            </div>
+                                            
+                                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap;">
+                                                <div class="food-item-luxury-price" style="color: #d4af37; font-size: 1.3rem; font-weight: 700; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);">
+                                                    <?php echo number_format($item['price']); ?>₫
+                                                </div>
+                                                
+                                                <div class="food-item-luxury-quantity" style="display: flex; align-items: center; gap: 10px;">
+                                                    <button type="button" class="food-qty-btn" data-action="decrease" data-item-id="<?php echo $item['id']; ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.5); background: rgba(212, 175, 55, 0.1); color: #d4af37; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <input type="number" 
+                                                           name="food_items[<?php echo $item['id']; ?>]" 
+                                                           value="0" 
+                                                           min="0" 
+                                                           max="10"
+                                                           class="food-quantity-input-luxury"
+                                                           data-price="<?php echo $item['price']; ?>"
+                                                           data-item-id="<?php echo $item['id']; ?>"
+                                                           style="width: 60px; text-align: center; padding: 8px; border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.5); background: rgba(255, 255, 255, 0.1); color: #fff; font-weight: 600; font-size: 1rem;">
+                                                    <button type="button" class="food-qty-btn" data-action="increase" data-item-id="<?php echo $item['id']; ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.5); background: rgba(212, 175, 55, 0.1); color: #d4af37; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
                 <?php else: ?>
                     <div class="booking-movie-info booking-movie-empty">
                         <div class="empty-movie-state">
@@ -160,6 +331,18 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                         <h2 class="booking-form-title">Đặt vé xem phim</h2>
                         <p class="booking-subtitle">Chọn phim, rạp, ngày giờ và ghế ngồi của bạn</p>
                     </header>
+                    
+                    <!-- Reservation Timer - Hiển thị ngay khi chọn showtime -->
+                    <?php if ($selected_showtime_id): ?>
+                        <div id="reservation-timer" class="reservation-timer mb-3" style="display: block;">
+                            <div class="alert alert-warning" style="margin: 0 -2.5rem 1rem -2.5rem; padding: 1rem 2.5rem; border-radius: 0; width: calc(100% + 5rem); border-left: none; border-right: none;">
+                                <i class="fas fa-clock me-2"></i>
+                                <strong>Thời gian giữ ghế:</strong> 
+                                <span id="timer-countdown">10:00</span>
+                                <small class="ms-2">(Bạn có 10 phút để hoàn tất thanh toán)</small>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     
                     <!-- Movies List - chỉ hiển thị khi chưa chọn phim -->
                     <?php if (empty($selected_movie)): ?>
@@ -304,18 +487,6 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                             </span>
                                         </div>
                                     <?php endif; ?>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <!-- Reservation Timer - Hiển thị ngay khi chọn showtime -->
-                        <?php if ($selected_showtime_id): ?>
-                            <div id="reservation-timer" class="reservation-timer mb-3" style="display: block;">
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-clock me-2"></i>
-                                    <strong>Thời gian giữ ghế:</strong> 
-                                    <span id="timer-countdown">10:00</span>
-                                    <small class="ms-2">(Bạn có 10 phút để hoàn tất thanh toán)</small>
                                 </div>
                             </div>
                         <?php endif; ?>
@@ -695,41 +866,6 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                         </div>
                                     </div>
                                     
-                                    <!-- Food Items / Combo Section -->
-                                    <?php if (!empty($foodItems)): ?>
-                                    <div class="food-items-section mb-4">
-                                        <button type="button" class="btn-food-toggle booking-label" id="foodToggleBtn" style="background: none; border: none; padding: 0; cursor: pointer; text-align: left; width: 100%;">
-                                            <i class="fas fa-utensils me-2"></i>Combo & Đồ ăn <i class="fas fa-chevron-down ms-2" id="foodToggleIcon"></i>
-                                        </button>
-                                        <div class="food-items-grid" id="foodItemsGrid" style="display: none; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
-                                            <?php foreach ($foodItems as $item): ?>
-                                            <div class="food-item-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: white;">
-                                                <div class="food-item-header" style="margin-bottom: 10px;">
-                                                    <h5 style="margin: 0; font-size: 16px; color: #333;"><?php echo htmlspecialchars($item['name']); ?></h5>
-                                                    <?php if ($item['description']): ?>
-                                                    <small class="text-muted" style="font-size: 12px;"><?php echo htmlspecialchars($item['description']); ?></small>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div class="food-item-price" style="font-size: 18px; font-weight: bold; color: #e50914; margin-bottom: 10px;">
-                                                    <?php echo number_format($item['price']); ?>₫
-                                                </div>
-                                                <div class="food-item-quantity">
-                                                    <label style="font-size: 14px; margin-bottom: 5px; display: block;">Số lượng:</label>
-                                                    <input type="number" 
-                                                           name="food_items[<?php echo $item['id']; ?>]" 
-                                                           value="0" 
-                                                           min="0" 
-                                                           max="10"
-                                                           class="food-quantity-input form-control"
-                                                           data-price="<?php echo $item['price']; ?>"
-                                                           data-item-id="<?php echo $item['id']; ?>"
-                                                           style="width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
-                                                </div>
-                                            </div>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    </div>
-                                    <?php endif; ?>
                                     
                                     <!-- Total Price -->
                                     <div class="total-price-section mb-4" role="status" aria-live="polite">
@@ -759,9 +895,10 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                     </div>
                                     
                                     <!-- Submit Button -->
-                                    <button type="submit" 
+                                    <button type="button" 
                                             class="btn-booking-submit" 
                                             id="submit-btn" 
+                                            onclick="openFoodModal()"
                                             disabled
                                             aria-label="Xác nhận đặt vé">
                                         <i class="fas fa-ticket-alt me-2"></i>
@@ -863,7 +1000,249 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
 </script>
 <?php endif; ?>
 
+<!-- Modal Combo & Đồ ăn -->
+<?php if ($selected_showtime_id && !empty($foodItems)): ?>
+<div id="foodModal" class="food-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 9999; overflow-y: auto; backdrop-filter: blur(5px);">
+    <div class="food-modal-content" style="position: relative; max-width: 800px; margin: 2rem auto; background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(22, 33, 62, 0.98) 100%); border: 2px solid rgba(212, 175, 55, 0.5); border-radius: 20px; padding: 30px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);">
+        <!-- Modal Header -->
+        <div class="food-modal-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid rgba(212, 175, 55, 0.3);">
+            <h2 style="color: #d4af37; font-size: 2rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 12px;">
+                <i class="fas fa-utensils" style="color: #d4af37;"></i>
+                <span>Combo & Đồ ăn</span>
+            </h2>
+            <button type="button" onclick="closeFoodModal()" style="background: transparent; border: 1px solid rgba(212, 175, 55, 0.5); color: #d4af37; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Modal Body - Food Items (Always visible, no toggle) -->
+        <div class="food-modal-body" style="max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-bottom: 25px;">
+            <div class="food-items-luxury-grid-modal" style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+                <?php foreach ($foodItems as $item): ?>
+                <div class="food-item-luxury-card-modal" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 20px; transition: all 0.3s; position: relative; overflow: hidden;">
+                    <div class="food-item-luxury-glow" style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #d4af37, transparent); opacity: 0; transition: opacity 0.3s;"></div>
+                    
+                    <div class="food-item-luxury-content" style="display: flex; gap: 15px;">
+                        <!-- Food Image -->
+                        <div class="food-item-luxury-image" style="flex-shrink: 0;">
+                            <?php if ($item['image']): ?>
+                                <img src="<?php echo htmlspecialchars($item['image']); ?>" 
+                                     alt="<?php echo htmlspecialchars($item['name']); ?>" 
+                                     style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; border: 2px solid rgba(212, 175, 55, 0.3); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);">
+                            <?php else: ?>
+                                <div style="width: 120px; height: 120px; background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1)); border-radius: 12px; border: 2px solid rgba(212, 175, 55, 0.3); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-utensils" style="font-size: 2.5rem; color: rgba(212, 175, 55, 0.5);"></i>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <!-- Food Info -->
+                        <div class="food-item-luxury-info" style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <h4 style="color: #fff; font-size: 1.2rem; font-weight: 600; margin: 0 0 10px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <?php echo htmlspecialchars($item['name']); ?>
+                                    <span class="food-type-badge" style="font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; background: <?php 
+                                        echo $item['type'] === 'combo' ? 'rgba(212, 175, 55, 0.2)' : 
+                                            ($item['type'] === 'snack' ? 'rgba(255, 193, 7, 0.2)' : 'rgba(23, 162, 184, 0.2)'); 
+                                    ?>; color: <?php 
+                                        echo $item['type'] === 'combo' ? '#d4af37' : 
+                                            ($item['type'] === 'snack' ? '#ffc107' : '#17a2b8'); 
+                                    ?>; border: 1px solid <?php 
+                                        echo $item['type'] === 'combo' ? 'rgba(212, 175, 55, 0.5)' : 
+                                            ($item['type'] === 'snack' ? 'rgba(255, 193, 7, 0.5)' : 'rgba(23, 162, 184, 0.5)'); 
+                                    ?>;">
+                                        <?php 
+                                        echo $item['type'] === 'combo' ? 'Combo' : 
+                                            ($item['type'] === 'snack' ? 'Snack' : 'Đồ uống'); 
+                                        ?>
+                                    </span>
+                                </h4>
+                                <?php if ($item['description']): ?>
+                                <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.95rem; margin: 0 0 12px 0; line-height: 1.5;">
+                                    <?php echo htmlspecialchars($item['description']); ?>
+                                </p>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap;">
+                                <div class="food-item-luxury-price" style="color: #d4af37; font-size: 1.5rem; font-weight: 700; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);">
+                                    <?php echo number_format($item['price']); ?>₫
+                                </div>
+                                
+                                <div class="food-item-luxury-quantity" style="display: flex; align-items: center; gap: 12px;">
+                                    <button type="button" class="food-qty-btn-modal" data-action="decrease" data-item-id="<?php echo $item['id']; ?>" style="width: 40px; height: 40px; border-radius: 10px; border: 1px solid rgba(212, 175, 55, 0.5); background: rgba(212, 175, 55, 0.1); color: #d4af37; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem;">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" 
+                                           name="food_items_modal[<?php echo $item['id']; ?>]" 
+                                           id="food_qty_modal_<?php echo $item['id']; ?>"
+                                           value="0" 
+                                           min="0" 
+                                           max="10"
+                                           class="food-quantity-input-modal"
+                                           data-price="<?php echo $item['price']; ?>"
+                                           data-item-id="<?php echo $item['id']; ?>"
+                                           style="width: 70px; text-align: center; padding: 10px; border-radius: 10px; border: 1px solid rgba(212, 175, 55, 0.5); background: rgba(255, 255, 255, 0.1); color: #fff; font-weight: 600; font-size: 1.1rem;">
+                                    <button type="button" class="food-qty-btn-modal" data-action="increase" data-item-id="<?php echo $item['id']; ?>" style="width: 40px; height: 40px; border-radius: 10px; border: 1px solid rgba(212, 175, 55, 0.5); background: rgba(212, 175, 55, 0.1); color: #d4af37; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem;">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        
+        <!-- Modal Footer -->
+        <div class="food-modal-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; padding-top: 20px; border-top: 2px solid rgba(212, 175, 55, 0.3);">
+            <div style="color: #fff; font-size: 1.1rem;">
+                <span>Tổng tiền combo & đồ ăn: </span>
+                <span id="modal-food-total" style="color: #d4af37; font-weight: 700; font-size: 1.3rem;">0₫</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="closeFoodModal()" style="padding: 12px 30px; border-radius: 10px; border: 1px solid rgba(212, 175, 55, 0.5); background: transparent; color: #d4af37; cursor: pointer; transition: all 0.3s; font-weight: 600;">
+                    Bỏ qua
+                </button>
+                <button type="button" onclick="confirmFoodSelection()" style="padding: 12px 30px; border-radius: 10px; border: none; background: linear-gradient(135deg, #d4af37, #b8941f); color: #000; cursor: pointer; transition: all 0.3s; font-weight: 700; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);">
+                    Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.food-modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.food-modal-body::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.food-modal-body::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.5);
+    border-radius: 10px;
+}
+
+.food-modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 55, 0.7);
+}
+
+.food-item-luxury-card-modal:hover .food-item-luxury-glow {
+    opacity: 1;
+}
+
+.food-qty-btn-modal:hover {
+    background: rgba(212, 175, 55, 0.3) !important;
+    border-color: #d4af37 !important;
+    transform: scale(1.1);
+}
+
+.food-qty-btn-modal:active {
+    transform: scale(0.95);
+}
+
+.food-quantity-input-modal:focus {
+    outline: none;
+    border-color: #d4af37 !important;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+</style>
+<?php endif; ?>
+
 <script>
+// Modal functions - Global scope để có thể gọi từ onclick
+function openFoodModal() {
+    // Kiểm tra xem có ghế được chọn không
+    const form = document.getElementById('booking-form');
+    if (!form) {
+        alert('Lỗi: Không tìm thấy form đặt vé!');
+        return;
+    }
+    
+    const selectedSeats = form.querySelectorAll('input[name="seats[]"]:checked');
+    if (selectedSeats.length === 0) {
+        alert('Vui lòng chọn ít nhất một ghế trước khi đặt vé!');
+        return;
+    }
+    
+    const modal = document.getElementById('foodModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        // Sync values from form to modal
+        syncFoodToModal();
+        updateModalFoodTotal();
+    } else {
+        // Nếu không có modal (không có food items), submit form luôn
+        form.submit();
+    }
+}
+
+function closeFoodModal() {
+    const modal = document.getElementById('foodModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+}
+
+function syncFoodToModal() {
+    // Copy values from form inputs to modal inputs
+    document.querySelectorAll('.food-quantity-input-luxury').forEach(function(input) {
+        const itemId = input.getAttribute('data-item-id');
+        const modalInput = document.getElementById('food_qty_modal_' + itemId);
+        if (modalInput) {
+            modalInput.value = input.value || 0;
+        }
+    });
+}
+
+function syncModalToForm() {
+    // Copy values from modal inputs to form inputs
+    document.querySelectorAll('.food-quantity-input-modal').forEach(function(modalInput) {
+        const itemId = modalInput.getAttribute('data-item-id');
+        const formInput = document.querySelector(`.food-quantity-input-luxury[data-item-id="${itemId}"]`);
+        if (formInput) {
+            formInput.value = modalInput.value || 0;
+        }
+    });
+}
+
+function updateModalFoodTotal() {
+    let total = 0;
+    document.querySelectorAll('.food-quantity-input-modal').forEach(function(input) {
+        const quantity = parseInt(input.value) || 0;
+        const price = parseFloat(input.getAttribute('data-price')) || 0;
+        total += quantity * price;
+    });
+    const totalElement = document.getElementById('modal-food-total');
+    if (totalElement) {
+        totalElement.textContent = total.toLocaleString('vi-VN') + '₫';
+    }
+}
+
+function confirmFoodSelection() {
+    // Sync modal values to form
+    syncModalToForm();
+    // Update total in main form
+    if (typeof updateSelection === 'function') {
+        updateSelection();
+    }
+    // Close modal
+    closeFoodModal();
+    // Submit form
+    const form = document.getElementById('booking-form');
+    if (form) {
+        form.submit();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Tự động điều chỉnh kích thước ghế dựa trên số lượng
     function adjustSeatSize() {
@@ -1198,8 +1577,8 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Seat map container not found!');
     }
     
-    // Food items quantity change handler
-    document.querySelectorAll('.food-quantity-input').forEach(function(input) {
+    // Food items quantity change handler (both old and luxury)
+    document.querySelectorAll('.food-quantity-input, .food-quantity-input-luxury').forEach(function(input) {
         input.addEventListener('change', function() {
             updateSelection();
         });
@@ -1645,9 +2024,16 @@ document.addEventListener('DOMContentLoaded', function() {
             seatTotal += getSeatPrice(seat);
         });
         
-        // Calculate food items total
+        // Calculate food items total (both old and luxury inputs)
         let foodTotal = 0;
+        // Old inputs
         document.querySelectorAll('.food-quantity-input').forEach(function(input) {
+            const quantity = parseInt(input.value) || 0;
+            const price = parseFloat(input.getAttribute('data-price')) || 0;
+            foodTotal += quantity * price;
+        });
+        // Luxury inputs
+        document.querySelectorAll('.food-quantity-input-luxury').forEach(function(input) {
             const quantity = parseInt(input.value) || 0;
             const price = parseFloat(input.getAttribute('data-price')) || 0;
             foodTotal += quantity * price;
@@ -1661,6 +2047,8 @@ document.addEventListener('DOMContentLoaded', function() {
             totalSeatsSpan.textContent = uniqueSelected.length + ' ghế' + (foodTotal > 0 ? ' + đồ ăn' : '');
             submitBtn.disabled = false;
             submitBtn.setAttribute('aria-label', 'Xác nhận đặt ' + uniqueSelected.length + ' vé');
+            // Đảm bảo onclick vẫn hoạt động khi enabled
+            submitBtn.onclick = function() { openFoodModal(); };
             
             // Hiển thị trường email
             if (emailContainer) {
@@ -2203,7 +2591,22 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Support Form Toggle
-// Toggle Food Items Section
+// Toggle Food Items Section (Luxury)
+function toggleFoodItemsLuxury() {
+    const grid = document.getElementById('foodItemsGridLuxury');
+    const icon = document.getElementById('foodToggleIconLuxury');
+    if (grid && icon) {
+        if (grid.style.display === 'none' || grid.style.display === '') {
+            grid.style.display = 'grid';
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            grid.style.display = 'none';
+            icon.style.transform = 'rotate(0deg)';
+        }
+    }
+}
+
+// Toggle Food Items Section (Old - for compatibility)
 function toggleFoodItems() {
     const grid = document.getElementById('foodItemsGrid');
     const icon = document.getElementById('foodToggleIcon');
@@ -2223,10 +2626,80 @@ function toggleFoodItems() {
 
 // Attach event listener for food toggle
 document.addEventListener('DOMContentLoaded', function() {
+    // Luxury food toggle
+    const foodToggleBtnLuxury = document.getElementById('foodToggleBtnLuxury');
+    if (foodToggleBtnLuxury) {
+        foodToggleBtnLuxury.addEventListener('click', toggleFoodItemsLuxury);
+    }
+    
+    // Old food toggle (for compatibility)
     const foodToggleBtn = document.getElementById('foodToggleBtn');
     if (foodToggleBtn) {
         foodToggleBtn.addEventListener('click', toggleFoodItems);
     }
+    
+    // Food quantity buttons (Luxury) - increase/decrease
+    // Modal functions đã được định nghĩa ở global scope ở trên
+    
+    // Modal quantity buttons
+    document.querySelectorAll('.food-qty-btn-modal').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const action = this.getAttribute('data-action');
+            const itemId = this.getAttribute('data-item-id');
+            const input = document.getElementById('food_qty_modal_' + itemId);
+            
+            if (input) {
+                let currentValue = parseInt(input.value) || 0;
+                if (action === 'increase' && currentValue < 10) {
+                    input.value = currentValue + 1;
+                } else if (action === 'decrease' && currentValue > 0) {
+                    input.value = currentValue - 1;
+                }
+                updateModalFoodTotal();
+            }
+        });
+    });
+    
+    // Modal input change
+    document.querySelectorAll('.food-quantity-input-modal').forEach(function(input) {
+        input.addEventListener('change', function() {
+            let value = parseInt(this.value) || 0;
+            if (value < 0) value = 0;
+            if (value > 10) value = 10;
+            this.value = value;
+            updateModalFoodTotal();
+        });
+    });
+    
+    // Close modal when clicking outside
+    const foodModal = document.getElementById('foodModal');
+    if (foodModal) {
+        foodModal.addEventListener('click', function(e) {
+            if (e.target === foodModal) {
+                closeFoodModal();
+            }
+        });
+    }
+    
+    document.querySelectorAll('.food-qty-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const action = this.getAttribute('data-action');
+            const itemId = this.getAttribute('data-item-id');
+            const input = document.querySelector(`.food-quantity-input-luxury[data-item-id="${itemId}"]`);
+            
+            if (input) {
+                let currentValue = parseInt(input.value) || 0;
+                if (action === 'increase' && currentValue < 10) {
+                    input.value = currentValue + 1;
+                } else if (action === 'decrease' && currentValue > 0) {
+                    input.value = currentValue - 1;
+                }
+                
+                // Trigger change event to update total
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    });
 });
 
 function toggleSupportForm() {

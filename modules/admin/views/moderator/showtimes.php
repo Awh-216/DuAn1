@@ -109,13 +109,13 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Thêm lịch chiếu mới</h5>
+                <h5 class="modal-title" style="color: black;">Thêm lịch chiếu mới</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" action="?route=moderator/showtimesStore">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="movie_id" class="form-label">Phim <span class="text-danger">*</span></label>
+                        <label for="movie_id" class="form-label" style="color: black;">Phim <span class="text-danger">*</span></label>
                         <select name="movie_id" id="movie_id" class="form-select" required>
                             <option value="">Chọn phim</option>
                             <?php foreach ($movies as $movie): ?>
@@ -124,7 +124,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="screen_id" class="form-label">Phòng <span class="text-danger">*</span></label>
+                        <label for="screen_id" class="form-label" style="color: black;">Phòng <span class="text-danger">*</span></label>
                         <select name="screen_id" id="screen_id" class="form-select" required>
                             <option value="">Chọn phòng</option>
                             <?php foreach ($screens as $screen): ?>
@@ -136,21 +136,21 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="show_date" class="form-label">Ngày chiếu <span class="text-danger">*</span></label>
+                        <label for="show_date" class="form-label" style="color: black;">Ngày chiếu <span class="text-danger">*</span></label>
                         <input type="date" name="show_date" id="show_date" class="form-control" required min="<?php echo date('Y-m-d'); ?>">
                     </div>
                     <div class="mb-3">
-                        <label for="show_time" class="form-label">Giờ chiếu <span class="text-danger">*</span></label>
+                        <label for="show_time" class="form-label" style="color: black;">Giờ chiếu <span class="text-danger">*</span></label>
                         <input type="time" name="show_time" id="show_time" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label for="price" class="form-label">Giá vé (VNĐ) <span class="text-danger">*</span></label>
+                        <label for="price" class="form-label" style="color: black;">Giá vé (VNĐ) <span class="text-danger">*</span></label>
                         <input type="number" name="price" id="price" class="form-control" min="0" required>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary">Thêm lịch chiếu</button>
+                    <button type="submit" class="btn btn-primary" >Thêm lịch chiếu</button>
                 </div>
             </form>
         </div>
@@ -216,21 +216,21 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Thêm phòng mới</h5>
+                <h5 class="modal-title" style="color: black;">Thêm phòng mới</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" action="?route=moderator/screensStore">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="screen_name" class="form-label">Tên phòng <span class="text-danger">*</span></label>
+                        <label for="screen_name" class="form-label" style="color: black;">Tên phòng <span class="text-danger">*</span></label>
                         <input type="text" name="screen_name" id="screen_name" class="form-control" required placeholder="Ví dụ: Phòng 1, Phòng VIP">
                     </div>
                     <div class="mb-3">
-                        <label for="total_seats" class="form-label">Số ghế <span class="text-danger">*</span></label>
+                        <label for="total_seats" class="form-label" style="color: black;">Số ghế <span class="text-danger">*</span></label>
                         <input type="number" name="total_seats" id="total_seats" class="form-control" min="1" required>
                     </div>
                     <div class="mb-3">
-                        <label for="screen_type" class="form-label">Loại màn hình</label>
+                        <label for="screen_type" class="form-label" style="color: black;">Loại màn hình</label>
                         <select name="screen_type" id="screen_type" class="form-select">
                             <option value="2D">2D</option>
                             <option value="3D">3D</option>

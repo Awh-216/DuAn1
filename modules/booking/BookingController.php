@@ -34,8 +34,17 @@ class BookingController extends Controller {
                 $user = $this->getCurrentUser();
                 
                 // Kiểm tra xem người dùng có bị cấm đặt vé phòng này không
-                if ($this->isUserBannedFromScreen($user['id'], $selected_showtime_id)) {
-                    $_SESSION['error'] = 'Bạn đã bị cấm đặt vé phòng này do vi phạm quy định thời gian đặt vé!';
+                $banCheck = $this->isUserBannedFromScreen($user['id'], $selected_showtime_id);
+                if ($banCheck['banned']) {
+                    $_SESSION['error'] = $banCheck['message'];
+                    $this->redirect('booking');
+                    return;
+                }
+                
+                // Kiểm tra thời gian thực và vi phạm trước khi bắt đầu session
+                $timeCheck = $this->checkBookingTimeAndViolations($user['id'], $selected_showtime_id);
+                if (!$timeCheck['allowed']) {
+                    $_SESSION['error'] = $timeCheck['message'];
                     $this->redirect('booking');
                     return;
                 }
@@ -764,6 +773,7 @@ class BookingController extends Controller {
         $this->requireLogin();
         
         $bookingModel = new BookingModel();
+        $user = $this->getCurrentUser();
         
         $showtime_id = $_GET['showtime'] ?? null;
         
@@ -775,6 +785,22 @@ class BookingController extends Controller {
         
         if (!$showtime) {
             $this->redirect('booking');
+        }
+        
+        // Kiểm tra xem người dùng có bị cấm đặt vé phòng này không
+        $banCheck = $this->isUserBannedFromScreen($user['id'], $showtime_id);
+        if ($banCheck['banned']) {
+            $_SESSION['error'] = $banCheck['message'];
+            $this->redirect('booking');
+            return;
+        }
+        
+        // Kiểm tra thời gian thực và vi phạm
+        $timeCheck = $this->checkBookingTimeAndViolations($user['id'], $showtime_id);
+        if (!$timeCheck['allowed']) {
+            $_SESSION['error'] = $timeCheck['message'];
+            $this->redirect('booking');
+            return;
         }
         
         // Kiểm tra xem showtime đã qua chưa
@@ -1470,6 +1496,9 @@ class BookingController extends Controller {
     /**
      * Kiểm tra thời gian thực và vi phạm
      * Trả về ['allowed' => bool, 'message' => string]
+     * Logic: 
+     * - Vi phạm lần 1: quá 10 phút → đưa ra khỏi trang
+     * - Vi phạm lần 2: quá 10 phút → cấm 10 phút
      */
     private function checkBookingTimeAndViolations($user_id, $showtime_id) {
         $db = Database::getInstance();
@@ -1485,7 +1514,7 @@ class BookingController extends Controller {
         
         // Lấy session hiện tại
         $session = $db->fetch("
-            SELECT id, session_start, violation_count, is_banned
+            SELECT id, session_start, violation_count, is_banned, ban_until
             FROM booking_session_tracking
             WHERE user_id = ? AND showtime_id = ? AND screen_id = ? AND session_end IS NULL
             ORDER BY session_start DESC
@@ -1496,51 +1525,52 @@ class BookingController extends Controller {
             return ['allowed' => true, 'message' => ''];
         }
         
-        // Tính thời gian thực (giây)
+        // Tính thời gian thực (giây) - thời gian không bị reset khi load lại trang
         $sessionStart = strtotime($session['session_start']);
         $currentTime = time();
         $durationSeconds = $currentTime - $sessionStart;
         
-        // Giới hạn 15 phút = 900 giây
-        $maxDuration = 15 * 60;
+        // Đếm tổng số vi phạm trước đó của user cho screen này (từ các session đã kết thúc)
+        $previousViolations = $db->fetch("
+            SELECT COUNT(*) as total_violations
+            FROM booking_session_tracking
+            WHERE user_id = ? AND screen_id = ? AND violation_count > 0 AND id != ?
+        ", [$user_id, $screen_id, $session['id']]);
         
-        if ($durationSeconds > $maxDuration) {
-            // Đã vượt quá 15 phút
-            $this->endBookingSession($session['id'], $durationSeconds);
-            return [
-                'allowed' => false,
-                'message' => 'Thời gian đặt vé đã hết! Bạn chỉ có 15 phút để đặt vé cho mỗi suất chiếu.'
-            ];
-        }
+        $previousViolationCount = $previousViolations['total_violations'] ?? 0;
+        $currentViolationCount = $session['violation_count'] ?? 0;
         
-        // Kiểm tra vi phạm: quá 10 phút lần 1, quá 5 phút lần 2
-        $violationCount = $session['violation_count'] ?? 0;
+        // Tổng số vi phạm = vi phạm từ các session trước + vi phạm của session hiện tại
+        $totalViolationCount = $previousViolationCount + $currentViolationCount;
         
-        if ($violationCount == 0 && $durationSeconds > 10 * 60) {
-            // Vi phạm lần 1: quá 10 phút
+        $maxDuration = 10 * 60; // 10 phút = 600 giây
+        
+        // Kiểm tra vi phạm: quá 10 phút lần 1 → đưa ra khỏi trang, quá 10 phút lần 2 → cấm 10 phút
+        if ($totalViolationCount == 0 && $durationSeconds > $maxDuration) {
+            // Vi phạm lần 1: quá 10 phút → đưa ra khỏi trang
             $db->execute("
                 UPDATE booking_session_tracking
-                SET violation_count = 1
+                SET violation_count = 1, session_end = NOW(), total_duration_seconds = ?
                 WHERE id = ?
-            ", [$session['id']]);
-            
-            return [
-                'allowed' => true,
-                'message' => 'Cảnh báo: Bạn đã ở quá 10 phút. Lần vi phạm thứ nhất.'
-            ];
-        } elseif ($violationCount == 1 && $durationSeconds > 5 * 60) {
-            // Vi phạm lần 2: quá 5 phút
-            $db->execute("
-                UPDATE booking_session_tracking
-                SET violation_count = 2, is_banned = 1
-                WHERE id = ?
-            ", [$session['id']]);
-            
-            $this->endBookingSession($session['id'], $durationSeconds);
+            ", [$durationSeconds, $session['id']]);
             
             return [
                 'allowed' => false,
-                'message' => 'Bạn đã bị cấm đặt vé phòng này do vi phạm quy định thời gian đặt vé (quá 5 phút lần thứ 2)!'
+                'message' => 'Thời gian đặt vé đã hết! Bạn đã ở quá 10 phút. Lần vi phạm thứ nhất. Vui lòng chọn suất chiếu khác.'
+            ];
+        } elseif ($totalViolationCount == 1 && $durationSeconds > $maxDuration) {
+            // Vi phạm lần 2: quá 10 phút → cấm 10 phút
+            $banUntil = date('Y-m-d H:i:s', $currentTime + (10 * 60)); // Cấm 10 phút
+            
+            $db->execute("
+                UPDATE booking_session_tracking
+                SET violation_count = 2, is_banned = 1, ban_until = ?, session_end = NOW(), total_duration_seconds = ?
+                WHERE id = ?
+            ", [$banUntil, $durationSeconds, $session['id']]);
+            
+            return [
+                'allowed' => false,
+                'message' => 'Bạn đã bị cấm đặt vé phòng này trong 10 phút do vi phạm quy định thời gian đặt vé lần thứ 2!'
             ];
         }
         
@@ -1561,6 +1591,7 @@ class BookingController extends Controller {
     
     /**
      * Kiểm tra xem người dùng có bị cấm đặt vé phòng này không
+     * Trả về ['banned' => bool, 'message' => string]
      */
     private function isUserBannedFromScreen($user_id, $showtime_id) {
         $db = Database::getInstance();
@@ -1569,20 +1600,42 @@ class BookingController extends Controller {
         // Lấy screen_id từ showtime
         $showtime = $bookingModel->getShowtimeById($showtime_id);
         if (!$showtime || !isset($showtime['screen_id'])) {
-            return false;
+            return ['banned' => false, 'message' => ''];
         }
         
         $screen_id = $showtime['screen_id'];
         
-        // Kiểm tra xem có bị cấm không
-        $banned = $db->fetch("
-            SELECT COUNT(*) as count
+        // Kiểm tra xem có bị cấm không và thời gian cấm còn hiệu lực không
+        $bannedSession = $db->fetch("
+            SELECT ban_until, violation_count
             FROM booking_session_tracking
             WHERE user_id = ? AND screen_id = ? AND is_banned = 1
+            ORDER BY created_at DESC
             LIMIT 1
         ", [$user_id, $screen_id]);
         
-        return ($banned['count'] ?? 0) > 0;
+        if ($bannedSession) {
+            $currentTime = time();
+            $banUntil = $bannedSession['ban_until'] ? strtotime($bannedSession['ban_until']) : 0;
+            
+            // Nếu thời gian cấm còn hiệu lực
+            if ($banUntil > $currentTime) {
+                $remainingMinutes = ceil(($banUntil - $currentTime) / 60);
+                return [
+                    'banned' => true,
+                    'message' => "Bạn đã bị cấm đặt vé phòng này do vi phạm quy định thời gian đặt vé. Thời gian cấm còn lại: {$remainingMinutes} phút."
+                ];
+            } else {
+                // Thời gian cấm đã hết, xóa trạng thái cấm
+                $db->execute("
+                    UPDATE booking_session_tracking
+                    SET is_banned = 0, ban_until = NULL
+                    WHERE user_id = ? AND screen_id = ? AND is_banned = 1
+                ", [$user_id, $screen_id]);
+            }
+        }
+        
+        return ['banned' => false, 'message' => ''];
     }
     
     /**

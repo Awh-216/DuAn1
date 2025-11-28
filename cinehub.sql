@@ -115,6 +115,7 @@ CREATE TABLE `booking_session_tracking` (
   `total_duration_seconds` int(11) DEFAULT 0,
   `violation_count` int(11) DEFAULT 0,
   `is_banned` tinyint(1) DEFAULT 0,
+  `ban_until` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1828,6 +1829,10 @@ ALTER TABLE `booking_session_tracking`
   ADD CONSTRAINT `booking_session_tracking_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `booking_session_tracking_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `booking_session_tracking_ibfk_3` FOREIGN KEY (`screen_id`) REFERENCES `theater_screens` (`id`) ON DELETE CASCADE;
+
+-- Lưu ý: Cột ban_until đã được thêm vào CREATE TABLE ở trên
+-- Nếu database đã tồn tại và chưa có cột ban_until, chạy câu lệnh sau:
+-- ALTER TABLE `booking_session_tracking` ADD COLUMN `ban_until` datetime DEFAULT NULL AFTER `is_banned`;
 
 --
 -- Các ràng buộc cho bảng `categories`

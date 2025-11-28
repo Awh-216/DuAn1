@@ -155,6 +155,149 @@
         .moderator-main > h6 {
             color: #fff !important;
         }
+        
+        /* Button styles trên nền tối - đảm bảo màu nổi bật */
+        .moderator-main .btn-primary {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: #fff !important;
+        }
+        
+        .moderator-main .btn-primary:hover {
+            background-color: #0b5ed7 !important;
+            border-color: #0a58ca !important;
+            color: #fff !important;
+        }
+        
+        .moderator-main .btn-secondary {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: #fff !important;
+        }
+        
+        .moderator-main .btn-secondary:hover {
+            background-color: #5c636a !important;
+            border-color: #565e64 !important;
+            color: #fff !important;
+        }
+        
+        .moderator-main .btn-outline-primary {
+            border-color: #0d6efd !important;
+            color: #0d6efd !important;
+            background-color: transparent !important;
+        }
+        
+        .moderator-main .btn-outline-primary:hover {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: #fff !important;
+        }
+        
+        .moderator-main .btn-outline-secondary {
+            border-color: #6c757d !important;
+            color: #6c757d !important;
+            background-color: transparent !important;
+        }
+        
+        .moderator-main .btn-outline-secondary:hover {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: #fff !important;
+        }
+        
+        .moderator-main .btn-outline-danger {
+            border-color: #dc3545 !important;
+            color: #dc3545 !important;
+            background-color: transparent !important;
+        }
+        
+        .moderator-main .btn-outline-danger:hover {
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
+            color: #fff !important;
+        }
+        
+        .moderator-main .btn-outline-info {
+            border-color: #0dcaf0 !important;
+            color: #0dcaf0 !important;
+            background-color: transparent !important;
+        }
+        
+        .moderator-main .btn-outline-info:hover {
+            background-color: #0dcaf0 !important;
+            border-color: #0dcaf0 !important;
+            color: #fff !important;
+        }
+        
+        .moderator-main .btn-outline-success {
+            border-color: #198754 !important;
+            color: #198754 !important;
+            background-color: transparent !important;
+        }
+        
+        .moderator-main .btn-outline-success:hover {
+            background-color: #198754 !important;
+            border-color: #198754 !important;
+            color: #fff !important;
+        }
+        
+        /* Button trong stat-card (nền trắng) - đảm bảo màu rõ ràng */
+        .stat-card .btn-outline-primary {
+            border-color: #0d6efd !important;
+            color: #0d6efd !important;
+        }
+        
+        .stat-card .btn-outline-primary:hover {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: #fff !important;
+        }
+        
+        .stat-card .btn-outline-secondary {
+            border-color: #6c757d !important;
+            color: #6c757d !important;
+        }
+        
+        .stat-card .btn-outline-secondary:hover {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: #fff !important;
+        }
+        
+        .stat-card .btn-outline-danger {
+            border-color: #dc3545 !important;
+            color: #dc3545 !important;
+        }
+        
+        .stat-card .btn-outline-danger:hover {
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
+            color: #fff !important;
+        }
+        
+        .stat-card .btn-primary {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: #fff !important;
+        }
+        
+        .stat-card .btn-primary:hover {
+            background-color: #0b5ed7 !important;
+            border-color: #0a58ca !important;
+            color: #fff !important;
+        }
+        
+        .stat-card .btn-secondary {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: #fff !important;
+        }
+        
+        .stat-card .btn-secondary:hover {
+            background-color: #5c636a !important;
+            border-color: #565e64 !important;
+            color: #fff !important;
+        }
     </style>
 </head>
 <body>
@@ -223,4 +366,5 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
+
 

@@ -2171,6 +2171,287 @@ class AdminController extends Controller {
     }
     
     // Logs
+    // Food Items Management
+    public function foodItems() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        $search = $_GET['search'] ?? '';
+        $type = $_GET['type'] ?? '';
+        
+        $sql = "SELECT * FROM food_items WHERE 1=1";
+        $params = [];
+        
+        if ($search) {
+            $sql .= " AND (name LIKE ? OR description LIKE ?)";
+            $params[] = "%$search%";
+            $params[] = "%$search%";
+        }
+        
+        if ($type) {
+            $sql .= " AND type = ?";
+            $params[] = $type;
+        }
+        
+        $sql .= " ORDER BY type, name ASC";
+        
+        $foodItems = $db->fetchAll($sql, $params);
+        
+        $this->adminView('food_items', [
+            'foodItems' => $foodItems,
+            'search' => $search,
+            'type' => $type,
+            'title' => 'Quản lý Combo & Đồ ăn',
+            'current_page' => 'food_items'
+        ]);
+    }
+    
+    public function foodItemsCreate() {
+        $user = AdminMiddleware::checkAdmin();
+        $this->adminView('food_items/create', [
+            'title' => 'Thêm Combo/Đồ ăn mới',
+            'current_page' => 'food_items'
+        ]);
+    }
+    
+    public function foodItemsStore() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/foodItems');
+            return;
+        }
+        
+        $name = $_POST['name'] ?? '';
+        $description = $_POST['description'] ?? '';
+        $price = $_POST['price'] ?? 0;
+        $type = $_POST['type'] ?? 'combo';
+        $is_active = isset($_POST['is_active']) ? 1 : 0;
+        
+        if (empty($name) || $price <= 0) {
+            $_SESSION['error'] = 'Vui lòng điền đầy đủ thông tin!';
+            $this->redirect('admin/foodItems/create');
+            return;
+        }
+        
+        // Xử lý upload ảnh
+        $imagePath = null;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = __DIR__ . '/../../data/img/food/';
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            $maxSize = 5 * 1024 * 1024; // 5MB
+            
+            $fileType = $_FILES['image']['type'];
+            $fileSize = $_FILES['image']['size'];
+            
+            if (!in_array($fileType, $allowedTypes)) {
+                $_SESSION['error'] = 'Chỉ chấp nhận file ảnh (JPEG, PNG, GIF, WebP)!';
+                $this->redirect('admin/foodItems/create');
+                return;
+            }
+            
+            if ($fileSize > $maxSize) {
+                $_SESSION['error'] = 'Kích thước file không được vượt quá 5MB!';
+                $this->redirect('admin/foodItems/create');
+                return;
+            }
+            
+            $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+            $fileName = 'food_' . time() . '_' . uniqid() . '.' . $extension;
+            $uploadPath = $uploadDir . $fileName;
+            
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath)) {
+                $imagePath = 'data/img/food/' . $fileName;
+            } else {
+                $_SESSION['error'] = 'Lỗi khi upload ảnh!';
+                $this->redirect('admin/foodItems/create');
+                return;
+            }
+        }
+        
+        try {
+            $db->execute("
+                INSERT INTO food_items (name, description, price, image, type, is_active)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ", [$name, $description, $price, $imagePath, $type, $is_active]);
+            
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Thêm combo/đồ ăn',
+                'Food',
+                'food_item',
+                $db->lastInsertId(),
+                null,
+                ['name' => $name, 'price' => $price, 'type' => $type]
+            );
+            
+            $_SESSION['success'] = 'Thêm combo/đồ ăn thành công!';
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+        }
+        
+        $this->redirect('admin/foodItems');
+    }
+    
+    public function foodItemsEdit() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            $this->redirect('admin/foodItems');
+            return;
+        }
+        
+        $foodItem = $db->fetch("SELECT * FROM food_items WHERE id = ?", [$id]);
+        if (!$foodItem) {
+            $_SESSION['error'] = 'Combo/đồ ăn không tồn tại!';
+            $this->redirect('admin/foodItems');
+            return;
+        }
+        
+        $this->adminView('food_items/edit', [
+            'foodItem' => $foodItem,
+            'title' => 'Sửa Combo/Đồ ăn',
+            'current_page' => 'food_items'
+        ]);
+    }
+    
+    public function foodItemsUpdate() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/foodItems');
+            return;
+        }
+        
+        $id = $_POST['id'] ?? null;
+        $name = $_POST['name'] ?? '';
+        $description = $_POST['description'] ?? '';
+        $price = $_POST['price'] ?? 0;
+        $type = $_POST['type'] ?? 'combo';
+        $is_active = isset($_POST['is_active']) ? 1 : 0;
+        
+        if (!$id || empty($name) || $price <= 0) {
+            $_SESSION['error'] = 'Vui lòng điền đầy đủ thông tin!';
+            $this->redirect('admin/foodItems');
+            return;
+        }
+        
+        // Lấy thông tin cũ để log
+        $oldFoodItem = $db->fetch("SELECT * FROM food_items WHERE id = ?", [$id]);
+        if (!$oldFoodItem) {
+            $_SESSION['error'] = 'Combo/đồ ăn không tồn tại!';
+            $this->redirect('admin/foodItems');
+            return;
+        }
+        
+        $imagePath = $oldFoodItem['image'];
+        
+        // Xử lý upload ảnh mới (nếu có)
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = __DIR__ . '/../../data/img/food/';
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            $maxSize = 5 * 1024 * 1024; // 5MB
+            
+            $fileType = $_FILES['image']['type'];
+            $fileSize = $_FILES['image']['size'];
+            
+            if (!in_array($fileType, $allowedTypes)) {
+                $_SESSION['error'] = 'Chỉ chấp nhận file ảnh (JPEG, PNG, GIF, WebP)!';
+                $this->redirect('admin/foodItems/edit&id=' . $id);
+                return;
+            }
+            
+            if ($fileSize > $maxSize) {
+                $_SESSION['error'] = 'Kích thước file không được vượt quá 5MB!';
+                $this->redirect('admin/foodItems/edit&id=' . $id);
+                return;
+            }
+            
+            $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+            $fileName = 'food_' . time() . '_' . uniqid() . '.' . $extension;
+            $uploadPath = $uploadDir . $fileName;
+            
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath)) {
+                // Xóa ảnh cũ nếu có
+                if ($oldFoodItem['image'] && file_exists(__DIR__ . '/../../' . $oldFoodItem['image'])) {
+                    @unlink(__DIR__ . '/../../' . $oldFoodItem['image']);
+                }
+                $imagePath = 'data/img/food/' . $fileName;
+            }
+        }
+        
+        try {
+            $db->execute("
+                UPDATE food_items
+                SET name = ?, description = ?, price = ?, image = ?, type = ?, is_active = ?
+                WHERE id = ?
+            ", [$name, $description, $price, $imagePath, $type, $is_active, $id]);
+            
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Cập nhật combo/đồ ăn',
+                'Food',
+                'food_item',
+                $id,
+                ['name' => $oldFoodItem['name'], 'price' => $oldFoodItem['price']],
+                ['name' => $name, 'price' => $price]
+            );
+            
+            $_SESSION['success'] = 'Cập nhật combo/đồ ăn thành công!';
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+        }
+        
+        $this->redirect('admin/foodItems');
+    }
+    
+    public function foodItemsDelete() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            $this->redirect('admin/foodItems');
+            return;
+        }
+        
+        $foodItem = $db->fetch("SELECT * FROM food_items WHERE id = ?", [$id]);
+        if (!$foodItem) {
+            $_SESSION['error'] = 'Combo/đồ ăn không tồn tại!';
+            $this->redirect('admin/foodItems');
+            return;
+        }
+        
+        try {
+            // Xóa ảnh nếu có
+            if ($foodItem['image'] && file_exists(__DIR__ . '/../../' . $foodItem['image'])) {
+                @unlink(__DIR__ . '/../../' . $foodItem['image']);
+            }
+            
+            $db->execute("DELETE FROM food_items WHERE id = ?", [$id]);
+            
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Xóa combo/đồ ăn',
+                'Food',
+                'food_item',
+                $id,
+                ['name' => $foodItem['name'], 'price' => $foodItem['price']],
+                null
+            );
+            
+            $_SESSION['success'] = 'Xóa combo/đồ ăn thành công!';
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+        }
+        
+        $this->redirect('admin/foodItems');
+    }
+    
     public function logs() {
         $db = Database::getInstance();
         $user = AdminMiddleware::checkAdmin();
