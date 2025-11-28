@@ -173,14 +173,25 @@ class BookingModel {
     }
     
     public function getUserTickets($user_id) {
-        return $this->db->fetchAll("SELECT t.*, s.show_date, s.show_time, s.price, 
-                                   m.title as movie_title, th.name as theater_name 
-                                   FROM tickets t 
-                                   JOIN showtimes s ON t.showtime_id = s.id 
-                                   JOIN movies m ON s.movie_id = m.id 
-                                   JOIN theaters th ON s.theater_id = th.id 
-                                   WHERE t.user_id = ? 
-                                   ORDER BY t.created_at DESC", [$user_id]);
+        try {
+            $tickets = $this->db->fetchAll("SELECT t.*, s.show_date, s.show_time, 
+                                           COALESCE(t.price, s.price) as price,
+                                           m.title as movie_title, th.name as theater_name 
+                                           FROM tickets t 
+                                           JOIN showtimes s ON t.showtime_id = s.id 
+                                           JOIN movies m ON s.movie_id = m.id 
+                                           JOIN theaters th ON s.theater_id = th.id 
+                                           WHERE t.user_id = ? 
+                                           ORDER BY t.created_at DESC", [$user_id]);
+            
+            // Log để debug
+            error_log("getUserTickets for user_id $user_id: Found " . count($tickets) . " tickets");
+            
+            return $tickets;
+        } catch (Exception $e) {
+            error_log("Error in getUserTickets: " . $e->getMessage());
+            return [];
+        }
     }
     
     public function createSupportTicket($data) {
@@ -376,6 +387,111 @@ class BookingModel {
             return $this->db->lastInsertId();
         } catch (Exception $e) {
             error_log("Error creating booking food item: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Tạo booking pending (chờ thanh toán)
+     */
+    public function createPendingBooking($data) {
+        try {
+            // Kiểm tra xem bảng đã tồn tại chưa
+            $tableExists = $this->db->fetch("SHOW TABLES LIKE 'booking_pending'");
+            
+            if (!$tableExists) {
+                // Tạo bảng booking_pending nếu chưa có - dùng exec() cho DDL statements
+                $pdo = $this->db->getConnection();
+                $createTableSql = "
+                    CREATE TABLE booking_pending (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        user_id INT NOT NULL,
+                        showtime_id INT NOT NULL,
+                        seats TEXT NOT NULL,
+                        food_items TEXT,
+                        customer_email VARCHAR(255) NOT NULL,
+                        total_amount DECIMAL(10,2) NOT NULL,
+                        vnp_txn_ref VARCHAR(100) UNIQUE,
+                        status ENUM('pending','completed','cancelled') DEFAULT 'pending',
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        expires_at TIMESTAMP NULL,
+                        INDEX idx_user (user_id),
+                        INDEX idx_showtime (showtime_id),
+                        INDEX idx_txn_ref (vnp_txn_ref),
+                        INDEX idx_status (status),
+                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                        FOREIGN KEY (showtime_id) REFERENCES showtimes(id) ON DELETE CASCADE
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+                ";
+                $pdo->exec($createTableSql);
+                error_log("Created booking_pending table successfully");
+            }
+        } catch (Exception $e) {
+            // Bảng đã tồn tại hoặc có lỗi khác, log và tiếp tục
+            error_log("Note when creating booking_pending table: " . $e->getMessage());
+        }
+        
+        try {
+            // Validate dữ liệu
+            if (empty($data['user_id']) || empty($data['showtime_id']) || empty($data['seats']) || empty($data['customer_email']) || empty($data['vnp_txn_ref'])) {
+                error_log("Missing required data for pending booking: " . json_encode($data));
+                return false;
+            }
+            
+            $expiresAt = isset($data['expires_at']) ? $data['expires_at'] : date('Y-m-d H:i:s', strtotime('+15 minutes'));
+            $seatsJson = json_encode($data['seats']);
+            $foodItemsJson = !empty($data['food_items']) ? json_encode($data['food_items']) : null;
+            
+            $sql = "INSERT INTO booking_pending (user_id, showtime_id, seats, food_items, customer_email, total_amount, vnp_txn_ref, expires_at) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            
+            error_log("Creating pending booking with data: user_id=" . $data['user_id'] . ", showtime_id=" . $data['showtime_id'] . ", txn_ref=" . $data['vnp_txn_ref']);
+            
+            $this->db->execute($sql, [
+                $data['user_id'],
+                $data['showtime_id'],
+                $seatsJson,
+                $foodItemsJson,
+                $data['customer_email'],
+                $data['total_amount'],
+                $data['vnp_txn_ref'],
+                $expiresAt
+            ]);
+            
+            $lastId = $this->db->lastInsertId();
+            error_log("Pending booking created successfully with ID: " . $lastId);
+            return $lastId;
+            
+        } catch (Exception $e) {
+            error_log("Error creating pending booking: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            error_log("Data: " . json_encode($data));
+            return false;
+        }
+    }
+    
+    /**
+     * Lấy pending booking theo vnp_txn_ref
+     */
+    public function getPendingBookingByTxnRef($vnp_txn_ref) {
+        try {
+            return $this->db->fetch("SELECT * FROM booking_pending WHERE vnp_txn_ref = ? AND status = 'pending'", [$vnp_txn_ref]);
+        } catch (Exception $e) {
+            error_log("Error getting pending booking: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Cập nhật trạng thái pending booking
+     */
+    public function updatePendingBookingStatus($id, $status) {
+        try {
+            $sql = "UPDATE booking_pending SET status = ? WHERE id = ?";
+            $this->db->execute($sql, [$status, $id]);
+            return true;
+        } catch (Exception $e) {
+            error_log("Error updating pending booking status: " . $e->getMessage());
             return false;
         }
     }

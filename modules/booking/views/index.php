@@ -894,18 +894,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (seatsPerRow < 12) {
                 // < 12 ghế: font size lớn hơn
                 seatNumbers.forEach(num => {
-                    num.style.fontSize = '1.1rem';
+                    num.style.fontSize = '1.0rem';
                 });
                 seatIcons.forEach(icon => {
-                    icon.style.fontSize = '0.6rem';
+                    icon.style.fontSize = '0.55rem';
                 });
             } else {
                 // <= 15 ghế: font size vừa
                 seatNumbers.forEach(num => {
-                    num.style.fontSize = '0.95rem';
+                    num.style.fontSize = '0.9rem';
                 });
                 seatIcons.forEach(icon => {
-                    icon.style.fontSize = '0.55rem';
+                    icon.style.fontSize = '0.5rem';
                 });
             }
             
@@ -928,28 +928,28 @@ document.addEventListener('DOMContentLoaded', function() {
             const totalGapWidth = (seatCount - 1) * gap * 16; // Convert rem to px (1rem = 16px)
             const totalSeparatorWidth = separatorCount * separatorWidth * 16;
             const availableWidth = containerWidth - totalGapWidth - totalSeparatorWidth;
-            // Giảm kích thước tối đa xuống 15px để ghế nhỏ hơn, có thể xem hết ghế trong rạp
-            const seatSize = Math.max(9, Math.min(15, availableWidth / seatCount));
+            // Giảm kích thước tối đa xuống 14px để ghế nhỏ hơn, có thể xem hết ghế trong rạp
+            const seatSize = Math.max(8, Math.min(14, availableWidth / seatCount));
             
             // Áp dụng kích thước (chỉ cho ghế thường, không phải ghế đôi)
             const seatLabels = seatMapContainer.querySelectorAll('.seat-label:not(.couple-seat)');
             seatLabels.forEach(label => {
                 label.style.width = seatSize + 'px';
                 label.style.height = seatSize + 'px';
-                label.style.minWidth = Math.max(9, seatSize * 0.7) + 'px';
-                label.style.minHeight = Math.max(9, seatSize * 0.7) + 'px';
+                label.style.minWidth = Math.max(8, seatSize * 0.7) + 'px';
+                label.style.minHeight = Math.max(8, seatSize * 0.7) + 'px';
             });
             
             // Điều chỉnh font size của số ghế
             const seatNumbers = seatMapContainer.querySelectorAll('.seat-number');
-            const fontSize = Math.max(5, Math.min(8, seatSize * 0.45));
+            const fontSize = Math.max(4, Math.min(7, seatSize * 0.42));
             seatNumbers.forEach(num => {
                 num.style.fontSize = fontSize + 'px';
             });
             
             // Điều chỉnh icon size
             const seatIcons = seatMapContainer.querySelectorAll('.seat-icon');
-            const iconSize = Math.max(3, Math.min(6, seatSize * 0.3));
+            const iconSize = Math.max(2.5, Math.min(5.5, seatSize * 0.28));
             seatIcons.forEach(icon => {
                 icon.style.fontSize = iconSize + 'px';
             });

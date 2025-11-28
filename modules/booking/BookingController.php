@@ -956,117 +956,67 @@ class BookingController extends Controller {
             return;
         }
         
-        // Xóa reservations trước khi tạo vé
-        $bookingModel->releaseSeats($showtime_id, $seats, $user['id']);
+        // Tính tổng tiền
+        $totalAmount = 0;
+        foreach ($seats as $seat) {
+            $seat_type = $bookingModel->getSeatType($seat, $seatLayout);
+            $seat_price = $bookingModel->getSeatPrice($seat, $seatLayout, $showtime['price']);
+            $totalAmount += $seat_price;
+        }
         
-        // Tạo vé cho mỗi ghế đã chọn
-        $createdTickets = [];
-        $db = Database::getInstance()->getConnection();
-        
-        try {
-            // Bắt đầu transaction để đảm bảo tất cả vé được tạo hoặc không tạo gì cả
-            $db->beginTransaction();
-            
-            // Lấy danh sách ghế đã đặt trước khi tạo vé (một lần duy nhất)
-            $existingTickets = $bookingModel->getBookedSeats($showtime_id);
-            $existingSeats = array_column($existingTickets, 'seat');
-            
-            foreach ($seats as $seat) {
-                // Kiểm tra lại ghế đã được đặt chưa (double check trong transaction)
-                if (in_array($seat, $existingSeats)) {
-                    throw new Exception("Ghế $seat đã được đặt bởi người khác!");
-                }
-                
-                // Xác định loại ghế và giá
-                $seat_type = $bookingModel->getSeatType($seat, $seatLayout);
-                $seat_price = $bookingModel->getSeatPrice($seat, $seatLayout, $showtime['price']);
-                
-                $qr_code = uniqid('TICKET_') . '_' . $user['id'] . '_' . $showtime_id . '_' . time() . '_' . $seat;
-                
-                $ticket_id = $bookingModel->createTicket([
-                    'user_id' => $user['id'],
-                    'showtime_id' => $showtime_id,
-                    'seat' => $seat,
-                    'seat_type' => $seat_type,
-                    'price' => $seat_price,
-                    'qr_code' => $qr_code
-                ]);
-                
-                if (!$ticket_id) {
-                    throw new Exception("Không thể tạo vé cho ghế $seat!");
-                }
-                
-                // Thêm food items cho vé này (nếu có)
-                if (!empty($food_items)) {
-                    foreach ($food_items as $food_item_id => $quantity) {
-                        if ($quantity > 0) {
-                            $foodItem = $bookingModel->getFoodItemById($food_item_id);
-                            if ($foodItem) {
-                                $bookingModel->createBookingFoodItem(
-                                    $ticket_id,
-                                    $food_item_id,
-                                    $quantity,
-                                    $foodItem['price']
-                                );
-                            }
-                        }
+        // Tính tiền food items
+        if (!empty($food_items)) {
+            foreach ($food_items as $food_item_id => $quantity) {
+                if ($quantity > 0) {
+                    $foodItem = $bookingModel->getFoodItemById($food_item_id);
+                    if ($foodItem) {
+                        $totalAmount += $foodItem['price'] * $quantity;
                     }
                 }
-                
-                $createdTickets[] = [
-                    'id' => $ticket_id,
-                    'seat' => $seat,
-                    'seat_type' => $seat_type,
-                    'qr_code' => $qr_code,
-                    'price' => $seat_price
-                ];
-                
-                // Thêm ghế vừa tạo vào danh sách để tránh duplicate trong cùng một transaction
-                $existingSeats[] = $seat;
             }
-            
-            // Commit transaction nếu tất cả vé được tạo thành công
-            $db->commit();
-            
-            // Log thành công
-            error_log("Successfully created " . count($createdTickets) . " tickets for user " . $user['id'] . " on showtime " . $showtime_id);
-            
-            // Log IP action thành công (không phải spam)
-            require_once __DIR__ . '/../../core/IPSpamChecker.php';
-            IPSpamChecker::logIPAction(null, 'booking', false, "Đặt vé thành công: " . count($createdTickets) . " vé", $user['id']);
-            
-        } catch (Exception $e) {
-            // Rollback nếu có lỗi
-            if ($db->inTransaction()) {
-                $db->rollBack();
-            }
-            error_log("Error creating tickets: " . $e->getMessage());
-            error_log("Stack trace: " . $e->getTraceAsString());
-            $_SESSION['error'] = 'Có lỗi xảy ra khi đặt vé: ' . $e->getMessage();
+        }
+        
+        // Tạo mã giao dịch VNPay
+        $vnp_TxnRef = 'BOOKING_' . $user['id'] . '_' . $showtime_id . '_' . time() . '_' . rand(1000, 9999);
+        
+        // Tạo pending booking
+        error_log("=== Creating pending booking ===");
+        error_log("User ID: " . $user['id']);
+        error_log("Showtime ID: " . $showtime_id);
+        error_log("Seats: " . json_encode($seats));
+        error_log("Food items: " . json_encode($food_items));
+        error_log("Total amount: " . $totalAmount);
+        error_log("Txn ref: " . $vnp_TxnRef);
+        
+        $pendingBookingId = $bookingModel->createPendingBooking([
+            'user_id' => $user['id'],
+            'showtime_id' => $showtime_id,
+            'seats' => $seats,
+            'food_items' => $food_items,
+            'customer_email' => $customer_email,
+            'total_amount' => $totalAmount,
+            'vnp_txn_ref' => $vnp_TxnRef,
+            'expires_at' => date('Y-m-d H:i:s', strtotime('+15 minutes'))
+        ]);
+        
+        error_log("Pending booking ID result: " . ($pendingBookingId ? $pendingBookingId : 'FALSE'));
+        
+        if (!$pendingBookingId) {
+            error_log("Failed to create pending booking");
+            $_SESSION['error'] = 'Có lỗi xảy ra khi tạo đơn hàng! Vui lòng thử lại. Lỗi đã được ghi vào log.';
             $redirectUrl = '?route=booking/index&showtime_id=' . urlencode($showtime_id);
             $this->redirect($redirectUrl);
             return;
         }
         
-        // Gửi email với QR code và thông tin vé
-        try {
-            $this->sendTicketEmail($customer_email, $showtime, $createdTickets, $user);
-        } catch (Exception $e) {
-            error_log("Error sending ticket email: " . $e->getMessage());
-            // Không cần dừng quá trình nếu gửi email lỗi, vé đã được tạo thành công
-        }
+        error_log("Pending booking created successfully with ID: " . $pendingBookingId);
         
-        $_SESSION['success'] = 'Đặt vé thành công! Vé và QR code đã được gửi đến email ' . htmlspecialchars($customer_email);
+        // Xóa reservations
+        $bookingModel->releaseSeats($showtime_id, $seats, $user['id']);
         
-        // Đảm bảo dữ liệu đã được commit vào database trước khi redirect
-        // Thêm một query để verify vé đã được tạo
-        $verifyTickets = $bookingModel->getBookedSeats($showtime_id);
-        $verifySeats = array_column($verifyTickets, 'seat');
-        error_log("After booking - Verified booked seats for showtime $showtime_id: " . implode(', ', $verifySeats));
-        
-        // Redirect về trang booking để xem ghế đã bán, giữ nguyên showtime_id
-        // Thêm timestamp để force refresh và tránh cache
-        $movie = isset($showtime['movie_id']) ? $showtime['movie_id'] : null;
+        // Chuyển hướng đến VNPay
+        $this->redirectToVNPay($vnp_TxnRef, $totalAmount, $showtime, $seats);
+        return;
         $theater = isset($showtime['theater_id']) ? $showtime['theater_id'] : null;
         $date = isset($showtime['show_date']) ? $showtime['show_date'] : date('Y-m-d');
         
@@ -1633,6 +1583,253 @@ class BookingController extends Controller {
         ", [$user_id, $screen_id]);
         
         return ($banned['count'] ?? 0) > 0;
+    }
+    
+    /**
+     * Chuyển hướng đến VNPay để thanh toán
+     */
+    private function redirectToVNPay($vnp_TxnRef, $amount, $showtime, $seats) {
+        require_once __DIR__ . '/../../vnpay_php/config.php';
+        
+        $vnp_Amount = $amount * 100; // VNPay yêu cầu số tiền nhân 100
+        $vnp_Locale = 'vn';
+        $vnp_BankCode = '';
+        $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
+        
+        $movieTitle = isset($showtime['movie_title']) ? $showtime['movie_title'] : 'Phim';
+        $orderInfo = "Dat ve: " . $movieTitle . " - " . implode(', ', $seats);
+        
+        $inputData = array(
+            "vnp_Version" => "2.1.0",
+            "vnp_TmnCode" => $vnp_TmnCode,
+            "vnp_Amount" => $vnp_Amount,
+            "vnp_Command" => "pay",
+            "vnp_CreateDate" => date('YmdHis'),
+            "vnp_CurrCode" => "VND",
+            "vnp_IpAddr" => $vnp_IpAddr,
+            "vnp_Locale" => $vnp_Locale,
+            "vnp_OrderInfo" => $orderInfo,
+            "vnp_OrderType" => "other",
+            "vnp_ReturnUrl" => $vnp_Returnurl,
+            "vnp_TxnRef" => $vnp_TxnRef,
+            "vnp_ExpireDate" => $expire
+        );
+        
+        if (isset($vnp_BankCode) && $vnp_BankCode != "") {
+            $inputData['vnp_BankCode'] = $vnp_BankCode;
+        }
+        
+        ksort($inputData);
+        $query = "";
+        $i = 0;
+        $hashdata = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashdata .= urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+            $query .= urlencode($key) . "=" . urlencode($value) . '&';
+        }
+        
+        $vnp_Url = $vnp_Url . "?" . $query;
+        if (isset($vnp_HashSecret)) {
+            $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+        }
+        
+        header('Location: ' . $vnp_Url);
+        die();
+    }
+    
+    /**
+     * Xử lý callback từ VNPay sau khi thanh toán
+     */
+    public function vnpayReturn() {
+        $this->requireLogin();
+        
+        require_once __DIR__ . '/../../vnpay_php/config.php';
+        
+        $vnp_SecureHash = isset($_GET['vnp_SecureHash']) ? $_GET['vnp_SecureHash'] : '';
+        $inputData = array();
+        foreach ($_GET as $key => $value) {
+            if (substr($key, 0, 4) == "vnp_") {
+                $inputData[$key] = $value;
+            }
+        }
+        
+        unset($inputData['vnp_SecureHash']);
+        ksort($inputData);
+        $i = 0;
+        $hashData = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashData = $hashData . '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashData = $hashData . urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+        }
+        
+        $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
+        $vnp_TxnRef = isset($_GET['vnp_TxnRef']) ? $_GET['vnp_TxnRef'] : '';
+        $vnp_ResponseCode = isset($_GET['vnp_ResponseCode']) ? $_GET['vnp_ResponseCode'] : '';
+        $vnp_Amount = isset($_GET['vnp_Amount']) ? $_GET['vnp_Amount'] : 0;
+        
+        $bookingModel = new BookingModel();
+        $pendingBooking = $bookingModel->getPendingBookingByTxnRef($vnp_TxnRef);
+        
+        if (!$pendingBooking) {
+            $_SESSION['error'] = 'Không tìm thấy thông tin đơn hàng!';
+            $this->redirect('booking');
+            return;
+        }
+        
+        // Kiểm tra chữ ký
+        if ($secureHash == $vnp_SecureHash) {
+            if ($vnp_ResponseCode == '00') {
+                // Thanh toán thành công
+                $this->completeBooking($pendingBooking, $vnp_TxnRef, $vnp_Amount);
+            } else {
+                // Thanh toán thất bại
+                $bookingModel->updatePendingBookingStatus($pendingBooking['id'], 'cancelled');
+                $_SESSION['error'] = 'Thanh toán thất bại! Mã lỗi: ' . $vnp_ResponseCode;
+                $redirectUrl = '?route=booking/index&showtime_id=' . $pendingBooking['showtime_id'];
+                $this->redirect($redirectUrl);
+            }
+        } else {
+            $_SESSION['error'] = 'Chữ ký không hợp lệ!';
+            $redirectUrl = '?route=booking/index&showtime_id=' . $pendingBooking['showtime_id'];
+            $this->redirect($redirectUrl);
+        }
+    }
+    
+    /**
+     * Hoàn tất booking sau khi thanh toán thành công
+     */
+    private function completeBooking($pendingBooking, $vnp_TxnRef, $vnp_Amount) {
+        $bookingModel = new BookingModel();
+        $user = $this->getCurrentUser();
+        
+        $seats = json_decode($pendingBooking['seats'], true);
+        $food_items = !empty($pendingBooking['food_items']) ? json_decode($pendingBooking['food_items'], true) : [];
+        $showtime_id = $pendingBooking['showtime_id'];
+        
+        $showtime = $bookingModel->getShowtimeWithScreen($showtime_id);
+        if (!$showtime) {
+            $_SESSION['error'] = 'Không tìm thấy thông tin suất chiếu!';
+            $this->redirect('booking');
+            return;
+        }
+        
+        // Lấy seat layout để tính giá
+        $seatLayout = null;
+        if (isset($showtime['screen_id']) && $showtime['screen_id']) {
+            $seatLayout = $bookingModel->getScreenSeatLayout($showtime['screen_id']);
+        }
+        
+        $db = Database::getInstance()->getConnection();
+        $createdTickets = [];
+        
+        try {
+            $db->beginTransaction();
+            
+            // Kiểm tra lại ghế đã được đặt chưa
+            $existingTickets = $bookingModel->getBookedSeats($showtime_id);
+            $existingSeats = array_column($existingTickets, 'seat');
+            
+            foreach ($seats as $seat) {
+                if (in_array($seat, $existingSeats)) {
+                    throw new Exception("Ghế $seat đã được đặt bởi người khác!");
+                }
+                
+                $seat_type = $bookingModel->getSeatType($seat, $seatLayout);
+                $seat_price = $bookingModel->getSeatPrice($seat, $seatLayout, $showtime['price']);
+                
+                $qr_code = uniqid('TICKET_') . '_' . $user['id'] . '_' . $showtime_id . '_' . time() . '_' . $seat;
+                
+                $ticket_id = $bookingModel->createTicket([
+                    'user_id' => $user['id'],
+                    'showtime_id' => $showtime_id,
+                    'seat' => $seat,
+                    'seat_type' => $seat_type,
+                    'price' => $seat_price,
+                    'qr_code' => $qr_code
+                ]);
+                
+                if (!$ticket_id) {
+                    throw new Exception("Không thể tạo vé cho ghế $seat!");
+                }
+                
+                // Thêm food items
+                if (!empty($food_items)) {
+                    foreach ($food_items as $food_item_id => $quantity) {
+                        if ($quantity > 0) {
+                            $foodItem = $bookingModel->getFoodItemById($food_item_id);
+                            if ($foodItem) {
+                                $bookingModel->createBookingFoodItem(
+                                    $ticket_id,
+                                    $food_item_id,
+                                    $quantity,
+                                    $foodItem['price']
+                                );
+                            }
+                        }
+                    }
+                }
+                
+                $createdTickets[] = [
+                    'id' => $ticket_id,
+                    'seat' => $seat,
+                    'seat_type' => $seat_type,
+                    'qr_code' => $qr_code,
+                    'price' => $seat_price
+                ];
+                
+                $existingSeats[] = $seat;
+            }
+            
+            // Tạo transaction record
+            require_once __DIR__ . '/../user/TransactionModel.php';
+            $transactionModel = new TransactionModel();
+            $transactionModel->create([
+                'user_id' => $user['id'],
+                'type' => 'ticket',
+                'related_id' => $pendingBooking['id'],
+                'amount' => $pendingBooking['total_amount'],
+                'method' => 'VNPay',
+                'status' => 'Thành công'
+            ]);
+            
+            // Cập nhật trạng thái pending booking
+            $bookingModel->updatePendingBookingStatus($pendingBooking['id'], 'completed');
+            
+            $db->commit();
+            
+            // Gửi email
+            try {
+                $this->sendTicketEmail($pendingBooking['customer_email'], $showtime, $createdTickets, $user);
+            } catch (Exception $e) {
+                error_log("Error sending ticket email: " . $e->getMessage());
+            }
+            
+            $_SESSION['success'] = 'Đặt vé thành công! Vé và QR code đã được gửi đến email ' . htmlspecialchars($pendingBooking['customer_email']);
+            
+            // Redirect về trang booking
+            $redirectUrl = '?route=booking/index&showtime_id=' . $showtime_id . '&_t=' . time();
+            $this->redirect($redirectUrl);
+            
+        } catch (Exception $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            error_log("Error completing booking: " . $e->getMessage());
+            $bookingModel->updatePendingBookingStatus($pendingBooking['id'], 'cancelled');
+            $_SESSION['error'] = 'Có lỗi xảy ra khi hoàn tất đặt vé: ' . $e->getMessage();
+            $redirectUrl = '?route=booking/index&showtime_id=' . $showtime_id;
+            $this->redirect($redirectUrl);
+        }
     }
 }
 ?>

@@ -3602,10 +3602,10 @@ button.btn-location-detect span,
 
 .seat-label {
   position: relative;
-  width: 26px;
-  height: 26px;
-  min-width: 18px;
-  max-width: 26px;
+  width: 24px;
+  height: 24px;
+  min-width: 16px;
+  max-width: 24px;
   border-radius: 4px;
   cursor: pointer;
   display: flex;
@@ -3633,18 +3633,18 @@ button.btn-location-detect span,
 .seat-map-container[data-seats-per-row="13"] .seat-label:not(.couple-seat),
 .seat-map-container[data-seats-per-row="14"] .seat-label:not(.couple-seat),
 .seat-map-container[data-seats-per-row="15"] .seat-label:not(.couple-seat) {
-  width: 33.8px !important; /* 26px * 1.3 */
-  height: 33.8px !important;
-  min-width: 33.8px !important;
-  max-width: 33.8px !important;
-  min-height: 33.8px !important;
-  max-height: 33.8px !important;
+  width: 30px !important; /* Giảm từ 33.8px */
+  height: 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
 }
 
 .seat-map-container[data-seats-per-row="13"] .seat-number,
 .seat-map-container[data-seats-per-row="14"] .seat-number,
 .seat-map-container[data-seats-per-row="15"] .seat-number {
-  font-size: 0.95rem !important; /* Tăng font size tương ứng */
+  font-size: 0.9rem !important; /* Giảm từ 0.95rem */
 }
 
 /* Tăng kích thước ghế khi < 12 ghế (1.7 lần) và căn giữa */
@@ -3688,12 +3688,12 @@ button.btn-location-detect span,
 .seat-map-container[data-seats-per-row="9"] .seat-label:not(.couple-seat),
 .seat-map-container[data-seats-per-row="10"] .seat-label:not(.couple-seat),
 .seat-map-container[data-seats-per-row="11"] .seat-label:not(.couple-seat) {
-  width: 44.2px !important; /* 26px * 1.7 */
-  height: 44.2px !important;
-  min-width: 44.2px !important;
-  max-width: 44.2px !important;
-  min-height: 44.2px !important;
-  max-height: 44.2px !important;
+  width: 40px !important; /* Giảm từ 44.2px */
+  height: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
 }
 
 .seat-map-container[data-seats-per-row="1"] .seat-number,
@@ -3707,7 +3707,7 @@ button.btn-location-detect span,
 .seat-map-container[data-seats-per-row="9"] .seat-number,
 .seat-map-container[data-seats-per-row="10"] .seat-number,
 .seat-map-container[data-seats-per-row="11"] .seat-number {
-  font-size: 1.1rem !important; /* Tăng font size tương ứng */
+  font-size: 1.0rem !important; /* Giảm từ 1.1rem */
 }
 
 /* Tự động giảm kích thước ghế khi có nhiều ghế (> 15) */
@@ -3727,11 +3727,11 @@ button.btn-location-detect span,
 .seat-map-container[data-seats-per-row="29"] .seat-label,
 .seat-map-container[data-seats-per-row="30"] .seat-label {
   width: calc((100% - (var(--seat-gap, 0.4rem) * (var(--seats-count, 25) - 1)) - 2rem) / var(--seats-count, 25));
-  max-width: 24px;
-  min-width: 16px;
+  max-width: 22px;
+  min-width: 14px;
   height: calc((100% - (var(--seat-gap, 0.4rem) * (var(--seats-count, 25) - 1)) - 2rem) / var(--seats-count, 25));
-  max-height: 24px;
-  min-height: 16px;
+  max-height: 22px;
+  min-height: 14px;
 }
 
 .seat-map-container[data-seats-per-row="31"] .seat-label,
@@ -3740,11 +3740,11 @@ button.btn-location-detect span,
 .seat-map-container[data-seats-per-row="34"] .seat-label,
 .seat-map-container[data-seats-per-row="35"] .seat-label {
   width: calc((100% - (var(--seat-gap, 0.4rem) * (var(--seats-count, 32) - 1)) - 2rem) / var(--seats-count, 32));
-  max-width: 22px;
-  min-width: 14px;
+  max-width: 20px;
+  min-width: 12px;
   height: calc((100% - (var(--seat-gap, 0.4rem) * (var(--seats-count, 32) - 1)) - 2rem) / var(--seats-count, 32));
-  max-height: 22px;
-  min-height: 14px;
+  max-height: 20px;
+  min-height: 12px;
 }
 
 /* Đảm bảo tất cả phần tử con của label (trừ checkbox) không chặn click */

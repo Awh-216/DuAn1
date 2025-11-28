@@ -157,19 +157,6 @@ class AuthController extends Controller {
                 $this->redirect('');
                 return;
             }
-                $error = 'Mật khẩu xác nhận không khớp!';
-                
-                if ($this->isAjaxRequest()) {
-                    header('Content-Type: application/json');
-                    echo json_encode(['success' => false, 'error' => $error]);
-                    return;
-                }
-                
-                // Nếu không phải AJAX, redirect về trang chủ với modal register
-                $_SESSION['error'] = $error;
-                $this->redirect('');
-                return;
-            }
             
             $userModel = new UserModel();
             $existingUser = $userModel->getByEmail($email);

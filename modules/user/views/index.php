@@ -152,9 +152,72 @@ $title = 'Hồ Sơ';
                         <h5 class="mb-0"><i class="fas fa-ticket-alt text-primary me-2"></i> Vé của tôi</h5>
                     </div>
                     <div class="card-body p-4">
-                        <a href="http://localhost/DuAn1/?route=booking/my-tickets" class="btn btn-outline-primary">
-                            <i class="fas fa-eye me-2"></i> Xem tất cả vé
-                        </a>
+                        <?php if (empty($tickets)): ?>
+                            <div class="text-center py-5">
+                                <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Bạn chưa có vé nào.</p>
+                                <a href="?route=booking/index" class="btn btn-primary">
+                                    <i class="fas fa-shopping-cart me-2"></i> Đặt vé ngay
+                                </a>
+                            </div>
+                        <?php else: ?>
+                            <div class="row g-3 mb-3">
+                                <?php 
+                                // Hiển thị tối đa 5 vé gần nhất
+                                $displayTickets = array_slice($tickets, 0, 5);
+                                foreach ($displayTickets as $ticket): 
+                                ?>
+                                    <div class="col-12">
+                                        <div class="card border h-100 hover-shadow">
+                                            <div class="card-body p-3">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="mb-0 fw-bold"><?php echo htmlspecialchars($ticket['movie_title']); ?></h6>
+                                                    <span class="badge <?php 
+                                                        echo $ticket['status'] === 'Đã đặt' ? 'bg-success' : 
+                                                            ($ticket['status'] === 'Đã hủy' ? 'bg-danger' : 'bg-warning'); 
+                                                    ?>">
+                                                        <?php echo htmlspecialchars($ticket['status']); ?>
+                                                    </span>
+                                                </div>
+                                                <div class="small text-muted">
+                                                    <div class="mb-1">
+                                                        <i class="fas fa-building me-1"></i>
+                                                        <?php echo htmlspecialchars($ticket['theater_name']); ?>
+                                                    </div>
+                                                    <div class="mb-1">
+                                                        <i class="fas fa-calendar me-1"></i>
+                                                        <?php echo date('d/m/Y', strtotime($ticket['show_date'])); ?>
+                                                        <i class="fas fa-clock ms-2 me-1"></i>
+                                                        <?php echo date('H:i', strtotime($ticket['show_time'])); ?>
+                                                    </div>
+                                                    <div class="mb-1">
+                                                        <i class="fas fa-chair me-1"></i>
+                                                        Ghế: <?php echo htmlspecialchars($ticket['seat']); ?>
+                                                    </div>
+                                                    <div>
+                                                        <i class="fas fa-money-bill me-1"></i>
+                                                        <?php echo number_format($ticket['price']); ?> đ
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php if (count($tickets) > 5): ?>
+                                <div class="text-center">
+                                    <a href="?route=booking/my-tickets" class="btn btn-outline-primary">
+                                        <i class="fas fa-eye me-2"></i> Xem tất cả vé (<?php echo count($tickets); ?>)
+                                    </a>
+                                </div>
+                            <?php else: ?>
+                                <div class="text-center">
+                                    <a href="?route=booking/my-tickets" class="btn btn-outline-primary">
+                                        <i class="fas fa-eye me-2"></i> Xem tất cả vé
+                                    </a>
+                                </div>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

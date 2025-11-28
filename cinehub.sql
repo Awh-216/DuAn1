@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th10 26, 2025 lúc 05:23 AM
+-- Máy chủ: 127.0.0.1
+-- Thời gian đã tạo: Th10 28, 2025 lúc 03:13 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -56,6 +56,82 @@ INSERT INTO `admin_logs` (`id`, `user_id`, `action`, `module`, `target_type`, `t
 (8, 3, 'Cập nhật điểm người dùng', 'User', 'user', 9, '{\"points\":100000}', '{\"points\":300000,\"action\":\"add\",\"points_changed\":200000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-11-19 01:08:44'),
 (9, 3, 'Cập nhật điểm người dùng', 'User', 'user', 12, '{\"points\":0}', '{\"points\":5000,\"action\":\"add\",\"points_changed\":5000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '2025-11-25 02:23:48'),
 (10, 3, 'Cập nhật điểm người dùng', 'User', 'user', 12, '{\"points\":5000}', '{\"points\":505000,\"action\":\"add\",\"points_changed\":500000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '2025-11-25 02:25:18');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `booking_food_items`
+--
+
+CREATE TABLE `booking_food_items` (
+  `id` int(11) NOT NULL,
+  `ticket_id` int(11) NOT NULL,
+  `food_item_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `price` decimal(10,2) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `booking_pending`
+--
+
+CREATE TABLE `booking_pending` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `showtime_id` int(11) NOT NULL,
+  `seats` text NOT NULL,
+  `food_items` text DEFAULT NULL,
+  `customer_email` varchar(255) NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `vnp_txn_ref` varchar(100) DEFAULT NULL,
+  `status` enum('pending','completed','cancelled') DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `expires_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `booking_pending`
+--
+
+INSERT INTO `booking_pending` (`id`, `user_id`, `showtime_id`, `seats`, `food_items`, `customer_email`, `total_amount`, `vnp_txn_ref`, `status`, `created_at`, `expires_at`) VALUES
+(1, 9, 357, '[\"E9\",\"E10\"]', '{\"1\":\"0\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"0\",\"8\":\"0\",\"6\":\"0\",\"7\":\"0\"}', 'nguyenvanlinh25062006@gmail.com', 400000.00, 'BOOKING_9_357_1764295710_8141', 'completed', '2025-11-28 02:08:30', '2025-11-27 20:23:30');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `booking_session_tracking`
+--
+
+CREATE TABLE `booking_session_tracking` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `showtime_id` int(11) NOT NULL,
+  `screen_id` int(11) NOT NULL,
+  `session_start` datetime NOT NULL,
+  `session_end` datetime DEFAULT NULL,
+  `total_duration_seconds` int(11) DEFAULT 0,
+  `violation_count` int(11) DEFAULT 0,
+  `is_banned` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `booking_session_tracking`
+--
+
+INSERT INTO `booking_session_tracking` (`id`, `user_id`, `showtime_id`, `screen_id`, `session_start`, `session_end`, `total_duration_seconds`, `violation_count`, `is_banned`, `created_at`) VALUES
+(1, 9, 351, 11, '2025-11-28 08:03:42', NULL, 0, 0, 0, '2025-11-28 01:03:42'),
+(2, 9, 354, 12, '2025-11-28 08:03:46', NULL, 0, 0, 0, '2025-11-28 01:03:46'),
+(3, 9, 355, 12, '2025-11-28 08:28:23', NULL, 0, 0, 0, '2025-11-28 01:28:23'),
+(4, 9, 352, 11, '2025-11-28 08:29:20', NULL, 0, 0, 0, '2025-11-28 01:29:20'),
+(5, 9, 353, 11, '2025-11-28 08:29:41', NULL, 0, 0, 0, '2025-11-28 01:29:41'),
+(6, 3, 354, 12, '2025-11-28 08:31:52', NULL, 0, 0, 0, '2025-11-28 01:31:52'),
+(7, 9, 356, 11, '2025-11-28 08:46:36', NULL, 0, 0, 0, '2025-11-28 01:46:36'),
+(8, 9, 357, 12, '2025-11-28 08:46:38', NULL, 0, 0, 0, '2025-11-28 01:46:38'),
+(9, 9, 191, 1, '2025-11-28 09:12:14', NULL, 0, 0, 0, '2025-11-28 02:12:14');
 
 -- --------------------------------------------------------
 
@@ -181,6 +257,90 @@ INSERT INTO `episodes` (`id`, `movie_id`, `episode_number`, `title`, `video_url`
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `food_items`
+--
+
+CREATE TABLE `food_items` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `type` enum('combo','snack','drink') DEFAULT 'combo',
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `food_items`
+--
+
+INSERT INTO `food_items` (`id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
+(1, 'Combo 1 - Bỏng + Nước', '1 bỏng ngô lớn + 1 nước ngọt lớn', 85000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(2, 'Combo 2 - Bỏng + Nước + Snack', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack', 120000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(3, 'Combo 3 - Đôi', '2 bỏng ngô lớn + 2 nước ngọt lớn', 150000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(4, 'Bỏng ngô lớn', 'Bỏng ngô size lớn', 55000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(5, 'Bỏng ngô vừa', 'Bỏng ngô size vừa', 40000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(6, 'Nước ngọt lớn', 'Nước ngọt size lớn', 35000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
+(7, 'Nước ngọt vừa', 'Nước ngọt size vừa', 25000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
+(8, 'Snack mix', 'Hỗn hợp snack', 45000.00, NULL, 'snack', 1, '2025-11-28 01:03:19');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `ip_blocks`
+--
+
+CREATE TABLE `ip_blocks` (
+  `id` int(11) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `expires_at` datetime DEFAULT NULL COMMENT 'NULL = chặn vĩnh viễn',
+  `reason` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `ip_spam_logs`
+--
+
+CREATE TABLE `ip_spam_logs` (
+  `id` int(11) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `action_type` varchar(50) NOT NULL DEFAULT 'general',
+  `is_spam` tinyint(1) DEFAULT 0,
+  `details` text DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `ip_spam_logs`
+--
+
+INSERT INTO `ip_spam_logs` (`id`, `ip_address`, `action_type`, `is_spam`, `details`, `user_id`, `created_at`) VALUES
+(1, '::1', 'booking', 0, 'Đặt vé thành công: 2 vé', 9, '2025-11-28 01:07:57'),
+(2, '::1', 'booking', 0, 'Đặt vé thành công: 4 vé', 9, '2025-11-28 01:09:16'),
+(3, '::1', 'booking', 0, 'Đặt vé thành công: 1 vé', 9, '2025-11-28 01:10:11'),
+(4, '::1', 'booking', 0, 'Đặt vé thành công: 2 vé', 9, '2025-11-28 01:10:35'),
+(5, '::1', 'booking', 0, 'Đặt vé thành công: 2 vé', 9, '2025-11-28 01:11:56'),
+(6, '::1', 'booking', 0, 'Đặt vé thành công: 2 vé', 9, '2025-11-28 01:15:31'),
+(7, '::1', 'booking', 0, 'Đặt vé thành công: 2 vé', 9, '2025-11-28 01:16:16'),
+(8, '::1', 'booking', 0, 'Đặt vé thành công: 2 vé', 9, '2025-11-28 01:16:52'),
+(9, '::1', 'booking', 0, 'Đặt vé thành công: 4 vé', 9, '2025-11-28 01:18:55'),
+(10, '::1', 'booking', 0, 'Đặt vé thành công: 2 vé', 9, '2025-11-28 01:20:31'),
+(11, '::1', 'booking', 0, 'Đặt vé thành công: 2 vé', 9, '2025-11-28 01:22:32'),
+(12, '::1', 'booking', 0, 'Đặt vé thành công: 2 vé', 9, '2025-11-28 01:23:11'),
+(13, '::1', 'booking', 0, 'Đặt vé thành công: 2 vé', 9, '2025-11-28 01:23:45'),
+(14, '::1', 'booking', 0, 'Đặt vé thành công: 2 vé', 9, '2025-11-28 01:26:33'),
+(15, '::1', 'booking', 0, 'Đặt vé thành công: 1 vé', 9, '2025-11-28 01:28:40'),
+(16, '::1', 'login', 1, 'Đăng nhập thất bại: admin2@cinehub.com', NULL, '2025-11-28 01:31:44');
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `movies`
 --
 
@@ -217,9 +377,9 @@ CREATE TABLE `movies` (
 INSERT INTO `movies` (`id`, `title`, `category_id`, `level`, `duration`, `description`, `director`, `actors`, `video_url`, `trailer_url`, `thumbnail`, `status`, `rating`, `created_at`, `status_admin`, `publish_date`, `geo_restriction`, `drm_enabled`, `banner`, `country`, `language`, `age_rating`, `type`) VALUES
 (1, 'Avengers: Endgame', 1, 'Premium', 181, 'Phim siêu anh hùng Marvel, kết thúc của Infinity Saga', 'Anthony Russo, Joe Russo', 'Robert Downey Jr., Chris Evans, Mark Ruffalo', 'data/phim/phimle/Avengers_Endgame.mp4', 'https://example.com/avengers-trailer.mp4', 'data/img/avengers_end_game_img.jpg', 'Chiếu rạp', 9.2, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/avengers_end_game.jpg', 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle'),
 (2, 'Titanic', 2, 'Gold', 194, 'Câu chuyện tình yêu trên con tàu định mệnh', 'James Cameron', 'Leonardo DiCaprio, Kate Winslet', 'data/phim/phimle/titanic.mp4\r\n', 'https://example.com/titanic-trailer.mp4', 'data/img/titanic.jpg', 'Chiếu rạp', 8.8, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle'),
-(3, 'The Hangover', 3, 'Silver', 100, 'Phim hài về chuyến đi Las Vegas đầy biến cố', 'Todd Phillips', 'Bradley Cooper, Ed Helms, Zach Galifianakis', 'https://example.com/hangover.mp4', 'https://example.com/hangover-trailer.mp4', 'hangover.jpg', 'Chiếu rạp', 7.7, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'R', 'phimle'),
-(4, 'The Conjuring', 4, 'Gold', 112, 'Phim kinh dị về các nhà điều tra siêu nhiên', 'James Wan', 'Patrick Wilson, Vera Farmiga', 'https://example.com/conjuring.mp4', 'https://example.com/conjuring-trailer.mp4', 'conjuring.jpg', 'Chiếu rạp', 7.5, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'R', 'phimle'),
-(5, 'Toy Story 4', 5, 'Free', 100, 'Cuộc phiêu lưu mới của Woody và Buzz', 'Josh Cooley', 'Tom Hanks, Tim Allen', 'https://example.com/toystory.mp4', 'https://example.com/toystory-trailer.mp4', 'toystory.jpg', 'Chiếu rạp', 8, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'G', 'phimle'),
+(3, 'The Hangover', 3, 'Silver', 100, 'Phim hài về chuyến đi Las Vegas đầy biến cố', 'Todd Phillips', 'Bradley Cooper, Ed Helms, Zach Galifianakis', 'https://example.com/hangover.mp4', 'https://example.com/hangover-trailer.mp4', 'data/img/the_hangover_img.jpg', 'Chiếu rạp', 7.7, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/the_hangover.jpg', 'Mỹ', 'Tiếng Anh', 'R', 'phimle'),
+(4, 'The Conjuring', 4, 'Gold', 112, 'Phim kinh dị về các nhà điều tra siêu nhiên', 'James Wan', 'Patrick Wilson, Vera Farmiga', 'https://example.com/conjuring.mp4', 'https://example.com/conjuring-trailer.mp4', 'data/img/the_conjuring_img.jpg', 'Chiếu rạp', 7.5, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/the_conjuring.jpg', 'Mỹ', 'Tiếng Anh', 'R', 'phimle'),
+(5, 'Toy Story 4', 5, 'Free', 100, 'Cuộc phiêu lưu mới của Woody và Buzz', 'Josh Cooley', 'Tom Hanks, Tim Allen', 'https://example.com/toystory.mp4', 'https://example.com/toystory-trailer.mp4', 'data/img/toy_story_img.jpg', 'Chiếu rạp', 8, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/toy_story.jpg', 'Mỹ', 'Tiếng Anh', 'G', 'phimle'),
 (6, 'Interstellar', 6, 'Premium', 169, 'Cuộc hành trình không gian để cứu nhân loại', 'Christopher Nolan', 'Matthew McConaughey, Anne Hathaway', 'data/phim/phimle/Interstellar\r\n.mp4', 'https://example.com/interstellar-trailer.mp4', 'data/img/interstellar.jpg', 'Chiếu online', 8.6, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle'),
 (7, 'Indiana Jones', 7, 'Gold', 122, 'Cuộc phiêu lưu tìm kiếm cổ vật', 'Steven Spielberg', 'Harrison Ford', 'https://example.com/indiana.mp4', 'https://example.com/indiana-trailer.mp4', 'data/img/indiana_jones_img.jpg', 'Chiếu online', 8.2, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/indiana_jones.jpg', 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle'),
 (8, 'Game of Thrones', 7, 'Premium', 60, 'Cuộc chiến giành quyền lực giữa các dòng họ ở vùng đất Westeros. Bộ phim kể về cuộc đấu tranh của các gia đình quý tộc để giành lấy Ngai Sắt Sắt và cai trị bảy vương quốc.', 'David Benioff, D.B. Weiss', 'Emilia Clarke, Kit Harington, Peter Dinklage, Lena Headey', 'data/phim/phimbo/gameofthrones', 'https://example.com/got-trailer.mp4', 'data/img/game_of_thrones_img.webp', 'Chiếu online', 9.3, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/game_of_thrones.jpg', 'Mỹ', 'Tiếng Anh', 'TV-MA', 'phimbo'),
@@ -232,7 +392,7 @@ INSERT INTO `movies` (`id`, `title`, `category_id`, `level`, `duration`, `descri
 (15, 'The Office', 3, 'Silver', 22, 'Một mockumentary về nhóm nhân viên văn phòng hàng ngày tại văn phòng chi nhánh Scranton của công ty giấy Dunder Mifflin.', 'Greg Daniels', 'Steve Carell, Rainn Wilson, John Krasinski, Jenna Fischer', 'data/phim/phimbo/the_office', 'https://example.com/the-office-trailer.mp4', 'data/img/the_office.png', 'Chiếu online', 8.9, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
 (16, 'Friends', 3, 'Silver', 22, 'Cuộc sống và tình yêu của sáu người bạn ở Manhattan, New York, khi họ cố gắng tìm ra con đường của mình trong cuộc sống.', 'David Crane, Marta Kauffman', 'Jennifer Aniston, Courteney Cox, Lisa Kudrow, Matt LeBlanc, Matthew Perry, David Schwimmer', 'data/phim/phimbo/friends', 'https://example.com/friends-trailer.mp4', 'data/img/friends.jpg', 'Chiếu online', 9, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
 (17, 'The Witcher', 7, 'Premium', 60, 'Geralt of Rivia, một thợ săn quái vật đột biến đi khắp đất liền để tìm nơi thuộc về mình trong một thế giới nơi con người thường tồi tệ hơn quái vật.', 'Lauren Schmidt Hissrich', 'Henry Cavill, Anya Chalotra, Freya Allan, Joey Batey', 'data/phim/phimbo/the_witcher', 'https://example.com/the-witcher-trailer.mp4', 'data/img/the_witcher.jpg', 'Chiếu online', 8.2, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ/ Ba Lan', 'Tiếng Anh', 'TV-MA', 'phimbo'),
-(18, 'Hai Phượng', 1, 'Premium', 98, 'Mẹ đơn thân từng là dân giang hồ phải chiến đấu với băng nhóm bắt cóc con gái mình.', 'Lê Văn Kiệt', 'Ngô Thanh Vân, Mai Cát Vi', 'data/phim/phimle/hai_phuong.mp4', 'https://example.com/hai-phuong-trailer.mp4', 'data/img/hai_phuong.jpg', 'Chiếu rạp', 7.5, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
+(18, 'Hai Phượng', 1, 'Premium', 98, 'Mẹ đơn thân từng là dân giang hồ phải chiến đấu với băng nhóm bắt cóc con gái mình.', 'Lê Văn Kiệt', 'Ngô Thanh Vân, Mai Cát Vi', 'data/phim/phimle/hai_phuong.mp4', 'https://example.com/hai-phuong-trailer.mp4', 'data/img/hai_phuong_img.jpg', 'Chiếu rạp', 7.5, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, 'data/img/hai_phuong.jpg', 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
 (19, 'Mắt Biếc', 2, 'Gold', 117, 'Câu chuyện tình đơn phương lãng mạn và đầy hoài niệm ở thập niên 70.', 'Victor Vũ', 'Trần Nghĩa, Trúc Anh, Trần Phong', 'data/phim/phimle/mat_biec.mp4', 'https://example.com/mat-biec-trailer.mp4', 'data/img/mat_biec_img.jpg', 'Chiếu rạp', 8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, 'data/img/mat_biec.webp', 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
 (20, 'Bố Già', 3, 'Premium', 128, 'Phim về tình cha con đầy cảm xúc và những mâu thuẫn trong gia đình.', 'Trấn Thành, Vũ Ngọc Đãng', 'Trấn Thành, Lê Giang, Tuấn Trần', 'data/phim/phimle/bo_gia.mp4', 'https://example.com/bo-gia-trailer.mp4', 'data/img/bo_gia.jpg', 'Chiếu rạp', 8.5, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
 (21, 'Tiệc Trăng Máu', 3, 'Gold', 100, 'Bảy người bạn cùng chơi một trò chơi công khai tin nhắn và cuộc gọi điện thoại, dẫn đến những bí mật bị phanh phui.', 'Nguyễn Quang Dũng', 'Thái Hòa, Thu Trang, Hồng Ánh, Hứa Vĩ Văn', 'data/phim/phimle/tiec_trang_mau.mp4', 'https://example.com/tiec-trang-mau-trailer.mp4', 'data/img/tiec_trang_mau.jpg', 'Chiếu rạp', 7.8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
@@ -446,6 +606,61 @@ CREATE TABLE `seat_reservations` (
   `reserved_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `expires_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `seat_selection_logs`
+--
+
+CREATE TABLE `seat_selection_logs` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `showtime_id` int(11) NOT NULL,
+  `seat_count` int(11) NOT NULL,
+  `seats` text DEFAULT NULL,
+  `is_spam` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `seat_selection_logs`
+--
+
+INSERT INTO `seat_selection_logs` (`id`, `user_id`, `ip_address`, `showtime_id`, `seat_count`, `seats`, `is_spam`, `created_at`) VALUES
+(1, 9, '::1', 354, 7, '[\"A5\",\"B6\",\"C1\",\"C3\",\"C5\",\"D4\",\"D6\"]', 0, '2025-11-28 01:07:25'),
+(2, 9, '::1', 354, 2, '[\"C1\",\"D1\"]', 0, '2025-11-28 01:07:57'),
+(3, 9, '::1', 354, 4, '[\"D2\",\"D6\",\"D7\",\"D16\"]', 0, '2025-11-28 01:08:36'),
+(4, 9, '::1', 354, 2, '[\"D2\",\"D4\"]', 0, '2025-11-28 01:08:52'),
+(5, 9, '::1', 354, 4, '[\"A4\",\"B4\",\"C4\",\"D4\"]', 0, '2025-11-28 01:09:16'),
+(6, 9, '::1', 354, 7, '[\"A3\",\"A9\",\"B3\",\"C3\",\"C9\",\"D3\",\"D9\"]', 0, '2025-11-28 01:09:59'),
+(7, 9, '::1', 354, 1, '[\"D3\"]', 0, '2025-11-28 01:10:11'),
+(8, 9, '::1', 354, 2, '[\"B6\",\"C6\"]', 0, '2025-11-28 01:10:35'),
+(9, 9, '::1', 354, 2, '[\"C5\",\"D6\"]', 0, '2025-11-28 01:11:56'),
+(10, 9, '::1', 354, 2, '[\"B2\",\"C3\"]', 0, '2025-11-28 01:13:17'),
+(11, 9, '::1', 354, 8, '[\"B3\",\"C2\",\"C10\",\"C12\",\"C14\",\"D9\",\"D11\",\"D13\"]', 0, '2025-11-28 01:14:29'),
+(12, 9, '::1', 354, 2, '[\"B7\",\"B8\"]', 0, '2025-11-28 01:15:31'),
+(13, 9, '::1', 354, 2, '[\"B5\",\"C9\"]', 0, '2025-11-28 01:16:16'),
+(14, 9, '::1', 354, 2, '[\"C12\",\"D11\"]', 0, '2025-11-28 01:16:51'),
+(15, 9, '::1', 354, 1, '[\"C18\"]', 0, '2025-11-28 01:18:31'),
+(16, 9, '::1', 354, 4, '[\"C18\",\"C19\",\"D17\",\"D18\"]', 0, '2025-11-28 01:18:55'),
+(17, 9, '::1', 354, 2, '[\"B14\",\"B15\"]', 0, '2025-11-28 01:19:19'),
+(18, 9, '::1', 354, 2, '[\"B11\",\"C10\"]', 0, '2025-11-28 01:20:31'),
+(19, 9, '::1', 354, 5, '[\"C14\",\"C20\",\"C21\",\"D9\",\"D10\"]', 0, '2025-11-28 01:22:18'),
+(20, 9, '::1', 354, 2, '[\"C20\",\"C21\"]', 0, '2025-11-28 01:22:32'),
+(21, 9, '::1', 354, 2, '[\"C24\",\"C25\"]', 0, '2025-11-28 01:23:11'),
+(22, 9, '::1', 354, 2, '[\"B23\",\"C22\"]', 0, '2025-11-28 01:23:45'),
+(23, 9, '::1', 354, 3, '[\"B21\",\"B25\",\"C23\"]', 0, '2025-11-28 01:24:17'),
+(24, 9, '::1', 354, 2, '[\"A25\",\"B24\"]', 0, '2025-11-28 01:25:53'),
+(25, 9, '::1', 354, 2, '[\"B14\",\"B15\"]', 0, '2025-11-28 01:26:13'),
+(26, 9, '::1', 354, 2, '[\"A11\",\"B10\"]', 0, '2025-11-28 01:26:33'),
+(27, 9, '::1', 355, 1, '[\"D11\"]', 0, '2025-11-28 01:28:40'),
+(28, 9, '::1', 357, 2, '[\"D8\",\"D9\"]', 0, '2025-11-28 02:06:18'),
+(29, 9, '::1', 357, 2, '[\"E9\",\"E10\"]', 0, '2025-11-28 02:06:26'),
+(30, 9, '::1', 357, 2, '[\"E10\",\"E11\"]', 0, '2025-11-28 02:06:47'),
+(31, 9, '::1', 357, 2, '[\"E9\",\"E10\"]', 0, '2025-11-28 02:08:30'),
+(32, 9, '::1', 191, 4, '[\"I2\",\"I3\",\"I4\",\"I5\"]', 0, '2025-11-28 02:12:24');
 
 -- --------------------------------------------------------
 
@@ -692,7 +907,14 @@ INSERT INTO `showtimes` (`id`, `movie_id`, `theater_id`, `show_date`, `show_time
 (339, 26, 1, '2025-11-25', '09:30:00', 75000.00, '2025-11-24 02:58:07', 1),
 (340, 26, 5, '2025-11-26', '13:00:00', 88000.00, '2025-11-24 02:58:07', 8),
 (341, 27, 2, '2025-11-25', '11:00:00', 75000.00, '2025-11-24 02:58:07', 4),
-(342, 27, 4, '2025-11-26', '12:30:00', 78000.00, '2025-11-24 02:58:07', 7);
+(342, 27, 4, '2025-11-26', '12:30:00', 78000.00, '2025-11-24 02:58:07', 7),
+(351, 18, 3, '2025-11-29', '14:00:00', 120000.00, '2025-11-28 01:03:25', 11),
+(352, 18, 3, '2025-11-29', '17:00:00', 120000.00, '2025-11-28 01:03:25', 11),
+(353, 18, 3, '2025-11-29', '20:00:00', 120000.00, '2025-11-28 01:03:25', 11),
+(354, 18, 3, '2025-11-29', '15:30:00', 130000.00, '2025-11-28 01:03:25', 12),
+(355, 18, 3, '2025-11-29', '19:00:00', 130000.00, '2025-11-28 01:03:25', 12),
+(356, 18, 3, '2025-11-28', '03:00:00', 120000.00, '2025-11-28 01:03:25', 11),
+(357, 18, 3, '2025-11-28', '04:00:00', 130000.00, '2025-11-28 01:03:25', 12);
 
 -- --------------------------------------------------------
 
@@ -808,6 +1030,19 @@ INSERT INTO `theaters` (`id`, `name`, `location`, `phone`, `created_at`, `total_
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `theater_managers`
+--
+
+CREATE TABLE `theater_managers` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `theater_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `theater_screens`
 --
 
@@ -828,47 +1063,17 @@ CREATE TABLE `theater_screens` (
 --
 
 INSERT INTO `theater_screens` (`id`, `theater_id`, `screen_name`, `total_seats`, `seat_layout`, `seat_layout_config`, `screen_type`, `is_active`, `created_at`) VALUES
-(1, 1, 'Phòng 1', 120, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K","L"],"cols":[1,2,3,4,5,6,7,8,9,10,11,12],"vip_rows":["D","E","F","G","H","I","J","K"],"couple_rows":["L"],"normal_price":120000,"vip_price":180000,"couple_price":240000,"layout_type":"standard"}', '2D', 1, '2025-11-12 07:41:09'),
-(2, 1, 'Phòng 2', 150, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K","L","M"],"cols":[1,2,3,4,5,6,7,8,9,10,11,12,13,14],"vip_rows":["D","E","F","G","H","I","J","K","L"],"couple_rows":["M"],"normal_price":130000,"vip_price":200000,"couple_price":260000,"layout_type":"standard"}', '3D', 1, '2025-11-12 07:41:09'),
-(3, 2, 'Phòng 1', 100, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J"],"cols":[1,2,3,4,5,6,7,8,9,10],"vip_rows":["D","E","F","G","H","I"],"couple_rows":["J"],"normal_price":110000,"vip_price":170000,"couple_price":220000,"layout_type":"standard"}', '2D', 1, '2025-11-12 07:41:09'),
-(4, 2, 'Phòng 2', 120, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K","L"],"cols":[1,2,3,4,5,6,7,8,9,10],"vip_rows":["D","E","F","G","H","I","J","K"],"couple_rows":["L"],"normal_price":150000,"vip_price":220000,"couple_price":300000,"layout_type":"imax"}', 'IMAX', 1, '2025-11-12 07:41:09'),
-(5, 3, 'Phòng 1', 200, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K","L","M","N"],"cols":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],"vip_rows":["D","E","F","G","H","I","J","K","L","M"],"couple_rows":["N"],"normal_price":140000,"vip_price":210000,"couple_price":280000,"layout_type":"4dx"}', '4DX', 1, '2025-11-12 07:41:09'),
-(6, 3, 'Phòng 2', 180, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K","L","M"],"cols":[1,2,3,4,5,6,7,8,9,10,11,12,13,14],"vip_rows":["D","E","F","G","H","I","J","K","L"],"couple_rows":["M"],"normal_price":130000,"vip_price":200000,"couple_price":260000,"layout_type":"standard"}', '3D', 1, '2025-11-12 07:41:09'),
-(7, 4, 'Phòng 1', 110, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K"],"cols":[1,2,3,4,5,6,7,8,9,10],"vip_rows":["D","E","F","G","H","I","J"],"couple_rows":["K"],"normal_price":115000,"vip_price":175000,"couple_price":230000,"layout_type":"standard"}', '2D', 1, '2025-11-12 07:41:09'),
-(8, 5, 'Phòng 1', 130, NULL, '{"rows":["A","B","C","D","E","F","G","H","I","J","K","L"],"cols":[1,2,3,4,5,6,7,8,9,10,11],"vip_rows":["D","E","F","G","H","I","J","K"],"couple_rows":["L"],"normal_price":125000,"vip_price":190000,"couple_price":250000,"layout_type":"standard"}', '3D', 1, '2025-11-12 07:41:09'),
-(9, 1, 'Phòng 3', 200, NULL, '{"rows":["A","B","C","D","E","F","G","H","I"],"cols":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"vip_rows":["D","E","F","G","H","I"],"couple_rows":[],"normal_price":120000,"vip_price":180000,"couple_price":240000,"layout_type":"complex","seat_groups":[{"rows":["A","B","C","D","E","F","G","H","I"],"cols":[1,2]},{"rows":["A","B","C","D","E","F","G","H","I"],"cols":[3,4,5,6,7,8,9,10,11,12,13,14,15]},{"rows":["H","I"],"cols":[16,17]}]}', 'IMAX', 1, '2025-11-12 07:41:09');
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `food_items`
---
-
-CREATE TABLE `food_items` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `price` decimal(10,2) NOT NULL,
-  `image` varchar(255) DEFAULT NULL,
-  `type` enum('combo','snack','drink') DEFAULT 'combo',
-  `is_active` tinyint(1) DEFAULT 1,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Đang đổ dữ liệu cho bảng `food_items`
---
-
-INSERT INTO `food_items` (`id`, `name`, `description`, `price`, `type`, `is_active`) VALUES
-(1, 'Combo 1 - Bỏng + Nước', '1 bỏng ngô lớn + 1 nước ngọt lớn', 85000.00, 'combo', 1),
-(2, 'Combo 2 - Bỏng + Nước + Snack', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack', 120000.00, 'combo', 1),
-(3, 'Combo 3 - Đôi', '2 bỏng ngô lớn + 2 nước ngọt lớn', 150000.00, 'combo', 1),
-(4, 'Bỏng ngô lớn', 'Bỏng ngô size lớn', 55000.00, 'snack', 1),
-(5, 'Bỏng ngô vừa', 'Bỏng ngô size vừa', 40000.00, 'snack', 1),
-(6, 'Nước ngọt lớn', 'Nước ngọt size lớn', 35000.00, 'drink', 1),
-(7, 'Nước ngọt vừa', 'Nước ngọt size vừa', 25000.00, 'drink', 1),
-(8, 'Snack mix', 'Hỗn hợp snack', 45000.00, 'snack', 1);
+(1, 1, 'Phòng 1', 120, NULL, '{\"rows\":[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\",\"L\"],\"cols\":[1,2,3,4,5,6,7,8,9,10,11,12],\"vip_rows\":[\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\"],\"couple_rows\":[\"L\"],\"normal_price\":120000,\"vip_price\":180000,\"couple_price\":240000,\"layout_type\":\"standard\"}', '2D', 1, '2025-11-12 07:41:09'),
+(2, 1, 'Phòng 2', 150, NULL, '{\"rows\":[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\",\"L\",\"M\"],\"cols\":[1,2,3,4,5,6,7,8,9,10,11,12,13,14],\"vip_rows\":[\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\",\"L\"],\"couple_rows\":[\"M\"],\"normal_price\":130000,\"vip_price\":200000,\"couple_price\":260000,\"layout_type\":\"standard\"}', '3D', 1, '2025-11-12 07:41:09'),
+(3, 2, 'Phòng 1', 100, NULL, '{\"rows\":[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\"],\"cols\":[1,2,3,4,5,6,7,8,9,10],\"vip_rows\":[\"D\",\"E\",\"F\",\"G\",\"H\",\"I\"],\"couple_rows\":[\"J\"],\"normal_price\":110000,\"vip_price\":170000,\"couple_price\":220000,\"layout_type\":\"standard\"}', '2D', 1, '2025-11-12 07:41:09'),
+(4, 2, 'Phòng 2', 120, NULL, '{\"rows\":[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\",\"L\"],\"cols\":[1,2,3,4,5,6,7,8,9,10],\"vip_rows\":[\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\"],\"couple_rows\":[\"L\"],\"normal_price\":150000,\"vip_price\":220000,\"couple_price\":300000,\"layout_type\":\"imax\"}', 'IMAX', 1, '2025-11-12 07:41:09'),
+(5, 3, 'Phòng 1', 200, NULL, '{\"rows\":[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\",\"L\",\"M\",\"N\"],\"cols\":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],\"vip_rows\":[\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\",\"L\",\"M\"],\"couple_rows\":[\"N\"],\"normal_price\":140000,\"vip_price\":210000,\"couple_price\":280000,\"layout_type\":\"4dx\"}', '4DX', 1, '2025-11-12 07:41:09'),
+(6, 3, 'Phòng 2', 180, NULL, '{\"rows\":[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\",\"L\",\"M\"],\"cols\":[1,2,3,4,5,6,7,8,9,10,11,12,13,14],\"vip_rows\":[\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\",\"L\"],\"couple_rows\":[\"M\"],\"normal_price\":130000,\"vip_price\":200000,\"couple_price\":260000,\"layout_type\":\"standard\"}', '3D', 1, '2025-11-12 07:41:09'),
+(7, 4, 'Phòng 1', 110, NULL, '{\"rows\":[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\"],\"cols\":[1,2,3,4,5,6,7,8,9,10],\"vip_rows\":[\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\"],\"couple_rows\":[\"K\"],\"normal_price\":115000,\"vip_price\":175000,\"couple_price\":230000,\"layout_type\":\"standard\"}', '2D', 1, '2025-11-12 07:41:09'),
+(8, 5, 'Phòng 1', 130, NULL, '{\"rows\":[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\",\"L\"],\"cols\":[1,2,3,4,5,6,7,8,9,10,11],\"vip_rows\":[\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\"],\"couple_rows\":[\"L\"],\"normal_price\":125000,\"vip_price\":190000,\"couple_price\":250000,\"layout_type\":\"standard\"}', '3D', 1, '2025-11-12 07:41:09'),
+(9, 1, 'Phòng 3', 200, NULL, '{\"rows\":[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\"],\"cols\":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],\"vip_rows\":[\"D\",\"E\",\"F\",\"G\",\"H\",\"I\"],\"couple_rows\":[],\"normal_price\":120000,\"vip_price\":180000,\"couple_price\":240000,\"layout_type\":\"complex\",\"seat_groups\":[{\"rows\":[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\"],\"cols\":[1,2]},{\"rows\":[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\"],\"cols\":[3,4,5,6,7,8,9,10,11,12,13,14,15]},{\"rows\":[\"H\",\"I\"],\"cols\":[16,17]}]}', 'IMAX', 1, '2025-11-12 07:41:09'),
+(11, 3, 'Phòng 3', 180, NULL, '{\r\n  \"layout_type\": \"grouped\",\r\n  \"rows\": [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\", \"H\", \"I\"],\r\n  \"seat_groups\": [\r\n    {\r\n      \"name\": \"Khối trái\",\r\n      \"rows\": [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\", \"H\", \"I\"],\r\n      \"cols\": [1, 2, 3, 4]\r\n    },\r\n    {\r\n      \"name\": \"Khối giữa\",\r\n      \"rows\": [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\", \"H\", \"I\"],\r\n      \"cols\": [5, 6, 7, 8]\r\n    },\r\n    {\r\n      \"name\": \"Khối phải\",\r\n      \"rows\": [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\", \"H\", \"I\"],\r\n      \"cols\": [9, 10, 11, 12]\r\n    },\r\n    {\r\n      \"name\": \"Ghế riêng lẻ\",\r\n      \"rows\": [\"H\", \"I\"],\r\n      \"cols\": [13, 14]\r\n    }\r\n  ],\r\n  \"vip_rows\": [\"D\", \"E\", \"F\", \"G\", \"H\"],\r\n  \"couple_rows\": [],\r\n  \"normal_price\": 120000,\r\n  \"vip_price\": 180000,\r\n  \"couple_price\": 240000\r\n}', '2D', 1, '2025-11-28 01:03:25'),
+(12, 3, 'Phòng 4', 224, NULL, '{\r\n  \"layout_type\": \"grouped\",\r\n  \"rows\": [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\"],\r\n  \"seat_groups\": [\r\n    {\r\n      \"name\": \"Khối 1\",\r\n      \"rows\": [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\"],\r\n      \"cols\": [1, 2, 3, 4, 5, 6]\r\n    },\r\n    {\r\n      \"name\": \"Khối 2\",\r\n      \"rows\": [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\"],\r\n      \"cols\": [7, 8, 9, 10, 11, 12, 13, 14, 15, 16]\r\n    },\r\n    {\r\n      \"name\": \"Khối 3\",\r\n      \"rows\": [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\"],\r\n      \"cols\": [17, 18, 19]\r\n    },\r\n    {\r\n      \"name\": \"Khối 4\",\r\n      \"rows\": [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\"],\r\n      \"cols\": [20, 21, 22, 23, 24, 25]\r\n    }\r\n  ],\r\n  \"vip_rows\": [\"E\", \"F\", \"G\"],\r\n  \"couple_rows\": [],\r\n  \"normal_price\": 130000,\r\n  \"vip_price\": 200000,\r\n  \"couple_price\": 260000\r\n}', '3D', 1, '2025-11-28 01:03:25');
 
 -- --------------------------------------------------------
 
@@ -877,7 +1082,7 @@ INSERT INTO `food_items` (`id`, `name`, `description`, `price`, `type`, `is_acti
 --
 
 CREATE TABLE `tickets` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `showtime_id` int(11) NOT NULL,
   `seat` varchar(10) NOT NULL,
@@ -885,8 +1090,7 @@ CREATE TABLE `tickets` (
   `qr_code` varchar(255) DEFAULT NULL,
   `price` decimal(10,2) DEFAULT NULL,
   `status` enum('Đã đặt','Đã hủy') DEFAULT 'Đã đặt',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`)
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -916,27 +1120,41 @@ INSERT INTO `tickets` (`id`, `user_id`, `showtime_id`, `seat`, `seat_type`, `qr_
 (20, 9, 121, 'I7', 'normal', 'TICKET_692506ab81559_9_121_1764034219_I7', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
 (21, 9, 116, 'I5', 'normal', 'TICKET_692512378240a_9_116_1764037175_I5', 130000.00, 'Đã đặt', '2025-11-25 02:19:35'),
 (22, 9, 116, 'I6', 'normal', 'TICKET_6925123783725_9_116_1764037175_I6', 130000.00, 'Đã đặt', '2025-11-25 02:19:35'),
-(23, 9, 151, 'K5', 'normal', 'TICKET_69266a0629905_9_151_1764125190_K5', 120000.00, 'Đã đặt', '2025-11-26 02:46:30');
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `booking_food_items`
---
-
-CREATE TABLE `booking_food_items` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ticket_id` int(11) NOT NULL,
-  `food_item_id` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL DEFAULT 1,
-  `price` decimal(10,2) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `ticket_id` (`ticket_id`),
-  KEY `food_item_id` (`food_item_id`),
-  CONSTRAINT `fk_booking_food_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_booking_food_item` FOREIGN KEY (`food_item_id`) REFERENCES `food_items` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+(23, 9, 151, 'K5', 'normal', 'TICKET_69266a0629905_9_151_1764125190_K5', 120000.00, 'Đã đặt', '2025-11-26 02:46:30'),
+(24, 9, 354, 'C1', 'normal', 'TICKET_6928f5ed22549_9_354_1764292077_C1', 130000.00, 'Đã đặt', '2025-11-28 01:07:57'),
+(25, 9, 354, 'D1', 'normal', 'TICKET_6928f5ed25b7b_9_354_1764292077_D1', 130000.00, 'Đã đặt', '2025-11-28 01:07:57'),
+(26, 9, 354, 'A4', 'normal', 'TICKET_6928f63cb1d3c_9_354_1764292156_A4', 130000.00, 'Đã đặt', '2025-11-28 01:09:16'),
+(27, 9, 354, 'B4', 'normal', 'TICKET_6928f63cb2506_9_354_1764292156_B4', 130000.00, 'Đã đặt', '2025-11-28 01:09:16'),
+(28, 9, 354, 'C4', 'normal', 'TICKET_6928f63cb2e75_9_354_1764292156_C4', 130000.00, 'Đã đặt', '2025-11-28 01:09:16'),
+(29, 9, 354, 'D4', 'normal', 'TICKET_6928f63cb342c_9_354_1764292156_D4', 130000.00, 'Đã đặt', '2025-11-28 01:09:16'),
+(30, 9, 354, 'D3', 'normal', 'TICKET_6928f6735fbc6_9_354_1764292211_D3', 130000.00, 'Đã đặt', '2025-11-28 01:10:11'),
+(31, 9, 354, 'B6', 'normal', 'TICKET_6928f68bda27a_9_354_1764292235_B6', 130000.00, 'Đã đặt', '2025-11-28 01:10:35'),
+(32, 9, 354, 'C6', 'normal', 'TICKET_6928f68bda8f8_9_354_1764292235_C6', 130000.00, 'Đã đặt', '2025-11-28 01:10:35'),
+(33, 9, 354, 'C5', 'normal', 'TICKET_6928f6dc1494e_9_354_1764292316_C5', 130000.00, 'Đã đặt', '2025-11-28 01:11:56'),
+(34, 9, 354, 'D6', 'normal', 'TICKET_6928f6dc14edb_9_354_1764292316_D6', 130000.00, 'Đã đặt', '2025-11-28 01:11:56'),
+(35, 9, 354, 'B7', 'normal', 'TICKET_6928f7b37254a_9_354_1764292531_B7', 130000.00, 'Đã đặt', '2025-11-28 01:15:31'),
+(36, 9, 354, 'B8', 'normal', 'TICKET_6928f7b3731f2_9_354_1764292531_B8', 130000.00, 'Đã đặt', '2025-11-28 01:15:31'),
+(37, 9, 354, 'B5', 'normal', 'TICKET_6928f7e0831f8_9_354_1764292576_B5', 130000.00, 'Đã đặt', '2025-11-28 01:16:16'),
+(38, 9, 354, 'C9', 'normal', 'TICKET_6928f7e083b07_9_354_1764292576_C9', 130000.00, 'Đã đặt', '2025-11-28 01:16:16'),
+(39, 9, 354, 'C12', 'normal', 'TICKET_6928f803f2edd_9_354_1764292611_C12', 130000.00, 'Đã đặt', '2025-11-28 01:16:51'),
+(40, 9, 354, 'D11', 'normal', 'TICKET_6928f803f3548_9_354_1764292611_D11', 130000.00, 'Đã đặt', '2025-11-28 01:16:52'),
+(41, 9, 354, 'C18', 'normal', 'TICKET_6928f87f60dcb_9_354_1764292735_C18', 130000.00, 'Đã đặt', '2025-11-28 01:18:55'),
+(42, 9, 354, 'C19', 'normal', 'TICKET_6928f87f6185a_9_354_1764292735_C19', 130000.00, 'Đã đặt', '2025-11-28 01:18:55'),
+(43, 9, 354, 'D17', 'normal', 'TICKET_6928f87f61eab_9_354_1764292735_D17', 130000.00, 'Đã đặt', '2025-11-28 01:18:55'),
+(44, 9, 354, 'D18', 'normal', 'TICKET_6928f87f6251b_9_354_1764292735_D18', 130000.00, 'Đã đặt', '2025-11-28 01:18:55'),
+(45, 9, 354, 'B11', 'normal', 'TICKET_6928f8df6b12b_9_354_1764292831_B11', 130000.00, 'Đã đặt', '2025-11-28 01:20:31'),
+(46, 9, 354, 'C10', 'normal', 'TICKET_6928f8df6c15a_9_354_1764292831_C10', 130000.00, 'Đã đặt', '2025-11-28 01:20:31'),
+(47, 9, 354, 'C20', 'normal', 'TICKET_6928f958850fe_9_354_1764292952_C20', 130000.00, 'Đã đặt', '2025-11-28 01:22:32'),
+(48, 9, 354, 'C21', 'normal', 'TICKET_6928f95885a36_9_354_1764292952_C21', 130000.00, 'Đã đặt', '2025-11-28 01:22:32'),
+(49, 9, 354, 'C24', 'normal', 'TICKET_6928f97fbc4c5_9_354_1764292991_C24', 130000.00, 'Đã đặt', '2025-11-28 01:23:11'),
+(50, 9, 354, 'C25', 'normal', 'TICKET_6928f97fbcdc9_9_354_1764292991_C25', 130000.00, 'Đã đặt', '2025-11-28 01:23:11'),
+(51, 9, 354, 'B23', 'normal', 'TICKET_6928f9a1b6715_9_354_1764293025_B23', 130000.00, 'Đã đặt', '2025-11-28 01:23:45'),
+(52, 9, 354, 'C22', 'normal', 'TICKET_6928f9a1b6ec4_9_354_1764293025_C22', 130000.00, 'Đã đặt', '2025-11-28 01:23:45'),
+(53, 9, 354, 'A11', 'normal', 'TICKET_6928fa497ab6e_9_354_1764293193_A11', 130000.00, 'Đã đặt', '2025-11-28 01:26:33'),
+(54, 9, 354, 'B10', 'normal', 'TICKET_6928fa497b6f2_9_354_1764293193_B10', 130000.00, 'Đã đặt', '2025-11-28 01:26:33'),
+(55, 9, 355, 'D11', 'normal', 'TICKET_6928fac8e037b_9_355_1764293320_D11', 130000.00, 'Đã đặt', '2025-11-28 01:28:40'),
+(56, 9, 357, 'E9', 'vip', 'TICKET_69290459ea985_9_357_1764295769_E9', 200000.00, 'Đã đặt', '2025-11-28 02:09:29'),
+(57, 9, 357, 'E10', 'vip', 'TICKET_69290459eb7b9_9_357_1764295769_E10', 200000.00, 'Đã đặt', '2025-11-28 02:09:29');
 
 -- --------------------------------------------------------
 
@@ -968,7 +1186,8 @@ INSERT INTO `transactions` (`id`, `user_id`, `type`, `related_id`, `amount`, `me
 (6, 1, 'ticket', 2, 120000.00, 'ZaloPay', 'Thành công', '2025-11-12 07:41:09'),
 (7, 9, 'subscription', 4, 199000.00, '', 'Thành công', '2025-11-19 01:09:14'),
 (8, 12, 'subscription', 2, 79000.00, '', 'Thành công', '2025-11-25 02:26:14'),
-(9, 12, 'subscription', 3, 129000.00, '', 'Thành công', '2025-11-25 02:27:04');
+(9, 12, 'subscription', 3, 129000.00, '', 'Thành công', '2025-11-25 02:27:04'),
+(10, 9, 'ticket', 1, 400000.00, '', 'Thành công', '2025-11-28 02:09:29');
 
 -- --------------------------------------------------------
 
@@ -1065,127 +1284,6 @@ INSERT INTO `user_tokens` (`id`, `user_id`, `token`, `device_info`, `ip_address`
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `seat_selection_logs`
--- Bảng này dùng để track việc chọn ghế để phát hiện spam
---
-CREATE TABLE `seat_selection_logs` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `ip_address` varchar(45) DEFAULT NULL,
-  `showtime_id` int(11) NOT NULL,
-  `seat_count` int(11) NOT NULL,
-  `seats` text DEFAULT NULL,
-  `is_spam` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-ALTER TABLE `seat_selection_logs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `idx_ip_address_seat_logs` (`ip_address`),
-  ADD KEY `showtime_id` (`showtime_id`),
-  ADD KEY `created_at` (`created_at`),
-  ADD KEY `is_spam` (`is_spam`);
-
-ALTER TABLE `seat_selection_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `theater_managers`
--- Bảng này lưu thông tin manager được phân quyền quản lý rạp
---
-CREATE TABLE `theater_managers` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `theater_id` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-ALTER TABLE `theater_managers`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_user_theater` (`user_id`, `theater_id`),
-  ADD KEY `theater_id` (`theater_id`);
-
-ALTER TABLE `theater_managers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `booking_session_tracking`
--- Bảng này track thời gian người dùng ở trong phòng đặt vé
---
-CREATE TABLE `booking_session_tracking` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `showtime_id` int(11) NOT NULL,
-  `screen_id` int(11) NOT NULL,
-  `session_start` datetime NOT NULL,
-  `session_end` datetime DEFAULT NULL,
-  `total_duration_seconds` int(11) DEFAULT 0,
-  `violation_count` int(11) DEFAULT 0,
-  `is_banned` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-ALTER TABLE `booking_session_tracking`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `showtime_id` (`showtime_id`),
-  ADD KEY `screen_id` (`screen_id`),
-  ADD KEY `session_start` (`session_start`),
-  ADD KEY `is_banned` (`is_banned`);
-
-ALTER TABLE `booking_session_tracking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `ip_spam_logs`
--- Bảng này lưu log các hành động của IP để tracking và phát hiện spam
---
-CREATE TABLE `ip_spam_logs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ip_address` varchar(45) NOT NULL,
-  `action_type` varchar(50) NOT NULL DEFAULT 'general',
-  `is_spam` tinyint(1) DEFAULT 0,
-  `details` text DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `idx_ip_address` (`ip_address`),
-  KEY `idx_action_type` (`action_type`),
-  KEY `idx_is_spam` (`is_spam`),
-  KEY `idx_created_at` (`created_at`),
-  KEY `idx_ip_action_spam` (`ip_address`, `action_type`, `is_spam`),
-  KEY `idx_user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `ip_blocks`
--- Bảng này lưu danh sách IP bị chặn
---
-CREATE TABLE `ip_blocks` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ip_address` varchar(45) NOT NULL,
-  `expires_at` datetime DEFAULT NULL COMMENT 'NULL = chặn vĩnh viễn',
-  `reason` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_ip` (`ip_address`),
-  KEY `idx_expires_at` (`expires_at`),
-  KEY `idx_ip_expires` (`ip_address`, `expires_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Cấu trúc bảng cho bảng `watch_history`
 --
 
@@ -1232,7 +1330,7 @@ INSERT INTO `watch_history` (`id`, `user_id`, `movie_id`, `last_time`, `rating`,
 (87, 3, 36, 0, NULL, 0, '2025-11-25 14:33:55'),
 (89, 3, 11, 0, NULL, 0, '2025-11-25 14:56:06'),
 (92, 9, 28, 0, NULL, 0, '2025-11-26 02:47:13'),
-(93, 9, 6, 0, NULL, 0, '2025-11-26 03:20:36');
+(93, 9, 6, 0, NULL, 0, '2025-11-28 02:09:56');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -1246,6 +1344,36 @@ ALTER TABLE `admin_logs`
   ADD KEY `idx_user_id` (`user_id`),
   ADD KEY `idx_created_at` (`created_at`),
   ADD KEY `idx_module` (`module`);
+
+--
+-- Chỉ mục cho bảng `booking_food_items`
+--
+ALTER TABLE `booking_food_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ticket_id` (`ticket_id`),
+  ADD KEY `food_item_id` (`food_item_id`);
+
+--
+-- Chỉ mục cho bảng `booking_pending`
+--
+ALTER TABLE `booking_pending`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `vnp_txn_ref` (`vnp_txn_ref`),
+  ADD KEY `idx_user` (`user_id`),
+  ADD KEY `idx_showtime` (`showtime_id`),
+  ADD KEY `idx_txn_ref` (`vnp_txn_ref`),
+  ADD KEY `idx_status` (`status`);
+
+--
+-- Chỉ mục cho bảng `booking_session_tracking`
+--
+ALTER TABLE `booking_session_tracking`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `showtime_id` (`showtime_id`),
+  ADD KEY `screen_id` (`screen_id`),
+  ADD KEY `session_start` (`session_start`),
+  ADD KEY `is_banned` (`is_banned`);
 
 --
 -- Chỉ mục cho bảng `categories`
@@ -1280,6 +1408,33 @@ ALTER TABLE `episodes`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_movie_episode` (`movie_id`,`episode_number`),
   ADD KEY `idx_movie_id` (`movie_id`);
+
+--
+-- Chỉ mục cho bảng `food_items`
+--
+ALTER TABLE `food_items`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Chỉ mục cho bảng `ip_blocks`
+--
+ALTER TABLE `ip_blocks`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_ip` (`ip_address`),
+  ADD KEY `idx_expires_at` (`expires_at`),
+  ADD KEY `idx_ip_expires` (`ip_address`,`expires_at`);
+
+--
+-- Chỉ mục cho bảng `ip_spam_logs`
+--
+ALTER TABLE `ip_spam_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_ip_address` (`ip_address`),
+  ADD KEY `idx_action_type` (`action_type`),
+  ADD KEY `idx_is_spam` (`is_spam`),
+  ADD KEY `idx_created_at` (`created_at`),
+  ADD KEY `idx_ip_action_spam` (`ip_address`,`action_type`,`is_spam`),
+  ADD KEY `idx_user_id` (`user_id`);
 
 --
 -- Chỉ mục cho bảng `movies`
@@ -1336,6 +1491,17 @@ ALTER TABLE `seat_reservations`
   ADD KEY `idx_active_reservations` (`showtime_id`,`expires_at`);
 
 --
+-- Chỉ mục cho bảng `seat_selection_logs`
+--
+ALTER TABLE `seat_selection_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `idx_ip_address_seat_logs` (`ip_address`),
+  ADD KEY `showtime_id` (`showtime_id`),
+  ADD KEY `created_at` (`created_at`),
+  ADD KEY `is_spam` (`is_spam`);
+
+--
 -- Chỉ mục cho bảng `showtimes`
 --
 ALTER TABLE `showtimes`
@@ -1373,6 +1539,14 @@ ALTER TABLE `theaters`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Chỉ mục cho bảng `theater_managers`
+--
+ALTER TABLE `theater_managers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_user_theater` (`user_id`,`theater_id`),
+  ADD KEY `theater_id` (`theater_id`);
+
+--
 -- Chỉ mục cho bảng `theater_screens`
 --
 ALTER TABLE `theater_screens`
@@ -1383,6 +1557,7 @@ ALTER TABLE `theater_screens`
 -- Chỉ mục cho bảng `tickets`
 --
 ALTER TABLE `tickets`
+  ADD PRIMARY KEY (`id`),
   ADD KEY `idx_user` (`user_id`),
   ADD KEY `idx_showtime` (`showtime_id`),
   ADD KEY `idx_showtime_status` (`showtime_id`,`status`),
@@ -1442,6 +1617,24 @@ ALTER TABLE `admin_logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
+-- AUTO_INCREMENT cho bảng `booking_food_items`
+--
+ALTER TABLE `booking_food_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `booking_pending`
+--
+ALTER TABLE `booking_pending`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT cho bảng `booking_session_tracking`
+--
+ALTER TABLE `booking_session_tracking`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
 -- AUTO_INCREMENT cho bảng `categories`
 --
 ALTER TABLE `categories`
@@ -1464,6 +1657,24 @@ ALTER TABLE `coupons`
 --
 ALTER TABLE `episodes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT cho bảng `food_items`
+--
+ALTER TABLE `food_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT cho bảng `ip_blocks`
+--
+ALTER TABLE `ip_blocks`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `ip_spam_logs`
+--
+ALTER TABLE `ip_spam_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT cho bảng `movies`
@@ -1493,7 +1704,7 @@ ALTER TABLE `reviews`
 -- AUTO_INCREMENT cho bảng `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `role_permissions`
@@ -1505,13 +1716,19 @@ ALTER TABLE `role_permissions`
 -- AUTO_INCREMENT cho bảng `seat_reservations`
 --
 ALTER TABLE `seat_reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=198;
+
+--
+-- AUTO_INCREMENT cho bảng `seat_selection_logs`
+--
+ALTER TABLE `seat_selection_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT cho bảng `showtimes`
 --
 ALTER TABLE `showtimes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=351;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=358;
 
 --
 -- AUTO_INCREMENT cho bảng `subscriptions`
@@ -1538,34 +1755,28 @@ ALTER TABLE `theaters`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT cho bảng `food_items`
+-- AUTO_INCREMENT cho bảng `theater_managers`
 --
-ALTER TABLE `food_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT cho bảng `booking_food_items`
---
-ALTER TABLE `booking_food_items`
+ALTER TABLE `theater_managers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `theater_screens`
 --
 ALTER TABLE `theater_screens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT cho bảng `tickets`
 --
 ALTER TABLE `tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT cho bảng `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT cho bảng `users`
@@ -1580,22 +1791,10 @@ ALTER TABLE `user_roles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT cho bảng `ip_spam_logs`
---
-ALTER TABLE `ip_spam_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT cho bảng `ip_blocks`
---
-ALTER TABLE `ip_blocks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT cho bảng `watch_history`
 --
 ALTER TABLE `watch_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=94;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
@@ -1606,6 +1805,28 @@ ALTER TABLE `watch_history`
 --
 ALTER TABLE `admin_logs`
   ADD CONSTRAINT `admin_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `booking_food_items`
+--
+ALTER TABLE `booking_food_items`
+  ADD CONSTRAINT `fk_booking_food_item` FOREIGN KEY (`food_item_id`) REFERENCES `food_items` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_booking_food_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `booking_pending`
+--
+ALTER TABLE `booking_pending`
+  ADD CONSTRAINT `booking_pending_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `booking_pending_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `booking_session_tracking`
+--
+ALTER TABLE `booking_session_tracking`
+  ADD CONSTRAINT `booking_session_tracking_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `booking_session_tracking_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `booking_session_tracking_ibfk_3` FOREIGN KEY (`screen_id`) REFERENCES `theater_screens` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `categories`
@@ -1655,6 +1876,13 @@ ALTER TABLE `seat_reservations`
   ADD CONSTRAINT `fk_seat_reservations_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
+-- Các ràng buộc cho bảng `seat_selection_logs`
+--
+ALTER TABLE `seat_selection_logs`
+  ADD CONSTRAINT `seat_selection_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `seat_selection_logs_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE;
+
+--
 -- Các ràng buộc cho bảng `showtimes`
 --
 ALTER TABLE `showtimes`
@@ -1677,6 +1905,13 @@ ALTER TABLE `support_tickets`
 --
 ALTER TABLE `system_config`
   ADD CONSTRAINT `system_config_ibfk_1` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Các ràng buộc cho bảng `theater_managers`
+--
+ALTER TABLE `theater_managers`
+  ADD CONSTRAINT `theater_managers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `theater_managers_ibfk_2` FOREIGN KEY (`theater_id`) REFERENCES `theaters` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `theater_screens`
@@ -1722,187 +1957,6 @@ ALTER TABLE `user_tokens`
 ALTER TABLE `watch_history`
   ADD CONSTRAINT `watch_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `watch_history_ibfk_2` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Các ràng buộc cho bảng `seat_selection_logs`
---
-ALTER TABLE `seat_selection_logs`
-  ADD CONSTRAINT `seat_selection_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `seat_selection_logs_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE;
-
---
--- Các ràng buộc cho bảng `theater_managers`
---
-ALTER TABLE `theater_managers`
-  ADD CONSTRAINT `theater_managers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `theater_managers_ibfk_2` FOREIGN KEY (`theater_id`) REFERENCES `theaters` (`id`) ON DELETE CASCADE;
-
---
--- Các ràng buộc cho bảng `booking_session_tracking`
---
-ALTER TABLE `booking_session_tracking`
-  ADD CONSTRAINT `booking_session_tracking_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `booking_session_tracking_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `booking_session_tracking_ibfk_3` FOREIGN KEY (`screen_id`) REFERENCES `theater_screens` (`id`) ON DELETE CASCADE;
-
--- --------------------------------------------------------
-
---
--- Thêm 2 mô hình ghế mới vào database
--- Mô hình 1: Layout 3 khối (Trái, Giữa, Phải) - Dựa trên hình ảnh mô tả
--- Mô hình 2: Layout 3 khối với số ghế khác
---
-
--- Mô hình 1: Layout 3 khối với 9 hàng (A-I) và 14 cột
--- Khối trái: cột 1-4, Khối giữa: cột 5-8, Khối phải: cột 9-12, Ghế riêng lẻ: cột 13-14
-INSERT INTO `theater_screens` (`theater_id`, `screen_name`, `total_seats`, `seat_layout`, `seat_layout_config`, `screen_type`, `is_active`, `created_at`) VALUES
-(3, 'Phòng 3', 180, NULL, '{
-  "layout_type": "grouped",
-  "rows": ["A", "B", "C", "D", "E", "F", "G", "H", "I"],
-  "seat_groups": [
-    {
-      "name": "Khối trái",
-      "rows": ["A", "B", "C", "D", "E", "F", "G", "H", "I"],
-      "cols": [1, 2, 3, 4]
-    },
-    {
-      "name": "Khối giữa",
-      "rows": ["A", "B", "C", "D", "E", "F", "G", "H", "I"],
-      "cols": [5, 6, 7, 8]
-    },
-    {
-      "name": "Khối phải",
-      "rows": ["A", "B", "C", "D", "E", "F", "G", "H", "I"],
-      "cols": [9, 10, 11, 12]
-    },
-    {
-      "name": "Ghế riêng lẻ",
-      "rows": ["H", "I"],
-      "cols": [13, 14]
-    }
-  ],
-  "vip_rows": ["D", "E", "F", "G", "H"],
-  "couple_rows": [],
-  "normal_price": 120000,
-  "vip_price": 180000,
-  "couple_price": 240000
-}', '2D', 1, NOW());
-
--- Mô hình 2: Layout 4 khối với 7 hàng (A-G) 
--- Thứ tự từ trái sang phải: 1-6, 7-16, 17-19, 20-25
--- 4 hàng đầu (A-D): ghế thường
--- 3 hàng cuối (E-G): ghế VIP
-INSERT INTO `theater_screens` (`theater_id`, `screen_name`, `total_seats`, `seat_layout`, `seat_layout_config`, `screen_type`, `is_active`, `created_at`) VALUES
-(3, 'Phòng 4', 224, NULL, '{
-  "layout_type": "grouped",
-  "rows": ["A", "B", "C", "D", "E", "F", "G"],
-  "seat_groups": [
-    {
-      "name": "Khối 1",
-      "rows": ["A", "B", "C", "D", "E", "F", "G"],
-      "cols": [1, 2, 3, 4, 5, 6]
-    },
-    {
-      "name": "Khối 2",
-      "rows": ["A", "B", "C", "D", "E", "F", "G"],
-      "cols": [7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-    },
-    {
-      "name": "Khối 3",
-      "rows": ["A", "B", "C", "D", "E", "F", "G"],
-      "cols": [17, 18, 19]
-    },
-    {
-      "name": "Khối 4",
-      "rows": ["A", "B", "C", "D", "E", "F", "G"],
-      "cols": [20, 21, 22, 23, 24, 25]
-    }
-  ],
-  "vip_rows": ["E", "F", "G"],
-  "couple_rows": [],
-  "normal_price": 130000,
-  "vip_price": 200000,
-  "couple_price": 260000
-}', '3D', 1, NOW());
-
--- Thêm showtime cho phòng mới để test
--- Lấy movie_id và theater_id từ database hiện có
--- Giả sử có movie_id = 18 và theater_id = 3 (Lotte Cinema)
-
--- Thêm showtime cho Phòng 3 (screen_id sẽ là ID của phòng 3 vừa tạo)
--- Lấy ID mới nhất của theater_screens với screen_name = 'Phòng 3' và theater_id = 3
-INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
-SELECT 
-    18 as movie_id,  -- Thay đổi movie_id theo phim bạn muốn test
-    3 as theater_id, -- Lotte Cinema
-    DATE_ADD(CURDATE(), INTERVAL 1 DAY) as show_date, -- Ngày mai
-    '14:00:00' as show_time,
-    120000 as price,
-    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 3' ORDER BY id DESC LIMIT 1) as screen_id,
-    NOW() as created_at;
-
-INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
-SELECT 
-    18 as movie_id,
-    3 as theater_id,
-    DATE_ADD(CURDATE(), INTERVAL 1 DAY) as show_date,
-    '17:00:00' as show_time,
-    120000 as price,
-    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 3' ORDER BY id DESC LIMIT 1) as screen_id,
-    NOW() as created_at;
-
-INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
-SELECT 
-    18 as movie_id,
-    3 as theater_id,
-    DATE_ADD(CURDATE(), INTERVAL 1 DAY) as show_date,
-    '20:00:00' as show_time,
-    120000 as price,
-    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 3' ORDER BY id DESC LIMIT 1) as screen_id,
-    NOW() as created_at;
-
--- Thêm showtime cho Phòng 4 (screen_id sẽ là ID của phòng 4 vừa tạo)
-INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
-SELECT 
-    18 as movie_id,
-    3 as theater_id,
-    DATE_ADD(CURDATE(), INTERVAL 1 DAY) as show_date,
-    '15:30:00' as show_time,
-    130000 as price,
-    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 4' ORDER BY id DESC LIMIT 1) as screen_id,
-    NOW() as created_at;
-
-INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
-SELECT 
-    18 as movie_id,
-    3 as theater_id,
-    DATE_ADD(CURDATE(), INTERVAL 1 DAY) as show_date,
-    '19:00:00' as show_time,
-    130000 as price,
-    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 4' ORDER BY id DESC LIMIT 1) as screen_id,
-    NOW() as created_at;
-
--- Thêm showtime cho ngày hôm nay để test ngay
-INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
-SELECT 
-    18 as movie_id,
-    3 as theater_id,
-    CURDATE() as show_date,
-    DATE_FORMAT(DATE_ADD(NOW(), INTERVAL 2 HOUR), '%H:00:00') as show_time,
-    120000 as price,
-    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 3' ORDER BY id DESC LIMIT 1) as screen_id,
-    NOW() as created_at;
-
-INSERT INTO `showtimes` (`movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `screen_id`, `created_at`) 
-SELECT 
-    18 as movie_id,
-    3 as theater_id,
-    CURDATE() as show_date,
-    DATE_FORMAT(DATE_ADD(NOW(), INTERVAL 3 HOUR), '%H:00:00') as show_time,
-    130000 as price,
-    (SELECT id FROM theater_screens WHERE theater_id = 3 AND screen_name = 'Phòng 4' ORDER BY id DESC LIMIT 1) as screen_id,
-    NOW() as created_at;
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
