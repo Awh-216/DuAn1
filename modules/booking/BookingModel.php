@@ -154,10 +154,11 @@ class BookingModel {
             return false; // Ghế đã được đặt
         }
         
-        $sql = "INSERT INTO tickets (user_id, showtime_id, seat, seat_type, price, qr_code, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO tickets (user_id, showtime_id, booking_pending_id, seat, seat_type, price, qr_code, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $this->db->execute($sql, [
             $data['user_id'],
             $data['showtime_id'],
+            $data['booking_pending_id'] ?? null,
             $data['seat'],
             $seat_type,
             $data['price'],
@@ -176,7 +177,8 @@ class BookingModel {
         try {
             $tickets = $this->db->fetchAll("SELECT t.*, s.show_date, s.show_time, 
                                            COALESCE(t.price, s.price) as price,
-                                           m.title as movie_title, th.name as theater_name 
+                                           m.title as movie_title, th.name as theater_name,
+                                           'completed' as booking_type
                                            FROM tickets t 
                                            JOIN showtimes s ON t.showtime_id = s.id 
                                            JOIN movies m ON s.movie_id = m.id 
@@ -191,6 +193,120 @@ class BookingModel {
         } catch (Exception $e) {
             error_log("Error in getUserTickets: " . $e->getMessage());
             return [];
+        }
+    }
+    
+    /**
+     * Lấy pending bookings của user (chưa thanh toán)
+     */
+    public function getUserPendingBookings($user_id) {
+        try {
+            // Xóa các booking đã hết hạn (tự động cleanup)
+            $this->cleanExpiredPendingBookings();
+            
+            // Lấy các pending bookings còn hiệu lực
+            $now = date('Y-m-d H:i:s');
+            $pendingBookings = $this->db->fetchAll("
+                SELECT bp.*, 
+                       s.show_date, s.show_time, s.price as showtime_price,
+                       m.title as movie_title, m.id as movie_id,
+                       th.name as theater_name, th.id as theater_id
+                FROM booking_pending bp
+                JOIN showtimes s ON bp.showtime_id = s.id
+                JOIN movies m ON s.movie_id = m.id
+                JOIN theaters th ON s.theater_id = th.id
+                WHERE bp.user_id = ? 
+                AND bp.status = 'pending'
+                AND (bp.expires_at IS NULL OR bp.expires_at > ?)
+                AND (bp.created_at > DATE_SUB(?, INTERVAL 10 MINUTE))
+                ORDER BY bp.created_at DESC
+            ", [$user_id, $now, $now]);
+            
+            // Lấy danh sách food items để map ID sang tên
+            $foodItemsMap = [];
+            try {
+                $foodItems = $this->getFoodItems();
+                foreach ($foodItems as $food) {
+                    $foodItemsMap[$food['id']] = $food;
+                }
+            } catch (Exception $e) {
+                error_log("Error getting food items for mapping: " . $e->getMessage());
+            }
+            
+            // Format dữ liệu để giống với tickets
+            $formattedBookings = [];
+            foreach ($pendingBookings as $booking) {
+                $seats = json_decode($booking['seats'], true) ?? [];
+                $totalAmount = floatval($booking['total_amount']);
+                $foodItemsData = !empty($booking['food_items']) ? json_decode($booking['food_items'], true) : null;
+                
+                // Map food items ID sang tên
+                $foodItemsWithNames = null;
+                if ($foodItemsData) {
+                    $foodItemsWithNames = [];
+                    foreach ($foodItemsData as $foodId => $quantity) {
+                        if ($quantity > 0 && isset($foodItemsMap[$foodId])) {
+                            $foodItemsWithNames[] = [
+                                'id' => $foodId,
+                                'name' => $foodItemsMap[$foodId]['name'],
+                                'quantity' => $quantity,
+                                'price' => $foodItemsMap[$foodId]['price']
+                            ];
+                        }
+                    }
+                }
+                
+                // Tạo một entry cho mỗi ghế (hoặc một entry tổng hợp)
+                $formattedBookings[] = [
+                    'id' => 'pending_' . $booking['id'],
+                    'booking_id' => $booking['id'],
+                    'user_id' => $booking['user_id'],
+                    'showtime_id' => $booking['showtime_id'],
+                    'seat' => implode(', ', $seats), // Hiển thị tất cả ghế
+                    'seats_array' => $seats,
+                    'seat_type' => 'normal',
+                    'price' => $totalAmount,
+                    'status' => 'Chưa thanh toán',
+                    'qr_code' => null,
+                    'created_at' => $booking['created_at'],
+                    'show_date' => $booking['show_date'],
+                    'show_time' => $booking['show_time'],
+                    'movie_title' => $booking['movie_title'],
+                    'movie_id' => $booking['movie_id'],
+                    'theater_name' => $booking['theater_name'],
+                    'theater_id' => $booking['theater_id'],
+                    'booking_type' => 'pending',
+                    'vnp_txn_ref' => $booking['vnp_txn_ref'],
+                    'expires_at' => $booking['expires_at'],
+                    'food_items' => $foodItemsWithNames
+                ];
+            }
+            
+            return $formattedBookings;
+        } catch (Exception $e) {
+            error_log("Error in getUserPendingBookings: " . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Xóa các pending bookings đã hết hạn
+     */
+    public function cleanExpiredPendingBookings() {
+        try {
+            $now = date('Y-m-d H:i:s');
+            // Xóa các booking đã hết hạn (expires_at < now hoặc created_at + 10 phút < now)
+            $this->db->execute("
+                DELETE FROM booking_pending 
+                WHERE status = 'pending' 
+                AND (
+                    (expires_at IS NOT NULL AND expires_at <= ?) 
+                    OR 
+                    (created_at <= DATE_SUB(?, INTERVAL 10 MINUTE))
+                )
+            ", [$now, $now]);
+        } catch (Exception $e) {
+            error_log("Error cleaning expired pending bookings: " . $e->getMessage());
         }
     }
     
@@ -380,10 +496,10 @@ class BookingModel {
         }
     }
     
-    public function createBookingFoodItem($ticket_id, $food_item_id, $quantity, $price) {
+    public function createBookingFoodItem($ticket_id, $food_item_id, $quantity, $price, $booking_pending_id = null) {
         try {
-            $sql = "INSERT INTO booking_food_items (ticket_id, food_item_id, quantity, price) VALUES (?, ?, ?, ?)";
-            $this->db->execute($sql, [$ticket_id, $food_item_id, $quantity, $price]);
+            $sql = "INSERT INTO booking_food_items (ticket_id, booking_pending_id, food_item_id, quantity, price) VALUES (?, ?, ?, ?, ?)";
+            $this->db->execute($sql, [$ticket_id, $booking_pending_id, $food_item_id, $quantity, $price]);
             return $this->db->lastInsertId();
         } catch (Exception $e) {
             error_log("Error creating booking food item: " . $e->getMessage());
@@ -438,7 +554,7 @@ class BookingModel {
                 return false;
             }
             
-            $expiresAt = isset($data['expires_at']) ? $data['expires_at'] : date('Y-m-d H:i:s', strtotime('+15 minutes'));
+            $expiresAt = isset($data['expires_at']) ? $data['expires_at'] : date('Y-m-d H:i:s', strtotime('+10 minutes'));
             $seatsJson = json_encode($data['seats']);
             $foodItemsJson = !empty($data['food_items']) ? json_encode($data['food_items']) : null;
             

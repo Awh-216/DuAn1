@@ -102,6 +102,7 @@
                     <th>Số suất chiếu</th>
                     <th>Vé đã bán</th>
                     <th>Vé tồn kho</th>
+                    <th>Giới hạn vé</th>
                     <th>Doanh thu</th>
                     <th>Tỷ lệ bán</th>
                     <th>Thao tác</th>
@@ -114,6 +115,7 @@
                     $sold = $stat['tickets_sold'] ?? 0;
                     $available = $stat['tickets_available'] ?? $total_seats;
                     $revenue = $stat['total_revenue'] ?? 0;
+                    $max_tickets = $stat['max_tickets'] ?? null;
                     $sell_rate = $total_seats > 0 ? round(($sold / $total_seats) * 100, 2) : 0;
                     ?>
                     <tr>
@@ -128,6 +130,30 @@
                             <span class="badge <?php echo $available > 50 ? 'bg-info' : ($available > 20 ? 'bg-warning' : 'bg-danger'); ?>">
                                 <?php echo number_format($available); ?>
                             </span>
+                        </td>
+                        <td>
+                            <form method="POST" action="?route=admin/ticketsUpdateMovie" class="d-inline-flex align-items-center gap-2" style="min-width: 200px;">
+                                <input type="hidden" name="movie_id" value="<?php echo $stat['movie_id']; ?>">
+                                <input type="number" 
+                                       name="max_tickets" 
+                                       class="form-control form-control-sm" 
+                                       value="<?php echo $max_tickets !== null ? $max_tickets : ''; ?>" 
+                                       placeholder="Không giới hạn"
+                                       min="0"
+                                       style="width: 120px;">
+                                <button type="submit" class="btn btn-sm btn-primary" title="Cập nhật">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                            </form>
+                            <?php if ($max_tickets !== null): ?>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="fas fa-info-circle"></i> Giới hạn: <?php echo number_format($max_tickets); ?> vé
+                                </small>
+                            <?php else: ?>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="fas fa-infinity"></i> Không giới hạn
+                                </small>
+                            <?php endif; ?>
                         </td>
                         <td><?php echo number_format($revenue); ?>₫</td>
                         <td>

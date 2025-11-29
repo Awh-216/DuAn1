@@ -1022,7 +1022,7 @@ class BookingController extends Controller {
             'customer_email' => $customer_email,
             'total_amount' => $totalAmount,
             'vnp_txn_ref' => $vnp_TxnRef,
-            'expires_at' => date('Y-m-d H:i:s', strtotime('+15 minutes'))
+            'expires_at' => date('Y-m-d H:i:s', strtotime('+10 minutes'))
         ]);
         
         error_log("Pending booking ID result: " . ($pendingBookingId ? $pendingBookingId : 'FALSE'));
@@ -1062,12 +1062,98 @@ class BookingController extends Controller {
         $bookingModel = new BookingModel();
         $user = $this->getCurrentUser();
         
+        // Lấy vé đã thanh toán
         $tickets = $bookingModel->getUserTickets($user['id']);
         
+        // Lấy vé chưa thanh toán (pending bookings)
+        $pendingBookings = $bookingModel->getUserPendingBookings($user['id']);
+        
+        // Gộp lại và sắp xếp: pending trước, completed sau
+        $allTickets = array_merge($pendingBookings, $tickets);
+        
+        // Sắp xếp theo thời gian tạo (mới nhất trước)
+        usort($allTickets, function($a, $b) {
+            $timeA = strtotime($a['created_at']);
+            $timeB = strtotime($b['created_at']);
+            return $timeB - $timeA;
+        });
+        
         $this->view('booking/my-tickets', [
-            'tickets' => $tickets,
+            'tickets' => $allTickets,
             'user' => $user
         ]);
+    }
+    
+    /**
+     * Tiếp tục thanh toán cho pending booking
+     */
+    public function payment() {
+        $this->requireLogin();
+        
+        $txn_ref = $_GET['txn_ref'] ?? null;
+        
+        if (!$txn_ref) {
+            $_SESSION['error'] = 'Không tìm thấy mã giao dịch!';
+            $this->redirect('booking/my-tickets');
+            return;
+        }
+        
+        $bookingModel = new BookingModel();
+        $user = $this->getCurrentUser();
+        
+        // Lấy pending booking
+        $pendingBooking = $bookingModel->getPendingBookingByTxnRef($txn_ref);
+        
+        if (!$pendingBooking) {
+            $_SESSION['error'] = 'Không tìm thấy đơn hàng chờ thanh toán!';
+            $this->redirect('booking/my-tickets');
+            return;
+        }
+        
+        // Kiểm tra xem booking có thuộc về user này không
+        if ($pendingBooking['user_id'] != $user['id']) {
+            $_SESSION['error'] = 'Bạn không có quyền truy cập đơn hàng này!';
+            $this->redirect('booking/my-tickets');
+            return;
+        }
+        
+        // Kiểm tra xem booking còn hiệu lực không
+        $now = date('Y-m-d H:i:s');
+        $expiresAt = $pendingBooking['expires_at'] ?? date('Y-m-d H:i:s', strtotime($pendingBooking['created_at'] . ' +10 minutes'));
+        
+        if (strtotime($expiresAt) < strtotime($now)) {
+            // Booking đã hết hạn, xóa và thông báo
+            $bookingModel->updatePendingBookingStatus($pendingBooking['id'], 'cancelled');
+            $_SESSION['error'] = 'Đơn hàng đã hết hạn thanh toán! Vui lòng đặt vé lại.';
+            $this->redirect('booking/my-tickets');
+            return;
+        }
+        
+        // Kiểm tra status
+        if ($pendingBooking['status'] !== 'pending') {
+            $_SESSION['error'] = 'Đơn hàng này đã được xử lý!';
+            $this->redirect('booking/my-tickets');
+            return;
+        }
+        
+        // Lấy thông tin showtime
+        $showtime = $bookingModel->getShowtimeById($pendingBooking['showtime_id']);
+        if (!$showtime) {
+            $_SESSION['error'] = 'Không tìm thấy thông tin suất chiếu!';
+            $this->redirect('booking/my-tickets');
+            return;
+        }
+        
+        // Parse seats
+        $seats = json_decode($pendingBooking['seats'], true) ?? [];
+        if (empty($seats)) {
+            $_SESSION['error'] = 'Không tìm thấy thông tin ghế!';
+            $this->redirect('booking/my-tickets');
+            return;
+        }
+        
+        // Redirect đến VNPay
+        $this->redirectToVNPay($txn_ref, floatval($pendingBooking['total_amount']), $showtime, $seats);
     }
     
     public function submitSupport() {
@@ -1792,6 +1878,7 @@ class BookingController extends Controller {
             $existingTickets = $bookingModel->getBookedSeats($showtime_id);
             $existingSeats = array_column($existingTickets, 'seat');
             
+            // Tạo tất cả tickets trước
             foreach ($seats as $seat) {
                 if (in_array($seat, $existingSeats)) {
                     throw new Exception("Ghế $seat đã được đặt bởi người khác!");
@@ -1805,6 +1892,7 @@ class BookingController extends Controller {
                 $ticket_id = $bookingModel->createTicket([
                     'user_id' => $user['id'],
                     'showtime_id' => $showtime_id,
+                    'booking_pending_id' => $pendingBooking['id'],
                     'seat' => $seat,
                     'seat_type' => $seat_type,
                     'price' => $seat_price,
@@ -1813,23 +1901,6 @@ class BookingController extends Controller {
                 
                 if (!$ticket_id) {
                     throw new Exception("Không thể tạo vé cho ghế $seat!");
-                }
-                
-                // Thêm food items
-                if (!empty($food_items)) {
-                    foreach ($food_items as $food_item_id => $quantity) {
-                        if ($quantity > 0) {
-                            $foodItem = $bookingModel->getFoodItemById($food_item_id);
-                            if ($foodItem) {
-                                $bookingModel->createBookingFoodItem(
-                                    $ticket_id,
-                                    $food_item_id,
-                                    $quantity,
-                                    $foodItem['price']
-                                );
-                            }
-                        }
-                    }
                 }
                 
                 $createdTickets[] = [
@@ -1841,6 +1912,25 @@ class BookingController extends Controller {
                 ];
                 
                 $existingSeats[] = $seat;
+            }
+            
+            // Tạo food items 1 lần cho toàn bộ booking (gắn với booking_pending_id)
+            if (!empty($food_items)) {
+                foreach ($food_items as $food_item_id => $quantity) {
+                    if ($quantity > 0) {
+                        $foodItem = $bookingModel->getFoodItemById($food_item_id);
+                        if ($foodItem) {
+                            // Gắn với booking_pending_id thay vì ticket_id
+                            $bookingModel->createBookingFoodItem(
+                                null, // ticket_id = null vì food items thuộc về booking, không phải ticket cụ thể
+                                $food_item_id,
+                                $quantity,
+                                $foodItem['price'],
+                                $pendingBooking['id'] // booking_pending_id
+                            );
+                        }
+                    }
+                }
             }
             
             // Tạo transaction record

@@ -1502,6 +1502,7 @@ class AdminController extends Controller {
             SELECT 
                 m.id as movie_id,
                 m.title as movie_title,
+                m.max_tickets,
                 COUNT(DISTINCT s.id) as total_showtimes,
                 COUNT(CASE WHEN t.status = 'Đã đặt' THEN 1 END) as tickets_sold,
                 (COUNT(DISTINCT s.id) * 132) - COUNT(CASE WHEN t.status = 'Đã đặt' THEN 1 END) as tickets_available,
@@ -1510,7 +1511,7 @@ class AdminController extends Controller {
             LEFT JOIN showtimes s ON m.id = s.movie_id AND s.show_date >= CURDATE()
             LEFT JOIN tickets t ON s.id = t.showtime_id
             WHERE m.status = 'Chiếu rạp'
-            GROUP BY m.id, m.title
+            GROUP BY m.id, m.title, m.max_tickets
             HAVING total_showtimes > 0
             ORDER BY total_revenue DESC
         ");
@@ -1536,6 +1537,75 @@ class AdminController extends Controller {
             'title' => 'Quản lý vé',
             'current_page' => 'tickets'
         ]);
+    }
+    
+    // Update movie tickets quantity
+    public function ticketsUpdateMovie() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $_SESSION['error'] = 'Phương thức không hợp lệ!';
+            $this->redirect('admin/tickets');
+            return;
+        }
+        
+        $movie_id = $_POST['movie_id'] ?? null;
+        $max_tickets = $_POST['max_tickets'] ?? null;
+        
+        if (!$movie_id) {
+            $_SESSION['error'] = 'Vui lòng chọn phim!';
+            $this->redirect('admin/tickets');
+            return;
+        }
+        
+        // Validate movie exists
+        $movie = $db->fetch("SELECT id, title, max_tickets FROM movies WHERE id = ?", [$movie_id]);
+        if (!$movie) {
+            $_SESSION['error'] = 'Phim không tồn tại!';
+            $this->redirect('admin/tickets');
+            return;
+        }
+        
+        // Validate max_tickets (must be positive integer or null)
+        if ($max_tickets !== null && $max_tickets !== '') {
+            $max_tickets = intval($max_tickets);
+            if ($max_tickets < 0) {
+                $_SESSION['error'] = 'Số lượng vé phải là số nguyên dương hoặc để trống!';
+                $this->redirect('admin/tickets');
+                return;
+            }
+            // Set to NULL if 0 (unlimited)
+            if ($max_tickets == 0) {
+                $max_tickets = null;
+            }
+        } else {
+            $max_tickets = null; // NULL means unlimited
+        }
+        
+        try {
+            // Update max_tickets
+            $db->execute("UPDATE movies SET max_tickets = ? WHERE id = ?", [$max_tickets, $movie_id]);
+            
+            // Log action
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Cập nhật số lượng vé cho phim',
+                'Tickets',
+                'movie',
+                $movie_id,
+                ['max_tickets' => $movie['max_tickets']],
+                ['max_tickets' => $max_tickets, 'movie_title' => $movie['title']]
+            );
+            
+            $ticketsText = $max_tickets === null ? 'không giới hạn' : number_format($max_tickets);
+            $_SESSION['success'] = "Đã cập nhật số lượng vé cho phim '{$movie['title']}' thành {$ticketsText} vé!";
+        } catch (Exception $e) {
+            error_log("Error updating movie tickets: " . $e->getMessage());
+            $_SESSION['error'] = 'Lỗi khi cập nhật số lượng vé: ' . $e->getMessage();
+        }
+        
+        $this->redirect('admin/tickets');
     }
     
     // View Ticket Details

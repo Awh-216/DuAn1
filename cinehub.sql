@@ -65,7 +65,8 @@ INSERT INTO `admin_logs` (`id`, `user_id`, `action`, `module`, `target_type`, `t
 
 CREATE TABLE `booking_food_items` (
   `id` int(11) NOT NULL,
-  `ticket_id` int(11) NOT NULL,
+  `ticket_id` int(11) DEFAULT NULL COMMENT 'Liên kết với ticket (để tương thích ngược)',
+  `booking_pending_id` int(11) DEFAULT NULL COMMENT 'Liên kết với booking_pending (ưu tiên)',
   `food_item_id` int(11) NOT NULL,
   `quantity` int(11) NOT NULL DEFAULT 1,
   `price` decimal(10,2) NOT NULL,
@@ -368,7 +369,8 @@ CREATE TABLE `movies` (
   `country` varchar(100) DEFAULT NULL,
   `language` varchar(50) DEFAULT NULL,
   `age_rating` varchar(10) DEFAULT NULL,
-  `type` enum('phimle','phimbo') DEFAULT 'phimle'
+  `type` enum('phimle','phimbo') DEFAULT 'phimle',
+  `max_tickets` int(11) DEFAULT NULL COMMENT 'Số lượng vé tối đa cho phim (NULL = không giới hạn)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1086,6 +1088,7 @@ CREATE TABLE `tickets` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `showtime_id` int(11) NOT NULL,
+  `booking_pending_id` int(11) DEFAULT NULL COMMENT 'Liên kết với booking_pending nếu vé được tạo từ pending booking',
   `seat` varchar(10) NOT NULL,
   `seat_type` enum('normal','vip','couple') DEFAULT 'normal',
   `qr_code` varchar(255) DEFAULT NULL,
@@ -1511,7 +1514,8 @@ ALTER TABLE `showtimes`
   ADD KEY `idx_movie` (`movie_id`),
   ADD KEY `idx_theater` (`theater_id`),
   ADD KEY `screen_id` (`screen_id`),
-  ADD KEY `idx_theater_screen` (`theater_id`, `screen_id`);
+  ADD KEY `idx_theater_screen` (`theater_id`, `screen_id`),
+  ADD UNIQUE KEY `unique_showtime` (`movie_id`, `theater_id`, `screen_id`, `show_date`, `show_time`);
 
 --
 -- Chỉ mục cho bảng `subscriptions`
@@ -1565,7 +1569,8 @@ ALTER TABLE `tickets`
   ADD KEY `idx_showtime` (`showtime_id`),
   ADD KEY `idx_showtime_status` (`showtime_id`,`status`),
   ADD KEY `idx_user_showtime` (`user_id`,`showtime_id`),
-  ADD KEY `idx_showtime_seat_status` (`showtime_id`,`seat`,`status`);
+  ADD KEY `idx_showtime_seat_status` (`showtime_id`,`seat`,`status`),
+  ADD KEY `idx_booking_pending` (`booking_pending_id`);
 
 --
 -- Chỉ mục cho bảng `transactions`
@@ -1814,7 +1819,8 @@ ALTER TABLE `admin_logs`
 --
 ALTER TABLE `booking_food_items`
   ADD CONSTRAINT `fk_booking_food_item` FOREIGN KEY (`food_item_id`) REFERENCES `food_items` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_booking_food_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_booking_food_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_booking_food_pending` FOREIGN KEY (`booking_pending_id`) REFERENCES `booking_pending` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `booking_pending`
@@ -1928,7 +1934,8 @@ ALTER TABLE `theater_screens`
 --
 ALTER TABLE `tickets`
   ADD CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `tickets_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `tickets_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `tickets_ibfk_3` FOREIGN KEY (`booking_pending_id`) REFERENCES `booking_pending` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `transactions`
@@ -1947,6 +1954,26 @@ ALTER TABLE `users`
 --
 ALTER TABLE `users`
   ADD INDEX `idx_theater_id` (`theater_id`);
+
+--
+-- Thêm cột max_tickets vào bảng movies (quản lý số lượng vé tối đa cho mỗi phim)
+-- Lưu ý: Cột max_tickets đã được thêm vào CREATE TABLE ở trên (dòng 372)
+-- Nếu database đã tồn tại và chưa có cột này, chạy câu lệnh sau (an toàn, kiểm tra trước khi thêm):
+--
+SET @dbname = DATABASE();
+SET @tablename = 'movies';
+SET @columnname = 'max_tickets';
+SET @preparedStatement = (SELECT IF(
+  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+   WHERE TABLE_SCHEMA = @dbname
+   AND TABLE_NAME = @tablename
+   AND COLUMN_NAME = @columnname) > 0,
+  'SELECT "Column max_tickets already exists" AS result',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` int(11) DEFAULT NULL COMMENT ''Số lượng vé tối đa cho phim (NULL = không giới hạn)'' AFTER `type`')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
 
 --
 -- Các ràng buộc cho bảng `user_roles`
