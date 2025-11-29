@@ -592,7 +592,7 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                         $layout = $seatLayout ?? [
                                             'rows' => ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'],
                                             'cols' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                                            'vip_rows' => ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'], // Từ hàng D (hàng 4) trở xuống là VIP
+                                            'vip_rows' => ['C', 'D', 'E'], // Chỉ hàng C, D, E là VIP (nằm ở giữa rạp)
                                             'couple_rows' => ['L'], // Hàng cuối là ghế đôi
                                             'normal_price' => 120000,
                                             'vip_price' => 180000,
@@ -604,15 +604,74 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                         $vip_rows = $layout['vip_rows'] ?? [];
                                         $couple_rows = $layout['couple_rows'] ?? [];
                                         
-                                        // Nếu không có config, tự động phân loại: 3 hàng đầu = thường, từ hàng 4 (D) trở xuống = VIP, cuối = ghế đôi
-                                        if (empty($vip_rows) && empty($couple_rows) && count($rows) > 3) {
-                                            // 3 hàng đầu (A-C) = thường
-                                            // Từ hàng 4 (D) đến hàng trước cuối = VIP
-                                            // Hàng cuối = ghế đôi
-                                            $normalRows = array_slice($rows, 0, 3); // A, B, C
-                                            $vip_rows = array_slice($rows, 3, -1); // D, E, F, G, H, I, J, K (từ hàng 4 trở xuống)
-                                            $couple_rows = [end($rows)]; // L
+                                        // Tính toán 3 hàng ở giữa rạp làm VIP (tự động, không cố định C, D, E)
+                                        if (!empty($rows) && count($rows) >= 3) {
+                                            $totalRows = count($rows);
+                                            // Tính toán vị trí bắt đầu để có 3 hàng ở giữa
+                                            // Ví dụ: 12 hàng (0-11) -> lấy hàng 4, 5, 6 (index 4, 5, 6)
+                                            // Công thức: (totalRows - 3) / 2, làm tròn xuống
+                                            $middleStartIndex = floor(($totalRows - 3) / 2);
+                                            $vip_rows = array_slice($rows, $middleStartIndex, 3); // Lấy 3 hàng ở giữa
+                                            
+                                            // Loại bỏ hàng cuối khỏi vip_rows nếu có (vì hàng cuối là ghế đôi)
+                                            $lastRow = end($rows);
+                                            $vip_rows = array_filter($vip_rows, function($row) use ($lastRow) {
+                                                return $row !== $lastRow;
+                                            });
+                                            $vip_rows = array_values($vip_rows); // Reset keys
+                                            
+                                            // Nếu sau khi loại bỏ hàng cuối, còn ít hơn 3 hàng, lấy thêm hàng từ phía trên
+                                            if (count($vip_rows) < 3 && $middleStartIndex > 0) {
+                                                $needed = 3 - count($vip_rows);
+                                                $additionalRows = array_slice($rows, max(0, $middleStartIndex - $needed), $needed);
+                                                $vip_rows = array_merge($additionalRows, $vip_rows);
+                                                $vip_rows = array_unique($vip_rows);
+                                                $vip_rows = array_values($vip_rows);
+                                            }
                                         }
+                                        
+                                        // Nếu không có config couple_rows, đặt hàng cuối là ghế đôi
+                                        if (empty($couple_rows) && !empty($rows)) {
+                                            $couple_rows = [end($rows)];
+                                        }
+                                        
+                                        // Đảm bảo hàng cuối cùng luôn là ghế đôi (cho tất cả các phòng)
+                                        if (!empty($rows)) {
+                                            $lastRow = end($rows);
+                                            if (!in_array($lastRow, $couple_rows)) {
+                                                $couple_rows[] = $lastRow;
+                                            }
+                                            // Loại bỏ hàng cuối khỏi vip_rows nếu có
+                                            $vip_rows = array_filter($vip_rows, function($row) use ($lastRow) {
+                                                return $row !== $lastRow;
+                                            });
+                                        }
+                                        
+                                        // Kiểm tra và loại bỏ các hàng ghế đôi không hợp lệ (ít hơn 2 ghế)
+                                        $validCoupleRows = [];
+                                        foreach ($couple_rows as $coupleRow) {
+                                            // Kiểm tra số ghế trong hàng
+                                            $rowSeatCount = 0;
+                                            if (isset($seat_groups) && is_array($seat_groups)) {
+                                                // Đếm số ghế trong hàng từ seat_groups
+                                                foreach ($seat_groups as $group) {
+                                                    $groupRows = $group['rows'] ?? [];
+                                                    $groupCols = $group['cols'] ?? [];
+                                                    if (in_array($coupleRow, $groupRows)) {
+                                                        $rowSeatCount += count($groupCols);
+                                                    }
+                                                }
+                                            } else {
+                                                // Layout tiêu chuẩn: đếm từ $cols
+                                                $rowSeatCount = count($cols);
+                                            }
+                                            
+                                            // Chỉ thêm vào danh sách nếu có ít nhất 2 ghế
+                                            if ($rowSeatCount >= 2) {
+                                                $validCoupleRows[] = $coupleRow;
+                                            }
+                                        }
+                                        $couple_rows = $validCoupleRows;
                                         
                                         require_once __DIR__ . '/../BookingModel.php';
                                         $bookingModel = new BookingModel();
@@ -675,6 +734,66 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                             
                                             // Sắp xếp các hàng và cột
                                             ksort($rowColsMap);
+                                            
+                                            // Tính toán 3 hàng ở giữa rạp làm VIP (tự động, không cố định)
+                                            $allRows = array_keys($rowColsMap);
+                                            if (!empty($allRows) && count($allRows) >= 3) {
+                                                $totalRows = count($allRows);
+                                                // Tính toán vị trí bắt đầu để có 3 hàng ở giữa
+                                                $middleStartIndex = floor(($totalRows - 3) / 2);
+                                                $middleRows = array_slice($allRows, $middleStartIndex, 3); // Lấy 3 hàng ở giữa
+                                                
+                                                // Loại bỏ hàng cuối khỏi vip_rows nếu có (vì hàng cuối là ghế đôi)
+                                                $lastRowInMap = end($allRows);
+                                                $middleRows = array_filter($middleRows, function($row) use ($lastRowInMap) {
+                                                    return $row !== $lastRowInMap;
+                                                });
+                                                $middleRows = array_values($middleRows); // Reset keys
+                                                
+                                                // Nếu sau khi loại bỏ hàng cuối, còn ít hơn 3 hàng, lấy thêm hàng từ phía trên
+                                                if (count($middleRows) < 3 && $middleStartIndex > 0) {
+                                                    $needed = 3 - count($middleRows);
+                                                    $additionalRows = array_slice($allRows, max(0, $middleStartIndex - $needed), $needed);
+                                                    $middleRows = array_merge($additionalRows, $middleRows);
+                                                    $middleRows = array_unique($middleRows);
+                                                    $middleRows = array_values($middleRows);
+                                                }
+                                                
+                                                $vip_rows = $middleRows;
+                                            }
+                                            
+                                            // Xác định hàng cuối cùng và đảm bảo nó là ghế đôi
+                                            if (!empty($allRows)) {
+                                                $lastRowInMap = end($allRows);
+                                                // Kiểm tra số ghế trong hàng cuối
+                                                $lastRowSeatCount = isset($rowColsMap[$lastRowInMap]) ? count($rowColsMap[$lastRowInMap]) : 0;
+                                                
+                                                // Chỉ đánh dấu là ghế đôi nếu có ít nhất 2 ghế
+                                                if ($lastRowSeatCount >= 2) {
+                                                    if (!in_array($lastRowInMap, $couple_rows)) {
+                                                        $couple_rows[] = $lastRowInMap;
+                                                    }
+                                                    // Loại bỏ hàng cuối khỏi vip_rows nếu có
+                                                    $vip_rows = array_filter($vip_rows, function($row) use ($lastRowInMap) {
+                                                        return $row !== $lastRowInMap;
+                                                    });
+                                                } else {
+                                                    // Nếu hàng cuối có ít hơn 2 ghế, loại bỏ khỏi couple_rows nếu có
+                                                    $couple_rows = array_filter($couple_rows, function($row) use ($lastRowInMap) {
+                                                        return $row !== $lastRowInMap;
+                                                    });
+                                                }
+                                            }
+                                            
+                                            // Loại bỏ các hàng ghế đôi không hợp lệ (ít hơn 2 ghế) khỏi danh sách
+                                            $validCoupleRows = [];
+                                            foreach ($couple_rows as $coupleRow) {
+                                                if (isset($rowColsMap[$coupleRow]) && count($rowColsMap[$coupleRow]) >= 2) {
+                                                    $validCoupleRows[] = $coupleRow;
+                                                }
+                                            }
+                                            $couple_rows = $validCoupleRows;
+                                            
                                             foreach ($rowColsMap as $row => $cols) {
                                                 // Sắp xếp cột theo thứ tự trong seat_groups (giữ nguyên thứ tự từ trái sang phải)
                                                 $sortedCols = [];
@@ -710,43 +829,126 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                                 }
                                                 
                                                 // Render các cột đã sắp xếp với khoảng cách giữa các nhóm
-                                                $prevGroupIndex = null;
-                                                foreach ($sortedCols as $index => $col) {
-                                                    $currentGroupIndex = $colToGroupMap[$col] ?? null;
-                                                    
-                                                    // Thêm khoảng cách nếu chuyển sang nhóm mới
-                                                    if ($prevGroupIndex !== null && $currentGroupIndex !== $prevGroupIndex) {
-                                                        echo '<span class="seat-group-separator" style="width: 1.5rem; display: inline-block;"></span>';
+                                                if ($isCoupleRow) {
+                                                    // Render ghế đôi cho hàng cuối
+                                                    $prevGroupIndex = null;
+                                                    for ($i = 0; $i < count($sortedCols); $i += 2) {
+                                                        if ($i + 1 < count($sortedCols)) {
+                                                            $col1 = $sortedCols[$i];
+                                                            $col2 = $sortedCols[$i + 1];
+                                                            $currentGroupIndex1 = $colToGroupMap[$col1] ?? null;
+                                                            $currentGroupIndex2 = $colToGroupMap[$col2] ?? null;
+                                                            
+                                                            // Thêm khoảng cách nếu chuyển sang nhóm mới
+                                                            if ($prevGroupIndex !== null && $currentGroupIndex1 !== $prevGroupIndex) {
+                                                                echo '<span class="seat-group-separator" style="width: 1.5rem; display: inline-block;"></span>';
+                                                            }
+                                                            
+                                                            $seat1 = $row . $col1;
+                                                            $seat2 = $row . $col2;
+                                                            $isBooked1 = in_array($seat1, $bookedSeats ?? []);
+                                                            $isBooked2 = in_array($seat2, $bookedSeats ?? []);
+                                                            $isReserved1 = in_array($seat1, $reservedSeats ?? []);
+                                                            $isReserved2 = in_array($seat2, $reservedSeats ?? []);
+                                                            $isBooked = $isBooked1 || $isBooked2;
+                                                            $isReserved = $isReserved1 || $isReserved2;
+                                                            
+                                                            $seatClass = 'available';
+                                                            if ($isBooked) {
+                                                                $seatClass = 'booked';
+                                                            } elseif ($isReserved) {
+                                                                $seatClass = 'reserved';
+                                                            }
+                                                            
+                                                            echo '<label class="seat-label couple-seat ' . $seatClass . '" data-seat="' . $seat1 . '" title="Ghế đôi ' . $col1 . '-' . $col2 . '">';
+                                                            if (!$isBooked && !$isReserved) {
+                                                                echo '<input type="checkbox" name="seats[]" value="' . $seat1 . '" class="seat-checkbox couple-seat-checkbox" data-couple-seat="' . $seat2 . '">';
+                                                                echo '<input type="checkbox" name="seats[]" value="' . $seat2 . '" class="seat-checkbox couple-seat-checkbox" data-couple-seat="' . $seat1 . '">';
+                                                            }
+                                                            echo '<span class="seat-number">' . $col1 . '-' . $col2 . '</span>';
+                                                            echo '<span class="couple-icon"><i class="fas fa-heart"></i></span>';
+                                                            echo '</label>';
+                                                            
+                                                            $prevGroupIndex = $currentGroupIndex2 ?? $currentGroupIndex1;
+                                                        } else {
+                                                            // Nếu số ghế lẻ, render ghế cuối cùng như ghế đơn
+                                                            $col = $sortedCols[$i];
+                                                            $currentGroupIndex = $colToGroupMap[$col] ?? null;
+                                                            
+                                                            if ($prevGroupIndex !== null && $currentGroupIndex !== $prevGroupIndex) {
+                                                                echo '<span class="seat-group-separator" style="width: 1.5rem; display: inline-block;"></span>';
+                                                            }
+                                                            
+                                                            $seat = $row . $col;
+                                                            $isBooked = in_array($seat, $bookedSeats ?? []);
+                                                            $isReserved = in_array($seat, $reservedSeats ?? []);
+                                                            
+                                                            $seatClass = 'available';
+                                                            if ($isBooked) {
+                                                                $seatClass = 'booked';
+                                                            } elseif ($isReserved) {
+                                                                $seatClass = 'reserved';
+                                                            }
+                                                            
+                                                            if ($isVipRow) {
+                                                                $seatClass .= ' vip-seat';
+                                                            }
+                                                            
+                                                            echo '<label class="seat-label ' . $seatClass . '" data-seat="' . $seat . '" data-seat-type="' . ($isVipRow ? 'vip' : 'normal') . '">';
+                                                            if (!$isBooked && !$isReserved) {
+                                                                echo '<input type="checkbox" name="seats[]" value="' . $seat . '" class="seat-checkbox" data-seat-type="' . ($isVipRow ? 'vip' : 'normal') . '">';
+                                                            }
+                                                            echo '<span class="seat-number">' . $col . '</span>';
+                                                            if ($isVipRow) {
+                                                                echo '<span class="seat-icon vip-icon" title="Ghế VIP"><i class="fas fa-crown"></i></span>';
+                                                            } else {
+                                                                echo '<span class="seat-icon normal-icon" title="Ghế thường"><i class="fas fa-chair"></i></span>';
+                                                            }
+                                                            echo '</label>';
+                                                            
+                                                            $prevGroupIndex = $currentGroupIndex;
+                                                        }
                                                     }
-                                                    
-                                                    $seat = $row . $col;
-                                                    $isBooked = in_array($seat, $bookedSeats ?? []);
-                                                    $isReserved = in_array($seat, $reservedSeats ?? []);
-                                                    
-                                                    $seatClass = 'available';
-                                                    if ($isBooked) {
-                                                        $seatClass = 'booked';
-                                                    } elseif ($isReserved) {
-                                                        $seatClass = 'reserved';
+                                                } else {
+                                                    // Render ghế đơn
+                                                    $prevGroupIndex = null;
+                                                    foreach ($sortedCols as $index => $col) {
+                                                        $currentGroupIndex = $colToGroupMap[$col] ?? null;
+                                                        
+                                                        // Thêm khoảng cách nếu chuyển sang nhóm mới
+                                                        if ($prevGroupIndex !== null && $currentGroupIndex !== $prevGroupIndex) {
+                                                            echo '<span class="seat-group-separator" style="width: 1.5rem; display: inline-block;"></span>';
+                                                        }
+                                                        
+                                                        $seat = $row . $col;
+                                                        $isBooked = in_array($seat, $bookedSeats ?? []);
+                                                        $isReserved = in_array($seat, $reservedSeats ?? []);
+                                                        
+                                                        $seatClass = 'available';
+                                                        if ($isBooked) {
+                                                            $seatClass = 'booked';
+                                                        } elseif ($isReserved) {
+                                                            $seatClass = 'reserved';
+                                                        }
+                                                        
+                                                        if ($isVipRow) {
+                                                            $seatClass .= ' vip-seat';
+                                                        }
+                                                        
+                                                        echo '<label class="seat-label ' . $seatClass . '" data-seat="' . $seat . '" data-seat-type="' . ($isVipRow ? 'vip' : 'normal') . '">';
+                                                        if (!$isBooked && !$isReserved) {
+                                                            echo '<input type="checkbox" name="seats[]" value="' . $seat . '" class="seat-checkbox" data-seat-type="' . ($isVipRow ? 'vip' : 'normal') . '">';
+                                                        }
+                                                        echo '<span class="seat-number">' . $col . '</span>';
+                                                        if ($isVipRow) {
+                                                            echo '<span class="seat-icon vip-icon" title="Ghế VIP"><i class="fas fa-crown"></i></span>';
+                                                        } else {
+                                                            echo '<span class="seat-icon normal-icon" title="Ghế thường"><i class="fas fa-chair"></i></span>';
+                                                        }
+                                                        echo '</label>';
+                                                        
+                                                        $prevGroupIndex = $currentGroupIndex;
                                                     }
-                                                    
-                                                    if ($isVipRow) {
-                                                        $seatClass .= ' vip-seat';
-                                                    }
-                                                    
-                                                    echo '<label class="seat-label ' . $seatClass . '" data-seat="' . $seat . '" data-seat-type="' . ($isVipRow ? 'vip' : 'normal') . '">';
-                                                    if (!$isBooked && !$isReserved) {
-                                                        echo '<input type="checkbox" name="seats[]" value="' . $seat . '" class="seat-checkbox" data-seat-type="' . ($isVipRow ? 'vip' : 'normal') . '">';
-                                                    }
-                                                    echo '<span class="seat-number">' . $col . '</span>';
-                                                    if ($isVipRow) {
-                                                        echo '<span class="seat-icon vip-icon" title="Ghế VIP"><i class="fas fa-crown"></i></span>';
-                                                    } else {
-                                                        echo '<span class="seat-icon normal-icon" title="Ghế thường"><i class="fas fa-chair"></i></span>';
-                                                    }
-                                                    echo '</label>';
-                                                    
-                                                    $prevGroupIndex = $currentGroupIndex;
                                                 }
                                                 
                                                 echo '</div>';
@@ -1267,6 +1469,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 label.style.maxHeight = '';
             });
             
+            // Tính toán kích thước ghế đôi dựa trên kích thước ghế đơn
+            const firstRegularSeat = seatMapContainer.querySelector('.seat-label:not(.couple-seat)');
+            if (firstRegularSeat) {
+                const regularSeatWidth = firstRegularSeat.offsetWidth || 40; // Fallback 40px
+                const regularSeatHeight = firstRegularSeat.offsetHeight || 40; // Fallback 40px
+                const seatGap = 6.4; // 0.4rem = 6.4px
+                const coupleSeatWidth = (regularSeatWidth * 2) + seatGap;
+                
+                const coupleSeats = seatMapContainer.querySelectorAll('.seat-label.couple-seat');
+                coupleSeats.forEach(label => {
+                    label.style.width = coupleSeatWidth + 'px';
+                    label.style.height = regularSeatHeight + 'px';
+                    label.style.minWidth = coupleSeatWidth + 'px';
+                    label.style.maxWidth = coupleSeatWidth + 'px';
+                    label.style.minHeight = regularSeatHeight + 'px';
+                    label.style.maxHeight = regularSeatHeight + 'px';
+                });
+            }
+            
             const seatNumbers = seatMapContainer.querySelectorAll('.seat-number');
             const seatIcons = seatMapContainer.querySelectorAll('.seat-icon');
             
@@ -1309,6 +1530,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const availableWidth = containerWidth - totalGapWidth - totalSeparatorWidth;
             // Giảm kích thước tối đa xuống 14px để ghế nhỏ hơn, có thể xem hết ghế trong rạp
             const seatSize = Math.max(8, Math.min(14, availableWidth / seatCount));
+            const seatGap = 6.4; // 0.4rem = 6.4px (giả sử 1rem = 16px)
             
             // Áp dụng kích thước (chỉ cho ghế thường, không phải ghế đôi)
             const seatLabels = seatMapContainer.querySelectorAll('.seat-label:not(.couple-seat)');
@@ -1317,6 +1539,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 label.style.height = seatSize + 'px';
                 label.style.minWidth = Math.max(8, seatSize * 0.7) + 'px';
                 label.style.minHeight = Math.max(8, seatSize * 0.7) + 'px';
+            });
+            
+            // Tính toán và áp dụng kích thước cho ghế đôi (width = 2 * seatSize + gap)
+            const coupleSeats = seatMapContainer.querySelectorAll('.seat-label.couple-seat');
+            const coupleSeatWidth = (seatSize * 2) + seatGap;
+            coupleSeats.forEach(label => {
+                label.style.width = coupleSeatWidth + 'px';
+                label.style.height = seatSize + 'px';
+                label.style.minWidth = coupleSeatWidth + 'px';
+                label.style.maxWidth = coupleSeatWidth + 'px';
+                label.style.minHeight = seatSize + 'px';
+                label.style.maxHeight = seatSize + 'px';
             });
             
             // Điều chỉnh font size của số ghế

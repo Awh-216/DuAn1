@@ -577,18 +577,99 @@ class AdminController extends Controller {
                 ['title' => $title, 'status' => $status, 'status_admin' => $status_admin]
             );
             
-            // Nếu là phim chiếu rạp, tạo các suất chiếu
+            // Nếu là phim chiếu rạp, tạo các suất chiếu và phòng chiếu
             if ($status === 'Chiếu rạp') {
                 $showtimeCount = 0;
+                $screenCount = 0;
                 
                 // Kiểm tra dữ liệu từ form mới (khoảng ngày)
-                if (!empty($_POST['schedule_theater_id']) && !empty($_POST['from_date']) && !empty($_POST['to_date']) && !empty($_POST['showtimes_time'])) {
-                    $theater_id = intval($_POST['schedule_theater_id']);
+                if (!empty($_POST['schedule_theater_id']) && is_array($_POST['schedule_theater_id']) && 
+                    !empty($_POST['from_date']) && !empty($_POST['to_date']) && !empty($_POST['showtimes_time'])) {
+                    
+                    $theater_ids = array_map('intval', $_POST['schedule_theater_id']);
                     $from_date = $_POST['from_date'];
                     $to_date = $_POST['to_date'];
                     $times = $_POST['showtimes_time'] ?? [];
                     $default_price = floatval($_POST['default_price'] ?? 120000);
-                    $screen_id = !empty($_POST['screen_id']) ? intval($_POST['screen_id']) : null;
+                    $number_of_screens = intval($_POST['number_of_screens'] ?? 1);
+                    
+                    // Tạo phòng chiếu cho mỗi rạp được chọn
+                    foreach ($theater_ids as $theater_id) {
+                        // Kiểm tra xem rạp có tồn tại không
+                        $theater = $db->fetch("SELECT * FROM theaters WHERE id = ?", [$theater_id]);
+                        if (!$theater) continue;
+                        
+                        // Tạo các phòng chiếu cho rạp này
+                        for ($i = 1; $i <= $number_of_screens; $i++) {
+                            // Kiểm tra xem phòng đã tồn tại chưa (kiểm tra theo tên)
+                            $screenName = 'Phòng ' . $i;
+                            $existingScreen = $db->fetch("
+                                SELECT id FROM theater_screens 
+                                WHERE theater_id = ? AND screen_name = ? AND screen_type IN ('2D', '3D')
+                            ", [$theater_id, $screenName]);
+                            
+                            // Nếu phòng đã tồn tại, tìm tên phòng tiếp theo chưa được sử dụng
+                            if ($existingScreen) {
+                                $counter = $i + 1;
+                                while ($counter <= 100) { // Giới hạn tối đa 100 phòng
+                                    $screenName = 'Phòng ' . $counter;
+                                    $existingScreen = $db->fetch("
+                                        SELECT id FROM theater_screens 
+                                        WHERE theater_id = ? AND screen_name = ? AND screen_type IN ('2D', '3D')
+                                    ", [$theater_id, $screenName]);
+                                    if (!$existingScreen) {
+                                        break; // Tìm thấy tên phòng chưa được sử dụng
+                                    }
+                                    $counter++;
+                                }
+                                if ($counter > 100) {
+                                    continue; // Bỏ qua nếu không tìm thấy tên phòng phù hợp
+                                }
+                            }
+                            
+                            if (!$existingScreen) {
+                                // Tạo phòng mới (mặc định 2D, có thể thay đổi sau)
+                                $screen_type = ($i % 2 == 0) ? '3D' : '2D'; // Xen kẽ 2D và 3D
+                                $total_seats = 144; // Mặc định 144 ghế (12 hàng x 12 cột)
+                                
+                                try {
+                                    $db->execute("
+                                        INSERT INTO theater_screens (theater_id, screen_name, total_seats, screen_type, is_active)
+                                        VALUES (?, ?, ?, ?, 1)
+                                    ", [$theater_id, $screenName, $total_seats, $screen_type]);
+                                    $screenCount++;
+                                    
+                                    // Tạo layout mặc định cho phòng
+                                    $defaultRows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+                                    $totalRows = count($defaultRows);
+                                    $middleStartIndex = floor(($totalRows - 3) / 2);
+                                    $vipRows = array_slice($defaultRows, $middleStartIndex, 3);
+                                    
+                                    $layout = [
+                                        'rows' => $defaultRows,
+                                        'cols' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                                        'vip_rows' => $vipRows,
+                                        'couple_rows' => [end($defaultRows)],
+                                        'normal_price' => 120000,
+                                        'vip_price' => 180000,
+                                        'couple_price' => 240000,
+                                        'layout_type' => 'standard'
+                                    ];
+                                    
+                                    $layoutJson = json_encode($layout, JSON_UNESCAPED_UNICODE);
+                                    $screenId = $db->lastInsertId();
+                                    
+                                    $db->execute("
+                                        UPDATE theater_screens 
+                                        SET seat_layout_config = ?
+                                        WHERE id = ?
+                                    ", [$layoutJson, $screenId]);
+                                } catch (Exception $e) {
+                                    error_log("Error creating screen: " . $e->getMessage());
+                                }
+                            }
+                        }
+                    }
                     
                     // Tạo suất chiếu cho từng ngày trong khoảng
                     $start = new DateTime($from_date);
@@ -598,44 +679,77 @@ class AdminController extends Controller {
                     $interval = new DateInterval('P1D');
                     $period = new DatePeriod($start, $interval, $end);
                     
-                    foreach ($period as $date) {
-                        $show_date = $date->format('Y-m-d');
+                    // Lấy danh sách phòng chiếu cho mỗi rạp
+                    foreach ($theater_ids as $theater_id) {
+                        // LIMIT không thể dùng tham số, phải dùng giá trị trực tiếp (đã validate là int)
+                        $limitValue = intval($number_of_screens);
+                        $screens = $db->fetchAll("
+                            SELECT id FROM theater_screens 
+                            WHERE theater_id = ? AND is_active = 1 
+                            ORDER BY screen_name 
+                            LIMIT " . $limitValue . "
+                        ", [$theater_id]);
                         
-                        // Tạo suất chiếu cho mỗi khung giờ
-                        foreach ($times as $show_time) {
-                            if (!empty($show_time)) {
-                                $db->execute("
-                                    INSERT INTO showtimes (movie_id, theater_id, show_date, show_time, price, screen_id)
-                                    VALUES (?, ?, ?, ?, ?, ?)
-                                ", [$movie_id, $theater_id, $show_date, $show_time, $default_price, $screen_id]);
-                                $showtimeCount++;
+                        if (empty($screens)) continue;
+                        
+                        foreach ($period as $date) {
+                            $show_date = $date->format('Y-m-d');
+                            
+                            // Tạo suất chiếu cho mỗi khung giờ và mỗi phòng
+                            foreach ($times as $show_time) {
+                                if (!empty($show_time)) {
+                                    foreach ($screens as $screen) {
+                                        $screen_id = $screen['id'];
+                                        $db->execute("
+                                            INSERT INTO showtimes (movie_id, theater_id, show_date, show_time, price, screen_id)
+                                            VALUES (?, ?, ?, ?, ?, ?)
+                                        ", [$movie_id, $theater_id, $show_date, $show_time, $default_price, $screen_id]);
+                                        $showtimeCount++;
+                                    }
+                                }
                             }
                         }
                     }
                     
-                    if ($showtimeCount > 0) {
-                        $_SESSION['success'] = 'Thêm phim thành công! Đã tạo ' . $showtimeCount . ' suất chiếu.';
-                    } else {
-                        $_SESSION['success'] = 'Thêm phim thành công!';
+                    $successMsg = 'Thêm phim thành công!';
+                    if ($screenCount > 0) {
+                        $successMsg .= ' Đã tạo ' . $screenCount . ' phòng chiếu.';
                     }
+                    if ($showtimeCount > 0) {
+                        $successMsg .= ' Đã tạo ' . $showtimeCount . ' suất chiếu.';
+                    }
+                    $_SESSION['success'] = $successMsg;
                 } 
                 // Fallback: Xử lý dữ liệu cũ (nếu có)
                 elseif (isset($_POST['showtimes']) && is_array($_POST['showtimes'])) {
-                    foreach ($_POST['showtimes'] as $showtimeData) {
-                        if (!empty($showtimeData['theater_id']) && !empty($showtimeData['show_date']) && !empty($showtimeData['show_time'])) {
-                            $theater_id = intval($showtimeData['theater_id']);
-                            $show_date = $showtimeData['show_date'];
-                            $show_time = $showtimeData['show_time'];
-                            $price = floatval($showtimeData['price'] ?? 120000);
-                            $screen_id = !empty($showtimeData['screen_id']) ? intval($showtimeData['screen_id']) : null;
-                            
-                            $db->execute("
-                                INSERT INTO showtimes (movie_id, theater_id, show_date, show_time, price, screen_id)
-                                VALUES (?, ?, ?, ?, ?, ?)
-                            ", [$movie_id, $theater_id, $show_date, $show_time, $price, $screen_id]);
-                            $showtimeCount++;
-                        }
-                    }
+                            foreach ($_POST['showtimes'] as $showtimeData) {
+                                if (!empty($showtimeData['theater_id']) && !empty($showtimeData['show_date']) && !empty($showtimeData['show_time'])) {
+                                    $theater_id = intval($showtimeData['theater_id']);
+                                    $show_date = $showtimeData['show_date'];
+                                    $show_time = $showtimeData['show_time'];
+                                    $price = floatval($showtimeData['price'] ?? 120000);
+                                    $screen_id = !empty($showtimeData['screen_id']) ? intval($showtimeData['screen_id']) : null;
+                                    
+                                    // Validate screen_id thuộc theater_id nếu có screen_id
+                                    if ($screen_id) {
+                                        $screenCheck = $db->fetch("
+                                            SELECT theater_id FROM theater_screens 
+                                            WHERE id = ? AND theater_id = ?
+                                        ", [$screen_id, $theater_id]);
+                                        
+                                        if (!$screenCheck) {
+                                            error_log("Warning: Screen $screen_id does not belong to theater $theater_id");
+                                            continue; // Bỏ qua showtime này
+                                        }
+                                    }
+                                    
+                                    $db->execute("
+                                        INSERT INTO showtimes (movie_id, theater_id, show_date, show_time, price, screen_id)
+                                        VALUES (?, ?, ?, ?, ?, ?)
+                                    ", [$movie_id, $theater_id, $show_date, $show_time, $price, $screen_id]);
+                                    $showtimeCount++;
+                                }
+                            }
                     
                     if ($showtimeCount > 0) {
                         $_SESSION['success'] = 'Thêm phim thành công! Đã tạo ' . $showtimeCount . ' suất chiếu.';
@@ -961,23 +1075,112 @@ class AdminController extends Controller {
                 $db->execute("DELETE FROM showtimes WHERE movie_id = ?", [$id]);
             } elseif ($status === 'Chiếu rạp') {
                 // Chỉ cập nhật showtimes nếu có dữ liệu mới từ form
-                if (!empty($_POST['schedule_theater_id']) && !empty($_POST['from_date']) && !empty($_POST['to_date']) && !empty($_POST['showtimes_time'])) {
+                if (!empty($_POST['schedule_theater_id']) && is_array($_POST['schedule_theater_id']) && 
+                    !empty($_POST['from_date']) && !empty($_POST['to_date']) && !empty($_POST['showtimes_time'])) {
                     // Xóa tất cả showtimes cũ trước khi tạo mới
                     $db->execute("DELETE FROM showtimes WHERE movie_id = ?", [$id]);
                     $showtimeCount = 0;
+                    $screenCount = 0;
                     
-                    $theater_id = intval($_POST['schedule_theater_id']);
+                    $theater_ids = array_map('intval', $_POST['schedule_theater_id']);
                     $from_date = $_POST['from_date'];
                     $to_date = $_POST['to_date'];
                     $times = $_POST['showtimes_time'] ?? [];
                     $default_price = floatval($_POST['default_price'] ?? 120000);
-                    $screen_id = !empty($_POST['screen_id']) ? intval($_POST['screen_id']) : null;
+                    $number_of_screens = intval($_POST['number_of_screens'] ?? 1);
                     
                     // Validate dates
                     if ($from_date > $to_date) {
                         $_SESSION['error'] = 'Ngày bắt đầu không thể lớn hơn ngày kết thúc!';
                         $this->redirect('admin/movies/edit&id=' . $id);
                         return;
+                    }
+                    
+                    // Tạo phòng chiếu cho mỗi rạp được chọn (nếu chưa có đủ)
+                    foreach ($theater_ids as $theater_id) {
+                        // Kiểm tra xem rạp có tồn tại không
+                        $theater = $db->fetch("SELECT * FROM theaters WHERE id = ?", [$theater_id]);
+                        if (!$theater) continue;
+                        
+                        // Đếm số phòng hiện có
+                        $existingScreens = $db->fetchAll("
+                            SELECT id FROM theater_screens 
+                            WHERE theater_id = ? AND screen_type IN ('2D', '3D') AND is_active = 1
+                        ", [$theater_id]);
+                        $currentScreenCount = count($existingScreens);
+                        
+                        // Tạo thêm phòng nếu thiếu
+                        if ($currentScreenCount < $number_of_screens) {
+                            $needed = $number_of_screens - $currentScreenCount;
+                            for ($i = 1; $i <= $needed; $i++) {
+                                $screenNumber = $currentScreenCount + $i;
+                                $screenName = 'Phòng ' . $screenNumber;
+                                
+                                // Kiểm tra xem tên phòng đã tồn tại chưa
+                                $existingScreenByName = $db->fetch("
+                                    SELECT id FROM theater_screens 
+                                    WHERE theater_id = ? AND screen_name = ? AND screen_type IN ('2D', '3D')
+                                ", [$theater_id, $screenName]);
+                                
+                                // Nếu tên đã tồn tại, tìm tên tiếp theo
+                                if ($existingScreenByName) {
+                                    $counter = $screenNumber + 1;
+                                    while ($counter <= 100) {
+                                        $screenName = 'Phòng ' . $counter;
+                                        $existingScreenByName = $db->fetch("
+                                            SELECT id FROM theater_screens 
+                                            WHERE theater_id = ? AND screen_name = ? AND screen_type IN ('2D', '3D')
+                                        ", [$theater_id, $screenName]);
+                                        if (!$existingScreenByName) {
+                                            break;
+                                        }
+                                        $counter++;
+                                    }
+                                    if ($counter > 100) {
+                                        continue;
+                                    }
+                                }
+                                
+                                $screen_type = ($screenNumber % 2 == 0) ? '3D' : '2D'; // Xen kẽ 2D và 3D
+                                $total_seats = 144; // Mặc định 144 ghế
+                                
+                                try {
+                                    $db->execute("
+                                        INSERT INTO theater_screens (theater_id, screen_name, total_seats, screen_type, is_active)
+                                        VALUES (?, ?, ?, ?, 1)
+                                    ", [$theater_id, $screenName, $total_seats, $screen_type]);
+                                    $screenCount++;
+                                    
+                                    // Tạo layout mặc định cho phòng
+                                    $defaultRows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+                                    $totalRows = count($defaultRows);
+                                    $middleStartIndex = floor(($totalRows - 3) / 2);
+                                    $vipRows = array_slice($defaultRows, $middleStartIndex, 3);
+                                    
+                                    $layout = [
+                                        'rows' => $defaultRows,
+                                        'cols' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                                        'vip_rows' => $vipRows,
+                                        'couple_rows' => [end($defaultRows)],
+                                        'normal_price' => 120000,
+                                        'vip_price' => 180000,
+                                        'couple_price' => 240000,
+                                        'layout_type' => 'standard'
+                                    ];
+                                    
+                                    $layoutJson = json_encode($layout, JSON_UNESCAPED_UNICODE);
+                                    $screenId = $db->lastInsertId();
+                                    
+                                    $db->execute("
+                                        UPDATE theater_screens 
+                                        SET seat_layout_config = ?
+                                        WHERE id = ?
+                                    ", [$layoutJson, $screenId]);
+                                } catch (Exception $e) {
+                                    error_log("Error creating screen: " . $e->getMessage());
+                                }
+                            }
+                        }
                     }
                     
                     // Tạo suất chiếu cho từng ngày trong khoảng
@@ -989,26 +1192,57 @@ class AdminController extends Controller {
                         $interval = new DateInterval('P1D');
                         $period = new DatePeriod($start, $interval, $end);
                         
-                        foreach ($period as $date) {
-                            $show_date = $date->format('Y-m-d');
+                        // Lấy danh sách phòng chiếu cho mỗi rạp
+                        foreach ($theater_ids as $theater_id) {
+                            // LIMIT không thể dùng tham số, phải dùng giá trị trực tiếp (đã validate là int)
+                            $limitValue = intval($number_of_screens);
+                            $screens = $db->fetchAll("
+                                SELECT id FROM theater_screens 
+                                WHERE theater_id = ? AND is_active = 1 AND screen_type IN ('2D', '3D')
+                                ORDER BY screen_name 
+                                LIMIT " . $limitValue . "
+                            ", [$theater_id]);
                             
-                            // Tạo suất chiếu cho mỗi khung giờ
-                            foreach ($times as $show_time) {
-                                if (!empty($show_time)) {
-                                    $db->execute("
-                                        INSERT INTO showtimes (movie_id, theater_id, show_date, show_time, price, screen_id)
-                                        VALUES (?, ?, ?, ?, ?, ?)
-                                    ", [$id, $theater_id, $show_date, $show_time, $default_price, $screen_id]);
-                                    $showtimeCount++;
+                            if (empty($screens)) continue;
+                            
+                            foreach ($period as $date) {
+                                $show_date = $date->format('Y-m-d');
+                                
+                                // Tạo suất chiếu cho mỗi khung giờ và mỗi phòng
+                                foreach ($times as $show_time) {
+                                    if (!empty($show_time)) {
+                                        foreach ($screens as $screen) {
+                                            $screen_id = $screen['id'];
+                                            
+                                            // Validate screen_id thuộc theater_id (double check để đảm bảo an toàn)
+                                            $screenCheck = $db->fetch("
+                                                SELECT theater_id FROM theater_screens 
+                                                WHERE id = ? AND theater_id = ?
+                                            ", [$screen_id, $theater_id]);
+                                            
+                                            if ($screenCheck) {
+                                                $db->execute("
+                                                    INSERT INTO showtimes (movie_id, theater_id, show_date, show_time, price, screen_id)
+                                                    VALUES (?, ?, ?, ?, ?, ?)
+                                                ", [$id, $theater_id, $show_date, $show_time, $default_price, $screen_id]);
+                                                $showtimeCount++;
+                                            } else {
+                                                error_log("Warning: Screen $screen_id does not belong to theater $theater_id");
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
                         
-                        if ($showtimeCount > 0) {
-                            $_SESSION['success'] = 'Cập nhật phim thành công! Đã cập nhật ' . $showtimeCount . ' suất chiếu.';
-                        } else {
-                            $_SESSION['success'] = 'Cập nhật phim thành công! (Đã xóa lịch chiếu cũ)';
+                        $successMsg = 'Cập nhật phim thành công!';
+                        if ($screenCount > 0) {
+                            $successMsg .= ' Đã tạo thêm ' . $screenCount . ' phòng chiếu.';
                         }
+                        if ($showtimeCount > 0) {
+                            $successMsg .= ' Đã cập nhật ' . $showtimeCount . ' suất chiếu.';
+                        }
+                        $_SESSION['success'] = $successMsg;
                     } catch (Exception $e) {
                         error_log("Error creating showtimes: " . $e->getMessage());
                         $_SESSION['error'] = 'Lỗi khi tạo lịch chiếu: ' . $e->getMessage();

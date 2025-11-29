@@ -173,17 +173,25 @@
             <div class="row mb-3">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Chọn rạp <span class="text-danger">*</span></label>
-                    <select class="form-select" id="scheduleTheater" name="schedule_theater_id">
-                        <option value="">-- Chọn rạp --</option>
+                    <select class="form-select" id="scheduleTheater" name="schedule_theater_id[]" multiple size="5" required>
                         <?php foreach ($theaters as $theater): ?>
-                            <option value="<?php echo $theater['id']; ?>"><?php echo htmlspecialchars($theater['name']); ?></option>
+                            <option value="<?php echo $theater['id']; ?>"><?php echo htmlspecialchars($theater['name']); ?> - <?php echo htmlspecialchars($theater['location'] ?? ''); ?></option>
                         <?php endforeach; ?>
                     </select>
+                    <small class="form-text text-muted">Giữ Ctrl (Windows) hoặc Cmd (Mac) để chọn nhiều rạp</small>
                 </div>
                 
                 <div class="col-md-6 mb-3">
+                    <label class="form-label">Số phòng chiếu <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="numberOfScreens" name="number_of_screens" min="1" value="1" required>
+                    <small class="form-text text-muted">Số phòng chiếu sẽ được tạo tự động cho mỗi rạp đã chọn</small>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
                     <label class="form-label">Giá vé mặc định (VNĐ) <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" id="defaultPrice" name="default_price" min="0" step="1000" value="120000">
+                    <input type="number" class="form-control" id="defaultPrice" name="default_price" min="0" step="1000" value="120000" required>
                 </div>
             </div>
             
@@ -378,23 +386,38 @@ function updateSchedulePreview() {
     const toDate = document.getElementById('toDate').value;
     const timeInputs = document.querySelectorAll('input[name="showtimes_time[]"]');
     const times = Array.from(timeInputs).map(input => input.value).filter(v => v);
+    const scheduleTheater = document.getElementById('scheduleTheater');
+    const numberOfScreens = parseInt(document.getElementById('numberOfScreens')?.value || 1);
     
     const preview = document.getElementById('schedulePreview');
     const previewContent = document.getElementById('previewContent');
     
-    if (fromDate && toDate && times.length > 0) {
+    if (fromDate && toDate && times.length > 0 && scheduleTheater) {
         // Tính số ngày
         const from = new Date(fromDate);
         const to = new Date(toDate);
         const daysDiff = Math.ceil((to - from) / (1000 * 60 * 60 * 24)) + 1;
-        const totalShowtimes = daysDiff * times.length;
+        
+        // Đếm số rạp được chọn
+        const selectedTheaters = Array.from(scheduleTheater.selectedOptions);
+        const theaterCount = selectedTheaters.length;
+        
+        // Tính tổng suất chiếu: số ngày × số khung giờ × số rạp × số phòng
+        const totalShowtimes = daysDiff * times.length * theaterCount * numberOfScreens;
+        
+        let theaterNames = selectedTheaters.map(opt => opt.text).join(', ');
+        if (theaterNames.length > 100) {
+            theaterNames = theaterNames.substring(0, 100) + '...';
+        }
         
         previewContent.innerHTML = `
             <p class="mb-1">Sẽ tạo <strong>${totalShowtimes}</strong> suất chiếu:</p>
             <ul class="mb-0">
                 <li>Khoảng thời gian: ${formatDate(fromDate)} - ${formatDate(toDate)} (${daysDiff} ngày)</li>
+                <li>Số rạp: ${theaterCount} rạp ${theaterCount > 0 ? '(' + theaterNames + ')' : ''}</li>
+                <li>Số phòng/rạp: ${numberOfScreens} phòng</li>
                 <li>Khung giờ: ${times.join(', ')}</li>
-                <li>Tổng: ${daysDiff} ngày × ${times.length} khung giờ = ${totalShowtimes} suất chiếu</li>
+                <li>Tổng: ${daysDiff} ngày × ${times.length} khung giờ × ${theaterCount} rạp × ${numberOfScreens} phòng = ${totalShowtimes} suất chiếu</li>
             </ul>
         `;
         preview.style.display = 'block';
@@ -433,6 +456,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const defaultPrice = document.getElementById('defaultPrice');
     if (defaultPrice) {
         defaultPrice.addEventListener('change', updateSchedulePreview);
+    }
+    
+    const scheduleTheater = document.getElementById('scheduleTheater');
+    if (scheduleTheater) {
+        scheduleTheater.addEventListener('change', updateSchedulePreview);
+    }
+    
+    const numberOfScreens = document.getElementById('numberOfScreens');
+    if (numberOfScreens) {
+        numberOfScreens.addEventListener('change', updateSchedulePreview);
     }
     
     toggleTheaterSection();

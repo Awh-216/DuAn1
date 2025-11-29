@@ -230,12 +230,10 @@
                         <input type="number" name="total_seats" id="total_seats" class="form-control" min="1" required>
                     </div>
                     <div class="mb-3">
-                        <label for="screen_type" class="form-label" style="color: black;">Loại màn hình</label>
-                        <select name="screen_type" id="screen_type" class="form-select">
+                        <label for="screen_type" class="form-label" style="color: black;">Loại phòng <span class="text-danger">*</span></label>
+                        <select name="screen_type" id="screen_type" class="form-select" required>
                             <option value="2D">2D</option>
                             <option value="3D">3D</option>
-                            <option value="IMAX">IMAX</option>
-                            <option value="4DX">4DX</option>
                         </select>
                     </div>
                 </div>

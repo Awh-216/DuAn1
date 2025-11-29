@@ -312,6 +312,9 @@
             <li><a href="?route=moderator/theater" class="<?php echo ($current_page ?? '') === 'theater' ? 'active' : ''; ?>">
                 <i class="fas fa-building"></i> Thông tin rạp
             </a></li>
+            <li><a href="?route=moderator/screens" class="<?php echo ($current_page ?? '') === 'screens' ? 'active' : ''; ?>">
+                <i class="fas fa-door-open"></i> Quản lý phòng
+            </a></li>
             <li><a href="?route=moderator/showtimes" class="<?php echo ($current_page ?? '') === 'showtimes' ? 'active' : ''; ?>">
                 <i class="fas fa-calendar-alt"></i> Lịch chiếu
             </a></li>

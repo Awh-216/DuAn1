@@ -1510,7 +1510,8 @@ ALTER TABLE `showtimes`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_movie` (`movie_id`),
   ADD KEY `idx_theater` (`theater_id`),
-  ADD KEY `screen_id` (`screen_id`);
+  ADD KEY `screen_id` (`screen_id`),
+  ADD KEY `idx_theater_screen` (`theater_id`, `screen_id`);
 
 --
 -- Chỉ mục cho bảng `subscriptions`
@@ -1894,10 +1895,7 @@ ALTER TABLE `seat_selection_logs`
 ALTER TABLE `showtimes`
   ADD CONSTRAINT `showtimes_ibfk_1` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `showtimes_ibfk_2` FOREIGN KEY (`theater_id`) REFERENCES `theaters` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `showtimes_ibfk_3` FOREIGN KEY (`screen_id`) REFERENCES `theater_screens` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `showtimes_ibfk_4` FOREIGN KEY (`screen_id`) REFERENCES `theater_screens` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `showtimes_ibfk_5` FOREIGN KEY (`screen_id`) REFERENCES `theater_screens` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `showtimes_ibfk_6` FOREIGN KEY (`screen_id`) REFERENCES `theater_screens` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `showtimes_ibfk_3` FOREIGN KEY (`screen_id`) REFERENCES `theater_screens` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `support_tickets`

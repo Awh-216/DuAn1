@@ -511,5 +511,435 @@ class ModeratorController extends Controller {
         
         $this->redirect('moderator/theater');
     }
+    
+    // Quản lý phòng chiếu
+    public function screens() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        $theaterId = $this->theaterId;
+        
+        $theater = $db->fetch("SELECT * FROM theaters WHERE id = ?", [$theaterId]);
+        
+        // Lấy danh sách phim đang chiếu hoặc sắp chiếu
+        $movies = $db->fetchAll("
+            SELECT DISTINCT m.id, m.title 
+            FROM movies m
+            INNER JOIN showtimes s ON m.id = s.movie_id
+            WHERE s.theater_id = ? AND m.status IN ('Chiếu rạp', 'Đang chiếu', 'Sắp chiếu')
+            ORDER BY m.title
+        ", [$theaterId]);
+        
+        // Lọc theo phim nếu có
+        $movieFilter = $_GET['movie_id'] ?? null;
+        
+        if ($movieFilter) {
+            // Lấy danh sách phòng có phim được chọn
+            $screens = $db->fetchAll("
+                SELECT DISTINCT ts.*
+                FROM theater_screens ts
+                INNER JOIN showtimes s ON ts.id = s.screen_id
+                WHERE ts.theater_id = ? 
+                AND s.movie_id = ?
+                AND s.show_date >= CURDATE()
+                ORDER BY ts.screen_name
+            ", [$theaterId, intval($movieFilter)]);
+        } else {
+            // Lấy tất cả phòng
+            $screens = $db->fetchAll("
+                SELECT ts.*
+                FROM theater_screens ts
+                WHERE ts.theater_id = ?
+                ORDER BY ts.screen_name
+            ", [$theaterId]);
+        }
+        
+        // Lấy thông tin phim đang chiếu cho mỗi phòng
+        foreach ($screens as &$screen) {
+            $currentMovies = $db->fetchAll("
+                SELECT DISTINCT m.id, m.title
+                FROM showtimes s
+                INNER JOIN movies m ON s.movie_id = m.id
+                WHERE s.screen_id = ? 
+                AND s.show_date >= CURDATE()
+                AND m.status IN ('Chiếu rạp', 'Đang chiếu', 'Sắp chiếu')
+                ORDER BY m.title
+            ", [$screen['id']]);
+            
+            $screen['current_movies'] = $currentMovies;
+        }
+        unset($screen);
+        
+        $this->moderatorView('screens', [
+            'theater' => $theater,
+            'screens' => $screens,
+            'movies' => $movies,
+            'user' => $user,
+            'title' => 'Quản lý phòng chiếu - ' . $theater['name'],
+            'current_page' => 'screens'
+        ]);
+    }
+    
+    // Cấu hình layout ghế cho phòng
+    public function screenEdit() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        $theaterId = $this->theaterId;
+        
+        $screen_id = $_GET['id'] ?? null;
+        if (!$screen_id) {
+            $_SESSION['error'] = 'Không tìm thấy phòng chiếu!';
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        // Kiểm tra phòng thuộc rạp này
+        $screen = $db->fetch("SELECT * FROM theater_screens WHERE id = ? AND theater_id = ?", [$screen_id, $theaterId]);
+        if (!$screen) {
+            $_SESSION['error'] = 'Phòng chiếu không thuộc rạp của bạn!';
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        $theater = $db->fetch("SELECT * FROM theaters WHERE id = ?", [$theaterId]);
+        
+        // Lấy layout hiện tại hoặc dùng default
+        $layout = null;
+        if ($screen['seat_layout_config']) {
+            $layout = json_decode($screen['seat_layout_config'], true);
+        }
+        
+        if (!$layout) {
+            // Default layout
+            $defaultRows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+            $totalRows = count($defaultRows);
+            $middleStartIndex = floor(($totalRows - 3) / 2);
+            $vipRows = array_slice($defaultRows, $middleStartIndex, 3);
+            
+            $layout = [
+                'rows' => $defaultRows,
+                'cols' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                'vip_rows' => $vipRows,
+                'couple_rows' => [end($defaultRows)],
+                'normal_price' => 120000,
+                'vip_price' => 180000,
+                'couple_price' => 240000
+            ];
+        }
+        
+        $this->moderatorView('screen_edit', [
+            'theater' => $theater,
+            'screen' => $screen,
+            'layout' => $layout,
+            'user' => $user,
+            'title' => 'Cấu hình layout ghế - ' . $screen['screen_name'],
+            'current_page' => 'screens'
+        ]);
+    }
+    
+    // Cập nhật layout ghế
+    public function screenLayoutUpdate() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        $theaterId = $this->theaterId;
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        $screen_id = $_POST['screen_id'] ?? null;
+        if (!$screen_id) {
+            $_SESSION['error'] = 'Không tìm thấy phòng chiếu!';
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        // Kiểm tra phòng thuộc rạp này
+        $screen = $db->fetch("SELECT * FROM theater_screens WHERE id = ? AND theater_id = ?", [$screen_id, $theaterId]);
+        if (!$screen) {
+            $_SESSION['error'] = 'Phòng chiếu không thuộc rạp của bạn!';
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        // Lấy dữ liệu từ form
+        $rows = $_POST['rows'] ?? [];
+        $cols = $_POST['cols'] ?? [];
+        $vip_rows = $_POST['vip_rows'] ?? [];
+        $couple_rows = $_POST['couple_rows'] ?? [];
+        $normal_price = floatval($_POST['normal_price'] ?? 120000);
+        $vip_price = floatval($_POST['vip_price'] ?? 180000);
+        $couple_price = floatval($_POST['couple_price'] ?? 240000);
+        
+        // Xử lý dữ liệu: loại bỏ khoảng trắng và filter empty
+        $rows = array_map('trim', $rows);
+        $rows = array_filter($rows, function($row) { return !empty($row); });
+        $rows = array_values($rows);
+        
+        $cols = array_map('trim', $cols);
+        $cols = array_filter($cols, function($col) { return !empty($col); });
+        $cols = array_map('intval', $cols);
+        $cols = array_values($cols);
+        
+        $vip_rows = array_map('trim', $vip_rows);
+        $vip_rows = array_filter($vip_rows, function($row) { return !empty($row); });
+        $vip_rows = array_values($vip_rows);
+        
+        $couple_rows = array_map('trim', $couple_rows);
+        $couple_rows = array_filter($couple_rows, function($row) { return !empty($row); });
+        $couple_rows = array_values($couple_rows);
+        
+        // Validate
+        if (empty($rows) || empty($cols)) {
+            $_SESSION['error'] = 'Vui lòng nhập đầy đủ thông tin hàng và cột!';
+            header('Location: ?route=moderator/screenEdit&id=' . $screen_id);
+            exit;
+        }
+        
+        // Tạo layout config
+        $layout = [
+            'rows' => $rows,
+            'cols' => array_map('intval', $cols),
+            'vip_rows' => $vip_rows,
+            'couple_rows' => $couple_rows,
+            'normal_price' => $normal_price,
+            'vip_price' => $vip_price,
+            'couple_price' => $couple_price,
+            'layout_type' => 'standard'
+        ];
+        
+        try {
+            $layoutJson = json_encode($layout, JSON_UNESCAPED_UNICODE);
+            
+            $db->execute("
+                UPDATE theater_screens 
+                SET seat_layout_config = ?
+                WHERE id = ? AND theater_id = ?
+            ", [$layoutJson, $screen_id, $theaterId]);
+            
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Cập nhật layout ghế phòng',
+                'Screen',
+                'screen',
+                $screen_id,
+                null,
+                ['screen_name' => $screen['screen_name'], 'layout' => $layout]
+            );
+            
+            $_SESSION['success'] = 'Cập nhật layout ghế thành công!';
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
+        }
+        
+        header('Location: ?route=moderator/screenEdit&id=' . $screen_id);
+        exit;
+    }
+    
+    // Lấy danh sách phim trong phòng (AJAX)
+    public function screenMovies() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        $theaterId = $this->theaterId;
+        
+        $screen_id = $_GET['screen_id'] ?? null;
+        if (!$screen_id) {
+            echo json_encode(['success' => false, 'message' => 'Không tìm thấy phòng']);
+            exit;
+        }
+        
+        // Kiểm tra phòng thuộc rạp này
+        $screen = $db->fetch("SELECT * FROM theater_screens WHERE id = ? AND theater_id = ?", [$screen_id, $theaterId]);
+        if (!$screen) {
+            echo json_encode(['success' => false, 'message' => 'Phòng không thuộc rạp của bạn']);
+            exit;
+        }
+        
+        // Lấy danh sách phim với thông tin lịch chiếu
+        $movies = $db->fetchAll("
+            SELECT 
+                m.id,
+                m.title,
+                MIN(s.show_date) as from_date,
+                MAX(s.show_date) as to_date,
+                COUNT(s.id) as showtime_count
+            FROM showtimes s
+            INNER JOIN movies m ON s.movie_id = m.id
+            WHERE s.screen_id = ? AND s.show_date >= CURDATE()
+            GROUP BY m.id, m.title
+            ORDER BY m.title
+        ", [$screen_id]);
+        
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'movies' => $movies]);
+        exit;
+    }
+    
+    // Thêm phim vào phòng
+    public function screenAddMovie() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        $theaterId = $this->theaterId;
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        $screen_id = $_POST['screen_id'] ?? null;
+        $movie_id = $_POST['movie_id'] ?? null;
+        $from_date = $_POST['from_date'] ?? null;
+        $to_date = $_POST['to_date'] ?? null;
+        $times = $_POST['showtimes_time'] ?? [];
+        $price = floatval($_POST['price'] ?? 120000);
+        
+        if (!$screen_id || !$movie_id || !$from_date || !$to_date || empty($times)) {
+            $_SESSION['error'] = 'Thiếu thông tin lịch chiếu!';
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        // Kiểm tra phòng thuộc rạp này
+        $screen = $db->fetch("SELECT * FROM theater_screens WHERE id = ? AND theater_id = ?", [$screen_id, $theaterId]);
+        if (!$screen) {
+            $_SESSION['error'] = 'Phòng chiếu không thuộc rạp của bạn!';
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        // Kiểm tra phim có tồn tại không
+        $movie = $db->fetch("SELECT * FROM movies WHERE id = ?", [$movie_id]);
+        if (!$movie) {
+            $_SESSION['error'] = 'Phim không tồn tại!';
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        // Validate dates
+        if ($from_date > $to_date) {
+            $_SESSION['error'] = 'Ngày bắt đầu không thể lớn hơn ngày kết thúc!';
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        try {
+            $showtimeCount = 0;
+            
+            // Tạo suất chiếu cho từng ngày trong khoảng
+            $start = new DateTime($from_date);
+            $end = new DateTime($to_date);
+            $end->modify('+1 day'); // Để bao gồm cả ngày cuối
+            
+            $interval = new DateInterval('P1D');
+            $period = new DatePeriod($start, $interval, $end);
+            
+            foreach ($period as $date) {
+                $show_date = $date->format('Y-m-d');
+                
+                        // Tạo suất chiếu cho mỗi khung giờ
+                        foreach ($times as $show_time) {
+                            if (!empty($show_time)) {
+                                // Kiểm tra xem suất chiếu đã tồn tại chưa
+                                $existing = $db->fetch("
+                                    SELECT id FROM showtimes 
+                                    WHERE screen_id = ? AND movie_id = ? AND show_date = ? AND show_time = ?
+                                ", [$screen_id, $movie_id, $show_date, $show_time]);
+                                
+                                if (!$existing) {
+                                    // Sử dụng theater_id từ screen để đảm bảo consistency
+                                    $db->execute("
+                                        INSERT INTO showtimes (movie_id, theater_id, screen_id, show_date, show_time, price)
+                                        VALUES (?, ?, ?, ?, ?, ?)
+                                    ", [$movie_id, $screen['theater_id'], $screen_id, $show_date, $show_time, $price]);
+                            $showtimeCount++;
+                        }
+                    }
+                }
+            }
+            
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Thêm phim vào phòng',
+                'Screen',
+                'screen',
+                $screen_id,
+                null,
+                ['screen_name' => $screen['screen_name'], 'movie_id' => $movie_id, 'movie_title' => $movie['title'], 'showtime_count' => $showtimeCount]
+            );
+            
+            $_SESSION['success'] = 'Đã thêm ' . $showtimeCount . ' suất chiếu cho phim "' . $movie['title'] . '" vào phòng "' . $screen['screen_name'] . '"!';
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Lỗi khi thêm lịch chiếu: ' . $e->getMessage();
+        }
+        
+        $this->redirect('moderator/screens');
+    }
+    
+    // Xóa lịch chiếu phim khỏi phòng
+    public function screenRemoveMovie() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        $theaterId = $this->theaterId;
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        $screen_id = $_POST['screen_id'] ?? null;
+        $movie_id = $_POST['movie_id'] ?? null;
+        
+        if (!$screen_id || !$movie_id) {
+            $_SESSION['error'] = 'Thiếu thông tin!';
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        // Kiểm tra phòng thuộc rạp này
+        $screen = $db->fetch("SELECT * FROM theater_screens WHERE id = ? AND theater_id = ?", [$screen_id, $theaterId]);
+        if (!$screen) {
+            $_SESSION['error'] = 'Phòng chiếu không thuộc rạp của bạn!';
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        // Lấy thông tin phim
+        $movie = $db->fetch("SELECT * FROM movies WHERE id = ?", [$movie_id]);
+        if (!$movie) {
+            $_SESSION['error'] = 'Phim không tồn tại!';
+            $this->redirect('moderator/screens');
+            return;
+        }
+        
+        try {
+            // Đếm số suất chiếu sẽ bị xóa
+            $deletedCount = $db->fetch("
+                SELECT COUNT(*) as count FROM showtimes 
+                WHERE screen_id = ? AND movie_id = ? AND show_date >= CURDATE()
+            ", [$screen_id, $movie_id]);
+            
+            // Xóa tất cả lịch chiếu của phim trong phòng này (chỉ xóa lịch tương lai)
+            $db->execute("
+                DELETE FROM showtimes 
+                WHERE screen_id = ? AND movie_id = ? AND show_date >= CURDATE()
+            ", [$screen_id, $movie_id]);
+            
+            AdminMiddleware::logAction(
+                $user['id'],
+                'Xóa lịch chiếu phim khỏi phòng',
+                'Screen',
+                'screen',
+                $screen_id,
+                ['movie_id' => $movie_id, 'movie_title' => $movie['title']],
+                null
+            );
+            
+            $_SESSION['success'] = 'Đã xóa ' . ($deletedCount['count'] ?? 0) . ' suất chiếu của phim "' . $movie['title'] . '" khỏi phòng "' . $screen['screen_name'] . '"!';
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Lỗi khi xóa lịch chiếu: ' . $e->getMessage();
+        }
+        
+        $this->redirect('moderator/screens');
+    }
 }
 
