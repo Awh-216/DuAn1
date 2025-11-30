@@ -197,6 +197,15 @@ $title = 'Xem Phim';
                             <?php if ($movie['description']): ?>
                                 <p class="movie-description"><?php echo htmlspecialchars(mb_substr($movie['description'], 0, 100)) . '...'; ?></p>
                             <?php endif; ?>
+                            <?php if (isset($movie['status']) && $movie['status'] === 'Chiếu rạp'): ?>
+                                <div class="mt-2">
+                                    <a href="?route=booking/index&movie=<?php echo $movie['id']; ?>" 
+                                       class="btn btn-primary btn-sm w-100" 
+                                       style="background: #e50914; border: none; padding: 8px 16px; border-radius: 6px; text-decoration: none; display: inline-block; text-align: center; color: white; font-weight: 500;">
+                                        <i class="fas fa-ticket-alt"></i> Đặt vé xem phim
+                                    </a>
+                                </div>
+                            <?php endif; ?>
                         </div>
                 </div>
                 <?php endforeach; ?>

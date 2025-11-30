@@ -19,6 +19,27 @@ $title = 'Hồ Sơ';
     position: sticky;
     top: 2rem;
     height: fit-content;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.profile-luxury-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.profile-luxury-sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.profile-luxury-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.profile-luxury-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .profile-avatar-wrapper {
@@ -269,6 +290,11 @@ $title = 'Hồ Sơ';
 
 .profile-content-luxury {
     padding-left: 2rem;
+}
+
+/* Đảm bảo phần content bên phải scroll tự do */
+.col-lg-8 {
+    position: relative;
 }
 
 .card-luxury {
@@ -530,8 +556,8 @@ $title = 'Hồ Sơ';
                     <!-- Profile Name -->
                     <div class="profile-name-luxury">
                         <h2><?php echo htmlspecialchars($user['name']); ?></h2>
-                        <p class="profile-role-luxury"><?php echo htmlspecialchars($userRole); ?></p>
-                        <?php if ($subscription && in_array(strtolower($subscription['name']), ['gold', 'premium', 'pro vip'])): ?>
+                        <p class="profile-role-luxury"><?php echo htmlspecialchars($userRole ?? 'Thành viên'); ?></p>
+                        <?php if (isset($subscription) && $subscription && in_array(strtolower($subscription['name']), ['gold', 'premium', 'pro vip'])): ?>
                             <span class="profile-badge-luxury">Pro Vip</span>
                         <?php endif; ?>
                     </div>
@@ -548,7 +574,7 @@ $title = 'Hồ Sơ';
                             <span>Số dư (điểm)</span>
                         </div>
                         <div class="balance-amount-luxury">
-                            <?php echo number_format($balance, 0, ',', '.'); ?> điểm
+                            <?php echo number_format($balance ?? 0, 0, ',', '.'); ?> điểm
                         </div>
                         <button class="btn-deposit-luxury" onclick="alert('Tính năng nạp điểm sẽ được thêm sau!');">
                             <i class="fas fa-plus me-2"></i> Nạp điểm
@@ -758,16 +784,16 @@ $title = 'Hồ Sơ';
             <div class="modal-body">
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
-                    Điểm hiện tại của bạn: <strong><?php echo number_format($balance, 0, ',', '.'); ?> điểm</strong>
+                    Điểm hiện tại của bạn: <strong><?php echo number_format($balance ?? 0, 0, ',', '.'); ?> điểm</strong>
                 </div>
                 
                 <div class="row g-3">
                     <?php foreach ($allSubscriptions as $sub): ?>
                         <?php 
                         $subPrice = intval($sub['price']);
-                        $canAfford = $balance >= $subPrice;
-                        $isCurrent = $subscription && $subscription['id'] == $sub['id'];
-                        $isHigher = $subscription && intval($subscription['price']) >= $subPrice;
+                        $canAfford = ($balance ?? 0) >= $subPrice;
+                        $isCurrent = isset($subscription) && $subscription && $subscription['id'] == $sub['id'];
+                        $isHigher = isset($subscription) && $subscription && intval($subscription['price']) >= $subPrice;
                         ?>
                         <div class="col-md-6">
                             <div class="card h-100 <?php echo $isCurrent ? 'border-warning' : ''; ?> <?php echo !$canAfford ? 'opacity-50' : ''; ?>">

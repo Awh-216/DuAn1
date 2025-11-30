@@ -273,6 +273,7 @@ class AdminController extends Controller {
             }
             
             $oldRole = $targetUser['role'] ?? 'user';
+            $oldTheaterId = $targetUser['theater_id'] ?? null;
             
             // Nếu set role là moderator, cần gán theater_id
             $theaterId = null;
@@ -285,7 +286,7 @@ class AdminController extends Controller {
                 }
                 
                 // Kiểm tra theater có tồn tại không
-                $theater = $db->fetch("SELECT id FROM theaters WHERE id = ?", [$theaterId]);
+                $theater = $db->fetch("SELECT id, name FROM theaters WHERE id = ?", [$theaterId]);
                 if (!$theater) {
                     $_SESSION['error'] = 'Rạp không tồn tại!';
                     $this->redirect('admin/users');
@@ -293,6 +294,121 @@ class AdminController extends Controller {
                 }
             }
             
+            // Nếu đang là moderator và thay đổi theater_id, cần lấy theater_id mới
+            if ($oldRole === 'moderator' && $newRole === 'moderator') {
+                $theaterId = $_POST['theater_id'] ?? $oldTheaterId;
+                if ($theaterId) {
+                    $theater = $db->fetch("SELECT id, name FROM theaters WHERE id = ?", [$theaterId]);
+                    if (!$theater) {
+                        $_SESSION['error'] = 'Rạp không tồn tại!';
+                        $this->redirect('admin/users');
+                        return;
+                    }
+                }
+            }
+            
+            // Xác định xem có cần approval không:
+            // 1. Nếu thay đổi role thành moderator -> LUÔN cần approval (nếu có moderator hiện tại)
+            // 2. Nếu đang là moderator và thay đổi theater_id -> LUÔN cần approval (nếu có moderator hiện tại)
+            // 3. Các trường hợp khác (user -> user, user -> admin, admin -> user) -> cập nhật trực tiếp
+            $needsApproval = false;
+            $currentModerator = null;
+            
+            if ($newRole === 'moderator' && $theaterId) {
+                // Tìm moderator hiện tại của rạp này
+                $currentModerator = $db->fetch("SELECT id, name, email FROM users WHERE role = 'moderator' AND theater_id = ? AND id != ?", [$theaterId, $userId]);
+                
+                // Nếu có moderator hiện tại, LUÔN cần approval
+                if ($currentModerator) {
+                    $needsApproval = true;
+                }
+            } elseif ($oldRole === 'moderator' && $newRole === 'moderator' && $oldTheaterId != $theaterId && $theaterId) {
+                // Đang là moderator và thay đổi theater_id
+                $currentModerator = $db->fetch("SELECT id, name, email FROM users WHERE role = 'moderator' AND theater_id = ? AND id != ?", [$theaterId, $userId]);
+                
+                // Nếu có moderator hiện tại của rạp mới, cần approval
+                if ($currentModerator) {
+                    $needsApproval = true;
+                }
+            }
+            
+            // Nếu cần approval, tạo request
+            if ($needsApproval && $currentModerator) {
+                // Tạo request trong bảng moderator_permission_requests
+                try {
+                    $pdo = $db->getConnection();
+                    $pdo->exec("CREATE TABLE IF NOT EXISTS moderator_permission_requests (
+                        id INT(11) NOT NULL AUTO_INCREMENT,
+                        theater_id INT(11) NOT NULL,
+                        moderator_id INT(11) DEFAULT NULL,
+                        requested_by INT(11) NOT NULL,
+                        target_user_id INT(11) NOT NULL,
+                        action VARCHAR(50) NOT NULL,
+                        old_data TEXT DEFAULT NULL,
+                        new_data TEXT DEFAULT NULL,
+                        status VARCHAR(20) DEFAULT 'pending',
+                        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        responded_at TIMESTAMP NULL DEFAULT NULL,
+                        PRIMARY KEY (id),
+                        KEY theater_id (theater_id),
+                        KEY moderator_id (moderator_id),
+                        KEY requested_by (requested_by),
+                        KEY target_user_id (target_user_id)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
+                } catch (Exception $e) {
+                    // Bảng đã tồn tại
+                }
+                
+                $oldData = json_encode(['role' => $oldRole, 'theater_id' => $targetUser['theater_id'] ?? null]);
+                $newData = json_encode(['role' => $newRole, 'theater_id' => $theaterId]);
+                
+                $db->execute("
+                    INSERT INTO moderator_permission_requests 
+                    (theater_id, moderator_id, requested_by, target_user_id, action, old_data, new_data, status)
+                    VALUES (?, ?, ?, ?, 'update_role', ?, ?, 'pending')
+                ", [$theaterId, $currentModerator['id'], $user['id'], $userId, $oldData, $newData]);
+                
+                $requestId = $db->lastInsertId();
+                
+                // Tạo thông báo cho moderator
+                try {
+                    $pdo = $db->getConnection();
+                    $pdo->exec("CREATE TABLE IF NOT EXISTS notifications (
+                        id INT(11) NOT NULL AUTO_INCREMENT,
+                        user_id INT(11) NOT NULL,
+                        type VARCHAR(50) NOT NULL DEFAULT 'info',
+                        title VARCHAR(255) NOT NULL,
+                        message TEXT NOT NULL,
+                        link VARCHAR(255) DEFAULT NULL,
+                        is_read TINYINT(1) DEFAULT 0,
+                        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        PRIMARY KEY (id),
+                        KEY user_id (user_id),
+                        KEY is_read (is_read)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
+                } catch (Exception $e) {
+                    // Bảng đã tồn tại
+                }
+                
+                $theaterName = $theater['name'];
+                $targetUserName = $targetUser['name'];
+                $adminName = $user['name'];
+                
+                $notificationTitle = "Yêu cầu thay đổi quyền thành viên";
+                $notificationMessage = "Admin {$adminName} muốn thay đổi quyền của {$targetUserName} thành Moderator cho rạp {$theaterName}. Vui lòng xem xét và phê duyệt.";
+                $notificationLink = "?route=moderator/permissionRequests" . ($requestId ? "&id={$requestId}" : "");
+                
+                $db->execute("
+                    INSERT INTO notifications (user_id, type, title, message, link, is_read)
+                    VALUES (?, 'warning', ?, ?, ?, 0)
+                ", [$currentModerator['id'], $notificationTitle, $notificationMessage, $notificationLink]);
+                
+                $_SESSION['success'] = 'Đã gửi yêu cầu thay đổi quyền đến moderator của rạp. Vui lòng chờ phê duyệt.';
+                $this->redirect('admin/users');
+                return;
+            }
+            
+            // Nếu không cần approval (thay đổi role của user thông thường), cập nhật trực tiếp
             // Cập nhật role và theater_id
             if ($newRole === 'moderator' && $theaterId) {
                 // Kiểm tra xem cột theater_id có tồn tại không
@@ -1456,8 +1572,24 @@ class AdminController extends Controller {
         $status = $_GET['status'] ?? '';
         $movie_id = $_GET['movie_id'] ?? '';
         
-        // Lấy danh sách phim để filter
-        $movies = $db->fetchAll("SELECT id, title FROM movies WHERE status = 'Chiếu rạp' ORDER BY title");
+        // Phân quyền theo rạp: Nếu là moderator, chỉ xem vé của rạp được gán
+        $theaterFilter = "";
+        $theaterParams = [];
+        if (isset($user['role']) && $user['role'] === 'moderator' && isset($user['theater_id']) && $user['theater_id']) {
+            $theaterFilter = " AND th.id = ?";
+            $theaterParams[] = $user['theater_id'];
+        }
+        
+        // Lấy danh sách phim để filter (chỉ phim của rạp được gán nếu là moderator)
+        $moviesSql = "SELECT DISTINCT m.id, m.title FROM movies m 
+                     JOIN showtimes s ON m.id = s.movie_id 
+                     JOIN theaters th ON s.theater_id = th.id
+                     WHERE m.status = 'Chiếu rạp'";
+        if ($theaterFilter) {
+            $moviesSql .= $theaterFilter;
+        }
+        $moviesSql .= " ORDER BY m.title";
+        $movies = $db->fetchAll($moviesSql, $theaterParams);
         
         // Build WHERE clause
         $where = "1=1";
@@ -1471,6 +1603,12 @@ class AdminController extends Controller {
         if ($movie_id) {
             $where .= " AND m.id = ?";
             $params[] = $movie_id;
+        }
+        
+        // Thêm filter theo rạp nếu là moderator
+        if ($theaterFilter) {
+            $where .= $theaterFilter;
+            $params = array_merge($params, $theaterParams);
         }
         
         // Lấy danh sách vé với filter và pagination
@@ -1495,10 +1633,8 @@ class AdminController extends Controller {
                             JOIN movies m ON s.movie_id = m.id
                             WHERE $where", $params)['count'];
         
-        // Thống kê vé tồn kho theo phim
-        // Tính tổng số ghế = số ghế mỗi showtime (132: 11 hàng x 12 cột + 6 ghế đôi hàng L)
-        // Vé tồn kho = tổng số ghế - số vé đã bán
-        $inventoryStats = $db->fetchAll("
+        // Thống kê vé tồn kho theo phim (chỉ của rạp được gán nếu là moderator)
+        $inventoryStatsSql = "
             SELECT 
                 m.id as movie_id,
                 m.title as movie_title,
@@ -1509,19 +1645,35 @@ class AdminController extends Controller {
                 SUM(CASE WHEN t.status = 'Đã đặt' THEN t.price ELSE 0 END) as total_revenue
             FROM movies m
             LEFT JOIN showtimes s ON m.id = s.movie_id AND s.show_date >= CURDATE()
+            LEFT JOIN theaters th ON s.theater_id = th.id
             LEFT JOIN tickets t ON s.id = t.showtime_id
-            WHERE m.status = 'Chiếu rạp'
+            WHERE m.status = 'Chiếu rạp'";
+        if ($theaterFilter) {
+            $inventoryStatsSql .= $theaterFilter;
+        }
+        $inventoryStatsSql .= "
             GROUP BY m.id, m.title, m.max_tickets
             HAVING total_showtimes > 0
-            ORDER BY total_revenue DESC
-        ");
+            ORDER BY total_revenue DESC";
+        $inventoryStats = $db->fetchAll($inventoryStatsSql, $theaterParams);
         
-        // Thống kê tổng quan
+        // Thống kê tổng quan (chỉ của rạp được gán nếu là moderator)
+        $overallStatsWhere = "";
+        $overallStatsParams = [];
+        if ($theaterFilter) {
+            $overallStatsWhere = " AND EXISTS (
+                SELECT 1 FROM showtimes s 
+                JOIN theaters th ON s.theater_id = th.id 
+                WHERE s.id = t.showtime_id" . $theaterFilter . "
+            )";
+            $overallStatsParams = $theaterParams;
+        }
+        
         $overallStats = [
-            'total_tickets' => $db->fetch("SELECT COUNT(*) as count FROM tickets")['count'],
-            'tickets_sold' => $db->fetch("SELECT COUNT(*) as count FROM tickets WHERE status = 'Đã đặt'")['count'],
-            'tickets_cancelled' => $db->fetch("SELECT COUNT(*) as count FROM tickets WHERE status = 'Đã hủy'")['count'],
-            'total_revenue' => $db->fetch("SELECT SUM(price) as total FROM tickets WHERE status = 'Đã đặt'")['total'] ?? 0
+            'total_tickets' => $db->fetch("SELECT COUNT(*) as count FROM tickets t WHERE 1=1" . $overallStatsWhere, $overallStatsParams)['count'],
+            'tickets_sold' => $db->fetch("SELECT COUNT(*) as count FROM tickets t WHERE t.status = 'Đã đặt'" . $overallStatsWhere, $overallStatsParams)['count'],
+            'tickets_cancelled' => $db->fetch("SELECT COUNT(*) as count FROM tickets t WHERE t.status = 'Đã hủy'" . $overallStatsWhere, $overallStatsParams)['count'],
+            'total_revenue' => $db->fetch("SELECT SUM(price) as total FROM tickets t WHERE t.status = 'Đã đặt'" . $overallStatsWhere, $overallStatsParams)['total'] ?? 0
         ];
         
         $this->adminView('tickets', [
@@ -1769,10 +1921,47 @@ class AdminController extends Controller {
             $theaters = $db->fetchAll("SELECT * FROM theaters ORDER BY name");
         }
         
+        // Lấy thông tin moderator cho mỗi rạp
+        foreach ($theaters as &$theater) {
+            $moderator = $db->fetch("SELECT id, name, email FROM users WHERE role = 'moderator' AND theater_id = ?", [$theater['id']]);
+            $theater['moderator'] = $moderator;
+        }
+        unset($theater);
+        
         $this->adminView('theaters', [
             'theaters' => $theaters,
             'user' => $user,
             'title' => 'Quản lý rạp',
+            'current_page' => 'theaters'
+        ]);
+    }
+    
+    // View Theater Details
+    public function theatersView() {
+        $db = Database::getInstance();
+        $user = AdminMiddleware::checkAdmin();
+        
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            $this->redirect('admin/theaters');
+            return;
+        }
+        
+        $theater = $db->fetch("SELECT * FROM theaters WHERE id = ?", [$id]);
+        if (!$theater) {
+            $_SESSION['error'] = 'Không tìm thấy rạp!';
+            $this->redirect('admin/theaters');
+            return;
+        }
+        
+        // Lấy thông tin moderator của rạp
+        $moderator = $db->fetch("SELECT id, name, email, created_at FROM users WHERE role = 'moderator' AND theater_id = ?", [$theater['id']]);
+        
+        $this->adminView('theaters/view', [
+            'theater' => $theater,
+            'moderator' => $moderator,
+            'user' => $user,
+            'title' => 'Thông tin rạp: ' . $theater['name'],
             'current_page' => 'theaters'
         ]);
     }
@@ -1857,15 +2046,19 @@ class AdminController extends Controller {
         $id = $_GET['id'] ?? null;
         if (!$id) {
             $this->redirect('admin/theaters');
+            return;
         }
         
-        // Kiểm tra quyền moderator
-        if (AdminMiddleware::isModerator($user['id'])) {
-            if (!AdminMiddleware::checkModeratorTheaterAccess($user['id'], $id)) {
-                $_SESSION['error'] = 'Bạn không có quyền quản lý rạp này!';
-                $this->redirect('admin/theaters');
-                return;
-            }
+        // Chỉ moderator của rạp này mới được sửa
+        $canEdit = false;
+        if (isset($user['role']) && $user['role'] === 'moderator' && isset($user['theater_id']) && $user['theater_id'] == $id) {
+            $canEdit = true;
+        }
+        
+        if (!$canEdit) {
+            $_SESSION['error'] = 'Bạn không có quyền sửa rạp này! Chỉ admin của rạp mới được sửa.';
+            $this->redirect('admin/theaters');
+            return;
         }
         
         $theater = $db->fetch("SELECT * FROM theaters WHERE id = ?", [$id]);
@@ -1896,13 +2089,16 @@ class AdminController extends Controller {
             $this->redirect('admin/theaters');
         }
         
-        // Kiểm tra quyền moderator
-        if (AdminMiddleware::isModerator($user['id'])) {
-            if (!AdminMiddleware::checkModeratorTheaterAccess($user['id'], $id)) {
-                $_SESSION['error'] = 'Bạn không có quyền quản lý rạp này!';
-                $this->redirect('admin/theaters');
-                return;
-            }
+        // Chỉ moderator của rạp này mới được sửa
+        $canEdit = false;
+        if (isset($user['role']) && $user['role'] === 'moderator' && isset($user['theater_id']) && $user['theater_id'] == $id) {
+            $canEdit = true;
+        }
+        
+        if (!$canEdit) {
+            $_SESSION['error'] = 'Bạn không có quyền sửa rạp này! Chỉ admin của rạp mới được sửa.';
+            $this->redirect('admin/theaters');
+            return;
         }
         
         $name = $_POST['name'] ?? '';
@@ -1911,6 +2107,8 @@ class AdminController extends Controller {
         $address = $_POST['address'] ?? '';
         $total_screens = intval($_POST['total_screens'] ?? 1);
         $is_active = isset($_POST['is_active']) ? 1 : 0;
+        $latitude = $_POST['latitude'] ?? null;
+        $longitude = $_POST['longitude'] ?? null;
         
         if (empty($name)) {
             $_SESSION['error'] = 'Tên rạp không được để trống!';
@@ -1921,11 +2119,61 @@ class AdminController extends Controller {
             // Lấy thông tin rạp cũ để log
             $oldTheater = $db->fetch("SELECT * FROM theaters WHERE id = ?", [$id]);
             
+            // Tự động thêm cột image, latitude, longitude nếu chưa có
+            try {
+                $columns = $db->fetchAll("SHOW COLUMNS FROM theaters");
+                $hasImage = false;
+                $hasLatitude = false;
+                $hasLongitude = false;
+                foreach ($columns as $col) {
+                    if ($col['Field'] === 'image') $hasImage = true;
+                    if ($col['Field'] === 'latitude') $hasLatitude = true;
+                    if ($col['Field'] === 'longitude') $hasLongitude = true;
+                }
+                
+                $pdo = $db->getConnection();
+                if (!$hasImage) {
+                    $pdo->exec("ALTER TABLE theaters ADD COLUMN image VARCHAR(255) NULL AFTER address");
+                }
+                if (!$hasLatitude) {
+                    $pdo->exec("ALTER TABLE theaters ADD COLUMN latitude DECIMAL(10, 8) NULL AFTER image");
+                }
+                if (!$hasLongitude) {
+                    $pdo->exec("ALTER TABLE theaters ADD COLUMN longitude DECIMAL(11, 8) NULL AFTER latitude");
+                }
+            } catch (Exception $e) {
+                // Cột đã tồn tại hoặc có lỗi
+            }
+            
+            // Xử lý upload ảnh nếu có
+            $imagePath = $oldTheater['image'] ?? null;
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../../data/img/theaters/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                $fileType = $_FILES['image']['type'];
+                if (in_array($fileType, $allowedTypes)) {
+                    $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                    $fileName = 'theater_' . $id . '_' . time() . '.' . $extension;
+                    $uploadPath = $uploadDir . $fileName;
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath)) {
+                        // Xóa ảnh cũ nếu có
+                        if ($imagePath && file_exists(__DIR__ . '/../../' . $imagePath)) {
+                            @unlink(__DIR__ . '/../../' . $imagePath);
+                        }
+                        $imagePath = 'data/img/theaters/' . $fileName;
+                    }
+                }
+            }
+            
             $db->execute("
                 UPDATE theaters 
-                SET name = ?, location = ?, phone = ?, address = ?, total_screens = ?, is_active = ?
+                SET name = ?, location = ?, phone = ?, address = ?, total_screens = ?, is_active = ?, 
+                    image = ?, latitude = ?, longitude = ?
                 WHERE id = ?
-            ", [$name, $location, $phone, $address, $total_screens, $is_active, $id]);
+            ", [$name, $location, $phone, $address, $total_screens, $is_active, $imagePath, $latitude, $longitude, $id]);
             
             // Log activity
             AdminMiddleware::logAction(
@@ -1950,13 +2198,6 @@ class AdminController extends Controller {
     public function theatersDelete() {
         $db = Database::getInstance();
         $user = AdminMiddleware::checkAdmin();
-        
-        // Moderator không thể xóa rạp
-        if (AdminMiddleware::isModerator($user['id'])) {
-            $_SESSION['error'] = 'Bạn không có quyền xóa rạp!';
-            $this->redirect('admin/theaters');
-            return;
-        }
         
         $id = $_GET['id'] ?? null;
         if (!$id) {
@@ -2480,8 +2721,24 @@ class AdminController extends Controller {
         $db = Database::getInstance();
         $user = AdminMiddleware::checkAdmin();
         
+        // Nếu là moderator, redirect đến route của moderator
+        if (AdminMiddleware::isModerator($user['id'])) {
+            $this->redirect('moderator/foodItems');
+            return;
+        }
+        
         $search = $_GET['search'] ?? '';
         $type = $_GET['type'] ?? '';
+        
+        // Phân quyền theo rạp: Nếu là moderator, chỉ xem combo/đồ ăn của rạp được gán
+        // Kiểm tra xem bảng food_items có cột theater_id không
+        $hasTheaterId = false;
+        try {
+            $columns = $db->fetchAll("SHOW COLUMNS FROM food_items LIKE 'theater_id'");
+            $hasTheaterId = !empty($columns);
+        } catch (Exception $e) {
+            // Bảng chưa có cột theater_id
+        }
         
         $sql = "SELECT * FROM food_items WHERE 1=1";
         $params = [];
@@ -2574,11 +2831,28 @@ class AdminController extends Controller {
             }
         }
         
+        // Tự động tạo cột theater_id nếu chưa có
+        try {
+            $columns = $db->fetchAll("SHOW COLUMNS FROM food_items LIKE 'theater_id'");
+            if (empty($columns)) {
+                $pdo = $db->getConnection();
+                $pdo->exec("ALTER TABLE food_items ADD COLUMN theater_id INT NULL AFTER is_active");
+            }
+        } catch (Exception $e) {
+            // Cột đã tồn tại hoặc có lỗi khác
+        }
+        
+        // Nếu là moderator, tự động gán theater_id
+        $theaterId = null;
+        if (isset($user['role']) && $user['role'] === 'moderator' && isset($user['theater_id']) && $user['theater_id']) {
+            $theaterId = $user['theater_id'];
+        }
+        
         try {
             $db->execute("
-                INSERT INTO food_items (name, description, price, image, type, is_active)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ", [$name, $description, $price, $imagePath, $type, $is_active]);
+                INSERT INTO food_items (name, description, price, image, type, is_active, theater_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ", [$name, $description, $price, $imagePath, $type, $is_active, $theaterId]);
             
             AdminMiddleware::logAction(
                 $user['id'],
@@ -2689,11 +2963,27 @@ class AdminController extends Controller {
         }
         
         try {
+            // Kiểm tra quyền trước khi update
+            $existingItem = $db->fetch("SELECT theater_id FROM food_items WHERE id = ?", [$id]);
+            if (isset($user['role']) && $user['role'] === 'moderator' && isset($user['theater_id']) && $user['theater_id']) {
+                if (isset($existingItem['theater_id']) && $existingItem['theater_id'] != $user['theater_id']) {
+                    $_SESSION['error'] = 'Bạn không có quyền sửa combo/đồ ăn này!';
+                    $this->redirect('admin/foodItems');
+                    return;
+                }
+            }
+            
+            // Nếu là moderator, đảm bảo theater_id được set
+            $theaterId = $existingItem['theater_id'] ?? null;
+            if (isset($user['role']) && $user['role'] === 'moderator' && isset($user['theater_id']) && $user['theater_id']) {
+                $theaterId = $user['theater_id'];
+            }
+            
             $db->execute("
                 UPDATE food_items
-                SET name = ?, description = ?, price = ?, image = ?, type = ?, is_active = ?
+                SET name = ?, description = ?, price = ?, image = ?, type = ?, is_active = ?, theater_id = ?
                 WHERE id = ?
-            ", [$name, $description, $price, $imagePath, $type, $is_active, $id]);
+            ", [$name, $description, $price, $imagePath, $type, $is_active, $theaterId, $id]);
             
             AdminMiddleware::logAction(
                 $user['id'],
@@ -2723,12 +3013,24 @@ class AdminController extends Controller {
             return;
         }
         
-        $foodItem = $db->fetch("SELECT * FROM food_items WHERE id = ?", [$id]);
+        // Kiểm tra quyền: Nếu là moderator, chỉ được xóa combo/đồ ăn của rạp được gán
+        $foodItem = $db->fetch("SELECT theater_id FROM food_items WHERE id = ?", [$id]);
         if (!$foodItem) {
             $_SESSION['error'] = 'Combo/đồ ăn không tồn tại!';
             $this->redirect('admin/foodItems');
             return;
         }
+        
+        if (isset($user['role']) && $user['role'] === 'moderator' && isset($user['theater_id']) && $user['theater_id']) {
+            if (isset($foodItem['theater_id']) && $foodItem['theater_id'] != $user['theater_id']) {
+                $_SESSION['error'] = 'Bạn không có quyền xóa combo/đồ ăn này!';
+                $this->redirect('admin/foodItems');
+                return;
+            }
+        }
+        
+        // Lấy lại thông tin đầy đủ của food item để xóa ảnh
+        $foodItem = $db->fetch("SELECT * FROM food_items WHERE id = ?", [$id]);
         
         try {
             // Xóa ảnh nếu có

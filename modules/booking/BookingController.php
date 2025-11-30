@@ -33,6 +33,19 @@ class BookingController extends Controller {
             if ($selected_showtime_id) {
                 $user = $this->getCurrentUser();
                 
+                // Kiểm tra IP có bị cấm vào phòng này không (tính theo tổng thời gian thực)
+                require_once __DIR__ . '/../../core/TokenHelper.php';
+                $ipAddress = TokenHelper::getClientIp();
+                $ipBanCheck = $this->checkIPRoomBan($ipAddress, $selected_showtime_id);
+                if ($ipBanCheck['banned']) {
+                    $_SESSION['error'] = $ipBanCheck['message'];
+                    $this->redirect('booking');
+                    return;
+                }
+                
+                // Track IP vào phòng (tính tổng thời gian thực, không reset)
+                $this->trackIPRoomEntry($ipAddress, $selected_showtime_id);
+                
                 // Kiểm tra xem người dùng có bị cấm đặt vé phòng này không
                 $banCheck = $this->isUserBannedFromScreen($user['id'], $selected_showtime_id);
                 if ($banCheck['banned']) {
@@ -1725,6 +1738,214 @@ class BookingController extends Controller {
     }
     
     /**
+     * Kiểm tra IP có bị cấm vào phòng này không (dựa trên tổng thời gian thực)
+     * Trả về ['banned' => bool, 'message' => string]
+     */
+    private function checkIPRoomBan($ipAddress, $showtime_id) {
+        // Bỏ qua kiểm tra cho localhost trong môi trường development
+        if (in_array($ipAddress, ['127.0.0.1', '::1', 'localhost'])) {
+            return ['banned' => false, 'message' => ''];
+        }
+        
+        $db = Database::getInstance();
+        $bookingModel = new BookingModel();
+        
+        // Lấy screen_id từ showtime
+        $showtime = $bookingModel->getShowtimeById($showtime_id);
+        if (!$showtime || !isset($showtime['screen_id'])) {
+            return ['banned' => false, 'message' => ''];
+        }
+        
+        $screen_id = $showtime['screen_id'];
+        
+        // Tạo bảng ip_room_tracking nếu chưa có
+        $this->createIPRoomTrackingTable();
+        
+        // Lấy thông tin tracking của IP trong phòng này
+        $tracking = $db->fetch("
+            SELECT id, first_enter_time, last_enter_time, total_duration_seconds, is_banned, ban_until
+            FROM ip_room_tracking
+            WHERE ip_address = ? AND screen_id = ? AND showtime_id = ?
+            ORDER BY created_at DESC
+            LIMIT 1
+        ", [$ipAddress, $screen_id, $showtime_id]);
+        
+        if (!$tracking) {
+            return ['banned' => false, 'message' => ''];
+        }
+        
+        // Kiểm tra xem có bị cấm không
+        if ($tracking['is_banned'] == 1 && $tracking['ban_until']) {
+            $banUntil = strtotime($tracking['ban_until']);
+            $currentTime = time();
+            
+            // Nếu thời gian cấm còn hiệu lực
+            if ($banUntil > $currentTime) {
+                $remainingMinutes = ceil(($banUntil - $currentTime) / 60);
+                $remainingHours = floor($remainingMinutes / 60);
+                $remainingMins = $remainingMinutes % 60;
+                
+                $timeStr = '';
+                if ($remainingHours > 0) {
+                    $timeStr = $remainingHours . ' giờ ' . $remainingMins . ' phút';
+                } else {
+                    $timeStr = $remainingMinutes . ' phút';
+                }
+                
+                return [
+                    'banned' => true,
+                    'message' => "IP của bạn đã bị cấm vào phòng này do giữ ghế quá 15 phút. Thời gian cấm còn lại: {$timeStr} (đến khi phim chiếu)."
+                ];
+            } else {
+                // Thời gian cấm đã hết, xóa trạng thái cấm
+                $db->execute("
+                    UPDATE ip_room_tracking
+                    SET is_banned = 0, ban_until = NULL
+                    WHERE id = ?
+                ", [$tracking['id']]);
+            }
+        }
+        
+        // Tính tổng thời gian thực
+        // Lấy thời gian đã tích lũy trước đó
+        $totalDurationSeconds = $tracking['total_duration_seconds'] ?? 0;
+        
+        // Tính thời gian từ lần vào cuối đến bây giờ (nếu < 1 giờ, coi như user vẫn ở trong phòng)
+        $lastEnterTime = strtotime($tracking['last_enter_time']);
+        $currentTime = time();
+        $durationSinceLastEnter = $currentTime - $lastEnterTime;
+        
+        // Chỉ cộng thời gian nếu < 1 giờ (tránh tính sai khi user quay lại sau nhiều giờ)
+        if ($durationSinceLastEnter < 3600) {
+            $totalDurationSeconds += $durationSinceLastEnter;
+        }
+        
+        // Kiểm tra nếu quá 15 phút (900 giây)
+        $maxDuration = 15 * 60; // 15 phút = 900 giây
+        
+        if ($totalDurationSeconds > $maxDuration && $tracking['is_banned'] == 0) {
+            // Cấm đến khi phim chiếu
+            $showtimeDateTime = $showtime['show_date'] . ' ' . $showtime['show_time'];
+            $banUntil = date('Y-m-d H:i:s', strtotime($showtimeDateTime));
+            
+            // Cập nhật trạng thái cấm
+            $db->execute("
+                UPDATE ip_room_tracking
+                SET is_banned = 1, ban_until = ?, total_duration_seconds = ?
+                WHERE id = ?
+            ", [$banUntil, $totalDurationSeconds, $tracking['id']]);
+            
+            $showtimeDateTimeStr = date('d/m/Y H:i', strtotime($showtimeDateTime));
+            
+            return [
+                'banned' => true,
+                'message' => "IP của bạn đã bị cấm vào phòng này do giữ ghế quá 15 phút. Bạn sẽ được phép vào lại khi phim bắt đầu chiếu (lúc {$showtimeDateTimeStr})."
+            ];
+        }
+        
+        return ['banned' => false, 'message' => ''];
+    }
+    
+    /**
+     * Track IP vào phòng (tính tổng thời gian thực, không reset)
+     */
+    private function trackIPRoomEntry($ipAddress, $showtime_id) {
+        // Bỏ qua tracking cho localhost
+        if (in_array($ipAddress, ['127.0.0.1', '::1', 'localhost'])) {
+            return;
+        }
+        
+        $db = Database::getInstance();
+        $bookingModel = new BookingModel();
+        
+        // Lấy screen_id từ showtime
+        $showtime = $bookingModel->getShowtimeById($showtime_id);
+        if (!$showtime || !isset($showtime['screen_id'])) {
+            return;
+        }
+        
+        $screen_id = $showtime['screen_id'];
+        
+        // Tạo bảng nếu chưa có
+        $this->createIPRoomTrackingTable();
+        
+        // Kiểm tra xem đã có tracking chưa
+        $tracking = $db->fetch("
+            SELECT id, first_enter_time, last_enter_time, total_duration_seconds
+            FROM ip_room_tracking
+            WHERE ip_address = ? AND screen_id = ? AND showtime_id = ?
+            ORDER BY created_at DESC
+            LIMIT 1
+        ", [$ipAddress, $screen_id, $showtime_id]);
+        
+        $now = date('Y-m-d H:i:s');
+        
+        if ($tracking) {
+            // Đã có tracking, cập nhật thời gian
+            $lastEnterTime = strtotime($tracking['last_enter_time']);
+            $currentTime = time();
+            
+            // Tính thời gian từ lần vào cuối đến bây giờ
+            $durationSinceLastEnter = $currentTime - $lastEnterTime;
+            
+            // Cộng vào tổng thời gian (chỉ cộng nếu khoảng cách < 1 giờ, tránh tính sai khi user quay lại sau nhiều ngày)
+            $totalDurationSeconds = $tracking['total_duration_seconds'] ?? 0;
+            if ($durationSinceLastEnter < 3600) { // Chỉ cộng nếu < 1 giờ
+                $totalDurationSeconds += $durationSinceLastEnter;
+            }
+            
+            // Cập nhật
+            $db->execute("
+                UPDATE ip_room_tracking
+                SET last_enter_time = ?, total_duration_seconds = ?, updated_at = NOW()
+                WHERE id = ?
+            ", [$now, $totalDurationSeconds, $tracking['id']]);
+        } else {
+            // Chưa có tracking, tạo mới
+            $db->execute("
+                INSERT INTO ip_room_tracking (ip_address, screen_id, showtime_id, first_enter_time, last_enter_time, total_duration_seconds, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, 0, NOW(), NOW())
+            ", [$ipAddress, $screen_id, $showtime_id, $now, $now]);
+        }
+    }
+    
+    /**
+     * Tạo bảng ip_room_tracking nếu chưa có
+     */
+    private function createIPRoomTrackingTable() {
+        $db = Database::getInstance();
+        $pdo = $db->getConnection();
+        
+        try {
+            $tableExists = $db->fetch("SHOW TABLES LIKE 'ip_room_tracking'");
+            
+            if (!$tableExists) {
+                $pdo->exec("
+                    CREATE TABLE ip_room_tracking (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        ip_address VARCHAR(45) NOT NULL,
+                        screen_id INT NOT NULL,
+                        showtime_id INT NOT NULL,
+                        first_enter_time DATETIME NOT NULL COMMENT 'Thời gian lần đầu vào phòng',
+                        last_enter_time DATETIME NOT NULL COMMENT 'Thời gian lần cuối vào phòng',
+                        total_duration_seconds INT DEFAULT 0 COMMENT 'Tổng thời gian đã ở trong phòng (giây)',
+                        is_banned TINYINT(1) DEFAULT 0 COMMENT 'Có bị cấm không',
+                        ban_until DATETIME DEFAULT NULL COMMENT 'Cấm đến khi nào (thời gian phim chiếu)',
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                        INDEX idx_ip_screen_showtime (ip_address, screen_id, showtime_id),
+                        INDEX idx_ip_screen (ip_address, screen_id),
+                        INDEX idx_is_banned (is_banned, ban_until)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+                ");
+                error_log("Created ip_room_tracking table successfully");
+            }
+        } catch (Exception $e) {
+            error_log("Note when creating ip_room_tracking table: " . $e->getMessage());
+        }
+    }
+    
+    /**
      * Chuyển hướng đến VNPay để thanh toán
      */
     private function redirectToVNPay($vnp_TxnRef, $amount, $showtime, $seats) {
@@ -1829,7 +2050,17 @@ class BookingController extends Controller {
         if ($secureHash == $vnp_SecureHash) {
             if ($vnp_ResponseCode == '00') {
                 // Thanh toán thành công
-                $this->completeBooking($pendingBooking, $vnp_TxnRef, $vnp_Amount);
+                try {
+                    $this->completeBooking($pendingBooking, $vnp_TxnRef, $vnp_Amount);
+                    // completeBooking() sẽ tự redirect, không cần làm gì thêm
+                } catch (Exception $e) {
+                    // Nếu có lỗi trong quá trình hoàn tất booking
+                    error_log("Error completing booking: " . $e->getMessage());
+                    $bookingModel->updatePendingBookingStatus($pendingBooking['id'], 'cancelled');
+                    $_SESSION['error'] = 'Có lỗi xảy ra khi hoàn tất đơn hàng! Vui lòng liên hệ hỗ trợ.';
+                    $redirectUrl = '?route=booking/index&showtime_id=' . $pendingBooking['showtime_id'];
+                    $this->redirect($redirectUrl);
+                }
             } else {
                 // Thanh toán thất bại
                 $bookingModel->updatePendingBookingStatus($pendingBooking['id'], 'cancelled');
@@ -1949,6 +2180,47 @@ class BookingController extends Controller {
             $bookingModel->updatePendingBookingStatus($pendingBooking['id'], 'completed');
             
             $db->commit();
+            
+            // Tạo thông báo cho user (sau khi commit để tránh lỗi transaction)
+            try {
+                $movieModel = new MovieModel();
+                $movie = $movieModel->getById($showtime['movie_id']);
+                $movieName = $movie ? $movie['title'] : 'Phim';
+                $seatList = implode(', ', $seats);
+                $totalSeats = count($seats);
+                
+                $notificationTitle = "Đặt vé thành công";
+                $notificationMessage = "Bạn đã đặt thành công {$totalSeats} vé xem phim \"{$movieName}\" tại ghế {$seatList}. Vé và QR code đã được gửi đến email của bạn.";
+                $notificationLink = "?route=profile/index";
+                
+                // Sử dụng Database instance thay vì PDO connection trực tiếp
+                $dbInstance = Database::getInstance();
+                
+                // Đảm bảo bảng notifications tồn tại
+                $pdo = $dbInstance->getConnection();
+                $pdo->exec("CREATE TABLE IF NOT EXISTS notifications (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    user_id INT(11) NOT NULL,
+                    type VARCHAR(50) NOT NULL DEFAULT 'info',
+                    title VARCHAR(255) NOT NULL,
+                    message TEXT NOT NULL,
+                    link VARCHAR(255) DEFAULT NULL,
+                    is_read TINYINT(1) DEFAULT 0,
+                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    KEY user_id (user_id),
+                    KEY is_read (is_read)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
+                
+                // Tạo thông báo
+                $dbInstance->execute("
+                    INSERT INTO notifications (user_id, type, title, message, link, is_read)
+                    VALUES (?, 'success', ?, ?, ?, 0)
+                ", [$user['id'], $notificationTitle, $notificationMessage, $notificationLink]);
+            } catch (Exception $e) {
+                // Không ảnh hưởng đến quá trình đặt vé nếu tạo thông báo lỗi
+                error_log("Error creating notification: " . $e->getMessage());
+            }
             
             // Gửi email
             try {

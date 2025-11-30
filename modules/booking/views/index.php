@@ -360,18 +360,20 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                     <?php foreach ($allMovies as $m): ?>
                                         <a href="?route=booking/index&movie=<?php echo $m['id']; ?>" 
                                            class="movie-card-booking"
-                                           onclick="sessionStorage.setItem('bookingScrollPos', window.pageYOffset || document.documentElement.scrollTop);"
-                                           style="display: block; text-decoration: none; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; transition: all 0.3s; background: white; cursor: pointer;">
+                                           onclick="sessionStorage.setItem('bookingScrollPos', window.pageYOffset || document.documentElement.scrollTop); return true;"
+                                           style="display: block; text-decoration: none; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; transition: all 0.3s; background: white; cursor: pointer; position: relative; z-index: 1;"
+                                           onmouseover="this.style.borderColor='#e50914'; this.style.transform='translateY(-5px)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.2)';"
+                                           onmouseout="this.style.borderColor='#ddd'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                                             <?php if ($m['thumbnail']): ?>
                                                 <img src="<?php echo htmlspecialchars($m['thumbnail']); ?>" 
                                                      alt="<?php echo htmlspecialchars($m['title']); ?>" 
-                                                     style="width: 100%; height: 200px; object-fit: cover;">
+                                                     style="width: 100%; height: 200px; object-fit: cover; pointer-events: none;">
                                             <?php else: ?>
-                                                <div style="width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                                <div style="width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
                                                     <i class="fas fa-film" style="font-size: 48px; color: #999;"></i>
                                                 </div>
                                             <?php endif; ?>
-                                            <div style="padding: 10px;">
+                                            <div style="padding: 10px; pointer-events: none;">
                                                 <h4 style="margin: 0; font-size: 14px; color: #333; font-weight: bold; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                                     <?php echo htmlspecialchars($m['title']); ?>
                                                 </h4>
@@ -554,6 +556,17 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                       aria-label="Form đặt vé xem phim"
                                       onsubmit="return validateBookingForm(event);">
                                     <input type="hidden" name="showtime_id" value="<?php echo $selected_showtime_id; ?>">
+                                    
+                                    <!-- Seat Validation Error Message - Bên trái khung ghế -->
+                                    <div id="seat-validation-error" style="display: none; margin-bottom: 1rem; padding: 15px; background: rgba(255, 107, 107, 0.15); border-left: 4px solid #ff6b6b; border-radius: 8px; color: #ff6b6b; box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);">
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem;"></i>
+                                            <div style="flex: 1;">
+                                                <strong style="display: block; margin-bottom: 5px;">Lỗi đặt ghế:</strong>
+                                                <span id="seat-validation-error-text"></span>
+                                            </div>
+                                        </div>
+                                    </div>
                                     
                                     <div class="seat-map-container" role="group" aria-label="Bản đồ ghế ngồi trong rạp"<?php 
                                     // Tính số ghế tối đa để set data attribute
@@ -1090,9 +1103,11 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                                 name="customer_email" 
                                                 class="form-control-booking" 
                                                 placeholder="Nhập email của bạn để nhận vé"
+                                                value="<?php echo isset($user['email']) ? htmlspecialchars($user['email']) : ''; ?>"
+                                                data-user-email="<?php echo isset($user['email']) ? htmlspecialchars($user['email']) : ''; ?>"
                                                 required
                                             >
-                                            <small class="form-text-booking">Vé và QR code sẽ được gửi đến email này sau khi thanh toán</small>
+                                            <small class="form-text-booking">Vé và QR code sẽ được gửi đến email này sau khi thanh toán. Bạn có thể thay đổi email nếu cần.</small>
                                         </div>
                                     </div>
                                     
@@ -1358,6 +1373,33 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
 <?php endif; ?>
 
 <script>
+// Function để enable các nút chọn đồ uống - Global scope
+function updateFoodButtonsState(enabled) {
+    // Enable các nút tăng/giảm số lượng đồ uống
+    document.querySelectorAll('.food-qty-btn, .food-qty-btn-modal').forEach(function(btn) {
+        btn.disabled = !enabled;
+        if (enabled) {
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        } else {
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+        }
+    });
+    
+    // Enable các input số lượng đồ uống
+    document.querySelectorAll('.food-quantity-input, .food-quantity-input-luxury, .food-quantity-input-modal').forEach(function(input) {
+        input.disabled = !enabled;
+        if (enabled) {
+            input.style.opacity = '1';
+            input.style.cursor = 'text';
+        } else {
+            input.style.opacity = '0.5';
+            input.style.cursor = 'not-allowed';
+        }
+    });
+}
+
 // Modal functions - Global scope để có thể gọi từ onclick
 function openFoodModal() {
     // Kiểm tra xem có ghế được chọn không
@@ -1373,6 +1415,50 @@ function openFoodModal() {
         return;
     }
     
+    // Lấy danh sách ghế đã chọn (loại bỏ duplicate)
+    var seatValues = Array.from(selectedSeats).map(function(cb) { return cb.value; });
+    var selectedSeatValues = [];
+    for (var i = 0; i < seatValues.length; i++) {
+        if (selectedSeatValues.indexOf(seatValues[i]) === -1) {
+            selectedSeatValues.push(seatValues[i]);
+        }
+    }
+    
+    // Validate ghế trước khi cho phép chọn đồ uống
+    if (typeof validateSeatSelection === 'function') {
+        console.log('=== Validating seats before opening food modal ===');
+        console.log('Selected seats:', selectedSeatValues);
+        const validationError = validateSeatSelection(selectedSeatValues);
+        if (validationError) {
+            // Hiển thị lỗi bên trái khung ghế ngồi
+            const errorMessageEl = document.getElementById('seat-validation-error');
+            const errorTextEl = document.getElementById('seat-validation-error-text');
+            if (errorMessageEl && errorTextEl) {
+                errorTextEl.textContent = validationError;
+                errorMessageEl.style.display = 'block';
+                // Scroll đến thông báo lỗi (bên trái khung ghế)
+                errorMessageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            console.error('Validation FAILED - Cannot open food modal');
+            return;
+        }
+        console.log('Validation PASSED - Opening food modal');
+        
+        // Ẩn thông báo lỗi nếu có
+        const errorMessageEl = document.getElementById('seat-validation-error');
+        if (errorMessageEl) {
+            errorMessageEl.style.display = 'none';
+        }
+        
+        // Hiển thị form đồ ăn uống khi ghế hợp lệ
+        const foodSection = document.querySelector('.food-items-luxury-section');
+        if (foodSection) {
+            foodSection.style.display = 'block';
+            // Scroll đến form đồ ăn uống
+            foodSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+    
     const modal = document.getElementById('foodModal');
     if (modal) {
         modal.style.display = 'block';
@@ -1380,6 +1466,10 @@ function openFoodModal() {
         // Sync values from form to modal
         syncFoodToModal();
         updateModalFoodTotal();
+        // Enable các nút trong modal vì ghế đã được validate
+        if (typeof updateFoodButtonsState === 'function') {
+            updateFoodButtonsState(true);
+        }
     } else {
         // Nếu không có modal (không có food items), submit form luôn
         form.submit();
@@ -2193,6 +2283,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Ẩn form đồ ăn uống khi trang load lần đầu
+    const foodSection = document.querySelector('.food-items-luxury-section');
+    if (foodSection) {
+        foodSection.style.display = 'none';
+    }
+    
     // Gọi updateSelection lần đầu để cập nhật trạng thái ban đầu
     updateSelection();
     
@@ -2275,13 +2371,41 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const grandTotal = seatTotal + foodTotal;
         
+        // Validate ghế để quyết định có cho phép chọn đồ uống không
+        let seatsValid = false;
+        let validationError = null;
+        const errorMessageEl = document.getElementById('seat-validation-error');
+        const errorTextEl = document.getElementById('seat-validation-error-text');
+        
+        if (uniqueSelected.length > 0) {
+            if (typeof validateSeatSelection === 'function') {
+                validationError = validateSeatSelection(uniqueSelected);
+                seatsValid = (validationError === null);
+            } else {
+                // Nếu không có function validate, coi như hợp lệ
+                seatsValid = true;
+            }
+        }
+        
+        // Ẩn thông báo lỗi khi chọn ghế (chỉ hiển thị khi click nút "Đặt vé")
+        if (errorMessageEl) {
+            errorMessageEl.style.display = 'none';
+        }
+        
+        // Ẩn form đồ ăn uống mặc định (chỉ hiển thị khi click nút và ghế hợp lệ)
+        const foodSection = document.querySelector('.food-items-luxury-section');
+        if (foodSection) {
+            foodSection.style.display = 'none';
+        }
+        
         if (uniqueSelected.length > 0) {
             totalAmountSpan.textContent = grandTotal.toLocaleString('vi-VN') + '₫';
             totalAmountSpan.setAttribute('aria-label', 'Tổng tiền ' + grandTotal.toLocaleString('vi-VN') + ' đồng');
             totalSeatsSpan.textContent = uniqueSelected.length + ' ghế' + (foodTotal > 0 ? ' + đồ ăn' : '');
+            // Luôn enable nút submit, không disable dựa trên validation
             submitBtn.disabled = false;
             submitBtn.setAttribute('aria-label', 'Xác nhận đặt ' + uniqueSelected.length + ' vé');
-            // Đảm bảo onclick vẫn hoạt động khi enabled
+            // Luôn set onclick để validate khi click
             submitBtn.onclick = function() { openFoodModal(); };
             
             // Hiển thị trường email
@@ -2295,13 +2419,20 @@ document.addEventListener('DOMContentLoaded', function() {
             totalAmountSpan.setAttribute('aria-label', 'Chưa chọn ghế nào');
             totalSeatsSpan.textContent = '0 ghế';
             submitBtn.disabled = true;
+            submitBtn.onclick = null;
             
-            // Ẩn trường email và xóa giá trị
+            // Ẩn trường email và reset về email mặc định của user
             if (emailContainer) {
                 emailContainer.style.display = 'none';
             }
             if (emailInput) {
-                emailInput.value = '';
+                // Reset về email mặc định của user (nếu có)
+                const userEmail = emailInput.getAttribute('data-user-email');
+                if (userEmail) {
+                    emailInput.value = userEmail;
+                } else {
+                    emailInput.value = '';
+                }
             }
         }
         

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 28, 2025 lúc 03:13 AM
+-- Thời gian đã tạo: Th10 30, 2025 lúc 07:40 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -55,7 +55,8 @@ INSERT INTO `admin_logs` (`id`, `user_id`, `action`, `module`, `target_type`, `t
 (7, 3, 'Cập nhật điểm người dùng', 'User', 'user', 9, '{\"points\":0}', '{\"points\":100000,\"action\":\"add\",\"points_changed\":100000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-11-19 01:08:28'),
 (8, 3, 'Cập nhật điểm người dùng', 'User', 'user', 9, '{\"points\":100000}', '{\"points\":300000,\"action\":\"add\",\"points_changed\":200000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', '2025-11-19 01:08:44'),
 (9, 3, 'Cập nhật điểm người dùng', 'User', 'user', 12, '{\"points\":0}', '{\"points\":5000,\"action\":\"add\",\"points_changed\":5000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '2025-11-25 02:23:48'),
-(10, 3, 'Cập nhật điểm người dùng', 'User', 'user', 12, '{\"points\":5000}', '{\"points\":505000,\"action\":\"add\",\"points_changed\":500000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '2025-11-25 02:25:18');
+(10, 3, 'Cập nhật điểm người dùng', 'User', 'user', 12, '{\"points\":5000}', '{\"points\":505000,\"action\":\"add\",\"points_changed\":500000}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '2025-11-25 02:25:18'),
+(11, 3, 'Cập nhật vai trò người dùng', 'User', 'user', 9, '{\"role\":\"user\"}', '{\"role\":\"moderator\",\"theater_id\":\"3\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '2025-11-30 16:13:48');
 
 -- --------------------------------------------------------
 
@@ -98,7 +99,14 @@ CREATE TABLE `booking_pending` (
 --
 
 INSERT INTO `booking_pending` (`id`, `user_id`, `showtime_id`, `seats`, `food_items`, `customer_email`, `total_amount`, `vnp_txn_ref`, `status`, `created_at`, `expires_at`) VALUES
-(1, 9, 357, '[\"E9\",\"E10\"]', '{\"1\":\"0\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"0\",\"8\":\"0\",\"6\":\"0\",\"7\":\"0\"}', 'nguyenvanlinh25062006@gmail.com', 400000.00, 'BOOKING_9_357_1764295710_8141', 'completed', '2025-11-28 02:08:30', '2025-11-27 20:23:30');
+(1, 9, 357, '[\"E9\",\"E10\"]', '{\"1\":\"0\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"0\",\"8\":\"0\",\"6\":\"0\",\"7\":\"0\"}', 'nguyenvanlinh25062006@gmail.com', 400000.00, 'BOOKING_9_357_1764295710_8141', 'completed', '2025-11-28 02:08:30', '2025-11-27 20:23:30'),
+(2, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764524690_6680', 'pending', '2025-11-30 17:44:50', '2025-11-30 11:54:50'),
+(3, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764524692_8687', 'pending', '2025-11-30 17:44:52', '2025-11-30 11:54:52'),
+(4, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764524694_6275', 'pending', '2025-11-30 17:44:54', '2025-11-30 11:54:54'),
+(5, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764524696_2416', 'pending', '2025-11-30 17:44:56', '2025-11-30 11:54:56'),
+(6, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764524698_4626', 'pending', '2025-11-30 17:44:58', '2025-11-30 11:54:58'),
+(7, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764524731_1057', 'pending', '2025-11-30 17:45:31', '2025-11-30 11:55:31'),
+(8, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764526271_9745', 'cancelled', '2025-11-30 18:11:11', '2025-11-30 12:21:11');
 
 -- --------------------------------------------------------
 
@@ -124,16 +132,17 @@ CREATE TABLE `booking_session_tracking` (
 -- Đang đổ dữ liệu cho bảng `booking_session_tracking`
 --
 
-INSERT INTO `booking_session_tracking` (`id`, `user_id`, `showtime_id`, `screen_id`, `session_start`, `session_end`, `total_duration_seconds`, `violation_count`, `is_banned`, `created_at`) VALUES
-(1, 9, 351, 11, '2025-11-28 08:03:42', NULL, 0, 0, 0, '2025-11-28 01:03:42'),
-(2, 9, 354, 12, '2025-11-28 08:03:46', NULL, 0, 0, 0, '2025-11-28 01:03:46'),
-(3, 9, 355, 12, '2025-11-28 08:28:23', NULL, 0, 0, 0, '2025-11-28 01:28:23'),
-(4, 9, 352, 11, '2025-11-28 08:29:20', NULL, 0, 0, 0, '2025-11-28 01:29:20'),
-(5, 9, 353, 11, '2025-11-28 08:29:41', NULL, 0, 0, 0, '2025-11-28 01:29:41'),
-(6, 3, 354, 12, '2025-11-28 08:31:52', NULL, 0, 0, 0, '2025-11-28 01:31:52'),
-(7, 9, 356, 11, '2025-11-28 08:46:36', NULL, 0, 0, 0, '2025-11-28 01:46:36'),
-(8, 9, 357, 12, '2025-11-28 08:46:38', NULL, 0, 0, 0, '2025-11-28 01:46:38'),
-(9, 9, 191, 1, '2025-11-28 09:12:14', NULL, 0, 0, 0, '2025-11-28 02:12:14');
+INSERT INTO `booking_session_tracking` (`id`, `user_id`, `showtime_id`, `screen_id`, `session_start`, `session_end`, `total_duration_seconds`, `violation_count`, `is_banned`, `ban_until`, `created_at`) VALUES
+(1, 9, 351, 11, '2025-11-28 08:03:42', NULL, 0, 0, 0, NULL, '2025-11-28 01:03:42'),
+(2, 9, 354, 12, '2025-11-28 08:03:46', NULL, 0, 0, 0, NULL, '2025-11-28 01:03:46'),
+(3, 9, 355, 12, '2025-11-28 08:28:23', NULL, 0, 0, 0, NULL, '2025-11-28 01:28:23'),
+(4, 9, 352, 11, '2025-11-28 08:29:20', NULL, 0, 0, 0, NULL, '2025-11-28 01:29:20'),
+(5, 9, 353, 11, '2025-11-28 08:29:41', NULL, 0, 0, 0, NULL, '2025-11-28 01:29:41'),
+(6, 3, 354, 12, '2025-11-28 08:31:52', NULL, 0, 0, 0, NULL, '2025-11-28 01:31:52'),
+(7, 9, 356, 11, '2025-11-28 08:46:36', NULL, 0, 0, 0, NULL, '2025-11-28 01:46:36'),
+(8, 9, 357, 12, '2025-11-28 08:46:38', NULL, 0, 0, 0, NULL, '2025-11-28 01:46:38'),
+(9, 9, 191, 1, '2025-11-28 09:12:14', NULL, 0, 0, 0, NULL, '2025-11-28 02:12:14'),
+(10, 9, 360, 12, '2025-12-01 00:44:40', NULL, 0, 0, 0, NULL, '2025-11-30 17:44:40');
 
 -- --------------------------------------------------------
 
@@ -264,6 +273,7 @@ INSERT INTO `episodes` (`id`, `movie_id`, `episode_number`, `title`, `video_url`
 
 CREATE TABLE `food_items` (
   `id` int(11) NOT NULL,
+  `theater_id` int(11) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
   `price` decimal(10,2) NOT NULL,
@@ -277,15 +287,15 @@ CREATE TABLE `food_items` (
 -- Đang đổ dữ liệu cho bảng `food_items`
 --
 
-INSERT INTO `food_items` (`id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
-(1, 'Combo 1 - Bỏng + Nước', '1 bỏng ngô lớn + 1 nước ngọt lớn', 85000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
-(2, 'Combo 2 - Bỏng + Nước + Snack', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack', 120000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
-(3, 'Combo 3 - Đôi', '2 bỏng ngô lớn + 2 nước ngọt lớn', 150000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
-(4, 'Bỏng ngô lớn', 'Bỏng ngô size lớn', 55000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
-(5, 'Bỏng ngô vừa', 'Bỏng ngô size vừa', 40000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
-(6, 'Nước ngọt lớn', 'Nước ngọt size lớn', 35000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
-(7, 'Nước ngọt vừa', 'Nước ngọt size vừa', 25000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
-(8, 'Snack mix', 'Hỗn hợp snack', 45000.00, NULL, 'snack', 1, '2025-11-28 01:03:19');
+INSERT INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
+(1, 1, 'Combo 1 - Bỏng + Nước', '1 bỏng ngô lớn + 1 nước ngọt lớn', 85000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(2, 1, 'Combo 2 - Bỏng + Nước + Snack', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack', 120000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(3, 1, 'Combo 3 - Đôi', '2 bỏng ngô lớn + 2 nước ngọt lớn', 150000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(4, 1, 'Bỏng ngô lớn', 'Bỏng ngô size lớn', 55000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(5, 1, 'Bỏng ngô vừa', 'Bỏng ngô size vừa', 40000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(6, 1, 'Nước ngọt lớn', 'Nước ngọt size lớn', 35000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
+(7, 1, 'Nước ngọt vừa', 'Nước ngọt size vừa', 25000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
+(8, 1, 'Snack mix', 'Hỗn hợp snack', 45000.00, NULL, 'snack', 1, '2025-11-28 01:03:19');
 
 -- --------------------------------------------------------
 
@@ -343,6 +353,33 @@ INSERT INTO `ip_spam_logs` (`id`, `ip_address`, `action_type`, `is_spam`, `detai
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `moderator_permission_requests`
+--
+
+CREATE TABLE `moderator_permission_requests` (
+  `id` int(11) NOT NULL,
+  `theater_id` int(11) NOT NULL,
+  `moderator_id` int(11) DEFAULT NULL,
+  `requested_by` int(11) NOT NULL,
+  `target_user_id` int(11) NOT NULL,
+  `action` varchar(50) NOT NULL,
+  `old_data` text DEFAULT NULL,
+  `new_data` text DEFAULT NULL,
+  `status` varchar(20) DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `responded_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `moderator_permission_requests`
+--
+
+INSERT INTO `moderator_permission_requests` (`id`, `theater_id`, `moderator_id`, `requested_by`, `target_user_id`, `action`, `old_data`, `new_data`, `status`, `created_at`, `responded_at`) VALUES
+(1, 3, 9, 3, 12, 'update_role', '{\"role\":\"user\",\"theater_id\":null}', '{\"role\":\"moderator\",\"theater_id\":\"3\"}', 'pending', '2025-11-30 17:57:49', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `movies`
 --
 
@@ -377,44 +414,69 @@ CREATE TABLE `movies` (
 -- Đang đổ dữ liệu cho bảng `movies`
 --
 
-INSERT INTO `movies` (`id`, `title`, `category_id`, `level`, `duration`, `description`, `director`, `actors`, `video_url`, `trailer_url`, `thumbnail`, `status`, `rating`, `created_at`, `status_admin`, `publish_date`, `geo_restriction`, `drm_enabled`, `banner`, `country`, `language`, `age_rating`, `type`) VALUES
-(1, 'Avengers: Endgame', 1, 'Premium', 181, 'Phim siêu anh hùng Marvel, kết thúc của Infinity Saga', 'Anthony Russo, Joe Russo', 'Robert Downey Jr., Chris Evans, Mark Ruffalo', 'data/phim/phimle/Avengers_Endgame.mp4', 'https://example.com/avengers-trailer.mp4', 'data/img/avengers_end_game_img.jpg', 'Chiếu rạp', 9.2, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/avengers_end_game.jpg', 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle'),
-(2, 'Titanic', 2, 'Gold', 194, 'Câu chuyện tình yêu trên con tàu định mệnh', 'James Cameron', 'Leonardo DiCaprio, Kate Winslet', 'data/phim/phimle/titanic.mp4\r\n', 'https://example.com/titanic-trailer.mp4', 'data/img/titanic.jpg', 'Chiếu rạp', 8.8, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle'),
-(3, 'The Hangover', 3, 'Silver', 100, 'Phim hài về chuyến đi Las Vegas đầy biến cố', 'Todd Phillips', 'Bradley Cooper, Ed Helms, Zach Galifianakis', 'https://example.com/hangover.mp4', 'https://example.com/hangover-trailer.mp4', 'data/img/the_hangover_img.jpg', 'Chiếu rạp', 7.7, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/the_hangover.jpg', 'Mỹ', 'Tiếng Anh', 'R', 'phimle'),
-(4, 'The Conjuring', 4, 'Gold', 112, 'Phim kinh dị về các nhà điều tra siêu nhiên', 'James Wan', 'Patrick Wilson, Vera Farmiga', 'https://example.com/conjuring.mp4', 'https://example.com/conjuring-trailer.mp4', 'data/img/the_conjuring_img.jpg', 'Chiếu rạp', 7.5, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/the_conjuring.jpg', 'Mỹ', 'Tiếng Anh', 'R', 'phimle'),
-(5, 'Toy Story 4', 5, 'Free', 100, 'Cuộc phiêu lưu mới của Woody và Buzz', 'Josh Cooley', 'Tom Hanks, Tim Allen', 'https://example.com/toystory.mp4', 'https://example.com/toystory-trailer.mp4', 'data/img/toy_story_img.jpg', 'Chiếu rạp', 8, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/toy_story.jpg', 'Mỹ', 'Tiếng Anh', 'G', 'phimle'),
-(6, 'Interstellar', 6, 'Premium', 169, 'Cuộc hành trình không gian để cứu nhân loại', 'Christopher Nolan', 'Matthew McConaughey, Anne Hathaway', 'data/phim/phimle/Interstellar\r\n.mp4', 'https://example.com/interstellar-trailer.mp4', 'data/img/interstellar.jpg', 'Chiếu online', 8.6, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle'),
-(7, 'Indiana Jones', 7, 'Gold', 122, 'Cuộc phiêu lưu tìm kiếm cổ vật', 'Steven Spielberg', 'Harrison Ford', 'https://example.com/indiana.mp4', 'https://example.com/indiana-trailer.mp4', 'data/img/indiana_jones_img.jpg', 'Chiếu online', 8.2, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/indiana_jones.jpg', 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle'),
-(8, 'Game of Thrones', 7, 'Premium', 60, 'Cuộc chiến giành quyền lực giữa các dòng họ ở vùng đất Westeros. Bộ phim kể về cuộc đấu tranh của các gia đình quý tộc để giành lấy Ngai Sắt Sắt và cai trị bảy vương quốc.', 'David Benioff, D.B. Weiss', 'Emilia Clarke, Kit Harington, Peter Dinklage, Lena Headey', 'data/phim/phimbo/gameofthrones', 'https://example.com/got-trailer.mp4', 'data/img/game_of_thrones_img.webp', 'Chiếu online', 9.3, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/game_of_thrones.jpg', 'Mỹ', 'Tiếng Anh', 'TV-MA', 'phimbo'),
-(9, 'Breaking Bad', 1, 'Gold', 47, 'Câu chuyện về giáo viên hóa học trung học Walter White, người bắt đầu sản xuất và bán methamphetamine sau khi được chẩn đoán ung thư phổi giai đoạn cuối.', 'Vince Gilligan', 'Bryan Cranston, Aaron Paul, Anna Gunn, Dean Norris', 'data/phim/phimbo/breaking_bad', 'https://example.com/breaking-bad-trailer.mp4', 'data/img/breaking_bad_img.jpg', 'Chiếu online', 9.5, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/breaking_bad.jpg', 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
-(10, 'The Walking Dead', 4, 'Gold', 45, 'Sheriff Deputy Rick Grimes tỉnh dậy sau một chấn thương và phát hiện ra thế giới đã bị tàn phá bởi đại dịch zombie. Anh phải dẫn dắt nhóm người sống sót tìm nơi trú ẩn.', 'Frank Darabont', 'Andrew Lincoln, Norman Reedus, Melissa McBride, Danai Gurira', 'data/phim/phimbo/the_walking_dead', 'https://example.com/walking-dead-trailer.mp4', 'data/img/the_walking_dead_img.jpg', 'Chiếu online', 8.2, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/the_walking_dead.jpg', 'Mỹ', 'Tiếng Anh', 'TV-MA', 'phimbo'),
-(11, 'Stranger Things', 6, 'Premium', 50, 'Khi một cậu bé 12 tuổi biến mất, một thị trấn nhỏ ở Indiana tiết lộ một bí mật liên quan đến thí nghiệm bí mật, siêu năng lực đáng sợ và một cô gái nhỏ lạ thường.', 'The Duffer Brothers', 'Millie Bobby Brown, Finn Wolfhard, Winona Ryder, David Harbour', 'data/phim/phimbo/stranger_things', 'https://example.com/stranger-things-trailer.mp4', 'data/img/stranger_things_img.jpg', 'Chiếu online', 8.7, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/stranger_things.jpg', 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
-(12, 'House of Cards', 2, 'Gold', 58, 'Một chính trị gia khôn ngoan và không khoan nhượng làm bất cứ điều gì để giành quyền lực ở Washington D.C.', 'Beau Willimon', 'Kevin Spacey, Robin Wright, Kate Mara, Michael Kelly', 'data/phim/phimbo/house_of_cards', 'https://example.com/house-of-cards-trailer.mp4', 'data/img/house_of_cards_img.png', 'Chiếu online', 8.8, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/house_of_cards.jpg', 'Mỹ', 'Tiếng Anh', 'TV-MA', 'phimbo'),
-(13, 'The Crown', 2, 'Premium', 58, 'Dòng thời gian về triều đại của Nữ hoàng Elizabeth II của Vương quốc Anh, từ những năm 1950 đến những năm 2000.', 'Peter Morgan', 'Claire Foy, Olivia Colman, Matt Smith, Tobias Menzies', 'data/phim/phimbo/the_crown', 'https://example.com/the-crown-trailer.mp4', 'data/img/the_crown.jpg', 'Chiếu online', 8.6, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Anh', 'Tiếng Anh', 'TV-MA', 'phimbo'),
-(14, 'Sherlock', 1, 'Gold', 90, 'Phiên bản hiện đại của các câu chuyện điều tra nổi tiếng của Sir Arthur Conan Doyle, với Sherlock Holmes và Dr. John Watson giải quyết các vụ án ở London thế kỷ 21.', 'Mark Gatiss, Steven Moffat', 'Benedict Cumberbatch, Martin Freeman, Rupert Graves, Mark Gatiss', 'data/phim/phimbo/sherlock', 'https://example.com/sherlock-trailer.mp4', 'data/img/Sherlock_img.jpg', 'Chiếu online', 9.1, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/sherlock.jpg', 'Anh', 'Tiếng Anh', 'TV-14', 'phimbo'),
-(15, 'The Office', 3, 'Silver', 22, 'Một mockumentary về nhóm nhân viên văn phòng hàng ngày tại văn phòng chi nhánh Scranton của công ty giấy Dunder Mifflin.', 'Greg Daniels', 'Steve Carell, Rainn Wilson, John Krasinski, Jenna Fischer', 'data/phim/phimbo/the_office', 'https://example.com/the-office-trailer.mp4', 'data/img/the_office.png', 'Chiếu online', 8.9, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
-(16, 'Friends', 3, 'Silver', 22, 'Cuộc sống và tình yêu của sáu người bạn ở Manhattan, New York, khi họ cố gắng tìm ra con đường của mình trong cuộc sống.', 'David Crane, Marta Kauffman', 'Jennifer Aniston, Courteney Cox, Lisa Kudrow, Matt LeBlanc, Matthew Perry, David Schwimmer', 'data/phim/phimbo/friends', 'https://example.com/friends-trailer.mp4', 'data/img/friends.jpg', 'Chiếu online', 9, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo'),
-(17, 'The Witcher', 7, 'Premium', 60, 'Geralt of Rivia, một thợ săn quái vật đột biến đi khắp đất liền để tìm nơi thuộc về mình trong một thế giới nơi con người thường tồi tệ hơn quái vật.', 'Lauren Schmidt Hissrich', 'Henry Cavill, Anya Chalotra, Freya Allan, Joey Batey', 'data/phim/phimbo/the_witcher', 'https://example.com/the-witcher-trailer.mp4', 'data/img/the_witcher.jpg', 'Chiếu online', 8.2, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ/ Ba Lan', 'Tiếng Anh', 'TV-MA', 'phimbo'),
-(18, 'Hai Phượng', 1, 'Premium', 98, 'Mẹ đơn thân từng là dân giang hồ phải chiến đấu với băng nhóm bắt cóc con gái mình.', 'Lê Văn Kiệt', 'Ngô Thanh Vân, Mai Cát Vi', 'data/phim/phimle/hai_phuong.mp4', 'https://example.com/hai-phuong-trailer.mp4', 'data/img/hai_phuong_img.jpg', 'Chiếu rạp', 7.5, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, 'data/img/hai_phuong.jpg', 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
-(19, 'Mắt Biếc', 2, 'Gold', 117, 'Câu chuyện tình đơn phương lãng mạn và đầy hoài niệm ở thập niên 70.', 'Victor Vũ', 'Trần Nghĩa, Trúc Anh, Trần Phong', 'data/phim/phimle/mat_biec.mp4', 'https://example.com/mat-biec-trailer.mp4', 'data/img/mat_biec_img.jpg', 'Chiếu rạp', 8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, 'data/img/mat_biec.webp', 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
-(20, 'Bố Già', 3, 'Premium', 128, 'Phim về tình cha con đầy cảm xúc và những mâu thuẫn trong gia đình.', 'Trấn Thành, Vũ Ngọc Đãng', 'Trấn Thành, Lê Giang, Tuấn Trần', 'data/phim/phimle/bo_gia.mp4', 'https://example.com/bo-gia-trailer.mp4', 'data/img/bo_gia.jpg', 'Chiếu rạp', 8.5, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
-(21, 'Tiệc Trăng Máu', 3, 'Gold', 100, 'Bảy người bạn cùng chơi một trò chơi công khai tin nhắn và cuộc gọi điện thoại, dẫn đến những bí mật bị phanh phui.', 'Nguyễn Quang Dũng', 'Thái Hòa, Thu Trang, Hồng Ánh, Hứa Vĩ Văn', 'data/phim/phimle/tiec_trang_mau.mp4', 'https://example.com/tiec-trang-mau-trailer.mp4', 'data/img/tiec_trang_mau.jpg', 'Chiếu rạp', 7.8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
-(22, 'Lật Mặt 4: Nhà Có Khách', 4, 'Silver', 90, 'Phim hài kinh dị với những tình huống dở khóc dở cười và yếu tố ma quái.', 'Lý Hải', 'Lý Hải, Katleen Phan Võ, Huy Khánh', 'data/phim/phimle/lat_mat_4.mp4', 'https://example.com/lat-mat-4-trailer.mp4', 'data/img/lat_mat_4.jpg', 'Chiếu rạp', 7, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
-(23, 'Em Chưa 18', 3, 'Free', 95, 'Chuyện tình hài hước giữa một cô gái tuổi teen và một chàng trai đã trưởng thành.', 'Lê Thanh Sơn', 'Kaity Nguyễn, Kiều Minh Tuấn', 'data/phim/phimle/em_chua_18.mp4', 'https://example.com/em-chua-18-trailer.mp4', 'data/img/em_chua_18.jpg', 'Chiếu rạp', 7.2, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
-(24, 'Chị Trợ Lý Của Anh', 2, 'Gold', 105, 'Giám đốc trẻ phải thuê một cô trợ lý bí ẩn để cứu công ty của mình.', 'Lý Minh Thắng', 'Mỹ Tâm, Mai Tài Phến', 'data/phim/phimle/chi_tro_ly_cua_anh.mp4', 'https://example.com/chi-tro-ly-cua-anh-trailer.mp4', 'data/img/chi_tro_ly_cua_anh_img.jpg', 'Chiếu online', 6.8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, 'data/img/chi_tro_ly_cua_anh.jpg', 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
-(25, 'Gái Già Lắm Chiêu 3', 3, 'Premium', 108, 'Cuộc chiến mẹ chồng nàng dâu đầy xa hoa và kịch tính ở Huế.', 'Nam Cito, Bảo Nhân', 'Ninh Dương Lan Ngọc, Lê Khanh, Hồng Vân', 'data/phim/phimle/gai_gia_lam_chieu_3.mp4', 'https://example.com/gai-gia-lam-chieu-3-trailer.mp4', 'data/img/gai_gia_lam_chieu_3.jpg', 'Chiếu rạp', 7.4, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle'),
-(26, 'Quỳnh Hoa Nhất Dạ', 7, 'Premium', 120, 'Phim cổ trang, dã sử về cuộc đời đầy sóng gió của Thái hậu Dương Vân Nga.', 'Lý Minh Thắng', 'Nhã Phương, Thuý Ngân, Lương Thế Thành', 'data/phim/phimle/quynh_hoa_nhat_da.mp4', 'https://example.com/quynh-hoa-nhat-da-trailer.mp4', 'data/img/quynh_hoa_nhat_da.jpg', 'Chiếu rạp', 7.7, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
-(27, 'Tấm Cám: Chuyện Chưa Kể', 5, 'Gold', 116, 'Phiên bản cải biên của truyện cổ tích Tấm Cám, kết hợp yếu tố giả tưởng và hành động.', 'Ngô Thanh Vân', 'Hạ Vi, Isaac, Ngô Thanh Vân', 'data/phim/phimle/tam_cam.mp4', 'https://example.com/tam-cam-trailer.mp4', 'data/img/tam_cam.jpg', 'Chiếu rạp', 7.1, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
-(28, 'Hương Vị Tình Thân (Phần 1)', 2, 'Free', 45, 'Phim truyền hình về cuộc đời đầy thử thách của Phương Nam, người luôn khát khao tình cảm gia đình.', 'Nguyễn Danh Dũng', 'Phương Oanh, Mạnh Trường, Công Lý', 'data/phim/phimbo/huong_vi_tinh_than_p1', 'https://example.com/hvtt-trailer.mp4', 'data/img/huong_vi_tinh_than_p1_img.jpg', 'Chiếu online', 8.4, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/huong_vi_tinh_than_p1.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
-(29, 'Về Nhà Đi Con', 2, 'Gold', 45, 'Phim về tình cảm gia đình, đặc biệt là tình cha và ba cô con gái có tính cách khác nhau.', 'Nguyễn Danh Dũng', 'NSND Hoàng Dũng, Thu Quỳnh, Bảo Thanh, Bảo Hân', 'data/phim/phimbo/venhadicon', 'https://example.com/vndc-trailer.mp4', 'data/img/venhadicon_img.webp', 'Chiếu online', 9, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/venhadicon.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
-(30, 'Người Phán Xử', 1, 'Premium', 45, 'Ông trùm Phan Quân và những cuộc chiến tranh giành quyền lực trong thế giới ngầm.', 'Nguyễn Mai Hiền, Nguyễn Khải Anh, Bùi Quốc Việt', 'NSND Hoàng Dũng, Việt Anh, Hồng Đăng', 'data/phim/phimbo/nguoi_phan_xu', 'https://example.com/npx-trailer.mp4', 'data/img/nguoi_phan_xu_img.jpg', 'Chiếu online', 10, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/nguoi_phan_xu.webp', 'Việt Nam', 'Tiếng Việt', 'C18', 'phimbo'),
-(31, 'Sống Chung Với Mẹ Chồng', 2, 'Gold', 45, 'Những mâu thuẫn nảy sinh khi nàng dâu và mẹ chồng sống chung dưới một mái nhà.', 'Vũ Trường Khoa', 'NSND Lan Hương, Bảo Thanh, Anh Dũng', 'data/phim/phimbo/song_chung_voi_me_chong', 'https://example.com/scvmc-trailer.mp4', 'data/img/song_chung_voi_me_chong_img.jpg', 'Chiếu online', 8.1, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/song_chung_voi_me_chong.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
-(32, 'Thương Ngày Nắng Về (Phần 2)', 2, 'Premium', 45, 'Câu chuyện về bà mẹ đơn thân cùng ba cô con gái, xoay quanh tình yêu, sự nghiệp và những mâu thuẫn.', 'Bùi Tiến Huy', 'NSƯT Thanh Quý, Phan Minh Huyền, Lan Phương', 'data/phim/phimbo/thuong_ngay_nang_ve_p2', 'https://example.com/tnnv-trailer.mp4', 'data/img/thuong_ngay_nang_ve_img.jpg', 'Chiếu online', 8.5, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/thuong_ngay_nang_ve.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
-(33, 'Phim ngắn: 20 Năm 20 Món Ăn', 5, 'Free', 15, 'Loạt phim ngắn ẩm thực về hành trình tìm kiếm hương vị đã mất sau 20 năm xa quê.', 'Nguyễn Hoàng Điệp', 'Nhiều diễn viên', 'data/phim/phimle/20_nam_20_mon_an.mp4', 'https://example.com/20nam-trailer.mp4', 'data/img/20_nam_20_mon_an.jpg', 'Chiếu online', 7, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimle'),
-(34, 'Series: Ai Là Hung Thủ (Mùa 1)', 1, 'Gold', 40, 'Series trinh thám điều tra các vụ án mạng phức tạp tại thành phố Hồ Chí Minh.', 'Lý Hải (Đóng vai trò sản xuất)', 'Trương Thế Vinh, Nhan Phúc Vinh', 'data/phim/phimbo/ai_la_hung_thu_s1', 'https://example.com/alht-trailer.mp4', 'data/img/ai_la_hung_thu_s1.jpg', 'Chiếu online', 7.9, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimbo'),
-(35, 'Phim lẻ: Cô Ba Sài Gòn', 2, 'Premium', 94, 'Phim lãng mạn, giả tưởng về thời trang áo dài và câu chuyện xuyên không giữa hai thế hệ.', 'Trần Bửu Lộc, Nguyễn Lê Minh', 'Ninh Dương Lan Ngọc, Diễm My 9x, Ngô Thanh Vân', 'data/phim/phimle/co_ba_sai_gon.mp4', 'https://example.com/cbsg-trailer.mp4', 'data/img/co_ba_sai_gon_img.jpg', 'Chiếu online', 7.6, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/co_ba_sai_gon.jpg', 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle'),
-(36, 'Series: Tình Yêu và Tham Vọng', 7, 'Gold', 45, 'Phim thương trường với những cuộc chiến khốc liệt giữa các tập đoàn và câu chuyện tình yêu phức tạp.', 'Bùi Tiến Huy', 'Nhan Phúc Vinh, Diễm My 9x, Lã Thanh Huyền', 'data/phim/phimbo/tinh_yeu_va_tham_vong', 'https://example.com/tyvtc-trailer.mp4', 'data/img/tinh_yeu_va_tham_vong_img.jpg', 'Chiếu online', 7.8, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/tinh_yeu_va_tham_vong.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo'),
-(37, 'Phim ngắn: Ngã Ba Đồng Lộc', 7, 'Free', 30, 'Phim tài liệu/chiến tranh về sự hy sinh anh dũng của 10 cô gái thanh niên xung phong.', 'Nguyễn Minh Chung', 'Nhiều diễn viên', 'data/phim/phimle/nga_ba_dong_loc.mp4', 'https://example.com/nbdl-trailer.mp4', 'data/img/nga_ba_dong_loc_img.jpg', 'Chiếu online', 8.2, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/nga_ba_dong_loc.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimle');
+INSERT INTO `movies` (`id`, `title`, `category_id`, `level`, `duration`, `description`, `director`, `actors`, `video_url`, `trailer_url`, `thumbnail`, `status`, `rating`, `created_at`, `status_admin`, `publish_date`, `geo_restriction`, `drm_enabled`, `banner`, `country`, `language`, `age_rating`, `type`, `max_tickets`) VALUES
+(1, 'Avengers: Endgame', 1, 'Premium', 181, 'Phim siêu anh hùng Marvel, kết thúc của Infinity Saga', 'Anthony Russo, Joe Russo', 'Robert Downey Jr., Chris Evans, Mark Ruffalo', 'data/phim/phimle/Avengers_Endgame.mp4', 'https://example.com/avengers-trailer.mp4', 'data/img/avengers_end_game_img.jpg', 'Chiếu rạp', 9.2, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/avengers_end_game.jpg', 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle', NULL),
+(2, 'Titanic', 2, 'Gold', 194, 'Câu chuyện tình yêu trên con tàu định mệnh', 'James Cameron', 'Leonardo DiCaprio, Kate Winslet', 'data/phim/phimle/titanic.mp4\r\n', 'https://example.com/titanic-trailer.mp4', 'data/img/titanic.jpg', 'Chiếu rạp', 8.8, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle', NULL),
+(3, 'The Hangover', 3, 'Silver', 100, 'Phim hài về chuyến đi Las Vegas đầy biến cố', 'Todd Phillips', 'Bradley Cooper, Ed Helms, Zach Galifianakis', 'https://example.com/hangover.mp4', 'https://example.com/hangover-trailer.mp4', 'data/img/the_hangover_img.jpg', 'Chiếu rạp', 7.7, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/the_hangover.jpg', 'Mỹ', 'Tiếng Anh', 'R', 'phimle', NULL),
+(4, 'The Conjuring', 4, 'Gold', 112, 'Phim kinh dị về các nhà điều tra siêu nhiên', 'James Wan', 'Patrick Wilson, Vera Farmiga', 'https://example.com/conjuring.mp4', 'https://example.com/conjuring-trailer.mp4', 'data/img/the_conjuring_img.jpg', 'Chiếu rạp', 7.5, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/the_conjuring.jpg', 'Mỹ', 'Tiếng Anh', 'R', 'phimle', NULL),
+(5, 'Toy Story 4', 5, 'Free', 100, 'Cuộc phiêu lưu mới của Woody và Buzz', 'Josh Cooley', 'Tom Hanks, Tim Allen', 'https://example.com/toystory.mp4', 'https://example.com/toystory-trailer.mp4', 'data/img/toy_story_img.jpg', 'Chiếu rạp', 8, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/toy_story.jpg', 'Mỹ', 'Tiếng Anh', 'G', 'phimle', NULL),
+(6, 'Interstellar', 6, 'Premium', 169, 'Cuộc hành trình không gian để cứu nhân loại', 'Christopher Nolan', 'Matthew McConaughey, Anne Hathaway', 'data/phim/phimle/Interstellar\r\n.mp4', 'https://example.com/interstellar-trailer.mp4', 'data/img/interstellar.jpg', 'Chiếu online', 8.6, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle', NULL),
+(7, 'Indiana Jones', 7, 'Gold', 122, 'Cuộc phiêu lưu tìm kiếm cổ vật', 'Steven Spielberg', 'Harrison Ford', 'https://example.com/indiana.mp4', 'https://example.com/indiana-trailer.mp4', 'data/img/indiana_jones_img.jpg', 'Chiếu online', 8.2, '2025-11-12 07:41:09', 'published', NULL, NULL, 0, 'data/img/indiana_jones.jpg', 'Mỹ', 'Tiếng Anh', 'PG-13', 'phimle', NULL),
+(8, 'Game of Thrones', 7, 'Premium', 60, 'Cuộc chiến giành quyền lực giữa các dòng họ ở vùng đất Westeros. Bộ phim kể về cuộc đấu tranh của các gia đình quý tộc để giành lấy Ngai Sắt Sắt và cai trị bảy vương quốc.', 'David Benioff, D.B. Weiss', 'Emilia Clarke, Kit Harington, Peter Dinklage, Lena Headey', 'data/phim/phimbo/gameofthrones', 'https://example.com/got-trailer.mp4', 'data/img/game_of_thrones_img.webp', 'Chiếu online', 9.3, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/game_of_thrones.jpg', 'Mỹ', 'Tiếng Anh', 'TV-MA', 'phimbo', NULL),
+(9, 'Breaking Bad', 1, 'Gold', 47, 'Câu chuyện về giáo viên hóa học trung học Walter White, người bắt đầu sản xuất và bán methamphetamine sau khi được chẩn đoán ung thư phổi giai đoạn cuối.', 'Vince Gilligan', 'Bryan Cranston, Aaron Paul, Anna Gunn, Dean Norris', 'data/phim/phimbo/breaking_bad', 'https://example.com/breaking-bad-trailer.mp4', 'data/img/breaking_bad_img.jpg', 'Chiếu online', 9.5, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/breaking_bad.jpg', 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo', NULL),
+(10, 'The Walking Dead', 4, 'Gold', 45, 'Sheriff Deputy Rick Grimes tỉnh dậy sau một chấn thương và phát hiện ra thế giới đã bị tàn phá bởi đại dịch zombie. Anh phải dẫn dắt nhóm người sống sót tìm nơi trú ẩn.', 'Frank Darabont', 'Andrew Lincoln, Norman Reedus, Melissa McBride, Danai Gurira', 'data/phim/phimbo/the_walking_dead', 'https://example.com/walking-dead-trailer.mp4', 'data/img/the_walking_dead_img.jpg', 'Chiếu online', 8.2, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/the_walking_dead.jpg', 'Mỹ', 'Tiếng Anh', 'TV-MA', 'phimbo', NULL),
+(11, 'Stranger Things', 6, 'Premium', 50, 'Khi một cậu bé 12 tuổi biến mất, một thị trấn nhỏ ở Indiana tiết lộ một bí mật liên quan đến thí nghiệm bí mật, siêu năng lực đáng sợ và một cô gái nhỏ lạ thường.', 'The Duffer Brothers', 'Millie Bobby Brown, Finn Wolfhard, Winona Ryder, David Harbour', 'data/phim/phimbo/stranger_things', 'https://example.com/stranger-things-trailer.mp4', 'data/img/stranger_things_img.jpg', 'Chiếu online', 8.7, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/stranger_things.jpg', 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo', NULL),
+(12, 'House of Cards', 2, 'Gold', 58, 'Một chính trị gia khôn ngoan và không khoan nhượng làm bất cứ điều gì để giành quyền lực ở Washington D.C.', 'Beau Willimon', 'Kevin Spacey, Robin Wright, Kate Mara, Michael Kelly', 'data/phim/phimbo/house_of_cards', 'https://example.com/house-of-cards-trailer.mp4', 'data/img/house_of_cards_img.png', 'Chiếu online', 8.8, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/house_of_cards.jpg', 'Mỹ', 'Tiếng Anh', 'TV-MA', 'phimbo', NULL),
+(13, 'The Crown', 2, 'Premium', 58, 'Dòng thời gian về triều đại của Nữ hoàng Elizabeth II của Vương quốc Anh, từ những năm 1950 đến những năm 2000.', 'Peter Morgan', 'Claire Foy, Olivia Colman, Matt Smith, Tobias Menzies', 'data/phim/phimbo/the_crown', 'https://example.com/the-crown-trailer.mp4', 'data/img/the_crown.jpg', 'Chiếu online', 8.6, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Anh', 'Tiếng Anh', 'TV-MA', 'phimbo', NULL),
+(14, 'Sherlock', 1, 'Gold', 90, 'Phiên bản hiện đại của các câu chuyện điều tra nổi tiếng của Sir Arthur Conan Doyle, với Sherlock Holmes và Dr. John Watson giải quyết các vụ án ở London thế kỷ 21.', 'Mark Gatiss, Steven Moffat', 'Benedict Cumberbatch, Martin Freeman, Rupert Graves, Mark Gatiss', 'data/phim/phimbo/sherlock', 'https://example.com/sherlock-trailer.mp4', 'data/img/Sherlock_img.jpg', 'Chiếu online', 9.1, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, 'data/img/sherlock.jpg', 'Anh', 'Tiếng Anh', 'TV-14', 'phimbo', NULL),
+(15, 'The Office', 3, 'Silver', 22, 'Một mockumentary về nhóm nhân viên văn phòng hàng ngày tại văn phòng chi nhánh Scranton của công ty giấy Dunder Mifflin.', 'Greg Daniels', 'Steve Carell, Rainn Wilson, John Krasinski, Jenna Fischer', 'data/phim/phimbo/the_office', 'https://example.com/the-office-trailer.mp4', 'data/img/the_office.png', 'Chiếu online', 8.9, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo', NULL),
+(16, 'Friends', 3, 'Silver', 22, 'Cuộc sống và tình yêu của sáu người bạn ở Manhattan, New York, khi họ cố gắng tìm ra con đường của mình trong cuộc sống.', 'David Crane, Marta Kauffman', 'Jennifer Aniston, Courteney Cox, Lisa Kudrow, Matt LeBlanc, Matthew Perry, David Schwimmer', 'data/phim/phimbo/friends', 'https://example.com/friends-trailer.mp4', 'data/img/friends.jpg', 'Chiếu online', 9, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ', 'Tiếng Anh', 'TV-14', 'phimbo', NULL),
+(17, 'The Witcher', 7, 'Premium', 60, 'Geralt of Rivia, một thợ săn quái vật đột biến đi khắp đất liền để tìm nơi thuộc về mình trong một thế giới nơi con người thường tồi tệ hơn quái vật.', 'Lauren Schmidt Hissrich', 'Henry Cavill, Anya Chalotra, Freya Allan, Joey Batey', 'data/phim/phimbo/the_witcher', 'https://example.com/the-witcher-trailer.mp4', 'data/img/the_witcher.jpg', 'Chiếu online', 8.2, '2025-11-17 01:17:59', 'published', NULL, NULL, 0, NULL, 'Mỹ/ Ba Lan', 'Tiếng Anh', 'TV-MA', 'phimbo', NULL),
+(18, 'Hai Phượng', 1, 'Premium', 98, 'Mẹ đơn thân từng là dân giang hồ phải chiến đấu với băng nhóm bắt cóc con gái mình.', 'Lê Văn Kiệt', 'Ngô Thanh Vân, Mai Cát Vi', 'data/phim/phimle/hai_phuong.mp4', 'https://example.com/hai-phuong-trailer.mp4', 'data/img/hai_phuong_img.jpg', 'Chiếu rạp', 7.5, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, 'data/img/hai_phuong.jpg', 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle', NULL),
+(19, 'Mắt Biếc', 2, 'Gold', 117, 'Câu chuyện tình đơn phương lãng mạn và đầy hoài niệm ở thập niên 70.', 'Victor Vũ', 'Trần Nghĩa, Trúc Anh, Trần Phong', 'data/phim/phimle/mat_biec.mp4', 'https://example.com/mat-biec-trailer.mp4', 'data/img/mat_biec_img.jpg', 'Chiếu rạp', 8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, 'data/img/mat_biec.webp', 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle', NULL),
+(20, 'Bố Già', 3, 'Premium', 128, 'Phim về tình cha con đầy cảm xúc và những mâu thuẫn trong gia đình.', 'Trấn Thành, Vũ Ngọc Đãng', 'Trấn Thành, Lê Giang, Tuấn Trần', 'data/phim/phimle/bo_gia.mp4', 'https://example.com/bo-gia-trailer.mp4', 'data/img/bo_gia.jpg', 'Chiếu rạp', 8.5, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle', NULL),
+(21, 'Tiệc Trăng Máu', 3, 'Gold', 100, 'Bảy người bạn cùng chơi một trò chơi công khai tin nhắn và cuộc gọi điện thoại, dẫn đến những bí mật bị phanh phui.', 'Nguyễn Quang Dũng', 'Thái Hòa, Thu Trang, Hồng Ánh, Hứa Vĩ Văn', 'data/phim/phimle/tiec_trang_mau.mp4', 'https://example.com/tiec-trang-mau-trailer.mp4', 'data/img/tiec_trang_mau.jpg', 'Chiếu rạp', 7.8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle', NULL),
+(22, 'Lật Mặt 4: Nhà Có Khách', 4, 'Silver', 90, 'Phim hài kinh dị với những tình huống dở khóc dở cười và yếu tố ma quái.', 'Lý Hải', 'Lý Hải, Katleen Phan Võ, Huy Khánh', 'data/phim/phimle/lat_mat_4.mp4', 'https://example.com/lat-mat-4-trailer.mp4', 'data/img/lat_mat_4.jpg', 'Chiếu rạp', 7, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle', NULL),
+(23, 'Em Chưa 18', 3, 'Free', 95, 'Chuyện tình hài hước giữa một cô gái tuổi teen và một chàng trai đã trưởng thành.', 'Lê Thanh Sơn', 'Kaity Nguyễn, Kiều Minh Tuấn', 'data/phim/phimle/em_chua_18.mp4', 'https://example.com/em-chua-18-trailer.mp4', 'data/img/em_chua_18.jpg', 'Chiếu rạp', 7.2, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle', NULL),
+(24, 'Chị Trợ Lý Của Anh', 2, 'Gold', 105, 'Giám đốc trẻ phải thuê một cô trợ lý bí ẩn để cứu công ty của mình.', 'Lý Minh Thắng', 'Mỹ Tâm, Mai Tài Phến', 'data/phim/phimle/chi_tro_ly_cua_anh.mp4', 'https://example.com/chi-tro-ly-cua-anh-trailer.mp4', 'data/img/chi_tro_ly_cua_anh_img.jpg', 'Chiếu online', 6.8, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, 'data/img/chi_tro_ly_cua_anh.jpg', 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle', NULL),
+(25, 'Gái Già Lắm Chiêu 3', 3, 'Premium', 108, 'Cuộc chiến mẹ chồng nàng dâu đầy xa hoa và kịch tính ở Huế.', 'Nam Cito, Bảo Nhân', 'Ninh Dương Lan Ngọc, Lê Khanh, Hồng Vân', 'data/phim/phimle/gai_gia_lam_chieu_3.mp4', 'https://example.com/gai-gia-lam-chieu-3-trailer.mp4', 'data/img/gai_gia_lam_chieu_3.jpg', 'Chiếu rạp', 7.4, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimle', NULL),
+(26, 'Quỳnh Hoa Nhất Dạ', 7, 'Premium', 120, 'Phim cổ trang, dã sử về cuộc đời đầy sóng gió của Thái hậu Dương Vân Nga.', 'Lý Minh Thắng', 'Nhã Phương, Thuý Ngân, Lương Thế Thành', 'data/phim/phimle/quynh_hoa_nhat_da.mp4', 'https://example.com/quynh-hoa-nhat-da-trailer.mp4', 'data/img/quynh_hoa_nhat_da.jpg', 'Chiếu rạp', 7.7, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle', NULL),
+(27, 'Tấm Cám: Chuyện Chưa Kể', 5, 'Gold', 116, 'Phiên bản cải biên của truyện cổ tích Tấm Cám, kết hợp yếu tố giả tưởng và hành động.', 'Ngô Thanh Vân', 'Hạ Vi, Isaac, Ngô Thanh Vân', 'data/phim/phimle/tam_cam.mp4', 'https://example.com/tam-cam-trailer.mp4', 'data/img/tam_cam.jpg', 'Chiếu rạp', 7.1, '2025-11-24 09:19:09', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle', NULL),
+(28, 'Hương Vị Tình Thân (Phần 1)', 2, 'Free', 45, 'Phim truyền hình về cuộc đời đầy thử thách của Phương Nam, người luôn khát khao tình cảm gia đình.', 'Nguyễn Danh Dũng', 'Phương Oanh, Mạnh Trường, Công Lý', 'data/phim/phimbo/huong_vi_tinh_than_p1', 'https://example.com/hvtt-trailer.mp4', 'data/img/huong_vi_tinh_than_p1_img.jpg', 'Chiếu online', 8.4, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/huong_vi_tinh_than_p1.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo', NULL),
+(29, 'Về Nhà Đi Con', 2, 'Gold', 45, 'Phim về tình cảm gia đình, đặc biệt là tình cha và ba cô con gái có tính cách khác nhau.', 'Nguyễn Danh Dũng', 'NSND Hoàng Dũng, Thu Quỳnh, Bảo Thanh, Bảo Hân', 'data/phim/phimbo/venhadicon', 'https://example.com/vndc-trailer.mp4', 'data/img/venhadicon_img.webp', 'Chiếu online', 9, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/venhadicon.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo', NULL),
+(30, 'Người Phán Xử', 1, 'Premium', 45, 'Ông trùm Phan Quân và những cuộc chiến tranh giành quyền lực trong thế giới ngầm.', 'Nguyễn Mai Hiền, Nguyễn Khải Anh, Bùi Quốc Việt', 'NSND Hoàng Dũng, Việt Anh, Hồng Đăng', 'data/phim/phimbo/nguoi_phan_xu', 'https://example.com/npx-trailer.mp4', 'data/img/nguoi_phan_xu_img.jpg', 'Chiếu online', 10, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/nguoi_phan_xu.webp', 'Việt Nam', 'Tiếng Việt', 'C18', 'phimbo', NULL),
+(31, 'Sống Chung Với Mẹ Chồng', 2, 'Gold', 45, 'Những mâu thuẫn nảy sinh khi nàng dâu và mẹ chồng sống chung dưới một mái nhà.', 'Vũ Trường Khoa', 'NSND Lan Hương, Bảo Thanh, Anh Dũng', 'data/phim/phimbo/song_chung_voi_me_chong', 'https://example.com/scvmc-trailer.mp4', 'data/img/song_chung_voi_me_chong_img.jpg', 'Chiếu online', 8.1, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/song_chung_voi_me_chong.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo', NULL),
+(32, 'Thương Ngày Nắng Về (Phần 2)', 2, 'Premium', 45, 'Câu chuyện về bà mẹ đơn thân cùng ba cô con gái, xoay quanh tình yêu, sự nghiệp và những mâu thuẫn.', 'Bùi Tiến Huy', 'NSƯT Thanh Quý, Phan Minh Huyền, Lan Phương', 'data/phim/phimbo/thuong_ngay_nang_ve_p2', 'https://example.com/tnnv-trailer.mp4', 'data/img/thuong_ngay_nang_ve_img.jpg', 'Chiếu online', 8.5, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/thuong_ngay_nang_ve.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo', NULL),
+(33, 'Phim ngắn: 20 Năm 20 Món Ăn', 5, 'Free', 15, 'Loạt phim ngắn ẩm thực về hành trình tìm kiếm hương vị đã mất sau 20 năm xa quê.', 'Nguyễn Hoàng Điệp', 'Nhiều diễn viên', 'data/phim/phimle/20_nam_20_mon_an.mp4', 'https://example.com/20nam-trailer.mp4', 'data/img/20_nam_20_mon_an.jpg', 'Chiếu online', 7, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'P', 'phimle', NULL),
+(34, 'Series: Ai Là Hung Thủ (Mùa 1)', 1, 'Gold', 40, 'Series trinh thám điều tra các vụ án mạng phức tạp tại thành phố Hồ Chí Minh.', 'Lý Hải (Đóng vai trò sản xuất)', 'Trương Thế Vinh, Nhan Phúc Vinh', 'data/phim/phimbo/ai_la_hung_thu_s1', 'https://example.com/alht-trailer.mp4', 'data/img/ai_la_hung_thu_s1.jpg', 'Chiếu online', 7.9, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, NULL, 'Việt Nam', 'Tiếng Việt', 'C16', 'phimbo', NULL),
+(35, 'Phim lẻ: Cô Ba Sài Gòn', 2, 'Premium', 94, 'Phim lãng mạn, giả tưởng về thời trang áo dài và câu chuyện xuyên không giữa hai thế hệ.', 'Trần Bửu Lộc, Nguyễn Lê Minh', 'Ninh Dương Lan Ngọc, Diễm My 9x, Ngô Thanh Vân', 'data/phim/phimle/co_ba_sai_gon.mp4', 'https://example.com/cbsg-trailer.mp4', 'data/img/co_ba_sai_gon_img.jpg', 'Chiếu online', 7.6, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/co_ba_sai_gon.jpg', 'Việt Nam', 'Tiếng Việt', 'C13', 'phimle', NULL),
+(36, 'Series: Tình Yêu và Tham Vọng', 7, 'Gold', 45, 'Phim thương trường với những cuộc chiến khốc liệt giữa các tập đoàn và câu chuyện tình yêu phức tạp.', 'Bùi Tiến Huy', 'Nhan Phúc Vinh, Diễm My 9x, Lã Thanh Huyền', 'data/phim/phimbo/tinh_yeu_va_tham_vong', 'https://example.com/tyvtc-trailer.mp4', 'data/img/tinh_yeu_va_tham_vong_img.jpg', 'Chiếu online', 7.8, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/tinh_yeu_va_tham_vong.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimbo', NULL),
+(37, 'Phim ngắn: Ngã Ba Đồng Lộc', 7, 'Free', 30, 'Phim tài liệu/chiến tranh về sự hy sinh anh dũng của 10 cô gái thanh niên xung phong.', 'Nguyễn Minh Chung', 'Nhiều diễn viên', 'data/phim/phimle/nga_ba_dong_loc.mp4', 'https://example.com/nbdl-trailer.mp4', 'data/img/nga_ba_dong_loc_img.jpg', 'Chiếu online', 8.2, '2025-11-25 09:25:05', 'published', NULL, NULL, 0, 'data/img/nga_ba_dong_loc.jpg', 'Việt Nam', 'Tiếng Việt', 'P', 'phimle', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `type` varchar(50) NOT NULL DEFAULT 'info',
+  `title` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `link` varchar(255) DEFAULT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `notifications`
+--
+
+INSERT INTO `notifications` (`id`, `user_id`, `type`, `title`, `message`, `link`, `is_read`, `created_at`) VALUES
+(1, 9, 'warning', 'Yêu cầu thay đổi quyền thành viên', 'Admin Admin Mới muốn thay đổi quyền của jack thành Moderator cho rạp Lotte Cinema. Vui lòng xem xét và phê duyệt.', '?route=moderator/permissionRequests&id=1', 1, '2025-11-30 17:57:49'),
+(2, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 3 vé xem phim \"Bố Già\" tại ghế E7, E8, E9. Vé và QR code đã được gửi đến email của bạn.', '?route=profile/index', 1, '2025-11-30 18:12:26');
 
 -- --------------------------------------------------------
 
@@ -663,7 +725,14 @@ INSERT INTO `seat_selection_logs` (`id`, `user_id`, `ip_address`, `showtime_id`,
 (29, 9, '::1', 357, 2, '[\"E9\",\"E10\"]', 0, '2025-11-28 02:06:26'),
 (30, 9, '::1', 357, 2, '[\"E10\",\"E11\"]', 0, '2025-11-28 02:06:47'),
 (31, 9, '::1', 357, 2, '[\"E9\",\"E10\"]', 0, '2025-11-28 02:08:30'),
-(32, 9, '::1', 191, 4, '[\"I2\",\"I3\",\"I4\",\"I5\"]', 0, '2025-11-28 02:12:24');
+(32, 9, '::1', 191, 4, '[\"I2\",\"I3\",\"I4\",\"I5\"]', 0, '2025-11-28 02:12:24'),
+(33, 9, '::1', 360, 3, '[\"E7\",\"E8\",\"E9\"]', 0, '2025-11-30 17:44:50'),
+(34, 9, '::1', 360, 3, '[\"E7\",\"E8\",\"E9\"]', 0, '2025-11-30 17:44:52'),
+(35, 9, '::1', 360, 3, '[\"E7\",\"E8\",\"E9\"]', 0, '2025-11-30 17:44:54'),
+(36, 9, '::1', 360, 3, '[\"E7\",\"E8\",\"E9\"]', 0, '2025-11-30 17:44:56'),
+(37, 9, '::1', 360, 3, '[\"E7\",\"E8\",\"E9\"]', 0, '2025-11-30 17:44:58'),
+(38, 9, '::1', 360, 3, '[\"E7\",\"E8\",\"E9\"]', 0, '2025-11-30 17:45:31'),
+(39, 9, '::1', 360, 3, '[\"E7\",\"E8\",\"E9\"]', 0, '2025-11-30 18:11:11');
 
 -- --------------------------------------------------------
 
@@ -687,237 +756,239 @@ CREATE TABLE `showtimes` (
 --
 
 INSERT INTO `showtimes` (`id`, `movie_id`, `theater_id`, `show_date`, `show_time`, `price`, `created_at`, `screen_id`) VALUES
-(71, 1, 1, '2025-11-24', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
-(72, 2, 2, '2025-11-24', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
-(73, 3, 3, '2025-11-24', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
-(74, 4, 4, '2025-11-24', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
-(75, 5, 5, '2025-11-24', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
-(76, 1, 2, '2025-11-24', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
-(77, 2, 3, '2025-11-24', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
-(78, 3, 4, '2025-11-24', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
-(79, 4, 5, '2025-11-24', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
-(80, 5, 1, '2025-11-24', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
-(81, 1, 3, '2025-11-24', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
-(82, 2, 4, '2025-11-24', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
-(83, 3, 5, '2025-11-24', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
-(84, 4, 1, '2025-11-24', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
-(85, 5, 2, '2025-11-24', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
-(86, 1, 4, '2025-11-24', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
-(87, 2, 5, '2025-11-24', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
-(88, 3, 1, '2025-11-24', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
-(89, 4, 2, '2025-11-24', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
-(90, 5, 3, '2025-11-24', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
-(91, 1, 5, '2025-11-24', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
-(92, 2, 1, '2025-11-24', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
-(93, 3, 2, '2025-11-24', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
-(94, 4, 3, '2025-11-24', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
-(95, 5, 4, '2025-11-24', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
-(96, 1, 1, '2025-11-24', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
-(97, 2, 2, '2025-11-24', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
-(98, 3, 3, '2025-11-24', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
-(99, 4, 4, '2025-11-24', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
-(100, 5, 5, '2025-11-24', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
-(101, 1, 1, '2025-11-25', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
-(102, 2, 2, '2025-11-25', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
-(103, 3, 3, '2025-11-25', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
-(104, 4, 4, '2025-11-25', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
-(105, 5, 5, '2025-11-25', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
-(106, 1, 2, '2025-11-25', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
-(107, 2, 3, '2025-11-25', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
-(108, 3, 4, '2025-11-25', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
-(109, 4, 5, '2025-11-25', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
-(110, 5, 1, '2025-11-25', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
-(111, 1, 3, '2025-11-25', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
-(112, 2, 4, '2025-11-25', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
-(113, 3, 5, '2025-11-25', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
-(114, 4, 1, '2025-11-25', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
-(115, 5, 2, '2025-11-25', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
-(116, 1, 4, '2025-11-25', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
-(117, 2, 5, '2025-11-25', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
-(118, 3, 1, '2025-11-25', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
-(119, 4, 2, '2025-11-25', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
-(120, 5, 3, '2025-11-25', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
-(121, 1, 5, '2025-11-25', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
-(122, 2, 1, '2025-11-25', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
-(123, 3, 2, '2025-11-25', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
-(124, 4, 3, '2025-11-25', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
-(125, 5, 4, '2025-11-25', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
-(126, 1, 1, '2025-11-25', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
-(127, 2, 2, '2025-11-25', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
-(128, 3, 3, '2025-11-25', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
-(129, 4, 4, '2025-11-25', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
-(130, 5, 5, '2025-11-25', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
-(131, 1, 1, '2025-11-26', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
-(132, 2, 2, '2025-11-26', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
-(133, 3, 3, '2025-11-26', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
-(134, 4, 4, '2025-11-26', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
-(135, 5, 5, '2025-11-26', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
-(136, 1, 2, '2025-11-26', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
-(137, 2, 3, '2025-11-26', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
-(138, 3, 4, '2025-11-26', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
-(139, 4, 5, '2025-11-26', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
-(140, 5, 1, '2025-11-26', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
-(141, 1, 3, '2025-11-26', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
-(142, 2, 4, '2025-11-26', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
-(143, 3, 5, '2025-11-26', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
-(144, 4, 1, '2025-11-26', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
-(145, 5, 2, '2025-11-26', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
-(146, 1, 4, '2025-11-26', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
-(147, 2, 5, '2025-11-26', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
-(148, 3, 1, '2025-11-26', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
-(149, 4, 2, '2025-11-26', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
-(150, 5, 3, '2025-11-26', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
-(151, 1, 5, '2025-11-26', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
-(152, 2, 1, '2025-11-26', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
-(153, 3, 2, '2025-11-26', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
-(154, 4, 3, '2025-11-26', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
-(155, 5, 4, '2025-11-26', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
-(156, 1, 1, '2025-11-26', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
-(157, 2, 2, '2025-11-26', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
-(158, 3, 3, '2025-11-26', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
-(159, 4, 4, '2025-11-26', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
-(160, 5, 5, '2025-11-26', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
-(161, 1, 1, '2025-11-27', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
-(162, 2, 2, '2025-11-27', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
-(163, 3, 3, '2025-11-27', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
-(164, 4, 4, '2025-11-27', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
-(165, 5, 5, '2025-11-27', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
-(166, 1, 2, '2025-11-27', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
-(167, 2, 3, '2025-11-27', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
-(168, 3, 4, '2025-11-27', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
-(169, 4, 5, '2025-11-27', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
-(170, 5, 1, '2025-11-27', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
-(171, 1, 3, '2025-11-27', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
-(172, 2, 4, '2025-11-27', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
-(173, 3, 5, '2025-11-27', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
-(174, 4, 1, '2025-11-27', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
-(175, 5, 2, '2025-11-27', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
-(176, 1, 4, '2025-11-27', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
-(177, 2, 5, '2025-11-27', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
-(178, 3, 1, '2025-11-27', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
-(179, 4, 2, '2025-11-27', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
-(180, 5, 3, '2025-11-27', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
-(181, 1, 5, '2025-11-27', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
-(182, 2, 1, '2025-11-27', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
-(183, 3, 2, '2025-11-27', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
-(184, 4, 3, '2025-11-27', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
-(185, 5, 4, '2025-11-27', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
-(186, 1, 1, '2025-11-27', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
-(187, 2, 2, '2025-11-27', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
-(188, 3, 3, '2025-11-27', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
-(189, 4, 4, '2025-11-27', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
-(190, 5, 5, '2025-11-27', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
-(191, 1, 1, '2025-11-28', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
-(192, 2, 2, '2025-11-28', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
-(193, 3, 3, '2025-11-28', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
-(194, 4, 4, '2025-11-28', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
-(195, 5, 5, '2025-11-28', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
-(196, 1, 2, '2025-11-28', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
-(197, 2, 3, '2025-11-28', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
-(198, 3, 4, '2025-11-28', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
-(199, 4, 5, '2025-11-28', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
-(200, 5, 1, '2025-11-28', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
-(201, 1, 3, '2025-11-28', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
-(202, 2, 4, '2025-11-28', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
-(203, 3, 5, '2025-11-28', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
-(204, 4, 1, '2025-11-28', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
-(205, 5, 2, '2025-11-28', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
-(206, 1, 4, '2025-11-28', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
-(207, 2, 5, '2025-11-28', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
-(208, 3, 1, '2025-11-28', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
-(209, 4, 2, '2025-11-28', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
-(210, 5, 3, '2025-11-28', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
-(211, 1, 5, '2025-11-28', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
-(212, 2, 1, '2025-11-28', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
-(213, 3, 2, '2025-11-28', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
-(214, 4, 3, '2025-11-28', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
-(215, 5, 4, '2025-11-28', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
-(216, 1, 1, '2025-11-28', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
-(217, 2, 2, '2025-11-28', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
-(218, 3, 3, '2025-11-28', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
-(219, 4, 4, '2025-11-28', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
-(220, 5, 5, '2025-11-28', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
-(221, 1, 1, '2025-11-29', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
-(222, 2, 2, '2025-11-29', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
-(223, 3, 3, '2025-11-29', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
-(224, 4, 4, '2025-11-29', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
-(225, 5, 5, '2025-11-29', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
-(226, 1, 2, '2025-11-29', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
-(227, 2, 3, '2025-11-29', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
-(228, 3, 4, '2025-11-29', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
-(229, 4, 5, '2025-11-29', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
-(230, 5, 1, '2025-11-29', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
-(231, 1, 3, '2025-11-29', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
-(232, 2, 4, '2025-11-29', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
-(233, 3, 5, '2025-11-29', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
-(234, 4, 1, '2025-11-29', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
-(235, 5, 2, '2025-11-29', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
-(236, 1, 4, '2025-11-29', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
-(237, 2, 5, '2025-11-29', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
-(238, 3, 1, '2025-11-29', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
-(239, 4, 2, '2025-11-29', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
-(240, 5, 3, '2025-11-29', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
-(241, 1, 5, '2025-11-29', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
-(242, 2, 1, '2025-11-29', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
-(243, 3, 2, '2025-11-29', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
-(244, 4, 3, '2025-11-29', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
-(245, 5, 4, '2025-11-29', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
-(246, 1, 1, '2025-11-29', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
-(247, 2, 2, '2025-11-29', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
-(248, 3, 3, '2025-11-29', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
-(249, 4, 4, '2025-11-29', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
-(250, 5, 5, '2025-11-29', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
-(251, 1, 1, '2025-11-30', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
-(252, 2, 2, '2025-11-30', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
-(253, 3, 3, '2025-11-30', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
-(254, 4, 4, '2025-11-30', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
-(255, 5, 5, '2025-11-30', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
-(256, 1, 2, '2025-11-30', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
-(257, 2, 3, '2025-11-30', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
-(258, 3, 4, '2025-11-30', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
-(259, 4, 5, '2025-11-30', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
-(260, 5, 1, '2025-11-30', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
-(261, 1, 3, '2025-11-30', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
-(262, 2, 4, '2025-11-30', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
-(263, 3, 5, '2025-11-30', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
-(264, 4, 1, '2025-11-30', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
-(265, 5, 2, '2025-11-30', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
-(266, 1, 4, '2025-11-30', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
-(267, 2, 5, '2025-11-30', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
-(268, 3, 1, '2025-11-30', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
-(269, 4, 2, '2025-11-30', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
-(270, 5, 3, '2025-11-30', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
-(319, 18, 1, '2025-11-25', '10:00:00', 85000.00, '2025-11-24 02:58:07', 1),
-(320, 18, 2, '2025-11-25', '14:30:00', 85000.00, '2025-11-24 02:58:07', 3),
-(321, 18, 3, '2025-11-26', '18:00:00', 95000.00, '2025-11-24 02:58:07', 5),
-(322, 18, 5, '2025-11-26', '21:00:00', 90000.00, '2025-11-24 02:58:07', 8),
-(323, 19, 1, '2025-11-25', '13:00:00', 90000.00, '2025-11-24 02:58:07', 2),
-(324, 19, 3, '2025-11-25', '16:30:00', 100000.00, '2025-11-24 02:58:07', 6),
-(325, 19, 4, '2025-11-26', '10:30:00', 80000.00, '2025-11-24 02:58:07', 7),
-(326, 19, 5, '2025-11-26', '15:00:00', 90000.00, '2025-11-24 02:58:07', 8),
-(327, 20, 2, '2025-11-25', '19:00:00', 95000.00, '2025-11-24 02:58:07', 4),
-(328, 20, 3, '2025-11-25', '22:00:00', 105000.00, '2025-11-24 02:58:07', 5),
-(329, 20, 4, '2025-11-26', '18:00:00', 90000.00, '2025-11-24 02:58:07', 7),
-(330, 21, 5, '2025-11-25', '12:00:00', 90000.00, '2025-11-24 02:58:07', 8),
-(331, 21, 1, '2025-11-26', '14:00:00', 80000.00, '2025-11-24 02:58:07', 1),
-(332, 21, 2, '2025-11-26', '20:30:00', 90000.00, '2025-11-24 02:58:07', 3),
-(333, 22, 1, '2025-11-25', '17:00:00', 80000.00, '2025-11-24 02:58:07', 2),
-(334, 22, 5, '2025-11-26', '19:30:00', 90000.00, '2025-11-24 02:58:07', 8),
-(335, 23, 2, '2025-11-25', '21:00:00', 85000.00, '2025-11-24 02:58:07', 4),
-(336, 23, 3, '2025-11-26', '16:00:00', 95000.00, '2025-11-24 02:58:07', 6),
-(337, 25, 3, '2025-11-25', '15:00:00', 100000.00, '2025-11-24 02:58:07', 5),
-(338, 25, 4, '2025-11-26', '20:30:00', 85000.00, '2025-11-24 02:58:07', 7),
-(339, 26, 1, '2025-11-25', '09:30:00', 75000.00, '2025-11-24 02:58:07', 1),
-(340, 26, 5, '2025-11-26', '13:00:00', 88000.00, '2025-11-24 02:58:07', 8),
-(341, 27, 2, '2025-11-25', '11:00:00', 75000.00, '2025-11-24 02:58:07', 4),
-(342, 27, 4, '2025-11-26', '12:30:00', 78000.00, '2025-11-24 02:58:07', 7),
-(351, 18, 3, '2025-11-29', '14:00:00', 120000.00, '2025-11-28 01:03:25', 11),
-(352, 18, 3, '2025-11-29', '17:00:00', 120000.00, '2025-11-28 01:03:25', 11),
-(353, 18, 3, '2025-11-29', '20:00:00', 120000.00, '2025-11-28 01:03:25', 11),
-(354, 18, 3, '2025-11-29', '15:30:00', 130000.00, '2025-11-28 01:03:25', 12),
-(355, 18, 3, '2025-11-29', '19:00:00', 130000.00, '2025-11-28 01:03:25', 12),
-(356, 18, 3, '2025-11-28', '03:00:00', 120000.00, '2025-11-28 01:03:25', 11),
-(357, 18, 3, '2025-11-28', '04:00:00', 130000.00, '2025-11-28 01:03:25', 12);
+(71, 1, 1, '2025-12-07', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(72, 2, 2, '2025-12-07', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(73, 3, 3, '2025-12-07', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(74, 4, 4, '2025-12-07', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(75, 5, 5, '2025-12-07', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(76, 1, 2, '2025-12-07', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(77, 2, 3, '2025-12-07', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(78, 3, 4, '2025-12-07', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(79, 4, 5, '2025-12-07', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(80, 5, 1, '2025-12-07', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(81, 1, 3, '2025-12-07', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(82, 2, 4, '2025-12-07', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(83, 3, 5, '2025-12-07', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(84, 4, 1, '2025-12-07', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(85, 5, 2, '2025-12-07', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(86, 1, 4, '2025-12-07', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(87, 2, 5, '2025-12-07', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(88, 3, 1, '2025-12-07', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(89, 4, 2, '2025-12-07', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(90, 5, 3, '2025-12-07', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(91, 1, 5, '2025-12-07', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
+(92, 2, 1, '2025-12-07', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
+(93, 3, 2, '2025-12-07', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
+(94, 4, 3, '2025-12-07', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
+(95, 5, 4, '2025-12-07', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
+(96, 1, 1, '2025-12-07', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
+(97, 2, 2, '2025-12-07', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
+(98, 3, 3, '2025-12-07', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
+(99, 4, 4, '2025-12-07', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
+(100, 5, 5, '2025-12-07', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
+(101, 1, 1, '2025-12-08', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(102, 2, 2, '2025-12-08', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(103, 3, 3, '2025-12-08', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(104, 4, 4, '2025-12-08', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(105, 5, 5, '2025-12-08', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(106, 1, 2, '2025-12-08', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(107, 2, 3, '2025-12-08', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(108, 3, 4, '2025-12-08', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(109, 4, 5, '2025-12-08', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(110, 5, 1, '2025-12-08', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(111, 1, 3, '2025-12-08', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(112, 2, 4, '2025-12-08', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(113, 3, 5, '2025-12-08', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(114, 4, 1, '2025-12-08', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(115, 5, 2, '2025-12-08', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(116, 1, 4, '2025-12-08', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(117, 2, 5, '2025-12-08', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(118, 3, 1, '2025-12-08', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(119, 4, 2, '2025-12-08', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(120, 5, 3, '2025-12-08', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(121, 1, 5, '2025-12-08', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
+(122, 2, 1, '2025-12-08', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
+(123, 3, 2, '2025-12-08', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
+(124, 4, 3, '2025-12-08', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
+(125, 5, 4, '2025-12-08', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
+(126, 1, 1, '2025-12-08', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
+(127, 2, 2, '2025-12-08', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
+(128, 3, 3, '2025-12-08', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
+(129, 4, 4, '2025-12-08', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
+(130, 5, 5, '2025-12-08', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
+(131, 1, 1, '2025-12-09', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(132, 2, 2, '2025-12-09', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(133, 3, 3, '2025-12-09', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(134, 4, 4, '2025-12-09', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(135, 5, 5, '2025-12-09', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(136, 1, 2, '2025-12-09', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(137, 2, 3, '2025-12-09', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(138, 3, 4, '2025-12-09', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(139, 4, 5, '2025-12-09', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(140, 5, 1, '2025-12-09', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(141, 1, 3, '2025-12-09', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(142, 2, 4, '2025-12-09', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(143, 3, 5, '2025-12-09', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(144, 4, 1, '2025-12-09', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(145, 5, 2, '2025-12-09', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(146, 1, 4, '2025-12-09', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(147, 2, 5, '2025-12-09', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(148, 3, 1, '2025-12-09', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(149, 4, 2, '2025-12-09', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(150, 5, 3, '2025-12-09', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(151, 1, 5, '2025-12-09', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
+(152, 2, 1, '2025-12-09', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
+(153, 3, 2, '2025-12-09', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
+(154, 4, 3, '2025-12-09', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
+(155, 5, 4, '2025-12-09', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
+(156, 1, 1, '2025-12-09', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
+(157, 2, 2, '2025-12-09', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
+(158, 3, 3, '2025-12-09', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
+(159, 4, 4, '2025-12-09', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
+(160, 5, 5, '2025-12-09', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
+(161, 1, 1, '2025-12-10', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(162, 2, 2, '2025-12-10', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(163, 3, 3, '2025-12-10', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(164, 4, 4, '2025-12-10', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(165, 5, 5, '2025-12-10', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(166, 1, 2, '2025-12-10', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(167, 2, 3, '2025-12-10', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(168, 3, 4, '2025-12-10', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(169, 4, 5, '2025-12-10', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(170, 5, 1, '2025-12-10', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(171, 1, 3, '2025-12-10', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(172, 2, 4, '2025-12-10', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(173, 3, 5, '2025-12-10', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(174, 4, 1, '2025-12-10', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(175, 5, 2, '2025-12-10', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(176, 1, 4, '2025-12-10', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(177, 2, 5, '2025-12-10', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(178, 3, 1, '2025-12-10', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(179, 4, 2, '2025-12-10', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(180, 5, 3, '2025-12-10', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(181, 1, 5, '2025-12-10', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
+(182, 2, 1, '2025-12-10', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
+(183, 3, 2, '2025-12-10', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
+(184, 4, 3, '2025-12-10', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
+(185, 5, 4, '2025-12-10', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
+(186, 1, 1, '2025-12-10', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
+(187, 2, 2, '2025-12-10', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
+(188, 3, 3, '2025-12-10', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
+(189, 4, 4, '2025-12-10', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
+(190, 5, 5, '2025-12-10', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
+(191, 1, 1, '2025-12-11', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(192, 2, 2, '2025-12-11', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(193, 3, 3, '2025-12-11', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(194, 4, 4, '2025-12-11', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(195, 5, 5, '2025-12-11', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(196, 1, 2, '2025-12-11', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(197, 2, 3, '2025-12-11', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(198, 3, 4, '2025-12-11', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(199, 4, 5, '2025-12-11', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(200, 5, 1, '2025-12-11', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(201, 1, 3, '2025-12-11', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(202, 2, 4, '2025-12-11', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(203, 3, 5, '2025-12-11', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(204, 4, 1, '2025-12-11', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(205, 5, 2, '2025-12-11', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(206, 1, 4, '2025-12-11', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(207, 2, 5, '2025-12-11', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(208, 3, 1, '2025-12-11', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(209, 4, 2, '2025-12-11', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(210, 5, 3, '2025-12-11', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(211, 1, 5, '2025-12-11', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
+(212, 2, 1, '2025-12-11', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
+(213, 3, 2, '2025-12-11', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
+(214, 4, 3, '2025-12-11', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
+(215, 5, 4, '2025-12-11', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
+(216, 1, 1, '2025-12-11', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
+(217, 2, 2, '2025-12-11', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
+(218, 3, 3, '2025-12-11', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
+(219, 4, 4, '2025-12-11', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
+(220, 5, 5, '2025-12-11', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
+(221, 1, 1, '2025-12-12', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(222, 2, 2, '2025-12-12', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(223, 3, 3, '2025-12-12', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(224, 4, 4, '2025-12-12', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(225, 5, 5, '2025-12-12', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(226, 1, 2, '2025-12-12', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(227, 2, 3, '2025-12-12', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(228, 3, 4, '2025-12-12', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(229, 4, 5, '2025-12-12', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(230, 5, 1, '2025-12-12', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(231, 1, 3, '2025-12-12', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(232, 2, 4, '2025-12-12', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(233, 3, 5, '2025-12-12', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(234, 4, 1, '2025-12-12', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(235, 5, 2, '2025-12-12', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(236, 1, 4, '2025-12-12', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(237, 2, 5, '2025-12-12', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(238, 3, 1, '2025-12-12', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(239, 4, 2, '2025-12-12', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(240, 5, 3, '2025-12-12', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(241, 1, 5, '2025-12-12', '19:00:00', 120000.00, '2025-11-24 09:32:00', 5),
+(242, 2, 1, '2025-12-12', '19:00:00', 100000.00, '2025-11-24 09:32:00', 6),
+(243, 3, 2, '2025-12-12', '19:00:00', 110000.00, '2025-11-24 09:32:00', 7),
+(244, 4, 3, '2025-12-12', '19:00:00', 115000.00, '2025-11-24 09:32:00', 8),
+(245, 5, 4, '2025-12-12', '19:00:00', 90000.00, '2025-11-24 09:32:00', 1),
+(246, 1, 1, '2025-12-12', '21:30:00', 130000.00, '2025-11-24 09:32:00', 2),
+(247, 2, 2, '2025-12-12', '21:30:00', 110000.00, '2025-11-24 09:32:00', 3),
+(248, 3, 3, '2025-12-12', '21:30:00', 120000.00, '2025-11-24 09:32:00', 4),
+(249, 4, 4, '2025-12-12', '21:30:00', 125000.00, '2025-11-24 09:32:00', 5),
+(250, 5, 5, '2025-12-12', '21:30:00', 100000.00, '2025-11-24 09:32:00', 6),
+(251, 1, 1, '2025-12-13', '10:00:00', 120000.00, '2025-11-24 09:32:00', 1),
+(252, 2, 2, '2025-12-13', '10:00:00', 100000.00, '2025-11-24 09:32:00', 2),
+(253, 3, 3, '2025-12-13', '10:00:00', 110000.00, '2025-11-24 09:32:00', 3),
+(254, 4, 4, '2025-12-13', '10:00:00', 115000.00, '2025-11-24 09:32:00', 4),
+(255, 5, 5, '2025-12-13', '10:00:00', 90000.00, '2025-11-24 09:32:00', 5),
+(256, 1, 2, '2025-12-13', '12:30:00', 130000.00, '2025-11-24 09:32:00', 6),
+(257, 2, 3, '2025-12-13', '12:30:00', 110000.00, '2025-11-24 09:32:00', 7),
+(258, 3, 4, '2025-12-13', '12:30:00', 120000.00, '2025-11-24 09:32:00', 8),
+(259, 4, 5, '2025-12-13', '12:30:00', 125000.00, '2025-11-24 09:32:00', 1),
+(260, 5, 1, '2025-12-13', '12:30:00', 100000.00, '2025-11-24 09:32:00', 2),
+(261, 1, 3, '2025-12-13', '15:00:00', 120000.00, '2025-11-24 09:32:00', 3),
+(262, 2, 4, '2025-12-13', '15:00:00', 100000.00, '2025-11-24 09:32:00', 4),
+(263, 3, 5, '2025-12-13', '15:00:00', 110000.00, '2025-11-24 09:32:00', 5),
+(264, 4, 1, '2025-12-13', '15:00:00', 115000.00, '2025-11-24 09:32:00', 6),
+(265, 5, 2, '2025-12-13', '15:00:00', 90000.00, '2025-11-24 09:32:00', 7),
+(266, 1, 4, '2025-12-13', '17:30:00', 130000.00, '2025-11-24 09:32:00', 8),
+(267, 2, 5, '2025-12-13', '17:30:00', 110000.00, '2025-11-24 09:32:00', 1),
+(268, 3, 1, '2025-12-13', '17:30:00', 120000.00, '2025-11-24 09:32:00', 2),
+(269, 4, 2, '2025-12-13', '17:30:00', 125000.00, '2025-11-24 09:32:00', 3),
+(270, 5, 3, '2025-12-13', '17:30:00', 100000.00, '2025-11-24 09:32:00', 4),
+(319, 18, 1, '2025-12-07', '10:00:00', 85000.00, '2025-11-24 02:58:07', 1),
+(320, 18, 2, '2025-12-07', '14:30:00', 85000.00, '2025-11-24 02:58:07', 3),
+(321, 18, 3, '2025-12-07', '18:00:00', 95000.00, '2025-11-24 02:58:07', 5),
+(322, 18, 5, '2025-12-07', '21:00:00', 90000.00, '2025-11-24 02:58:07', 8),
+(323, 19, 1, '2025-12-07', '13:00:00', 90000.00, '2025-11-24 02:58:07', 2),
+(324, 19, 3, '2025-12-07', '16:30:00', 100000.00, '2025-11-24 02:58:07', 6),
+(325, 19, 4, '2025-12-07', '10:30:00', 80000.00, '2025-11-24 02:58:07', 7),
+(326, 19, 5, '2025-12-07', '15:00:00', 90000.00, '2025-11-24 02:58:07', 8),
+(327, 20, 2, '2025-12-07', '19:00:00', 95000.00, '2025-11-24 02:58:07', 4),
+(328, 20, 3, '2025-12-07', '22:00:00', 105000.00, '2025-11-24 02:58:07', 5),
+(329, 20, 4, '2025-12-07', '18:00:00', 90000.00, '2025-11-24 02:58:07', 7),
+(330, 21, 5, '2025-12-07', '12:00:00', 90000.00, '2025-11-24 02:58:07', 8),
+(331, 21, 1, '2025-12-07', '14:00:00', 80000.00, '2025-11-24 02:58:07', 1),
+(332, 21, 2, '2025-12-07', '20:30:00', 90000.00, '2025-11-24 02:58:07', 3),
+(333, 22, 1, '2025-12-07', '17:00:00', 80000.00, '2025-11-24 02:58:07', 2),
+(334, 22, 5, '2025-12-07', '19:30:00', 90000.00, '2025-11-24 02:58:07', 8),
+(335, 23, 2, '2025-12-07', '21:00:00', 85000.00, '2025-11-24 02:58:07', 4),
+(336, 23, 3, '2025-12-07', '16:00:00', 95000.00, '2025-11-24 02:58:07', 6),
+(337, 25, 3, '2025-12-07', '15:00:00', 100000.00, '2025-11-24 02:58:07', 5),
+(338, 25, 4, '2025-12-07', '20:30:00', 85000.00, '2025-11-24 02:58:07', 7),
+(339, 26, 1, '2025-12-07', '09:30:00', 75000.00, '2025-11-24 02:58:07', 1),
+(340, 26, 5, '2025-12-07', '13:00:00', 88000.00, '2025-11-24 02:58:07', 8),
+(341, 27, 2, '2025-12-07', '11:00:00', 75000.00, '2025-11-24 02:58:07', 4),
+(342, 27, 4, '2025-12-07', '12:30:00', 78000.00, '2025-11-24 02:58:07', 7),
+(351, 18, 3, '2025-12-07', '14:00:00', 120000.00, '2025-11-28 01:03:25', 11),
+(352, 18, 3, '2025-12-07', '17:00:00', 120000.00, '2025-11-28 01:03:25', 11),
+(353, 18, 3, '2025-12-07', '20:00:00', 120000.00, '2025-11-28 01:03:25', 11),
+(354, 18, 3, '2025-12-07', '15:30:00', 130000.00, '2025-11-28 01:03:25', 12),
+(355, 18, 3, '2025-12-07', '19:00:00', 130000.00, '2025-11-28 01:03:25', 12),
+(356, 18, 3, '2025-12-07', '03:00:00', 120000.00, '2025-11-28 01:03:25', 11),
+(357, 18, 3, '2025-12-07', '04:00:00', 130000.00, '2025-11-28 01:03:25', 12),
+(359, 20, 3, '2025-12-02', '06:00:00', 200000.00, '2025-11-30 17:43:52', 11),
+(360, 20, 3, '2025-12-01', '10:00:00', 200000.00, '2025-11-30 17:44:28', 12);
 
 -- --------------------------------------------------------
 
@@ -1101,64 +1172,67 @@ CREATE TABLE `tickets` (
 -- Đang đổ dữ liệu cho bảng `tickets`
 --
 
-INSERT INTO `tickets` (`id`, `user_id`, `showtime_id`, `seat`, `seat_type`, `qr_code`, `price`, `status`, `created_at`) VALUES
-(1, 1, 71, 'A5', 'normal', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(2, 1, 71, 'A6', 'normal', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(3, 2, 72, 'B10', 'normal', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(4, 3, 73, 'C15', 'normal', NULL, 100000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(5, 4, 74, 'D20', 'normal', NULL, 110000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(6, 5, 75, 'E12', 'normal', NULL, 115000.00, 'Đã đặt', '2025-11-12 07:41:09'),
-(7, 9, 81, 'A6', 'normal', 'TICKET_69240f4b89ccf_9_81_1763970891_A6', 120000.00, 'Đã đặt', '2025-11-24 07:54:51'),
-(8, 9, 81, 'G7', 'normal', 'TICKET_69240f61d71ab_9_81_1763970913_G7', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
-(9, 9, 81, 'G8', 'normal', 'TICKET_69240f61d7831_9_81_1763970913_G8', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
-(10, 9, 81, 'G9', 'normal', 'TICKET_69240f61d7bcf_9_81_1763970913_G9', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
-(11, 9, 121, 'G4', 'normal', 'TICKET_692506ab7cef0_9_121_1764034219_G4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(12, 9, 121, 'G5', 'normal', 'TICKET_692506ab7d8a8_9_121_1764034219_G5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(13, 9, 121, 'H4', 'normal', 'TICKET_692506ab7e237_9_121_1764034219_H4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(14, 9, 121, 'H5', 'normal', 'TICKET_692506ab7ea13_9_121_1764034219_H5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(15, 9, 121, 'H6', 'normal', 'TICKET_692506ab7f17a_9_121_1764034219_H6', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(16, 9, 121, 'H7', 'normal', 'TICKET_692506ab7f857_9_121_1764034219_H7', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(17, 9, 121, 'I4', 'normal', 'TICKET_692506ab7ff3e_9_121_1764034219_I4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(18, 9, 121, 'I5', 'normal', 'TICKET_692506ab80651_9_121_1764034219_I5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(19, 9, 121, 'I6', 'normal', 'TICKET_692506ab80dbd_9_121_1764034219_I6', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(20, 9, 121, 'I7', 'normal', 'TICKET_692506ab81559_9_121_1764034219_I7', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
-(21, 9, 116, 'I5', 'normal', 'TICKET_692512378240a_9_116_1764037175_I5', 130000.00, 'Đã đặt', '2025-11-25 02:19:35'),
-(22, 9, 116, 'I6', 'normal', 'TICKET_6925123783725_9_116_1764037175_I6', 130000.00, 'Đã đặt', '2025-11-25 02:19:35'),
-(23, 9, 151, 'K5', 'normal', 'TICKET_69266a0629905_9_151_1764125190_K5', 120000.00, 'Đã đặt', '2025-11-26 02:46:30'),
-(24, 9, 354, 'C1', 'normal', 'TICKET_6928f5ed22549_9_354_1764292077_C1', 130000.00, 'Đã đặt', '2025-11-28 01:07:57'),
-(25, 9, 354, 'D1', 'normal', 'TICKET_6928f5ed25b7b_9_354_1764292077_D1', 130000.00, 'Đã đặt', '2025-11-28 01:07:57'),
-(26, 9, 354, 'A4', 'normal', 'TICKET_6928f63cb1d3c_9_354_1764292156_A4', 130000.00, 'Đã đặt', '2025-11-28 01:09:16'),
-(27, 9, 354, 'B4', 'normal', 'TICKET_6928f63cb2506_9_354_1764292156_B4', 130000.00, 'Đã đặt', '2025-11-28 01:09:16'),
-(28, 9, 354, 'C4', 'normal', 'TICKET_6928f63cb2e75_9_354_1764292156_C4', 130000.00, 'Đã đặt', '2025-11-28 01:09:16'),
-(29, 9, 354, 'D4', 'normal', 'TICKET_6928f63cb342c_9_354_1764292156_D4', 130000.00, 'Đã đặt', '2025-11-28 01:09:16'),
-(30, 9, 354, 'D3', 'normal', 'TICKET_6928f6735fbc6_9_354_1764292211_D3', 130000.00, 'Đã đặt', '2025-11-28 01:10:11'),
-(31, 9, 354, 'B6', 'normal', 'TICKET_6928f68bda27a_9_354_1764292235_B6', 130000.00, 'Đã đặt', '2025-11-28 01:10:35'),
-(32, 9, 354, 'C6', 'normal', 'TICKET_6928f68bda8f8_9_354_1764292235_C6', 130000.00, 'Đã đặt', '2025-11-28 01:10:35'),
-(33, 9, 354, 'C5', 'normal', 'TICKET_6928f6dc1494e_9_354_1764292316_C5', 130000.00, 'Đã đặt', '2025-11-28 01:11:56'),
-(34, 9, 354, 'D6', 'normal', 'TICKET_6928f6dc14edb_9_354_1764292316_D6', 130000.00, 'Đã đặt', '2025-11-28 01:11:56'),
-(35, 9, 354, 'B7', 'normal', 'TICKET_6928f7b37254a_9_354_1764292531_B7', 130000.00, 'Đã đặt', '2025-11-28 01:15:31'),
-(36, 9, 354, 'B8', 'normal', 'TICKET_6928f7b3731f2_9_354_1764292531_B8', 130000.00, 'Đã đặt', '2025-11-28 01:15:31'),
-(37, 9, 354, 'B5', 'normal', 'TICKET_6928f7e0831f8_9_354_1764292576_B5', 130000.00, 'Đã đặt', '2025-11-28 01:16:16'),
-(38, 9, 354, 'C9', 'normal', 'TICKET_6928f7e083b07_9_354_1764292576_C9', 130000.00, 'Đã đặt', '2025-11-28 01:16:16'),
-(39, 9, 354, 'C12', 'normal', 'TICKET_6928f803f2edd_9_354_1764292611_C12', 130000.00, 'Đã đặt', '2025-11-28 01:16:51'),
-(40, 9, 354, 'D11', 'normal', 'TICKET_6928f803f3548_9_354_1764292611_D11', 130000.00, 'Đã đặt', '2025-11-28 01:16:52'),
-(41, 9, 354, 'C18', 'normal', 'TICKET_6928f87f60dcb_9_354_1764292735_C18', 130000.00, 'Đã đặt', '2025-11-28 01:18:55'),
-(42, 9, 354, 'C19', 'normal', 'TICKET_6928f87f6185a_9_354_1764292735_C19', 130000.00, 'Đã đặt', '2025-11-28 01:18:55'),
-(43, 9, 354, 'D17', 'normal', 'TICKET_6928f87f61eab_9_354_1764292735_D17', 130000.00, 'Đã đặt', '2025-11-28 01:18:55'),
-(44, 9, 354, 'D18', 'normal', 'TICKET_6928f87f6251b_9_354_1764292735_D18', 130000.00, 'Đã đặt', '2025-11-28 01:18:55'),
-(45, 9, 354, 'B11', 'normal', 'TICKET_6928f8df6b12b_9_354_1764292831_B11', 130000.00, 'Đã đặt', '2025-11-28 01:20:31'),
-(46, 9, 354, 'C10', 'normal', 'TICKET_6928f8df6c15a_9_354_1764292831_C10', 130000.00, 'Đã đặt', '2025-11-28 01:20:31'),
-(47, 9, 354, 'C20', 'normal', 'TICKET_6928f958850fe_9_354_1764292952_C20', 130000.00, 'Đã đặt', '2025-11-28 01:22:32'),
-(48, 9, 354, 'C21', 'normal', 'TICKET_6928f95885a36_9_354_1764292952_C21', 130000.00, 'Đã đặt', '2025-11-28 01:22:32'),
-(49, 9, 354, 'C24', 'normal', 'TICKET_6928f97fbc4c5_9_354_1764292991_C24', 130000.00, 'Đã đặt', '2025-11-28 01:23:11'),
-(50, 9, 354, 'C25', 'normal', 'TICKET_6928f97fbcdc9_9_354_1764292991_C25', 130000.00, 'Đã đặt', '2025-11-28 01:23:11'),
-(51, 9, 354, 'B23', 'normal', 'TICKET_6928f9a1b6715_9_354_1764293025_B23', 130000.00, 'Đã đặt', '2025-11-28 01:23:45'),
-(52, 9, 354, 'C22', 'normal', 'TICKET_6928f9a1b6ec4_9_354_1764293025_C22', 130000.00, 'Đã đặt', '2025-11-28 01:23:45'),
-(53, 9, 354, 'A11', 'normal', 'TICKET_6928fa497ab6e_9_354_1764293193_A11', 130000.00, 'Đã đặt', '2025-11-28 01:26:33'),
-(54, 9, 354, 'B10', 'normal', 'TICKET_6928fa497b6f2_9_354_1764293193_B10', 130000.00, 'Đã đặt', '2025-11-28 01:26:33'),
-(55, 9, 355, 'D11', 'normal', 'TICKET_6928fac8e037b_9_355_1764293320_D11', 130000.00, 'Đã đặt', '2025-11-28 01:28:40'),
-(56, 9, 357, 'E9', 'vip', 'TICKET_69290459ea985_9_357_1764295769_E9', 200000.00, 'Đã đặt', '2025-11-28 02:09:29'),
-(57, 9, 357, 'E10', 'vip', 'TICKET_69290459eb7b9_9_357_1764295769_E10', 200000.00, 'Đã đặt', '2025-11-28 02:09:29');
+INSERT INTO `tickets` (`id`, `user_id`, `showtime_id`, `booking_pending_id`, `seat`, `seat_type`, `qr_code`, `price`, `status`, `created_at`) VALUES
+(1, 1, 71, NULL, 'A5', 'normal', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(2, 1, 71, NULL, 'A6', 'normal', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(3, 2, 72, NULL, 'B10', 'normal', NULL, 120000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(4, 3, 73, NULL, 'C15', 'normal', NULL, 100000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(5, 4, 74, NULL, 'D20', 'normal', NULL, 110000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(6, 5, 75, NULL, 'E12', 'normal', NULL, 115000.00, 'Đã đặt', '2025-11-12 07:41:09'),
+(7, 9, 81, NULL, 'A6', 'normal', 'TICKET_69240f4b89ccf_9_81_1763970891_A6', 120000.00, 'Đã đặt', '2025-11-24 07:54:51'),
+(8, 9, 81, NULL, 'G7', 'normal', 'TICKET_69240f61d71ab_9_81_1763970913_G7', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
+(9, 9, 81, NULL, 'G8', 'normal', 'TICKET_69240f61d7831_9_81_1763970913_G8', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
+(10, 9, 81, NULL, 'G9', 'normal', 'TICKET_69240f61d7bcf_9_81_1763970913_G9', 120000.00, 'Đã đặt', '2025-11-24 07:55:13'),
+(11, 9, 121, NULL, 'G4', 'normal', 'TICKET_692506ab7cef0_9_121_1764034219_G4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(12, 9, 121, NULL, 'G5', 'normal', 'TICKET_692506ab7d8a8_9_121_1764034219_G5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(13, 9, 121, NULL, 'H4', 'normal', 'TICKET_692506ab7e237_9_121_1764034219_H4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(14, 9, 121, NULL, 'H5', 'normal', 'TICKET_692506ab7ea13_9_121_1764034219_H5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(15, 9, 121, NULL, 'H6', 'normal', 'TICKET_692506ab7f17a_9_121_1764034219_H6', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(16, 9, 121, NULL, 'H7', 'normal', 'TICKET_692506ab7f857_9_121_1764034219_H7', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(17, 9, 121, NULL, 'I4', 'normal', 'TICKET_692506ab7ff3e_9_121_1764034219_I4', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(18, 9, 121, NULL, 'I5', 'normal', 'TICKET_692506ab80651_9_121_1764034219_I5', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(19, 9, 121, NULL, 'I6', 'normal', 'TICKET_692506ab80dbd_9_121_1764034219_I6', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(20, 9, 121, NULL, 'I7', 'normal', 'TICKET_692506ab81559_9_121_1764034219_I7', 120000.00, 'Đã đặt', '2025-11-25 01:30:19'),
+(21, 9, 116, NULL, 'I5', 'normal', 'TICKET_692512378240a_9_116_1764037175_I5', 130000.00, 'Đã đặt', '2025-11-25 02:19:35'),
+(22, 9, 116, NULL, 'I6', 'normal', 'TICKET_6925123783725_9_116_1764037175_I6', 130000.00, 'Đã đặt', '2025-11-25 02:19:35'),
+(23, 9, 151, NULL, 'K5', 'normal', 'TICKET_69266a0629905_9_151_1764125190_K5', 120000.00, 'Đã đặt', '2025-11-26 02:46:30'),
+(24, 9, 354, NULL, 'C1', 'normal', 'TICKET_6928f5ed22549_9_354_1764292077_C1', 130000.00, 'Đã đặt', '2025-11-28 01:07:57'),
+(25, 9, 354, NULL, 'D1', 'normal', 'TICKET_6928f5ed25b7b_9_354_1764292077_D1', 130000.00, 'Đã đặt', '2025-11-28 01:07:57'),
+(26, 9, 354, NULL, 'A4', 'normal', 'TICKET_6928f63cb1d3c_9_354_1764292156_A4', 130000.00, 'Đã đặt', '2025-11-28 01:09:16'),
+(27, 9, 354, NULL, 'B4', 'normal', 'TICKET_6928f63cb2506_9_354_1764292156_B4', 130000.00, 'Đã đặt', '2025-11-28 01:09:16'),
+(28, 9, 354, NULL, 'C4', 'normal', 'TICKET_6928f63cb2e75_9_354_1764292156_C4', 130000.00, 'Đã đặt', '2025-11-28 01:09:16'),
+(29, 9, 354, NULL, 'D4', 'normal', 'TICKET_6928f63cb342c_9_354_1764292156_D4', 130000.00, 'Đã đặt', '2025-11-28 01:09:16'),
+(30, 9, 354, NULL, 'D3', 'normal', 'TICKET_6928f6735fbc6_9_354_1764292211_D3', 130000.00, 'Đã đặt', '2025-11-28 01:10:11'),
+(31, 9, 354, NULL, 'B6', 'normal', 'TICKET_6928f68bda27a_9_354_1764292235_B6', 130000.00, 'Đã đặt', '2025-11-28 01:10:35'),
+(32, 9, 354, NULL, 'C6', 'normal', 'TICKET_6928f68bda8f8_9_354_1764292235_C6', 130000.00, 'Đã đặt', '2025-11-28 01:10:35'),
+(33, 9, 354, NULL, 'C5', 'normal', 'TICKET_6928f6dc1494e_9_354_1764292316_C5', 130000.00, 'Đã đặt', '2025-11-28 01:11:56'),
+(34, 9, 354, NULL, 'D6', 'normal', 'TICKET_6928f6dc14edb_9_354_1764292316_D6', 130000.00, 'Đã đặt', '2025-11-28 01:11:56'),
+(35, 9, 354, NULL, 'B7', 'normal', 'TICKET_6928f7b37254a_9_354_1764292531_B7', 130000.00, 'Đã đặt', '2025-11-28 01:15:31'),
+(36, 9, 354, NULL, 'B8', 'normal', 'TICKET_6928f7b3731f2_9_354_1764292531_B8', 130000.00, 'Đã đặt', '2025-11-28 01:15:31'),
+(37, 9, 354, NULL, 'B5', 'normal', 'TICKET_6928f7e0831f8_9_354_1764292576_B5', 130000.00, 'Đã đặt', '2025-11-28 01:16:16'),
+(38, 9, 354, NULL, 'C9', 'normal', 'TICKET_6928f7e083b07_9_354_1764292576_C9', 130000.00, 'Đã đặt', '2025-11-28 01:16:16'),
+(39, 9, 354, NULL, 'C12', 'normal', 'TICKET_6928f803f2edd_9_354_1764292611_C12', 130000.00, 'Đã đặt', '2025-11-28 01:16:51'),
+(40, 9, 354, NULL, 'D11', 'normal', 'TICKET_6928f803f3548_9_354_1764292611_D11', 130000.00, 'Đã đặt', '2025-11-28 01:16:52'),
+(41, 9, 354, NULL, 'C18', 'normal', 'TICKET_6928f87f60dcb_9_354_1764292735_C18', 130000.00, 'Đã đặt', '2025-11-28 01:18:55'),
+(42, 9, 354, NULL, 'C19', 'normal', 'TICKET_6928f87f6185a_9_354_1764292735_C19', 130000.00, 'Đã đặt', '2025-11-28 01:18:55'),
+(43, 9, 354, NULL, 'D17', 'normal', 'TICKET_6928f87f61eab_9_354_1764292735_D17', 130000.00, 'Đã đặt', '2025-11-28 01:18:55'),
+(44, 9, 354, NULL, 'D18', 'normal', 'TICKET_6928f87f6251b_9_354_1764292735_D18', 130000.00, 'Đã đặt', '2025-11-28 01:18:55'),
+(45, 9, 354, NULL, 'B11', 'normal', 'TICKET_6928f8df6b12b_9_354_1764292831_B11', 130000.00, 'Đã đặt', '2025-11-28 01:20:31'),
+(46, 9, 354, NULL, 'C10', 'normal', 'TICKET_6928f8df6c15a_9_354_1764292831_C10', 130000.00, 'Đã đặt', '2025-11-28 01:20:31'),
+(47, 9, 354, NULL, 'C20', 'normal', 'TICKET_6928f958850fe_9_354_1764292952_C20', 130000.00, 'Đã đặt', '2025-11-28 01:22:32'),
+(48, 9, 354, NULL, 'C21', 'normal', 'TICKET_6928f95885a36_9_354_1764292952_C21', 130000.00, 'Đã đặt', '2025-11-28 01:22:32'),
+(49, 9, 354, NULL, 'C24', 'normal', 'TICKET_6928f97fbc4c5_9_354_1764292991_C24', 130000.00, 'Đã đặt', '2025-11-28 01:23:11'),
+(50, 9, 354, NULL, 'C25', 'normal', 'TICKET_6928f97fbcdc9_9_354_1764292991_C25', 130000.00, 'Đã đặt', '2025-11-28 01:23:11'),
+(51, 9, 354, NULL, 'B23', 'normal', 'TICKET_6928f9a1b6715_9_354_1764293025_B23', 130000.00, 'Đã đặt', '2025-11-28 01:23:45'),
+(52, 9, 354, NULL, 'C22', 'normal', 'TICKET_6928f9a1b6ec4_9_354_1764293025_C22', 130000.00, 'Đã đặt', '2025-11-28 01:23:45'),
+(53, 9, 354, NULL, 'A11', 'normal', 'TICKET_6928fa497ab6e_9_354_1764293193_A11', 130000.00, 'Đã đặt', '2025-11-28 01:26:33'),
+(54, 9, 354, NULL, 'B10', 'normal', 'TICKET_6928fa497b6f2_9_354_1764293193_B10', 130000.00, 'Đã đặt', '2025-11-28 01:26:33'),
+(55, 9, 355, NULL, 'D11', 'normal', 'TICKET_6928fac8e037b_9_355_1764293320_D11', 130000.00, 'Đã đặt', '2025-11-28 01:28:40'),
+(56, 9, 357, NULL, 'E9', 'vip', 'TICKET_69290459ea985_9_357_1764295769_E9', 200000.00, 'Đã đặt', '2025-11-28 02:09:29'),
+(57, 9, 357, NULL, 'E10', 'vip', 'TICKET_69290459eb7b9_9_357_1764295769_E10', 200000.00, 'Đã đặt', '2025-11-28 02:09:29'),
+(58, 9, 360, 8, 'E7', 'vip', 'TICKET_692c890a2b7f5_9_360_1764526346_E7', 200000.00, 'Đã đặt', '2025-11-30 18:12:26'),
+(59, 9, 360, 8, 'E8', 'vip', 'TICKET_692c890a2c1b7_9_360_1764526346_E8', 200000.00, 'Đã đặt', '2025-11-30 18:12:26'),
+(60, 9, 360, 8, 'E9', 'vip', 'TICKET_692c890a2c7c6_9_360_1764526346_E9', 200000.00, 'Đã đặt', '2025-11-30 18:12:26');
 
 -- --------------------------------------------------------
 
@@ -1191,7 +1265,8 @@ INSERT INTO `transactions` (`id`, `user_id`, `type`, `related_id`, `amount`, `me
 (7, 9, 'subscription', 4, 199000.00, '', 'Thành công', '2025-11-19 01:09:14'),
 (8, 12, 'subscription', 2, 79000.00, '', 'Thành công', '2025-11-25 02:26:14'),
 (9, 12, 'subscription', 3, 129000.00, '', 'Thành công', '2025-11-25 02:27:04'),
-(10, 9, 'ticket', 1, 400000.00, '', 'Thành công', '2025-11-28 02:09:29');
+(10, 9, 'ticket', 1, 400000.00, '', 'Thành công', '2025-11-28 02:09:29'),
+(11, 9, 'ticket', 8, 600000.00, '', 'Thành công', '2025-11-30 18:12:26');
 
 -- --------------------------------------------------------
 
@@ -1223,21 +1298,21 @@ CREATE TABLE `users` (
 -- Đang đổ dữ liệu cho bảng `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `password`, `avatar`, `birthdate`, `rank`, `points`, `subscription_id`, `status`, `email_verified`, `created_at`, `updated_at`, `role`, `is_active`, `last_login`) VALUES
-(1, 'Tuan Anh', 'noble.toad.nict@letterguard.net', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-10 15:10:16', '2025-11-10 15:10:16', 'user', 1, NULL),
-(2, 'Super Admin', 'admin@cinehub.com', '$2y$10$Q516uBkFiAAoP9sABaJJRebPWUFZjqKI9370ZLqFxlhtFE1L1r9ba', NULL, NULL, 'Bronze', 0, NULL, 'active', 0, '2025-11-10 16:41:17', '2025-11-10 16:45:54', 'admin', 1, NULL),
-(3, 'Admin Mới', 'admin2@cinehub.com', '$2y$10$DcmIe4LT6ByLRbWkKLRrE.r4fPNWpOtQylE4ISfTbP6TeCs/J5T2a', NULL, NULL, 'Bronze', 0, NULL, 'active', 0, '2025-11-12 02:39:06', '2025-11-12 02:39:39', 'admin', 1, NULL),
-(4, 'Nguyễn Văn A', 'nguyenvana@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Silver', 500, 2, 'active', 0, '2025-11-12 07:41:09', '2025-11-12 07:41:09', 'user', 1, NULL),
-(5, 'Trần Thị B', 'tranthib@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Gold', 1200, 3, 'active', 0, '2025-11-12 07:41:09', '2025-11-12 07:41:09', 'user', 1, NULL),
-(6, 'Lê Văn C', 'levanc@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Bronze', 100, 1, 'active', 0, '2025-11-12 07:41:09', '2025-11-12 07:41:09', 'user', 1, NULL),
-(7, 'Phạm Thị D', 'phamthid@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Platinum', 2500, 4, 'active', 0, '2025-11-12 07:41:09', '2025-11-12 07:41:09', 'user', 1, NULL),
-(8, 'Hoàng Văn E', 'hoangvane@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Silver', 800, 2, 'active', 0, '2025-11-12 07:41:09', '2025-11-12 07:41:09', 'user', 1, NULL),
-(9, 'vanlinh', 'nguyenvanlinh25062006@gmail.com', '$2y$10$RfY4oVxCmmN5s57rhg2WzuD1eWIFh5MZUNhN.Sa3erAbC5Vt01mwC', NULL, NULL, 'Bronze', 101000, 4, 'active', 0, '2025-11-14 01:35:37', '2025-11-19 01:09:14', 'user', 1, NULL),
-(10, 'Tuan_awh', 'tuanawh@gmail.com', '$2y$10$5NwNHefnp5jwjr1Vls5HG.dnt4SWC1newqSkuV8X4QTcwZ0Ok1JQ.', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-14 01:45:51', '2025-11-14 01:45:51', 'user', 1, NULL),
-(11, 'Hoang Son', 'hsson97805@gmail.com', '$2y$10$4OBk1HA71jEhbVPP7FA7VueQ8B30EgEy9eB9tAHRFmUvA8I7lwAPe', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-24 08:52:25', '2025-11-24 08:52:25', 'user', 1, NULL),
-(12, 'jack', 'jack@gmail.com', '$2y$10$4OPMx0NC7sXIg23/hWQt1u0t52jEDgc5grk/LZAOmmFw8a3DAy.BW', NULL, NULL, 'Bronze', 297000, 3, 'active', 0, '2025-11-25 02:20:46', '2025-11-25 02:27:04', 'user', 1, NULL),
-(13, 'huung', 'nguyenconghung954@gmail.com', '$2y$10$0aCzLlyOsSw4IZeDM8Vr8uC.1zWUY/F0SZTjwU8hrS9jxzvUvTgeG', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-25 12:43:00', '2025-11-25 12:43:00', 'user', 1, NULL),
-(14, 'bom', 'vlinh25062006@gmail.com', '$2y$10$SGQNRO1gcjuJy76tKCWx7e/9boVMyK2kkgK5D4PMepeswkveVa2qa', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-26 04:03:42', '2025-11-26 04:03:42', 'user', 1, NULL);
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `avatar`, `birthdate`, `rank`, `points`, `subscription_id`, `status`, `email_verified`, `created_at`, `updated_at`, `role`, `theater_id`, `is_active`, `last_login`) VALUES
+(1, 'Tuan Anh', 'noble.toad.nict@letterguard.net', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-10 15:10:16', '2025-11-10 15:10:16', 'user', NULL, 1, NULL),
+(2, 'Super Admin', 'admin@cinehub.com', '$2y$10$Q516uBkFiAAoP9sABaJJRebPWUFZjqKI9370ZLqFxlhtFE1L1r9ba', NULL, NULL, 'Bronze', 0, NULL, 'active', 0, '2025-11-10 16:41:17', '2025-11-10 16:45:54', 'admin', NULL, 1, NULL),
+(3, 'Admin Mới', 'admin2@cinehub.com', '$2y$10$DcmIe4LT6ByLRbWkKLRrE.r4fPNWpOtQylE4ISfTbP6TeCs/J5T2a', NULL, NULL, 'Bronze', 0, NULL, 'active', 0, '2025-11-12 02:39:06', '2025-11-12 02:39:39', 'admin', NULL, 1, NULL),
+(4, 'Nguyễn Văn A', 'nguyenvana@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Silver', 500, 2, 'active', 0, '2025-11-12 07:41:09', '2025-11-12 07:41:09', 'user', NULL, 1, NULL),
+(5, 'Trần Thị B', 'tranthib@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Gold', 1200, 3, 'active', 0, '2025-11-12 07:41:09', '2025-11-12 07:41:09', 'user', NULL, 1, NULL),
+(6, 'Lê Văn C', 'levanc@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Bronze', 100, 1, 'active', 0, '2025-11-12 07:41:09', '2025-11-12 07:41:09', 'user', NULL, 1, NULL),
+(7, 'Phạm Thị D', 'phamthid@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Platinum', 2500, 4, 'active', 0, '2025-11-12 07:41:09', '2025-11-12 07:41:09', 'user', NULL, 1, NULL),
+(8, 'Hoàng Văn E', 'hoangvane@example.com', '$2y$10$lOJtx0GSp2xgBlX1cKw1LuTf90z0qfuXcrVlz6fiGQn1QM3kwl.fW', NULL, NULL, 'Silver', 800, 2, 'active', 0, '2025-11-12 07:41:09', '2025-11-12 07:41:09', 'user', NULL, 1, NULL),
+(9, 'vanlinh', 'nguyenvanlinh25062006@gmail.com', '$2y$10$RfY4oVxCmmN5s57rhg2WzuD1eWIFh5MZUNhN.Sa3erAbC5Vt01mwC', 'data/avatars/avatar_9_1764520379.jpg', NULL, 'Bronze', 101000, 4, 'active', 0, '2025-11-14 01:35:37', '2025-11-30 16:32:59', 'moderator', 3, 1, NULL),
+(10, 'Tuan_awh', 'tuanawh@gmail.com', '$2y$10$5NwNHefnp5jwjr1Vls5HG.dnt4SWC1newqSkuV8X4QTcwZ0Ok1JQ.', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-14 01:45:51', '2025-11-14 01:45:51', 'user', NULL, 1, NULL),
+(11, 'Hoang Son', 'hsson97805@gmail.com', '$2y$10$4OBk1HA71jEhbVPP7FA7VueQ8B30EgEy9eB9tAHRFmUvA8I7lwAPe', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-24 08:52:25', '2025-11-24 08:52:25', 'user', NULL, 1, NULL),
+(12, 'jack', 'jack@gmail.com', '$2y$10$4OPMx0NC7sXIg23/hWQt1u0t52jEDgc5grk/LZAOmmFw8a3DAy.BW', NULL, NULL, 'Bronze', 297000, 3, 'active', 0, '2025-11-25 02:20:46', '2025-11-25 02:27:04', 'user', NULL, 1, NULL),
+(13, 'huung', 'nguyenconghung954@gmail.com', '$2y$10$0aCzLlyOsSw4IZeDM8Vr8uC.1zWUY/F0SZTjwU8hrS9jxzvUvTgeG', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-25 12:43:00', '2025-11-25 12:43:00', 'user', NULL, 1, NULL),
+(14, 'bom', 'vlinh25062006@gmail.com', '$2y$10$SGQNRO1gcjuJy76tKCWx7e/9boVMyK2kkgK5D4PMepeswkveVa2qa', NULL, NULL, 'Bronze', 0, 1, 'active', 0, '2025-11-26 04:03:42', '2025-11-26 04:03:42', 'user', NULL, 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -1356,7 +1431,8 @@ ALTER TABLE `admin_logs`
 ALTER TABLE `booking_food_items`
   ADD PRIMARY KEY (`id`),
   ADD KEY `ticket_id` (`ticket_id`),
-  ADD KEY `food_item_id` (`food_item_id`);
+  ADD KEY `food_item_id` (`food_item_id`),
+  ADD KEY `fk_booking_food_pending` (`booking_pending_id`);
 
 --
 -- Chỉ mục cho bảng `booking_pending`
@@ -1418,7 +1494,8 @@ ALTER TABLE `episodes`
 -- Chỉ mục cho bảng `food_items`
 --
 ALTER TABLE `food_items`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `theater_id` (`theater_id`);
 
 --
 -- Chỉ mục cho bảng `ip_blocks`
@@ -1442,11 +1519,29 @@ ALTER TABLE `ip_spam_logs`
   ADD KEY `idx_user_id` (`user_id`);
 
 --
+-- Chỉ mục cho bảng `moderator_permission_requests`
+--
+ALTER TABLE `moderator_permission_requests`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `theater_id` (`theater_id`),
+  ADD KEY `moderator_id` (`moderator_id`),
+  ADD KEY `requested_by` (`requested_by`),
+  ADD KEY `target_user_id` (`target_user_id`);
+
+--
 -- Chỉ mục cho bảng `movies`
 --
 ALTER TABLE `movies`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_category` (`category_id`);
+
+--
+-- Chỉ mục cho bảng `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `is_read` (`is_read`);
 
 --
 -- Chỉ mục cho bảng `permissions`
@@ -1511,11 +1606,11 @@ ALTER TABLE `seat_selection_logs`
 --
 ALTER TABLE `showtimes`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_showtime` (`movie_id`,`theater_id`,`screen_id`,`show_date`,`show_time`),
   ADD KEY `idx_movie` (`movie_id`),
   ADD KEY `idx_theater` (`theater_id`),
   ADD KEY `screen_id` (`screen_id`),
-  ADD KEY `idx_theater_screen` (`theater_id`, `screen_id`),
-  ADD UNIQUE KEY `unique_showtime` (`movie_id`, `theater_id`, `screen_id`, `show_date`, `show_time`);
+  ADD KEY `idx_theater_screen` (`theater_id`,`screen_id`);
 
 --
 -- Chỉ mục cho bảng `subscriptions`
@@ -1586,7 +1681,8 @@ ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
   ADD KEY `idx_email` (`email`),
-  ADD KEY `idx_subscription` (`subscription_id`);
+  ADD KEY `idx_subscription` (`subscription_id`),
+  ADD KEY `idx_theater_id` (`theater_id`);
 
 --
 -- Chỉ mục cho bảng `user_roles`
@@ -1622,7 +1718,7 @@ ALTER TABLE `watch_history`
 -- AUTO_INCREMENT cho bảng `admin_logs`
 --
 ALTER TABLE `admin_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT cho bảng `booking_food_items`
@@ -1634,13 +1730,13 @@ ALTER TABLE `booking_food_items`
 -- AUTO_INCREMENT cho bảng `booking_pending`
 --
 ALTER TABLE `booking_pending`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT cho bảng `booking_session_tracking`
 --
 ALTER TABLE `booking_session_tracking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT cho bảng `categories`
@@ -1685,10 +1781,22 @@ ALTER TABLE `ip_spam_logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
+-- AUTO_INCREMENT cho bảng `moderator_permission_requests`
+--
+ALTER TABLE `moderator_permission_requests`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT cho bảng `movies`
 --
 ALTER TABLE `movies`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+
+--
+-- AUTO_INCREMENT cho bảng `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT cho bảng `permissions`
@@ -1724,19 +1832,19 @@ ALTER TABLE `role_permissions`
 -- AUTO_INCREMENT cho bảng `seat_reservations`
 --
 ALTER TABLE `seat_reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=198;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=209;
 
 --
 -- AUTO_INCREMENT cho bảng `seat_selection_logs`
 --
 ALTER TABLE `seat_selection_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT cho bảng `showtimes`
 --
 ALTER TABLE `showtimes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=358;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=361;
 
 --
 -- AUTO_INCREMENT cho bảng `subscriptions`
@@ -1778,13 +1886,13 @@ ALTER TABLE `theater_screens`
 -- AUTO_INCREMENT cho bảng `tickets`
 --
 ALTER TABLE `tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT cho bảng `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT cho bảng `users`
@@ -1819,8 +1927,8 @@ ALTER TABLE `admin_logs`
 --
 ALTER TABLE `booking_food_items`
   ADD CONSTRAINT `fk_booking_food_item` FOREIGN KEY (`food_item_id`) REFERENCES `food_items` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_booking_food_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_booking_food_pending` FOREIGN KEY (`booking_pending_id`) REFERENCES `booking_pending` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_booking_food_pending` FOREIGN KEY (`booking_pending_id`) REFERENCES `booking_pending` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_booking_food_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `booking_pending`
@@ -1836,10 +1944,6 @@ ALTER TABLE `booking_session_tracking`
   ADD CONSTRAINT `booking_session_tracking_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `booking_session_tracking_ibfk_2` FOREIGN KEY (`showtime_id`) REFERENCES `showtimes` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `booking_session_tracking_ibfk_3` FOREIGN KEY (`screen_id`) REFERENCES `theater_screens` (`id`) ON DELETE CASCADE;
-
--- Lưu ý: Cột ban_until đã được thêm vào CREATE TABLE ở trên
--- Nếu database đã tồn tại và chưa có cột ban_until, chạy câu lệnh sau:
--- ALTER TABLE `booking_session_tracking` ADD COLUMN `ban_until` datetime DEFAULT NULL AFTER `is_banned`;
 
 --
 -- Các ràng buộc cho bảng `categories`
@@ -1862,10 +1966,24 @@ ALTER TABLE `episodes`
   ADD CONSTRAINT `fk_episodes_movie` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE;
 
 --
+-- Các ràng buộc cho bảng `moderator_permission_requests`
+--
+ALTER TABLE `moderator_permission_requests`
+  ADD CONSTRAINT `moderator_permission_requests_ibfk_1` FOREIGN KEY (`theater_id`) REFERENCES `theaters` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `moderator_permission_requests_ibfk_2` FOREIGN KEY (`moderator_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `moderator_permission_requests_ibfk_3` FOREIGN KEY (`requested_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
 -- Các ràng buộc cho bảng `movies`
 --
 ALTER TABLE `movies`
   ADD CONSTRAINT `movies_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `notifications`
+--
+ALTER TABLE `notifications`
+  ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `reviews`
@@ -1950,32 +2068,6 @@ ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Thêm index cho theater_id trong bảng users (cho moderator)
---
-ALTER TABLE `users`
-  ADD INDEX `idx_theater_id` (`theater_id`);
-
---
--- Thêm cột max_tickets vào bảng movies (quản lý số lượng vé tối đa cho mỗi phim)
--- Lưu ý: Cột max_tickets đã được thêm vào CREATE TABLE ở trên (dòng 372)
--- Nếu database đã tồn tại và chưa có cột này, chạy câu lệnh sau (an toàn, kiểm tra trước khi thêm):
---
-SET @dbname = DATABASE();
-SET @tablename = 'movies';
-SET @columnname = 'max_tickets';
-SET @preparedStatement = (SELECT IF(
-  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
-   WHERE TABLE_SCHEMA = @dbname
-   AND TABLE_NAME = @tablename
-   AND COLUMN_NAME = @columnname) > 0,
-  'SELECT "Column max_tickets already exists" AS result',
-  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` int(11) DEFAULT NULL COMMENT ''Số lượng vé tối đa cho phim (NULL = không giới hạn)'' AFTER `type`')
-));
-PREPARE alterIfNotExists FROM @preparedStatement;
-EXECUTE alterIfNotExists;
-DEALLOCATE PREPARE alterIfNotExists;
-
---
 -- Các ràng buộc cho bảng `user_roles`
 --
 ALTER TABLE `user_roles`
@@ -1994,14 +2086,6 @@ ALTER TABLE `user_tokens`
 ALTER TABLE `watch_history`
   ADD CONSTRAINT `watch_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `watch_history_ibfk_2` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Cập nhật mô tả role Moderator (nếu đã có dữ liệu)
---
-UPDATE `roles` 
-SET `description` = 'Quản lý từng rạp, quản lý lịch chiếu và vé của rạp được gán' 
-WHERE `name` = 'Moderator' AND `description` = 'Điều hành viên, quản lý bình luận và hỗ trợ';
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

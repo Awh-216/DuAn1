@@ -15,7 +15,13 @@
     <form method="GET" class="row g-2">
         <input type="hidden" name="route" value="moderator/showtimes">
         <div class="col-md-4">
-            <input type="date" name="date" class="form-control" value="<?php echo htmlspecialchars($_GET['date'] ?? date('Y-m-d')); ?>" onchange="this.form.submit()">
+            <input type="date" name="date" class="form-control" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>" onchange="this.form.submit()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small">Hoặc xem tất cả (7 ngày tới)</label>
+            <a href="?route=moderator/showtimes&date=" class="btn btn-outline-info w-100 btn-sm">
+                <i class="fas fa-list"></i> Tất cả
+            </a>
         </div>
         <div class="col-md-2">
             <button type="submit" class="btn btn-secondary w-100">

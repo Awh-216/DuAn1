@@ -51,17 +51,22 @@ if (empty($route) || $route === '/' || (count($parts) === 1 && empty($parts[0]))
 $controllerMap = [
     'auth' => 'AuthController',  // auth -> AuthController trong user module
     'profile' => 'ProfileController',  // profile -> ProfileController trong user module
-    'moderator' => 'ModeratorController'  // moderator -> ModeratorController trong admin module
+    'moderator' => 'ModeratorController',  // moderator -> ModeratorController trong admin module
+    'notifications' => 'NotificationController'  // notifications -> NotificationController trong user module
 ];
 
 $firstPart = $parts[0];
 $controllerName = null;
 
 // Kiểm tra xem có controller đặc biệt không
-if (isset($controllerMap[$firstPart])) {
+    if (isset($controllerMap[$firstPart])) {
     $controllerName = $controllerMap[$firstPart];
-    // Load controller từ user module
-    $controllerPath = __DIR__ . '/modules/user/' . $controllerName . '.php';
+    // Load controller từ module tương ứng
+    $moduleForMap = 'user';
+    if ($controllerName === 'ModeratorController') {
+        $moduleForMap = 'admin';
+    }
+    $controllerPath = __DIR__ . '/modules/' . $moduleForMap . '/' . $controllerName . '.php';
     if (file_exists($controllerPath) && !class_exists($controllerName)) {
         require_once $controllerPath;
     }
@@ -87,7 +92,7 @@ if (count($parts) >= 3) {
         $action = str_replace('-', ' ', $action);
         $action = ucwords($action);
         $action = str_replace(' ', '', $action);
-        $action = lcfirst($action); // processBooking
+        $action = lcfirst($action);
     }
 }
 
@@ -99,6 +104,8 @@ if (!class_exists($controllerName)) {
         $moduleForMap = 'user';
         if ($controllerName === 'ModeratorController') {
             $moduleForMap = 'admin';
+        } elseif ($controllerName === 'NotificationController') {
+            $moduleForMap = 'user';
         }
         $controllerPath = __DIR__ . '/modules/' . $moduleForMap . '/' . $controllerName . '.php';
         if (file_exists($controllerPath)) {

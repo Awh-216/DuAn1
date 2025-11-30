@@ -239,6 +239,16 @@ $title = htmlspecialchars($movie['title']);
                     <span><i class="fas fa-layer-group"></i> <?php echo $movie['level']; ?></span>
                 </div>
                 
+                <?php if (isset($movie['status']) && $movie['status'] === 'Chiếu rạp'): ?>
+                    <div class="mt-3 mb-3">
+                        <a href="?route=booking/index&movie=<?php echo $movie['id']; ?>" 
+                           class="btn btn-primary btn-lg" 
+                           style="background: #e50914; border: none; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; color: white; font-weight: 600; font-size: 1.1rem;">
+                            <i class="fas fa-ticket-alt"></i> Đặt vé xem phim
+                        </a>
+                    </div>
+                <?php endif; ?>
+                
                 <?php if ($movie['description']): ?>
                     <div class="movie-description-full">
                         <h3>Nội dung</h3>

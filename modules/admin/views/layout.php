@@ -377,12 +377,18 @@
             <li><a href="?route=admin/theaters" class="<?php echo ($current_page ?? '') === 'theaters' ? 'active' : ''; ?>">
                 <i class="fas fa-building"></i> Quản lý rạp
             </a></li>
+            <?php 
+            // "Quản lý vé" và "Combo & Đồ ăn" chỉ dành cho moderator (admin của các rạp)
+            // Admin chính không cần 2 phần này vì đã có moderator quản lý
+            // Chỉ hiển thị nếu user là moderator (trường hợp moderator truy cập admin panel)
+            if (isset($user['role']) && $user['role'] === 'moderator'): ?>
             <li><a href="?route=admin/tickets" class="<?php echo ($current_page ?? '') === 'tickets' ? 'active' : ''; ?>">
                 <i class="fas fa-ticket-alt"></i> Quản lý vé
             </a></li>
             <li><a href="?route=admin/foodItems" class="<?php echo ($current_page ?? '') === 'food_items' ? 'active' : ''; ?>">
                 <i class="fas fa-utensils"></i> Combo & Đồ ăn
             </a></li>
+            <?php endif; ?>
             <li><a href="?route=admin/analytics" class="<?php echo ($current_page ?? '') === 'analytics' ? 'active' : ''; ?>">
                 <i class="fas fa-chart-line"></i> Analytics & Báo cáo
             </a></li>

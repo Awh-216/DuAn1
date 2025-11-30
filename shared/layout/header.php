@@ -181,7 +181,7 @@
                             <span>Admin Panel</span>
                         </a>
                     <?php elseif ($isModerator): ?>
-                        <a href="http://localhost/DuAn1/?route=moderator/index" class="sign-in-btn" style="background-color: #FFFFFF37; margin-right: 10px;">
+                        <a href="http://localhost/DuAn1/?route=moderator/index" class="sign-in-btn" style="margin-right: 10px;">
                             <i class="fas fa-building"></i>
                             <span>Quản lý rạp</span>
                         </a>
@@ -201,6 +201,47 @@
             </div>
         </div>
     </header>
+    <?php endif; ?>
+    
+    <?php
+    // Nút thông báo hình tròn fixed bên phải ngoài cùng
+    if (isset($user) && $user): 
+        // Đếm số thông báo chưa đọc
+        $unreadCount = 0;
+        try {
+            require_once __DIR__ . '/../../core/Database.php';
+            $db = Database::getInstance();
+            $unreadCount = $db->fetch("SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = 0", [$user['id']])['count'] ?? 0;
+        } catch (Exception $e) {
+            // Bảng chưa tồn tại
+        }
+    ?>
+    <div class="notification-wrapper-fixed" id="notificationWrapper">
+        <a href="javascript:void(0);" class="notification-btn-fixed" id="notificationBtnFixed" onclick="toggleNotificationDropdown()">
+            <i class="fas fa-bell"></i>
+            <?php if ($unreadCount > 0): ?>
+                <span class="notification-badge"><?php echo $unreadCount > 99 ? '99+' : $unreadCount; ?></span>
+            <?php endif; ?>
+        </a>
+        <div class="notification-dropdown" id="notificationDropdown" style="display: none;">
+            <div class="notification-dropdown-header">
+                <h6>Thông báo</h6>
+                <?php 
+                // Nếu là moderator, link đến trang yêu cầu thay đổi quyền
+                $viewAllLink = '?route=notifications/index';
+                if ($isModerator) {
+                    $viewAllLink = '?route=moderator/permissionRequests';
+                }
+                ?>
+                <a href="<?php echo $viewAllLink; ?>" class="view-all-link">Xem tất cả</a>
+            </div>
+            <div class="notification-dropdown-body" id="notificationList">
+                <div class="notification-loading">
+                    <i class="fas fa-spinner fa-spin"></i> Đang tải...
+                </div>
+            </div>
+        </div>
+    </div>
     <?php endif; ?>
 
     <?php if (isset($_SESSION['success'])): ?>

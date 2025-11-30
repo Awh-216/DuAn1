@@ -15,8 +15,8 @@ class Controller {
         $module = $viewParts[0] ?? 'home';
         $viewFile = $viewParts[1] ?? 'index';
         
-        // Xử lý auth và profile views (đặc biệt)
-        if ($module === 'auth' || $module === 'profile') {
+        // Xử lý auth, profile và notifications views (đặc biệt)
+        if ($module === 'auth' || $module === 'profile' || $module === 'notifications') {
             $module = 'user';
         }
         

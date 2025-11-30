@@ -321,6 +321,25 @@
             <li><a href="?route=moderator/tickets" class="<?php echo ($current_page ?? '') === 'tickets' ? 'active' : ''; ?>">
                 <i class="fas fa-ticket-alt"></i> Quản lý vé
             </a></li>
+            <li><a href="?route=moderator/foodItems" class="<?php echo ($current_page ?? '') === 'food_items' ? 'active' : ''; ?>">
+                <i class="fas fa-utensils"></i> Combo & Đồ ăn
+            </a></li>
+            <li><a href="?route=moderator/permissionRequests" class="<?php echo ($current_page ?? '') === 'permission_requests' ? 'active' : ''; ?>">
+                <i class="fas fa-user-shield"></i> Yêu cầu thay đổi quyền
+                <?php
+                // Đếm số yêu cầu chưa xử lý
+                try {
+                    $db = Database::getInstance();
+                    $pendingCount = $db->fetch("
+                        SELECT COUNT(*) as count 
+                        FROM moderator_permission_requests 
+                        WHERE theater_id = ? AND status = 'pending'
+                    ", [$theaterId])['count'] ?? 0;
+                    if ($pendingCount > 0):
+                ?>
+                    <span class="badge bg-danger ms-2"><?php echo $pendingCount; ?></span>
+                <?php endif; } catch (Exception $e) {} ?>
+            </a></li>
             <li><a href="http://localhost/DuAn1/">
                 <i class="fas fa-home"></i> Về trang chủ
             </a></li>
