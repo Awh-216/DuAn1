@@ -288,6 +288,7 @@ CREATE TABLE `food_items` (
 --
 
 INSERT INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
+-- Rạp 1: CGV Vincom Center
 (1, 1, 'Combo 1 - Bỏng + Nước', '1 bỏng ngô lớn + 1 nước ngọt lớn', 85000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
 (2, 1, 'Combo 2 - Bỏng + Nước + Snack', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack', 120000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
 (3, 1, 'Combo 3 - Đôi', '2 bỏng ngô lớn + 2 nước ngọt lớn', 150000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
@@ -295,7 +296,43 @@ INSERT INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `i
 (5, 1, 'Bỏng ngô vừa', 'Bỏng ngô size vừa', 40000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
 (6, 1, 'Nước ngọt lớn', 'Nước ngọt size lớn', 35000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
 (7, 1, 'Nước ngọt vừa', 'Nước ngọt size vừa', 25000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
-(8, 1, 'Snack mix', 'Hỗn hợp snack', 45000.00, NULL, 'snack', 1, '2025-11-28 01:03:19');
+(8, 1, 'Snack mix', 'Hỗn hợp snack', 45000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+-- Rạp 2: CGV Landmark
+(9, 2, 'Combo Premium', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 hotdog', 140000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(10, 2, 'Combo Family', '2 bỏng ngô lớn + 2 nước ngọt lớn + 2 snack', 250000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(11, 2, 'Combo Sweet', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 bánh ngọt', 110000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(12, 2, 'Bỏng ngô caramel', 'Bỏng ngô vị caramel size lớn', 65000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(13, 2, 'Bỏng ngô phô mai', 'Bỏng ngô vị phô mai size lớn', 65000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(14, 2, 'Hotdog', 'Hotdog thịt bò', 75000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(15, 2, 'Nước ép trái cây', 'Nước ép trái cây tươi', 45000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
+(16, 2, 'Cà phê đá', 'Cà phê đá phin', 40000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
+-- Rạp 3: Lotte Cinema
+(17, 3, 'Combo VIP', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack + 1 bánh ngọt', 160000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(18, 3, 'Combo Couple', '2 bỏng ngô lớn + 2 nước ngọt lớn + 1 snack lớn', 200000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(19, 3, 'Combo Kids', '1 bỏng ngô vừa + 1 nước ngọt vừa + 1 kẹo', 90000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(20, 3, 'Bỏng ngô bơ', 'Bỏng ngô vị bơ size lớn', 60000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(21, 3, 'Khoai tây chiên', 'Khoai tây chiên giòn', 50000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(22, 3, 'Bánh mì sandwich', 'Bánh mì sandwich thịt nguội', 70000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(23, 3, 'Trà sữa', 'Trà sữa thái xanh', 55000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
+(24, 3, 'Nước lọc', 'Nước lọc tinh khiết', 20000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
+-- Rạp 4: Galaxy Cinema
+(25, 4, 'Combo Galaxy', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack + 1 bánh quy', 130000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(26, 4, 'Combo Star', '2 bỏng ngô lớn + 2 nước ngọt lớn + 2 snack', 220000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(27, 4, 'Combo Solo', '1 bỏng ngô vừa + 1 nước ngọt vừa', 70000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(28, 4, 'Bỏng ngô mật ong', 'Bỏng ngô vị mật ong size lớn', 60000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(29, 4, 'Bánh quy giòn', 'Bánh quy giòn thơm ngon', 35000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(30, 4, 'Bánh ngọt', 'Bánh ngọt kem tươi', 60000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(31, 4, 'Soda chanh', 'Soda chanh mát lạnh', 40000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
+(32, 4, 'Nước cam ép', 'Nước cam ép tươi', 50000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
+-- Rạp 5: BHD Star Cineplex
+(33, 5, 'Combo Star', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 hotdog + 1 snack', 170000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(34, 5, 'Combo Deluxe', '2 bỏng ngô lớn + 2 nước ngọt lớn + 2 hotdog', 280000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(35, 5, 'Combo Classic', '1 bỏng ngô lớn + 1 nước ngọt lớn', 95000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
+(36, 5, 'Bỏng ngô socola', 'Bỏng ngô vị socola size lớn', 70000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(37, 5, 'Hotdog phô mai', 'Hotdog phô mai thơm ngon', 85000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(38, 5, 'Bánh pizza mini', 'Bánh pizza mini 4 miếng', 120000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
+(39, 5, 'Coca Cola', 'Coca Cola size lớn', 40000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
+(40, 5, 'Pepsi', 'Pepsi size lớn', 40000.00, NULL, 'drink', 1, '2025-11-28 01:03:19');
 
 -- --------------------------------------------------------
 
@@ -1766,7 +1803,7 @@ ALTER TABLE `episodes`
 -- AUTO_INCREMENT cho bảng `food_items`
 --
 ALTER TABLE `food_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT cho bảng `ip_blocks`
@@ -2091,3 +2128,64 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+-- ============================================================
+-- Script bổ sung: Đảm bảo có dữ liệu đồ ăn/combo cho tất cả các rạp
+-- Script này sử dụng INSERT IGNORE để tránh lỗi duplicate key
+-- Chạy script này nếu cần cập nhật/thêm lại dữ liệu đồ ăn
+-- ============================================================
+
+-- Kiểm tra và thêm dữ liệu cho Rạp 1: CGV Vincom Center (theater_id = 1)
+INSERT IGNORE INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
+(1, 1, 'Combo 1 - Bỏng + Nước', '1 bỏng ngô lớn + 1 nước ngọt lớn', 85000.00, NULL, 'combo', 1, NOW()),
+(2, 1, 'Combo 2 - Bỏng + Nước + Snack', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack', 120000.00, NULL, 'combo', 1, NOW()),
+(3, 1, 'Combo 3 - Đôi', '2 bỏng ngô lớn + 2 nước ngọt lớn', 150000.00, NULL, 'combo', 1, NOW()),
+(4, 1, 'Bỏng ngô lớn', 'Bỏng ngô size lớn', 55000.00, NULL, 'snack', 1, NOW()),
+(5, 1, 'Bỏng ngô vừa', 'Bỏng ngô size vừa', 40000.00, NULL, 'snack', 1, NOW()),
+(6, 1, 'Nước ngọt lớn', 'Nước ngọt size lớn', 35000.00, NULL, 'drink', 1, NOW()),
+(7, 1, 'Nước ngọt vừa', 'Nước ngọt size vừa', 25000.00, NULL, 'drink', 1, NOW()),
+(8, 1, 'Snack mix', 'Hỗn hợp snack', 45000.00, NULL, 'snack', 1, NOW());
+
+-- Kiểm tra và thêm dữ liệu cho Rạp 2: CGV Landmark (theater_id = 2)
+INSERT IGNORE INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
+(9, 2, 'Combo Premium', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 hotdog', 140000.00, NULL, 'combo', 1, NOW()),
+(10, 2, 'Combo Family', '2 bỏng ngô lớn + 2 nước ngọt lớn + 2 snack', 250000.00, NULL, 'combo', 1, NOW()),
+(11, 2, 'Combo Sweet', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 bánh ngọt', 110000.00, NULL, 'combo', 1, NOW()),
+(12, 2, 'Bỏng ngô caramel', 'Bỏng ngô vị caramel size lớn', 65000.00, NULL, 'snack', 1, NOW()),
+(13, 2, 'Bỏng ngô phô mai', 'Bỏng ngô vị phô mai size lớn', 65000.00, NULL, 'snack', 1, NOW()),
+(14, 2, 'Hotdog', 'Hotdog thịt bò', 75000.00, NULL, 'snack', 1, NOW()),
+(15, 2, 'Nước ép trái cây', 'Nước ép trái cây tươi', 45000.00, NULL, 'drink', 1, NOW()),
+(16, 2, 'Cà phê đá', 'Cà phê đá phin', 40000.00, NULL, 'drink', 1, NOW());
+
+-- Kiểm tra và thêm dữ liệu cho Rạp 3: Lotte Cinema (theater_id = 3)
+INSERT IGNORE INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
+(17, 3, 'Combo VIP', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack + 1 bánh ngọt', 160000.00, NULL, 'combo', 1, NOW()),
+(18, 3, 'Combo Couple', '2 bỏng ngô lớn + 2 nước ngọt lớn + 1 snack lớn', 200000.00, NULL, 'combo', 1, NOW()),
+(19, 3, 'Combo Kids', '1 bỏng ngô vừa + 1 nước ngọt vừa + 1 kẹo', 90000.00, NULL, 'combo', 1, NOW()),
+(20, 3, 'Bỏng ngô bơ', 'Bỏng ngô vị bơ size lớn', 60000.00, NULL, 'snack', 1, NOW()),
+(21, 3, 'Khoai tây chiên', 'Khoai tây chiên giòn', 50000.00, NULL, 'snack', 1, NOW()),
+(22, 3, 'Bánh mì sandwich', 'Bánh mì sandwich thịt nguội', 70000.00, NULL, 'snack', 1, NOW()),
+(23, 3, 'Trà sữa', 'Trà sữa thái xanh', 55000.00, NULL, 'drink', 1, NOW()),
+(24, 3, 'Nước lọc', 'Nước lọc tinh khiết', 20000.00, NULL, 'drink', 1, NOW());
+
+-- Kiểm tra và thêm dữ liệu cho Rạp 4: Galaxy Cinema (theater_id = 4)
+INSERT IGNORE INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
+(25, 4, 'Combo Galaxy', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack + 1 bánh quy', 130000.00, NULL, 'combo', 1, NOW()),
+(26, 4, 'Combo Star', '2 bỏng ngô lớn + 2 nước ngọt lớn + 2 snack', 220000.00, NULL, 'combo', 1, NOW()),
+(27, 4, 'Combo Solo', '1 bỏng ngô vừa + 1 nước ngọt vừa', 70000.00, NULL, 'combo', 1, NOW()),
+(28, 4, 'Bỏng ngô mật ong', 'Bỏng ngô vị mật ong size lớn', 60000.00, NULL, 'snack', 1, NOW()),
+(29, 4, 'Bánh quy giòn', 'Bánh quy giòn thơm ngon', 35000.00, NULL, 'snack', 1, NOW()),
+(30, 4, 'Bánh ngọt', 'Bánh ngọt kem tươi', 60000.00, NULL, 'snack', 1, NOW()),
+(31, 4, 'Soda chanh', 'Soda chanh mát lạnh', 40000.00, NULL, 'drink', 1, NOW()),
+(32, 4, 'Nước cam ép', 'Nước cam ép tươi', 50000.00, NULL, 'drink', 1, NOW());
+
+-- Kiểm tra và thêm dữ liệu cho Rạp 5: BHD Star Cineplex (theater_id = 5)
+INSERT IGNORE INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
+(33, 5, 'Combo Star', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 hotdog + 1 snack', 170000.00, NULL, 'combo', 1, NOW()),
+(34, 5, 'Combo Deluxe', '2 bỏng ngô lớn + 2 nước ngọt lớn + 2 hotdog', 280000.00, NULL, 'combo', 1, NOW()),
+(35, 5, 'Combo Classic', '1 bỏng ngô lớn + 1 nước ngọt lớn', 95000.00, NULL, 'combo', 1, NOW()),
+(36, 5, 'Bỏng ngô socola', 'Bỏng ngô vị socola size lớn', 70000.00, NULL, 'snack', 1, NOW()),
+(37, 5, 'Hotdog phô mai', 'Hotdog phô mai thơm ngon', 85000.00, NULL, 'snack', 1, NOW()),
+(38, 5, 'Bánh pizza mini', 'Bánh pizza mini 4 miếng', 120000.00, NULL, 'snack', 1, NOW()),
+(39, 5, 'Coca Cola', 'Coca Cola size lớn', 40000.00, NULL, 'drink', 1, NOW()),
+(40, 5, 'Pepsi', 'Pepsi size lớn', 40000.00, NULL, 'drink', 1, NOW());

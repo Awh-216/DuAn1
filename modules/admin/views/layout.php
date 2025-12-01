@@ -368,9 +368,23 @@
             <li><a href="?route=admin/index" class="<?php echo ($current_page ?? '') === 'dashboard' ? 'active' : ''; ?>">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a></li>
+            <?php 
+            // Chỉ hiển thị menu "Quản lý người dùng" cho admin (không phải moderator)
+            $isModerator = false;
+            if (isset($user['role']) && $user['role'] === 'moderator') {
+                $isModerator = true;
+            } else {
+                try {
+                    $isModerator = AdminMiddleware::isModerator($user['id'] ?? 0);
+                } catch (Exception $e) {
+                    // Bỏ qua nếu có lỗi
+                }
+            }
+            if (!$isModerator): ?>
             <li><a href="?route=admin/users" class="<?php echo ($current_page ?? '') === 'users' ? 'active' : ''; ?>">
                 <i class="fas fa-users"></i> Quản lý người dùng
             </a></li>
+            <?php endif; ?>
             <li><a href="?route=admin/movies" class="<?php echo ($current_page ?? '') === 'movies' ? 'active' : ''; ?>">
                 <i class="fas fa-film"></i> Quản lý phim
             </a></li>

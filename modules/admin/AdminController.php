@@ -23,6 +23,29 @@ class AdminController extends Controller {
         require_once __DIR__ . '/views/layout.php';
     }
     
+    /**
+     * Kiểm tra xem user có phải là admin (không phải moderator)
+     */
+    protected function checkIsAdmin() {
+        $user = AdminMiddleware::checkAdmin();
+        
+        // Kiểm tra nếu là moderator
+        if (isset($user['role']) && $user['role'] === 'moderator') {
+            $_SESSION['error'] = 'Bạn không có quyền truy cập chức năng này!';
+            $this->redirect('admin/index');
+            exit;
+        }
+        
+        // Kiểm tra role trong bảng roles
+        if (AdminMiddleware::isModerator($user['id'])) {
+            $_SESSION['error'] = 'Bạn không có quyền truy cập chức năng này!';
+            $this->redirect('admin/index');
+            exit;
+        }
+        
+        return $user;
+    }
+    
     // Dashboard Overview
     public function index() {
         $db = Database::getInstance();
@@ -88,8 +111,10 @@ class AdminController extends Controller {
     
     // Users Management
     public function users() {
+        // Chặn moderator truy cập quản lý người dùng
+        $user = $this->checkIsAdmin();
+        
         $db = Database::getInstance();
-        $user = AdminMiddleware::checkAdmin();
         
         $search = $_GET['search'] ?? '';
         $status = $_GET['status'] ?? '';
@@ -137,7 +162,8 @@ class AdminController extends Controller {
      */
     public function usersUpdatePoints() {
         try {
-            $user = AdminMiddleware::checkAdmin();
+            // Chặn moderator truy cập quản lý người dùng
+            $user = $this->checkIsAdmin();
             
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 $_SESSION['error'] = 'Phương thức không hợp lệ!';
@@ -230,8 +256,10 @@ class AdminController extends Controller {
      */
     public function usersUpdateRole() {
         try {
+            // Chặn moderator truy cập quản lý người dùng
+            $user = $this->checkIsAdmin();
+            
             $db = Database::getInstance();
-            $user = AdminMiddleware::checkAdmin();
             
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 $_SESSION['error'] = 'Phương thức không hợp lệ!';
@@ -467,7 +495,8 @@ class AdminController extends Controller {
      */
     public function usersToggleStatus() {
         try {
-            $user = AdminMiddleware::checkAdmin();
+            // Chặn moderator truy cập quản lý người dùng
+            $user = $this->checkIsAdmin();
             
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 $_SESSION['error'] = 'Phương thức không hợp lệ!';

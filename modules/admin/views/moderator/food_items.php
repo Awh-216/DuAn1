@@ -1,5 +1,10 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h5>Quản lý Combo & Đồ ăn</h5>
+    <div>
+        <h5>Quản lý Combo & Đồ ăn</h5>
+        <?php if (isset($theater)): ?>
+            <small class="text-muted">Rạp: <strong><?php echo htmlspecialchars($theater['name'] ?? ''); ?></strong></small>
+        <?php endif; ?>
+    </div>
     <a href="?route=moderator/foodItemsCreate" class="btn btn-primary">
         <i class="fas fa-plus"></i> Thêm mới
     </a>
@@ -52,7 +57,11 @@
             <tbody>
                 <?php if (empty($foodItems)): ?>
                     <tr>
-                        <td colspan="8" class="text-center text-muted">Chưa có combo/đồ ăn nào</td>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                            Chưa có combo/đồ ăn nào cho rạp này. 
+                            <a href="?route=moderator/foodItemsCreate" class="text-primary">Thêm mới ngay</a>
+                        </td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($foodItems as $item): ?>

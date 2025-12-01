@@ -986,11 +986,15 @@ class ModeratorController extends Controller {
         
         $foodItems = $db->fetchAll($sql, $params);
         
+        // Lấy thông tin rạp để hiển thị
+        $theater = $db->fetch("SELECT * FROM theaters WHERE id = ?", [$this->theaterId]);
+        
         $this->moderatorView('food_items', [
             'user' => $user,
             'foodItems' => $foodItems,
             'search' => $search,
             'type' => $type,
+            'theater' => $theater,
             'title' => 'Quản lý Combo & Đồ ăn',
             'current_page' => 'food_items'
         ]);
