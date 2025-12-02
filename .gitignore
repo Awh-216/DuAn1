@@ -1,0 +1,40 @@
+# Composer dependencies
+/vendor/
+composer.phar
+composer-setup.php
+
+# Data directories (QR codes, PDFs, uploads)
+/data/
+/data/ticket_qr_codes/
+/data/ticket_pdfs/
+/uploads/
+
+# Environment and config files
+.env
+config.local.php
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# PHP
+*.php~
+*.php.bak
+
