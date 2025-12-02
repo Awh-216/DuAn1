@@ -1091,6 +1091,43 @@ class BookingController extends Controller {
             return $timeB - $timeA;
         });
         
+        // Nhóm vé theo booking_pending_id và tạo QR code cho booking
+        $processedBookings = [];
+        
+        foreach ($allTickets as &$ticket) {
+            $bookingId = $ticket['booking_pending_id'] ?? null;
+            
+            // Nếu vé thuộc booking đã completed và có booking_qr_code
+            if ($bookingId && !empty($ticket['booking_qr_code']) && 
+                (!$ticket['booking_type'] || $ticket['booking_type'] === 'completed')) {
+                
+                // Chỉ tạo QR code 1 lần cho mỗi booking
+                if (!isset($processedBookings[$bookingId])) {
+                    $processedBookings[$bookingId] = true;
+                    
+                    // Tạo QR code cho booking nếu chưa có
+                    $vendorAutoload = __DIR__ . '/../../vendor/autoload.php';
+                    if (file_exists($vendorAutoload)) {
+                        try {
+                            require_once __DIR__ . '/../../core/TicketQRService.php';
+                            $qrService = new TicketQRService();
+                            
+                            $qrFiles = glob(__DIR__ . '/../../data/qr_codes/booking_' . $bookingId . '_*.png');
+                            if (empty($qrFiles) || !file_exists($qrFiles[0])) {
+                                $qrResult = $qrService->generateBookingQRCode($ticket['booking_qr_code'], $bookingId);
+                                if ($qrResult['success']) {
+                                    error_log("Booking QR code created for booking ID: " . $bookingId);
+                                }
+                            }
+                        } catch (Exception $e) {
+                            error_log("Error generating booking QR code: " . $e->getMessage());
+                        }
+                    }
+                }
+            }
+        }
+        unset($ticket); // Unset reference
+        
         $this->view('booking/my-tickets', [
             'tickets' => $allTickets,
             'user' => $user
@@ -2181,6 +2218,34 @@ class BookingController extends Controller {
             
             $db->commit();
             
+            // Tạo QR code cho booking (1 QR code cho cả booking) - sau khi commit để đảm bảo dữ liệu đã được lưu
+            try {
+                // Kiểm tra xem thư viện đã được cài đặt chưa
+                $vendorAutoload = __DIR__ . '/../../vendor/autoload.php';
+                if (file_exists($vendorAutoload)) {
+                    require_once __DIR__ . '/../../core/TicketQRService.php';
+                    $qrService = new TicketQRService();
+                    
+                    // Tạo mã QR code cho booking
+                    $bookingQRCode = 'BOOKING_' . uniqid() . '_' . $pendingBooking['id'] . '_' . time();
+                    
+                    // Tạo QR code cho booking
+                    $qrResult = $qrService->generateBookingQRCode($bookingQRCode, $pendingBooking['id']);
+                    if ($qrResult['success']) {
+                        // Lưu QR code vào database
+                        $bookingModel->updateBookingQRCode($pendingBooking['id'], $bookingQRCode);
+                        error_log("Booking QR code created successfully for booking ID: " . $pendingBooking['id']);
+                    } else {
+                        error_log("Failed to create booking QR code for booking ID: " . $pendingBooking['id'] . " - " . ($qrResult['error'] ?? 'Unknown error'));
+                    }
+                } else {
+                    error_log("Warning: Vendor libraries not installed. QR code generation skipped. Please run 'composer install'.");
+                }
+            } catch (Exception $e) {
+                error_log("Error generating booking QR code: " . $e->getMessage());
+                // Không ảnh hưởng đến quá trình đặt vé nếu tạo QR code lỗi
+            }
+            
             // Tạo thông báo cho user (sau khi commit để tránh lỗi transaction)
             try {
                 $movieModel = new MovieModel();
@@ -2190,8 +2255,8 @@ class BookingController extends Controller {
                 $totalSeats = count($seats);
                 
                 $notificationTitle = "Đặt vé thành công";
-                $notificationMessage = "Bạn đã đặt thành công {$totalSeats} vé xem phim \"{$movieName}\" tại ghế {$seatList}. Vé và QR code đã được gửi đến email của bạn.";
-                $notificationLink = "?route=profile/index";
+                $notificationMessage = "Bạn đã đặt thành công {$totalSeats} vé xem phim \"{$movieName}\" tại ghế {$seatList}. QR code đã được tạo, bạn có thể xem tại trang 'Vé của tôi'.";
+                $notificationLink = "?route=booking/myTickets"; // Link đến trang vé của tôi
                 
                 // Sử dụng Database instance thay vì PDO connection trực tiếp
                 $dbInstance = Database::getInstance();
@@ -2229,7 +2294,7 @@ class BookingController extends Controller {
                 error_log("Error sending ticket email: " . $e->getMessage());
             }
             
-            $_SESSION['success'] = 'Đặt vé thành công! Vé và QR code đã được gửi đến email ' . htmlspecialchars($pendingBooking['customer_email']);
+            $_SESSION['success'] = 'Đặt vé thành công! QR code đã được tạo. Bạn có thể xem tại trang "Vé của tôi".';
             
             // Redirect về trang booking
             $redirectUrl = '?route=booking/index&showtime_id=' . $showtime_id . '&_t=' . time();
@@ -2244,6 +2309,465 @@ class BookingController extends Controller {
             $_SESSION['error'] = 'Có lỗi xảy ra khi hoàn tất đặt vé: ' . $e->getMessage();
             $redirectUrl = '?route=booking/index&showtime_id=' . $showtime_id;
             $this->redirect($redirectUrl);
+        }
+    }
+    
+    /**
+     * Xác thực QR code và hiển thị PDF
+     * Hỗ trợ cả booking_id (hiển thị tất cả vé trong booking) và ticket_id (hiển thị 1 vé)
+     */
+    public function verify() {
+        // Bypass ngrok warning page
+        if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'ngrok') !== false) {
+            header('ngrok-skip-browser-warning: true');
+        }
+        
+        // Clear output buffer
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+        
+        // Log để debug
+        error_log("Verify route called with: " . json_encode($_GET));
+        error_log("Request URI: " . ($_SERVER['REQUEST_URI'] ?? 'N/A'));
+        error_log("HTTP Host: " . ($_SERVER['HTTP_HOST'] ?? 'N/A'));
+        
+        $booking_code = $_GET['booking'] ?? null;
+        $booking_id = $_GET['booking_id'] ?? null;
+        $ticket_code = $_GET['ticket'] ?? null;
+        $ticket_id = $_GET['id'] ?? null;
+        
+        try {
+            $bookingModel = new BookingModel();
+            $vendorAutoload = __DIR__ . '/../../vendor/autoload.php';
+            if (!file_exists($vendorAutoload)) {
+                http_response_code(500);
+                die('Thư viện chưa được cài đặt. Vui lòng chạy "composer install".');
+            }
+            
+            require_once __DIR__ . '/../../core/TicketQRService.php';
+            $qrService = new TicketQRService();
+            
+            // Nếu có booking_id, hiển thị tất cả vé trong booking
+            if ($booking_id && $booking_code) {
+                $booking = $bookingModel->getPendingBookingById($booking_id);
+                
+                if (!$booking) {
+                    http_response_code(404);
+                    die('Không tìm thấy booking với ID: ' . $booking_id);
+                }
+                
+                if ($booking['qr_code'] !== $booking_code) {
+                    http_response_code(403);
+                    die('Mã booking không hợp lệ!');
+                }
+                
+                if ($booking['status'] !== 'completed') {
+                    http_response_code(400);
+                    die('Booking này chưa được thanh toán hoặc không còn hợp lệ!');
+                }
+                
+                // Lấy tất cả vé trong booking
+                $tickets = $bookingModel->getTicketsByBookingId($booking_id, null);
+                
+                if (empty($tickets)) {
+                    http_response_code(404);
+                    die('Không tìm thấy vé trong booking này!');
+                }
+                
+                // Lấy thông tin user
+                require_once __DIR__ . '/../user/UserModel.php';
+                $userModel = new UserModel();
+                $user = $userModel->getById($booking['user_id']);
+                
+                if (!$user) {
+                    http_response_code(404);
+                    die('Không tìm thấy thông tin người dùng!');
+                }
+                
+                // Lấy thông tin showtime, movie, theater (tất cả vé cùng 1 showtime)
+                $showtime = $bookingModel->getShowtimeById($booking['showtime_id']);
+                if (!$showtime) {
+                    http_response_code(404);
+                    die('Không tìm thấy thông tin suất chiếu!');
+                }
+                
+                require_once __DIR__ . '/../movie/MovieModel.php';
+                $movieModel = new MovieModel();
+                $movie = $movieModel->getById($showtime['movie_id']);
+                if (!$movie) {
+                    http_response_code(404);
+                    die('Không tìm thấy thông tin phim!');
+                }
+                
+                $theater = $bookingModel->getTheaterById($showtime['theater_id']);
+                if (!$theater) {
+                    http_response_code(404);
+                    die('Không tìm thấy thông tin rạp!');
+                }
+                
+                // Kiểm tra xem có yêu cầu PDF không (mặc định hiển thị HTML cho mobile)
+                $forcePdf = isset($_GET['pdf']) && $_GET['pdf'] == '1';
+                
+                // Tạo PDF chứa tất cả vé
+                $pdfResult = $qrService->generateBookingPDF($tickets, $showtime, $movie, $theater, $user);
+                
+                // Nếu yêu cầu PDF, trả về PDF
+                if ($forcePdf && $pdfResult['success'] && file_exists($pdfResult['file_path'])) {
+                    // Kiểm tra xem có yêu cầu download không
+                    $download = isset($_GET['download']) && $_GET['download'] == '1';
+                    
+                    // Trả về PDF
+                    header('Content-Type: application/pdf');
+                    if ($download) {
+                        header('Content-Disposition: attachment; filename="' . $pdfResult['filename'] . '"');
+                    } else {
+                        header('Content-Disposition: inline; filename="' . $pdfResult['filename'] . '"');
+                    }
+                    header('Content-Length: ' . filesize($pdfResult['file_path']));
+                    header('Cache-Control: public, max-age=3600');
+                    readfile($pdfResult['file_path']);
+                    exit;
+                }
+                
+                // Mặc định hiển thị HTML (dễ xem trên mobile)
+                if (!$pdfResult['success']) {
+                    error_log("PDF generation failed: " . ($pdfResult['error'] ?? 'Unknown error'));
+                }
+                
+                // Hiển thị trang HTML với thông tin vé (standalone, không dùng layout)
+                $pdfUrl = $pdfResult['success'] ? '?' . http_build_query(array_merge($_GET, ['pdf' => '1'])) : null;
+                
+                // Lấy thông tin screen (phòng chiếu)
+                $screenInfo = null;
+                if (isset($showtime['screen_id']) && $showtime['screen_id']) {
+                    $screenInfo = $bookingModel->getScreenInfo($showtime['screen_id']);
+                }
+                
+                // Lấy thông tin food items/combo từ booking
+                $bookingFoodItems = [];
+                $foodItemsMap = [];
+                try {
+                    // Lấy food items từ booking_food_items
+                    $db = Database::getInstance();
+                    $bookingFoodItems = $db->fetchAll("
+                        SELECT bfi.*, fi.name, fi.type, fi.image
+                        FROM booking_food_items bfi
+                        JOIN food_items fi ON bfi.food_item_id = fi.id
+                        WHERE bfi.booking_pending_id = ?
+                        ORDER BY fi.type, fi.name
+                    ", [$booking_id]);
+                    
+                    // Nếu không có trong booking_food_items, thử lấy từ booking_pending.food_items (JSON)
+                    if (empty($bookingFoodItems) && !empty($booking['food_items'])) {
+                        $foodItemsData = json_decode($booking['food_items'], true);
+                        if ($foodItemsData) {
+                            $allFoodItems = $bookingModel->getFoodItems();
+                            foreach ($allFoodItems as $food) {
+                                $foodItemsMap[$food['id']] = $food;
+                            }
+                            
+                            foreach ($foodItemsData as $foodId => $quantity) {
+                                if ($quantity > 0 && isset($foodItemsMap[$foodId])) {
+                                    $bookingFoodItems[] = [
+                                        'food_item_id' => $foodId,
+                                        'name' => $foodItemsMap[$foodId]['name'],
+                                        'type' => $foodItemsMap[$foodId]['type'],
+                                        'quantity' => $quantity,
+                                        'price' => $foodItemsMap[$foodId]['price'],
+                                        'image' => $foodItemsMap[$foodId]['image'] ?? null
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception $e) {
+                    error_log("Error getting booking food items: " . $e->getMessage());
+                }
+                
+                // Log để debug
+                error_log("Preparing view data - Tickets count: " . count($tickets));
+                error_log("Movie: " . ($movie['title'] ?? 'N/A'));
+                error_log("Theater: " . ($theater['name'] ?? 'N/A'));
+                error_log("User: " . ($user['name'] ?? 'N/A'));
+                error_log("Food items count: " . count($bookingFoodItems));
+                
+                // Chuẩn bị data để view có thể sử dụng
+                $viewData = [
+                    'tickets' => $tickets,
+                    'showtime' => $showtime,
+                    'movie' => $movie,
+                    'theater' => $theater,
+                    'user' => $user,
+                    'booking' => $booking,
+                    'screenInfo' => $screenInfo,
+                    'foodItems' => $bookingFoodItems,
+                    'pdfUrl' => $pdfUrl,
+                    'error' => !$pdfResult['success'] ? ('Không thể tạo PDF: ' . ($pdfResult['error'] ?? 'Unknown error')) : null
+                ];
+                
+                // Extract data để view có thể sử dụng
+                // Sử dụng EXTR_OVERWRITE để đảm bảo các biến được set
+                extract($viewData, EXTR_OVERWRITE);
+                
+                // Load view trực tiếp (không dùng layout)
+                $viewPath = __DIR__ . '/views/verify-tickets.php';
+                if (file_exists($viewPath)) {
+                    // Đảm bảo không có output trước đó
+                    while (ob_get_level()) {
+                        ob_end_clean();
+                    }
+                    require_once $viewPath;
+                    exit;
+                } else {
+                    http_response_code(500);
+                    die('View file not found: ' . $viewPath);
+                }
+                exit;
+            }
+            // Nếu có ticket_id, hiển thị 1 vé (tương thích ngược)
+            else if ($ticket_code && $ticket_id) {
+                // Lấy thông tin vé
+                $ticket = $bookingModel->getTicketById($ticket_id, null);
+                if (!$ticket || $ticket['qr_code'] !== $ticket_code) {
+                    die('Mã vé không hợp lệ hoặc không tồn tại!');
+                }
+                
+                // Kiểm tra xem vé có hợp lệ không
+                if ($ticket['status'] !== 'Đã đặt') {
+                    die('Vé này không còn hợp lệ!');
+                }
+                
+                // Lấy thông tin user
+                require_once __DIR__ . '/../user/UserModel.php';
+                $userModel = new UserModel();
+                $user = $userModel->getById($ticket['user_id']);
+                
+                if (!$user) {
+                    die('Không tìm thấy thông tin người dùng!');
+                }
+                
+                // Lấy thông tin showtime, movie, theater
+                $showtime = $bookingModel->getShowtimeById($ticket['showtime_id']);
+                $movieModel = new MovieModel();
+                $movie = $movieModel->getById($showtime['movie_id']);
+                $theater = $bookingModel->getTheaterById($showtime['theater_id']);
+                
+                // Tạo và hiển thị PDF
+                $pdfResult = $qrService->generateTicketPDF($ticket, $showtime, $movie, $theater, $user);
+                
+                if ($pdfResult['success'] && file_exists($pdfResult['file_path'])) {
+                    // Trả về PDF
+                    header('Content-Type: application/pdf');
+                    header('Content-Disposition: inline; filename="' . $pdfResult['filename'] . '"');
+                    header('Content-Length: ' . filesize($pdfResult['file_path']));
+                    readfile($pdfResult['file_path']);
+                    exit;
+                } else {
+                    die('Không thể tạo PDF: ' . ($pdfResult['error'] ?? 'Unknown error'));
+                }
+            } else {
+                die('Thông tin không hợp lệ!');
+            }
+            
+        } catch (Exception $e) {
+            error_log("Error verifying: " . $e->getMessage());
+            die('Có lỗi xảy ra khi xác thực: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Hiển thị QR code image
+     * Hỗ trợ cả booking_id (QR code của booking) và ticket_id (tương thích ngược)
+     */
+    public function showQRCode() {
+        $booking_id = $_GET['booking_id'] ?? null;
+        $ticket_id = $_GET['ticket_id'] ?? null;
+        
+        if (!$booking_id && !$ticket_id) {
+            http_response_code(404);
+            die('Không tìm thấy thông tin!');
+        }
+        
+        try {
+            $vendorAutoload = __DIR__ . '/../../vendor/autoload.php';
+            if (!file_exists($vendorAutoload)) {
+                http_response_code(500);
+                die('Thư viện chưa được cài đặt.');
+            }
+            
+            require_once __DIR__ . '/../../core/TicketQRService.php';
+            $qrService = new TicketQRService();
+            $bookingModel = new BookingModel();
+            
+            $qrFilePath = null;
+            
+            // Nếu có booking_id, hiển thị QR code của booking
+            if ($booking_id) {
+                $this->requireLogin();
+                $user = $this->getCurrentUser();
+                
+                $booking = $bookingModel->getPendingBookingById($booking_id);
+                
+                if (!$booking || $booking['user_id'] != $user['id']) {
+                    http_response_code(404);
+                    die('Không tìm thấy booking!');
+                }
+                
+                if (empty($booking['qr_code'])) {
+                    http_response_code(404);
+                    die('Không tìm thấy QR code!');
+                }
+                
+                // Kiểm tra xem file QR code đã tồn tại chưa
+                $qrFiles = glob(__DIR__ . '/../../data/qr_codes/booking_' . $booking_id . '_*.png');
+                
+                if (!empty($qrFiles) && file_exists($qrFiles[0])) {
+                    // File đã tồn tại, sử dụng file đó
+                    $qrFilePath = $qrFiles[0];
+                } else {
+                    // Tạo QR code mới
+                    $qrResult = $qrService->generateBookingQRCode($booking['qr_code'], $booking_id);
+                    
+                    if ($qrResult['success'] && file_exists($qrResult['file_path'])) {
+                        $qrFilePath = $qrResult['file_path'];
+                    } else {
+                        http_response_code(500);
+                        error_log("QR code generation failed: " . ($qrResult['error'] ?? 'Unknown error'));
+                        die('Không thể tạo QR code!');
+                    }
+                }
+            }
+            // Nếu có ticket_id, hiển thị QR code của ticket (tương thích ngược)
+            else if ($ticket_id) {
+                $this->requireLogin();
+                $user = $this->getCurrentUser();
+                
+                $ticket = $bookingModel->getTicketById($ticket_id, $user['id']);
+                
+                if (!$ticket || empty($ticket['qr_code'])) {
+                    http_response_code(404);
+                    die('Không tìm thấy QR code!');
+                }
+                
+                // Kiểm tra xem file QR code đã tồn tại chưa
+                $qrFiles = glob(__DIR__ . '/../../data/qr_codes/ticket_' . $ticket_id . '_*.png');
+                
+                if (!empty($qrFiles) && file_exists($qrFiles[0])) {
+                    // File đã tồn tại, sử dụng file đó
+                    $qrFilePath = $qrFiles[0];
+                } else {
+                    // Tạo QR code mới
+                    $qrResult = $qrService->generateQRCode($ticket['qr_code'], $ticket_id);
+                    
+                    if ($qrResult['success'] && file_exists($qrResult['file_path'])) {
+                        $qrFilePath = $qrResult['file_path'];
+                    } else {
+                        http_response_code(500);
+                        error_log("QR code generation failed: " . ($qrResult['error'] ?? 'Unknown error'));
+                        die('Không thể tạo QR code!');
+                    }
+                }
+            }
+            
+            // Hiển thị QR code
+            if ($qrFilePath && file_exists($qrFilePath)) {
+                // Clear any output before sending image
+                while (ob_get_level()) {
+                    ob_end_clean();
+                }
+                
+                header('Content-Type: image/png');
+                header('Content-Length: ' . filesize($qrFilePath));
+                header('Cache-Control: public, max-age=3600');
+                readfile($qrFilePath);
+                exit;
+            } else {
+                http_response_code(500);
+                error_log("QR code file not found: " . $qrFilePath);
+                die('Không tìm thấy file QR code!');
+            }
+            
+        } catch (Exception $e) {
+            error_log("Error showing QR code: " . $e->getMessage());
+            http_response_code(500);
+            die('Có lỗi xảy ra!');
+        }
+    }
+    
+    /**
+     * Xem/tải PDF vé
+     */
+    public function viewTicketPDF() {
+        $this->requireLogin();
+        $user = $this->getCurrentUser();
+        
+        $booking_id = $_GET['booking_id'] ?? null;
+        $ticket_id = $_GET['ticket_id'] ?? null;
+        
+        if (!$booking_id && !$ticket_id) {
+            $_SESSION['error'] = 'Không tìm thấy thông tin vé!';
+            $this->redirect('booking/myTickets');
+            return;
+        }
+        
+        try {
+            // Kiểm tra xem thư viện đã được cài đặt chưa
+            $vendorAutoload = __DIR__ . '/../../vendor/autoload.php';
+            if (!file_exists($vendorAutoload)) {
+                throw new Exception('Thư viện QR Code và PDF chưa được cài đặt. Vui lòng chạy "composer install" hoặc xem file HUONG_DAN_CAI_DAT_QR_PDF.md để biết hướng dẫn chi tiết.');
+            }
+            
+            require_once __DIR__ . '/../../core/TicketQRService.php';
+            $qrService = new TicketQRService();
+            $bookingModel = new BookingModel();
+            $movieModel = new MovieModel();
+            
+            if ($booking_id) {
+                // Lấy tất cả vé trong booking
+                $tickets = $bookingModel->getTicketsByBookingId($booking_id, $user['id']);
+                if (empty($tickets)) {
+                    throw new Exception('Không tìm thấy vé!');
+                }
+                
+                // Lấy thông tin showtime, movie, theater từ vé đầu tiên
+                $firstTicket = $tickets[0];
+                $showtime = $bookingModel->getShowtimeById($firstTicket['showtime_id']);
+                $movie = $movieModel->getById($showtime['movie_id']);
+                $theater = $bookingModel->getTheaterById($showtime['theater_id']);
+                
+                // Tạo PDF cho booking
+                $pdfResult = $qrService->generateBookingPDF($tickets, $showtime, $movie, $theater, $user);
+            } else {
+                // Lấy một vé cụ thể
+                $ticket = $bookingModel->getTicketById($ticket_id, $user['id']);
+                if (!$ticket) {
+                    throw new Exception('Không tìm thấy vé!');
+                }
+                
+                $showtime = $bookingModel->getShowtimeById($ticket['showtime_id']);
+                $movie = $movieModel->getById($showtime['movie_id']);
+                $theater = $bookingModel->getTheaterById($showtime['theater_id']);
+                
+                // Tạo PDF cho một vé
+                $pdfResult = $qrService->generateTicketPDF($ticket, $showtime, $movie, $theater, $user);
+            }
+            
+            if ($pdfResult['success'] && file_exists($pdfResult['file_path'])) {
+                // Trả về PDF
+                header('Content-Type: application/pdf');
+                header('Content-Disposition: inline; filename="' . $pdfResult['filename'] . '"');
+                header('Content-Length: ' . filesize($pdfResult['file_path']));
+                readfile($pdfResult['file_path']);
+                exit;
+            } else {
+                throw new Exception('Không thể tạo PDF: ' . ($pdfResult['error'] ?? 'Unknown error'));
+            }
+            
+        } catch (Exception $e) {
+            error_log("Error viewing ticket PDF: " . $e->getMessage());
+            $_SESSION['error'] = 'Không thể tải PDF: ' . $e->getMessage();
+            $this->redirect('booking/myTickets');
         }
     }
 }

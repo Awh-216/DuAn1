@@ -1,0 +1,16 @@
+{
+    "name": "cinehub/ticket-system",
+    "description": "CineHub - Hệ thống đặt vé xem phim",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "endroid/qr-code": "^4.0",
+        "tecnickcom/tcpdf": "^6.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}
+

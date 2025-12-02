@@ -1,0 +1,22 @@
+# Bypass ngrok warning page
+<IfModule mod_headers.c>
+    Header set ngrok-skip-browser-warning "true"
+</IfModule>
+
+# Enable rewrite engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /DuAn1/
+    
+    # Redirect to index.php if file doesn't exist
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes
+
+# Set default charset
+AddDefaultCharset UTF-8
+

@@ -23,7 +23,14 @@
     <meta property="og:site_name" content="CineHub">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="http://localhost/DuAn1/style.css?v=<?php echo time(); ?>">
+    <?php
+    // Sử dụng UrlHelper để lấy base URL
+    if (!class_exists('UrlHelper')) {
+        require_once __DIR__ . '/../../core/UrlHelper.php';
+    }
+    $baseUrl = UrlHelper::getBaseUrl();
+    ?>
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($baseUrl); ?>/style.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -72,14 +79,14 @@
         <div class="header-container">
             <div class="header-left">
                 <div class="logo-new">
-                    <a href="http://localhost/DuAn1/">
+                    <a href="<?php echo $baseUrl; ?>/">
                         <i class="fas fa-film"></i>
                         <span>CineHub</span>
                     </a>
                 </div>
                 
                 <div class="search-bar">
-                    <form method="GET" action="http://localhost/DuAn1/?route=movie/index" class="search-form-inline">
+                    <form method="GET" action="<?php echo $baseUrl; ?>/?route=movie/index" class="search-form-inline">
                         <input type="hidden" name="route" value="movie/index">
                         <label class="labeo" for="search-input-header"></label>
                         <input type="text" name="search" id="search-input-header" class="search-input" placeholder="Tìm kiếm phim...">
@@ -91,10 +98,10 @@
             </div>
             
             <nav class="nav-new">
-                <a href="http://localhost/DuAn1/?route=movie/index&type=phimle" class="nav-link-new">
+                <a href="<?php echo $baseUrl; ?>/?route=movie/index&type=phimle" class="nav-link-new">
                     Phim lẻ
                 </a>
-                <a href="http://localhost/DuAn1/?route=movie/index&type=phimbo" class="nav-link-new">
+                <a href="<?php echo $baseUrl; ?>/?route=movie/index&type=phimbo" class="nav-link-new">
                     Phim bộ
                 </a>
                 <div class="nav-dropdown">
@@ -103,7 +110,7 @@
                     </span>
                     <div class="dropdown-menu">
                         <?php foreach ($menuCategories as $cat): ?>
-                            <a href="http://localhost/DuAn1/?route=movie/index&category=<?php echo $cat['id']; ?>" class="dropdown-item">
+                            <a href="<?php echo $baseUrl; ?>/?route=movie/index&category=<?php echo $cat['id']; ?>" class="dropdown-item">
                                 <?php echo htmlspecialchars($cat['name']); ?>
                             </a>
                         <?php endforeach; ?>
@@ -115,16 +122,16 @@
                     </span>
                     <div class="dropdown-menu">
                         <?php foreach ($countries as $country): ?>
-                            <a href="http://localhost/DuAn1/?route=movie/index&country=<?php echo urlencode($country['country']); ?>" class="dropdown-item">
+                            <a href="<?php echo $baseUrl; ?>/?route=movie/index&country=<?php echo urlencode($country['country']); ?>" class="dropdown-item">
                                 <?php echo htmlspecialchars($country['country']); ?>
                             </a>
                         <?php endforeach; ?>
                     </div>
                 </div>
-                <a href="http://localhost/DuAn1/?route=movie/index" class="nav-link-new">
+                <a href="<?php echo $baseUrl; ?>/?route=movie/index" class="nav-link-new">
                     Top phim
                 </a>
-                <a href="http://localhost/DuAn1/?route=booking/index" class="nav-link-new" id="booking-link">
+                <a href="<?php echo $baseUrl; ?>/?route=booking/index" class="nav-link-new" id="booking-link">
                     Vé xem phim
                 </a>
             </nav>
@@ -176,17 +183,17 @@
                     }
                     ?>
                     <?php if ($isAdmin): ?>
-                        <a href="http://localhost/DuAn1/?route=admin/index" class="sign-in-btn" style="background-color: #FFFFFF37; margin-right: 10px;">
+                        <a href="<?php echo $baseUrl; ?>/?route=admin/index" class="sign-in-btn" style="background-color: #FFFFFF37; margin-right: 10px;">
                             <i class="fas fa-cog"></i>
                             <span>Admin Panel</span>
                         </a>
                     <?php elseif ($isModerator): ?>
-                        <a href="http://localhost/DuAn1/?route=moderator/index" class="sign-in-btn" style="margin-right: 10px;">
+                        <a href="<?php echo $baseUrl; ?>/?route=moderator/index" class="sign-in-btn" style="margin-right: 10px;">
                             <i class="fas fa-building"></i>
                             <span>Quản lý rạp</span>
                         </a>
                     <?php endif; ?>
-                    <a href="http://localhost/DuAn1/?route=profile/index" class="sign-in-btn">
+                    <a href="<?php echo $baseUrl; ?>/?route=profile/index" class="sign-in-btn">
                         <i class="fas fa-user"></i>
                         <span><?php echo htmlspecialchars($user['name']); ?></span>
                         <!-- <i class="fas fa-chevron-down"></i> -->
@@ -298,7 +305,7 @@
         <div id="loginTab" class="auth-tab-content active">
             <h2 class="modal-title">Đăng nhập</h2>
             <div id="loginError" class="alert alert-error" style="display: none;"></div>
-            <form id="loginForm" method="POST" action="http://localhost/DuAn1/?route=auth/login">
+            <form id="loginForm" method="POST" action="<?php echo $baseUrl; ?>/?route=auth/login">
                 <div class="form-group-new">
                     <input type="email" name="email" required placeholder="Email" class="input-field">
                 </div>
@@ -323,7 +330,7 @@
         <div id="registerTab" class="auth-tab-content" style="display: none;">
             <h2 class="modal-title">Đăng ký</h2>
             <div id="registerError" class="alert alert-error" style="display: none;"></div>
-            <form id="registerForm" method="POST" action="http://localhost/DuAn1/?route=auth/register">
+            <form id="registerForm" method="POST" action="<?php echo $baseUrl; ?>/?route=auth/register">
                 <div class="form-group-new">
                     <input type="text" name="name" required placeholder="Họ và tên" class="input-field">
                 </div>

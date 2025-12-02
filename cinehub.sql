@@ -89,6 +89,7 @@ CREATE TABLE `booking_pending` (
   `customer_email` varchar(255) NOT NULL,
   `total_amount` decimal(10,2) NOT NULL,
   `vnp_txn_ref` varchar(100) DEFAULT NULL,
+  `qr_code` varchar(255) DEFAULT NULL,
   `status` enum('pending','completed','cancelled') DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `expires_at` timestamp NULL DEFAULT NULL

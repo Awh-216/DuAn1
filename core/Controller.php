@@ -30,7 +30,8 @@ class Controller {
     }
     
     protected function redirect($url) {
-        $base_url = 'http://localhost/DuAn1/';
+        // Lấy base URL từ request hiện tại hoặc config
+        $base_url = $this->getBaseUrl();
         
         // Nếu URL không bắt đầu bằng http hoặc ?route=, thêm ?route=
         if (strpos($url, 'http') !== 0 && strpos($url, '?route=') !== 0 && strpos($url, '/') !== 0) {
@@ -39,6 +40,16 @@ class Controller {
         
         header('Location: ' . $base_url . $url);
         exit;
+    }
+    
+    /**
+     * Lấy base URL từ request hiện tại hoặc config
+     */
+    protected function getBaseUrl() {
+        if (!class_exists('UrlHelper')) {
+            require_once __DIR__ . '/UrlHelper.php';
+        }
+        return UrlHelper::getBaseUrl() . '/';
     }
     
     protected function isLoggedIn() {

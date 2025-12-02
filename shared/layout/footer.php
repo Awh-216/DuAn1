@@ -40,22 +40,31 @@
                 <div class="footer-section">
                     <h3 class="footer-title">Danh mục</h3>
                     <ul class="footer-links">
-                        <li><a href="http://localhost/DuAn1/?route=movie/index">Phim mới</a></li>
-                        <li><a href="http://localhost/DuAn1/?route=movie/index">Phim hot</a></li>
-                        <li><a href="http://localhost/DuAn1/?route=movie/index">Phim lẻ</a></li>
-                        <li><a href="http://localhost/DuAn1/?route=movie/index">Phim bộ</a></li>
-                        <li><a href="http://localhost/DuAn1/?route=movie/index">Phim hoạt hình</a></li>
+                        <?php
+                        // Sử dụng UrlHelper để lấy base URL
+                        if (!isset($baseUrl)) {
+                            if (!class_exists('UrlHelper')) {
+                                require_once __DIR__ . '/../../core/UrlHelper.php';
+                            }
+                            $baseUrl = UrlHelper::getBaseUrl();
+                        }
+                        ?>
+                        <li><a href="<?php echo $baseUrl; ?>/?route=movie/index">Phim mới</a></li>
+                        <li><a href="<?php echo $baseUrl; ?>/?route=movie/index">Phim hot</a></li>
+                        <li><a href="<?php echo $baseUrl; ?>/?route=movie/index">Phim lẻ</a></li>
+                        <li><a href="<?php echo $baseUrl; ?>/?route=movie/index">Phim bộ</a></li>
+                        <li><a href="<?php echo $baseUrl; ?>/?route=movie/index">Phim hoạt hình</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-section">
                     <h3 class="footer-title">Thể loại</h3>
                     <ul class="footer-links">
-                        <li><a href="http://localhost/DuAn1/?route=movie/index&category=1">Hành động</a></li>
-                        <li><a href="http://localhost/DuAn1/?route=movie/index&category=2">Tình cảm</a></li>
-                        <li><a href="http://localhost/DuAn1/?route=movie/index&category=3">Hài</a></li>
-                        <li><a href="http://localhost/DuAn1/?route=movie/index&category=4">Kinh dị</a></li>
-                        <li><a href="http://localhost/DuAn1/?route=movie/index&category=5">Hoạt hình</a></li>
+                        <li><a href="<?php echo $baseUrl; ?>/?route=movie/index&category=1">Hành động</a></li>
+                        <li><a href="<?php echo $baseUrl; ?>/?route=movie/index&category=2">Tình cảm</a></li>
+                        <li><a href="<?php echo $baseUrl; ?>/?route=movie/index&category=3">Hài</a></li>
+                        <li><a href="<?php echo $baseUrl; ?>/?route=movie/index&category=4">Kinh dị</a></li>
+                        <li><a href="<?php echo $baseUrl; ?>/?route=movie/index&category=5">Hoạt hình</a></li>
                     </ul>
                 </div>
                 
@@ -66,7 +75,7 @@
                         <li><a href="#">Điều khoản sử dụng</a></li>
                         <li><a href="#">Chính sách bảo mật</a></li>
                         <li><a href="#">Liên hệ</a></li>
-                        <li><a href="http://localhost/DuAn1/?route=booking/index">Đặt vé xem phim</a></li>
+                        <li><a href="<?php echo $baseUrl; ?>/?route=booking/index">Đặt vé xem phim</a></li>
                     </ul>
                 </div>
             </div>

@@ -6,7 +6,14 @@
     <title><?php echo isset($title) ? $title . ' - ' : ''; ?>Quản lý rạp - CineHub</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="http://localhost/DuAn1/style.css">
+    <?php
+    // Sử dụng UrlHelper để lấy base URL
+    if (!class_exists('UrlHelper')) {
+        require_once __DIR__ . '/../../../../core/UrlHelper.php';
+    }
+    $baseUrl = UrlHelper::getBaseUrl();
+    ?>
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($baseUrl); ?>/style.css?v=<?php echo time(); ?>">
     <style>
         .moderator-sidebar {
             min-height: 100vh;

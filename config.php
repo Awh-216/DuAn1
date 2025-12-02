@@ -1,76 +1,36 @@
 <?php
-// Cấu hình database
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'cinehub');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_CHARSET', 'utf8mb4');
+/**
+ * Cấu hình cho ứng dụng CineHub
+ */
 
-// Cấu hình ứng dụng
-define('BASE_URL', 'http://localhost/DuAn1/');
-define('SITE_NAME', 'CineHub');
+// ============================================
+// CẤU HÌNH PUBLIC URL CHO QR CODE
+// ============================================
 
-// Cấu hình Email SMTP
-// Để gửi email thật, cần cấu hình thông tin SMTP dưới đây
-// Xem file HUONG_DAN_CAU_HINH_EMAIL.md để biết chi tiết
-// Ví dụ với Gmail:
-define('SMTP_HOST', 'smtp.gmail.com');
-define('SMTP_PORT', 587);
-define('SMTP_USERNAME', ''); // Email đầy đủ của bạn (VD: nguyenvana@gmail.com) - BẮT BUỘC phải có @ và domain
-define('SMTP_PASSWORD', ''); // App Password của Gmail (16 ký tự, không phải mật khẩu thường)
-define('SMTP_ENCRYPTION', 'tls'); // 'tls' hoặc 'ssl'
-define('SMTP_FROM_EMAIL', 'noreply@cinehub.com'); // Email gửi đi (thường giống SMTP_USERNAME)
-define('SMTP_FROM_NAME', 'CineHub'); // Tên người gửi
+// Cách 1: Sử dụng NGROK (Khuyến nghị cho development)
+// Sau khi chạy ngrok, copy URL và paste vào đây
+// Ví dụ: 'https://abc123.ngrok-free.app' hoặc 'https://abc123.ngrok.io'
+define('PUBLIC_BASE_URL', 'https://tressie-decurrent-nonpastorally.ngrok-free.dev');
 
-// Khởi động session
-session_start();
+// Cách 2: Sử dụng Domain/IP Public
+// - Nếu dùng domain: 'https://yourdomain.com'
+// - Nếu dùng IP public: 'http://123.456.789.0'
+// - Nếu dùng localhost: 'http://localhost' (mặc định)
 
-// Autoload classes
-spl_autoload_register(function ($class) {
-    $paths = [
-        __DIR__ . '/models/' . $class . '.php',
-        __DIR__ . '/controllers/' . $class . '.php',
-        __DIR__ . '/core/' . $class . '.php'
-    ];
-    
-    foreach ($paths as $path) {
-        if (file_exists($path)) {
-            require_once $path;
-            return;
-        }
-    }
-});
+// Tự động detect public URL từ request
+// Nếu true, sẽ tự động lấy từ $_SERVER['HTTP_HOST'] (hữu ích khi dùng ngrok)
+// Nếu false, sẽ sử dụng PUBLIC_BASE_URL ở trên
+// Đặt false để luôn dùng URL ngrok cố định
+define('AUTO_DETECT_PUBLIC_URL', false);
 
-// Kết nối database
-try {
-    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
-    $pdo = new PDO($dsn, DB_USER, DB_PASS);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch(PDOException $e) {
-    // Hiển thị lỗi chi tiết hơn
-    $error_message = "Lỗi kết nối database: " . $e->getMessage();
-    
-    // Kiểm tra nếu database chưa tồn tại
-    if (strpos($e->getMessage(), "Unknown database") !== false) {
-        $error_message .= "<br><br><strong>Database '" . DB_NAME . "' chưa tồn tại!</strong>";
-        $error_message .= "<br>Vui lòng:";
-        $error_message .= "<br>1. Mở phpMyAdmin (http://localhost/phpmyadmin)";
-        $error_message .= "<br>2. Tạo database tên 'cinehub'";
-        $error_message .= "<br>3. Hoặc chạy file database.sql để tự động tạo";
-        $error_message .= "<br>4. Hoặc truy cập <a href='test-db.php'>test-db.php</a> để kiểm tra và tự động tạo";
-    }
-    
-    // Kiểm tra nếu MySQL chưa chạy
-    if (strpos($e->getMessage(), "Connection refused") !== false || 
-        strpos($e->getMessage(), "Access denied") !== false) {
-        $error_message .= "<br><br><strong>Không thể kết nối đến MySQL!</strong>";
-        $error_message .= "<br>Vui lòng kiểm tra:";
-        $error_message .= "<br>1. XAMPP đã được khởi động chưa?";
-        $error_message .= "<br>2. MySQL service đã được bật chưa?";
-        $error_message .= "<br>3. Thông tin đăng nhập (username/password) có đúng không?";
-    }
-    
-    die($error_message);
-}
-?>
+// Path của ứng dụng (thường là /DuAn1 hoặc /)
+define('APP_PATH', '/DuAn1');
+
+// ============================================
+// HƯỚNG DẪN SỬ DỤNG NGROK
+// ============================================
+// 1. Tải ngrok từ: https://ngrok.com/download
+// 2. Chạy lệnh: ngrok http 80
+// 3. Copy URL từ ngrok (ví dụ: https://abc123.ngrok-free.app)
+// 4. Cập nhật PUBLIC_BASE_URL ở trên với URL đó
+// 5. Hoặc để AUTO_DETECT_PUBLIC_URL = true và truy cập qua ngrok URL

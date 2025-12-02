@@ -19,7 +19,18 @@ $title = 'Chọn Ghế';
                 <div class="screen">MÀN HÌNH</div>
             </div>
             
-            <form method="POST" action="http://localhost/DuAn1/?route=booking/process-booking" class="seat-form">
+            <?php
+            // Lấy base URL
+            $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
+            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
+            $appPath = dirname($scriptName);
+            if ($appPath === '/' || $appPath === '\\') {
+                $appPath = '';
+            }
+            $baseUrl = $protocol . "://" . $host . $appPath;
+            ?>
+            <form method="POST" action="<?php echo $baseUrl; ?>/?route=booking/process-booking" class="seat-form">
                 <input type="hidden" name="showtime_id" value="<?php echo $showtime['id']; ?>">
                 
                 <div class="seat-map">

@@ -12,6 +12,10 @@ class BookingModel {
         return $this->db->fetchAll("SELECT * FROM theaters ORDER BY name");
     }
     
+    public function getTheaterById($theater_id) {
+        return $this->db->fetch("SELECT * FROM theaters WHERE id = ?", [$theater_id]);
+    }
+    
     public function getTheatersByMovie($movie_id) {
         $today = date('Y-m-d');
         return $this->db->fetchAll("SELECT DISTINCT t.* FROM theaters t 
@@ -178,11 +182,13 @@ class BookingModel {
             $tickets = $this->db->fetchAll("SELECT t.*, s.show_date, s.show_time, 
                                            COALESCE(t.price, s.price) as price,
                                            m.title as movie_title, th.name as theater_name,
+                                           bp.qr_code as booking_qr_code, bp.id as booking_pending_id,
                                            'completed' as booking_type
                                            FROM tickets t 
                                            JOIN showtimes s ON t.showtime_id = s.id 
                                            JOIN movies m ON s.movie_id = m.id 
                                            JOIN theaters th ON s.theater_id = th.id 
+                                           LEFT JOIN booking_pending bp ON t.booking_pending_id = bp.id
                                            WHERE t.user_id = ? 
                                            ORDER BY t.created_at DESC", [$user_id]);
             
@@ -528,6 +534,7 @@ class BookingModel {
                         customer_email VARCHAR(255) NOT NULL,
                         total_amount DECIMAL(10,2) NOT NULL,
                         vnp_txn_ref VARCHAR(100) UNIQUE,
+                        qr_code VARCHAR(255) DEFAULT NULL,
                         status ENUM('pending','completed','cancelled') DEFAULT 'pending',
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         expires_at TIMESTAMP NULL,
@@ -608,6 +615,40 @@ class BookingModel {
             return true;
         } catch (Exception $e) {
             error_log("Error updating pending booking status: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Lấy pending booking theo ID
+     */
+    public function getPendingBookingById($id) {
+        try {
+            return $this->db->fetch("SELECT * FROM booking_pending WHERE id = ?", [$id]);
+        } catch (Exception $e) {
+            error_log("Error getting pending booking by ID: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Cập nhật QR code cho booking
+     */
+    public function updateBookingQRCode($booking_id, $qr_code) {
+        try {
+            // Đảm bảo cột qr_code tồn tại
+            $pdo = $this->db->getConnection();
+            try {
+                $pdo->exec("ALTER TABLE booking_pending ADD COLUMN qr_code VARCHAR(255) DEFAULT NULL");
+            } catch (Exception $e) {
+                // Cột đã tồn tại, bỏ qua
+            }
+            
+            $sql = "UPDATE booking_pending SET qr_code = ? WHERE id = ?";
+            $this->db->execute($sql, [$qr_code, $booking_id]);
+            return true;
+        } catch (Exception $e) {
+            error_log("Error updating booking QR code: " . $e->getMessage());
             return false;
         }
     }
@@ -697,10 +738,71 @@ class BookingModel {
     
     public function getTheaterInfo($theater_id) {
         try {
-            return $this->db->fetch("SELECT id, name, location FROM theaters WHERE id = ?", [$theater_id]);
+            return $this->getTheaterById($theater_id);
         } catch (Exception $e) {
             error_log("Error getting theater info: " . $e->getMessage());
             return null;
+        }
+    }
+    
+    /**
+     * Lấy vé theo booking_id
+     * @param int $booking_id ID của booking
+     * @param int|null $user_id ID của user (null nếu không cần kiểm tra user, dùng cho verify QR code)
+     */
+    public function getTicketsByBookingId($booking_id, $user_id = null) {
+        if ($user_id !== null) {
+            return $this->db->fetchAll("
+                SELECT t.*, s.show_date, s.show_time, s.price as showtime_price,
+                       m.title as movie_title, th.name as theater_name
+                FROM tickets t
+                JOIN showtimes s ON t.showtime_id = s.id
+                JOIN movies m ON s.movie_id = m.id
+                JOIN theaters th ON s.theater_id = th.id
+                WHERE t.booking_pending_id = ? AND t.user_id = ?
+                ORDER BY t.seat
+            ", [$booking_id, $user_id]);
+        } else {
+            // Không kiểm tra user_id (dùng cho verify QR code)
+            return $this->db->fetchAll("
+                SELECT t.*, s.show_date, s.show_time, s.price as showtime_price,
+                       m.title as movie_title, th.name as theater_name
+                FROM tickets t
+                JOIN showtimes s ON t.showtime_id = s.id
+                JOIN movies m ON s.movie_id = m.id
+                JOIN theaters th ON s.theater_id = th.id
+                WHERE t.booking_pending_id = ?
+                ORDER BY t.seat
+            ", [$booking_id]);
+        }
+    }
+    
+    /**
+     * Lấy một vé theo ID
+     * @param int $ticket_id ID của vé
+     * @param int|null $user_id ID của user (null nếu không cần kiểm tra user, dùng cho verify QR code)
+     */
+    public function getTicketById($ticket_id, $user_id = null) {
+        if ($user_id !== null) {
+            return $this->db->fetch("
+                SELECT t.*, s.show_date, s.show_time, s.price as showtime_price,
+                       m.title as movie_title, th.name as theater_name
+                FROM tickets t
+                JOIN showtimes s ON t.showtime_id = s.id
+                JOIN movies m ON s.movie_id = m.id
+                JOIN theaters th ON s.theater_id = th.id
+                WHERE t.id = ? AND t.user_id = ?
+            ", [$ticket_id, $user_id]);
+        } else {
+            return $this->db->fetch("
+                SELECT t.*, s.show_date, s.show_time, s.price as showtime_price,
+                       m.title as movie_title, th.name as theater_name
+                FROM tickets t
+                JOIN showtimes s ON t.showtime_id = s.id
+                JOIN movies m ON s.movie_id = m.id
+                JOIN theaters th ON s.theater_id = th.id
+                WHERE t.id = ?
+            ", [$ticket_id]);
         }
     }
 }

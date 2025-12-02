@@ -1,4 +1,18 @@
 <?php
+// Load config nếu có
+$configFile = __DIR__ . '/config.php';
+if (file_exists($configFile)) {
+    require_once $configFile;
+}
+
+// Load UrlHelper
+require_once __DIR__ . '/core/UrlHelper.php';
+
+// Bypass ngrok warning page
+if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'ngrok') !== false) {
+    header('ngrok-skip-browser-warning: true');
+}
+
 // Khởi động session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
