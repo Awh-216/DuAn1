@@ -3,11 +3,11 @@
         'name' => 'cinehub/ticket-system',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '23ff5131400bec0db1ad9e291b41fb9950dde2f7',
+        'reference' => '8dd6d762d093fe8a4542dc09535f075acef0bccb',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'dev' => true,
+        'dev' => false,
     ),
     'versions' => array(
         'bacon/bacon-qr-code' => array(
@@ -22,7 +22,7 @@
         'cinehub/ticket-system' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '23ff5131400bec0db1ad9e291b41fb9950dde2f7',
+            'reference' => '8dd6d762d093fe8a4542dc09535f075acef0bccb',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -34,15 +34,6 @@
             'reference' => 'b5874fa9ed0043116c72162ec7f4fb50e02e7cce',
             'type' => 'library',
             'install_path' => __DIR__ . '/../dasprid/enum',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
-        'endroid/qr-code' => array(
-            'pretty_version' => '4.8.5',
-            'version' => '4.8.5.0',
-            'reference' => '0db25b506a8411a5e1644ebaa67123a6eb7b6a77',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../endroid/qr-code',
             'aliases' => array(),
             'dev_requirement' => false,
         ),

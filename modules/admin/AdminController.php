@@ -697,16 +697,23 @@ class AdminController extends Controller {
                     return;
                 }
             }
+            // Lấy giá ghế từ form (nếu là phim chiếu rạp)
+            $normal_price = intval($_POST['normal_price'] ?? 90000);
+            $vip_price = intval($_POST['vip_price'] ?? 120000);
+            $couple_price = intval($_POST['couple_price'] ?? 180000);
+            
             $db->execute("
                 INSERT INTO movies (
                     title, category_id, level, duration, description, director, actors,
                     video_url, trailer_url, thumbnail, status, status_admin, rating,
-                    country, language, age_rating, banner, type
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    country, language, age_rating, banner, type,
+                    normal_price, vip_price, couple_price
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ", [
                 $title, $category_id, $level, $duration, $description, $director, $actors,
                 $video_url, $trailer_url, $thumbnail, $status, $status_admin, $rating,
-                $country, $language, $age_rating, $banner, $type
+                $country, $language, $age_rating, $banner, $type,
+                $normal_price, $vip_price, $couple_price
             ]);
             
             $movie_id = $db->lastInsertId();
@@ -1155,6 +1162,11 @@ class AdminController extends Controller {
                 $video_url = $oldMovie['video_url'];
             }
             
+            // Lấy giá ghế từ form
+            $normal_price = intval($_POST['normal_price'] ?? 90000);
+            $vip_price = intval($_POST['vip_price'] ?? 120000);
+            $couple_price = intval($_POST['couple_price'] ?? 180000);
+            
             // Chuẩn bị dữ liệu
             $updateParams = [
                 $title, 
@@ -1174,7 +1186,10 @@ class AdminController extends Controller {
                 $language, 
                 $age_rating, 
                 $banner, 
-                $type, 
+                $type,
+                $normal_price,
+                $vip_price,
+                $couple_price,
                 $id
             ];
             
@@ -1184,7 +1199,8 @@ class AdminController extends Controller {
                     title = ?, category_id = ?, level = ?, duration = ?, description = ?,
                     director = ?, actors = ?, video_url = ?, trailer_url = ?, thumbnail = ?,
                     status = ?, status_admin = ?, rating = ?, country = ?, language = ?,
-                    age_rating = ?, banner = ?, type = ?
+                    age_rating = ?, banner = ?, type = ?,
+                    normal_price = ?, vip_price = ?, couple_price = ?
                 WHERE id = ?
             ";
             

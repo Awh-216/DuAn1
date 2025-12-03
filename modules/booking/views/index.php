@@ -1706,25 +1706,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Kiểm tra xem có thời gian bắt đầu đã lưu không (TRƯỚC KHI set mới)
         const savedStartTime = sessionStorage.getItem('showtimeStartTime');
         const savedShowtimeId = sessionStorage.getItem('selectedShowtimeId');
-        const savedTheaterId = sessionStorage.getItem('selectedTheaterId');
         
-        // Tạo key duy nhất cho showtime + theater để tránh reset khi chuyển phòng và quay lại
-        const currentKey = showtimeIdFromUrl + '_' + (theaterIdFromUrl || '');
-        const savedKey = savedShowtimeId + '_' + (savedTheaterId || '');
-        
-        // Nếu showtime_id hoặc theater_id thay đổi hoặc chưa có timer, tạo mới
-        if (!savedStartTime || currentKey !== savedKey) {
+        // Chỉ so sánh showtime_id để tránh reset khi reload trang
+        // Nếu showtime_id thay đổi hoặc chưa có timer, tạo mới
+        if (!savedStartTime || showtimeIdFromUrl !== savedShowtimeId) {
             showtimeStartTime = Date.now();
             sessionStorage.setItem('showtimeStartTime', showtimeStartTime.toString());
             sessionStorage.setItem('selectedShowtimeId', showtimeIdFromUrl);
-            if (theaterIdFromUrl) {
-                sessionStorage.setItem('selectedTheaterId', theaterIdFromUrl);
-            }
-            console.log('Created new timer start time for showtime:', showtimeIdFromUrl, 'theater:', theaterIdFromUrl);
+            console.log('Created new timer start time for showtime:', showtimeIdFromUrl);
         } else {
-            // Sử dụng timer hiện có, KHÔNG reset
+            // Sử dụng timer hiện có, KHÔNG reset khi reload
             showtimeStartTime = parseInt(savedStartTime);
-            console.log('Using existing timer for showtime:', showtimeIdFromUrl, 'theater:', theaterIdFromUrl);
+            console.log('Using existing timer for showtime:', showtimeIdFromUrl, 'remaining:', Math.floor((SHOWTIME_DURATION - (Date.now() - showtimeStartTime)) / 1000), 'seconds');
         }
         
         // Đợi DOM load xong rồi khởi động timer NGAY
@@ -1757,9 +1750,10 @@ document.addEventListener('DOMContentLoaded', function() {
             echo 'null';
         }
     ?>;
-    const normalPrice = (seatLayout && seatLayout.normal_price) ? seatLayout.normal_price : pricePerSeat;
-    const vipPrice = (seatLayout && seatLayout.vip_price) ? seatLayout.vip_price : (pricePerSeat * 1.5);
-    const couplePrice = (seatLayout && seatLayout.couple_price) ? seatLayout.couple_price : (pricePerSeat * 2);
+    // Giá ghế từ PHP (đã tính từ movie hoặc seatLayout)
+    const normalPrice = <?php echo isset($normalPrice) ? (int)$normalPrice : 90000; ?>;
+    const vipPrice = <?php echo isset($vipPrice) ? (int)$vipPrice : 120000; ?>;
+    const couplePrice = <?php echo isset($couplePrice) ? (int)$couplePrice : 180000; ?>;
     
     // Timer variables đã được khai báo ở trên
     
@@ -2464,32 +2458,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Kiểm tra xem có thời gian bắt đầu đã lưu trong sessionStorage không
         const savedStartTime = sessionStorage.getItem('showtimeStartTime');
         const savedShowtimeId = sessionStorage.getItem('selectedShowtimeId');
-        const savedTheaterId = sessionStorage.getItem('selectedTheaterId');
         
-        // Tạo key duy nhất cho showtime + theater
-        const currentKey = currentShowtimeId + '_' + currentTheaterId;
-        const savedKey = (savedShowtimeId || '') + '_' + (savedTheaterId || '');
-        
-        // Chỉ tạo timer mới nếu:
-        // 1. Chưa có timer nào đang chạy
-        // 2. Hoặc showtime_id hoặc theater_id đã thay đổi (chọn showtime/theater mới)
-        if (savedStartTime && currentKey === savedKey && showtimeTimer) {
-            // Timer đã tồn tại và đang chạy cho cùng showtime và theater, không reset
+        // Chỉ so sánh showtime_id để tránh reset khi reload
+        if (savedStartTime && currentShowtimeId === savedShowtimeId) {
+            // Sử dụng timer đã lưu, KHÔNG reset khi reload
             showtimeStartTime = parseInt(savedStartTime);
-            console.log('Using existing timer for showtime:', currentShowtimeId, 'theater:', currentTheaterId);
-        } else if (savedStartTime && currentKey === savedKey) {
-            // Có timer đã lưu nhưng chưa chạy, sử dụng lại
-            showtimeStartTime = parseInt(savedStartTime);
-            console.log('Resuming existing timer for showtime:', currentShowtimeId, 'theater:', currentTheaterId);
+            console.log('Using existing timer for showtime:', currentShowtimeId);
         } else {
-            // Tạo timer mới hoặc reset khi chọn showtime/theater mới
+            // Tạo timer mới khi chọn showtime mới
             showtimeStartTime = Date.now();
             sessionStorage.setItem('showtimeStartTime', showtimeStartTime.toString());
             sessionStorage.setItem('selectedShowtimeId', currentShowtimeId);
-            if (currentTheaterId) {
-                sessionStorage.setItem('selectedTheaterId', currentTheaterId);
-            }
-            console.log('Starting new timer for showtime:', currentShowtimeId, 'theater:', currentTheaterId);
+            console.log('Starting new timer for showtime:', currentShowtimeId);
         }
         
         // Hiển thị timer element

@@ -1,7 +1,10 @@
 # Enable rewrite engine
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
+    
+    # LOCAL: RewriteBase /DuAn1/
+    # HOSTING: RewriteBase /
+    RewriteBase /DuAn1/
     
     # Redirect to index.php if file doesn't exist
     RewriteCond %{REQUEST_FILENAME} !-f

@@ -3,14 +3,28 @@ class Database {
     private static $instance = null;
     private $pdo;
     
-    // Cấu hình database - kết nối trực tiếp
+    // ============================================
+    // CẤU HÌNH DATABASE - LOCAL (XAMPP)
+    // ============================================
     private $host = 'localhost';
-    private $port = 3306; // Port MySQL (kiểm tra trong phpMyAdmin config.inc.php)
+    private $port = 3306;        // XAMPP: 3306, MAMP: 8889
     private $dbname = 'cinehub';
-    private $username = 'cinehub';
-    private $password = 'Cinehub1234@';
+    private $username = 'root';
+    private $password = '';      // XAMPP: '' (rỗng), MAMP: 'root'
     private $charset = 'utf8mb4';
     
+    // ============================================
+    // CẤU HÌNH DATABASE - HOSTING (uncomment khi upload)
+    // ============================================
+    // private $host = 'localhost';
+    // private $port = 3306;
+    // private $dbname = 'cinehub';
+    // private $username = 'cinehub';
+    // private $password = 'Cinehub1234@';
+    // private $charset = 'utf8mb4';
+
+
+
     private function __construct() {
         try {
             $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbname};charset={$this->charset}";

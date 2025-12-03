@@ -695,20 +695,52 @@ class BookingModel {
         return 'normal';
     }
     
-    public function getSeatPrice($seat, $layout, $base_price) {
-        if (!$layout) {
-            return $base_price;
-        }
-        
+    public function getSeatPrice($seat, $layout, $base_price, $movie = null) {
         $seat_type = $this->getSeatType($seat, $layout);
         
+        // Ưu tiên lấy giá từ layout (phòng chiếu) vì giá theo loại phòng (2D, 3D, IMAX...)
+        if ($layout) {
+            switch ($seat_type) {
+                case 'vip':
+                    return $layout['vip_price'] ?? ($base_price * 1.5);
+                case 'couple':
+                    return $layout['couple_price'] ?? ($base_price * 2);
+                default:
+                    return $layout['normal_price'] ?? $base_price;
+            }
+        }
+        
+        // Fallback: lấy từ movie hoặc tính từ base_price
+        if ($movie) {
+            switch ($seat_type) {
+                case 'vip':
+                    return $movie['vip_price'] ?? ($base_price * 1.5);
+                case 'couple':
+                    return $movie['couple_price'] ?? ($base_price * 2);
+                default:
+                    return $movie['normal_price'] ?? $base_price;
+            }
+        }
+        
+        // Fallback cuối: tính từ base_price
         switch ($seat_type) {
             case 'vip':
-                return $layout['vip_price'] ?? ($base_price * 1.5);
+                return $base_price * 1.5;
             case 'couple':
-                return $layout['couple_price'] ?? ($base_price * 2);
+                return $base_price * 2;
             default:
-                return $layout['normal_price'] ?? $base_price;
+                return $base_price;
+        }
+    }
+    
+    /**
+     * Lấy giá ghế từ movie theo movie_id
+     */
+    public function getMoviePrices($movie_id) {
+        try {
+            return $this->db->fetch("SELECT normal_price, vip_price, couple_price FROM movies WHERE id = ?", [$movie_id]);
+        } catch (Exception $e) {
+            return null;
         }
     }
     

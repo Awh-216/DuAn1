@@ -253,13 +253,33 @@
                 </div>
             </div>
             
+            <?php
+            // Lấy giá từ showtime hoặc movie
+            $normalPrice = $movie['normal_price'] ?? 90000;
+            $vipPrice = $movie['vip_price'] ?? 120000;
+            $couplePrice = $movie['couple_price'] ?? 180000;
+            ?>
             <div class="row mb-3">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Giá vé mặc định (VNĐ) <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" id="defaultPrice" name="default_price" min="0" step="1000" 
-                           value="<?php echo isset($existingShowtimes) && !empty($existingShowtimes) ? $existingShowtimes[0]['price'] : '120000'; ?>" required>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Giá ghế thường (VNĐ) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="normalPrice" name="normal_price" min="0" step="1000" 
+                           value="<?php echo $normalPrice; ?>" required>
+                    <small class="text-muted">Ghế hàng A, B, C</small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Giá ghế VIP (VNĐ) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="vipPrice" name="vip_price" min="0" step="1000" 
+                           value="<?php echo $vipPrice; ?>" required>
+                    <small class="text-muted">Ghế hàng D-K</small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Giá ghế đôi (VNĐ) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="couplePrice" name="couple_price" min="0" step="1000" 
+                           value="<?php echo $couplePrice; ?>" required>
+                    <small class="text-muted">Ghế hàng cuối (L)</small>
                 </div>
             </div>
+            <input type="hidden" name="default_price" id="defaultPrice" value="<?php echo $vipPrice; ?>">
             
             <div class="row mb-3">
                 <div class="col-md-6 mb-3">

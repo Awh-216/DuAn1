@@ -189,11 +189,23 @@
             </div>
             
             <div class="row mb-3">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Giá vé mặc định (VNĐ) <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" id="defaultPrice" name="default_price" min="0" step="1000" value="120000" required>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Giá ghế thường (VNĐ) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="normalPrice" name="normal_price" min="0" step="1000" value="90000" required>
+                    <small class="text-muted">Ghế hàng A, B, C</small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Giá ghế VIP (VNĐ) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="vipPrice" name="vip_price" min="0" step="1000" value="120000" required>
+                    <small class="text-muted">Ghế hàng D-K</small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Giá ghế đôi (VNĐ) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="couplePrice" name="couple_price" min="0" step="1000" value="180000" required>
+                    <small class="text-muted">Ghế hàng cuối (L)</small>
                 </div>
             </div>
+            <input type="hidden" name="default_price" id="defaultPrice" value="120000">
             
             <div class="row mb-3">
                 <div class="col-md-6 mb-3">

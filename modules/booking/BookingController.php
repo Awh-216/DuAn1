@@ -202,6 +202,11 @@ class BookingController extends Controller {
             
             $user = $this->getCurrentUser();
             
+            // Lấy giá từ seatLayout (phòng chiếu) - ưu tiên vì giá theo loại phòng (2D, 3D, IMAX...)
+            $normalPrice = $seatLayout['normal_price'] ?? 90000;
+            $vipPrice = $seatLayout['vip_price'] ?? 120000;
+            $couplePrice = $seatLayout['couple_price'] ?? 180000;
+            
             $this->view('booking/index', [
                 'allMovies' => $allMovies,
                 'theaters' => $theaters,
@@ -216,9 +221,9 @@ class BookingController extends Controller {
                 'bookedSeats' => $bookedSeats,
                 'reservedSeats' => $reservedSeats,
                 'seatLayout' => $seatLayout,
-                'normalPrice' => $seatLayout['normal_price'] ?? 120000,
-                'vipPrice' => $seatLayout['vip_price'] ?? 180000,
-                'couplePrice' => $seatLayout['couple_price'] ?? 240000,
+                'normalPrice' => $normalPrice,
+                'vipPrice' => $vipPrice,
+                'couplePrice' => $couplePrice,
                 'foodItems' => $foodItems,
                 'user' => $user,
                 'screenInfo' => $screenInfo ?? null,
@@ -296,6 +301,11 @@ class BookingController extends Controller {
                     }
                 }
                 
+            // Lấy giá từ seatLayout (phòng chiếu)
+            $normalPrice = $seatLayout['normal_price'] ?? 90000;
+            $vipPrice = $seatLayout['vip_price'] ?? 120000;
+            $couplePrice = $seatLayout['couple_price'] ?? 180000;
+            
             $this->view('booking/index', [
                 'allMovies' => $allMovies,
                 'theaters' => $theaters,
@@ -310,9 +320,9 @@ class BookingController extends Controller {
                 'bookedSeats' => $bookedSeats,
                 'reservedSeats' => $reservedSeats,
                 'seatLayout' => $seatLayout,
-                'normalPrice' => $seatLayout['normal_price'] ?? 120000,
-                'vipPrice' => $seatLayout['vip_price'] ?? 180000,
-                'couplePrice' => $seatLayout['couple_price'] ?? 240000,
+                'normalPrice' => $normalPrice,
+                'vipPrice' => $vipPrice,
+                'couplePrice' => $couplePrice,
                 'user' => $user
             ]);
             } catch (Exception $e2) {
@@ -995,13 +1005,23 @@ class BookingController extends Controller {
             return;
         }
         
+        // Lấy giá ghế từ movie
+        $moviePrices = $bookingModel->getMoviePrices($showtime['movie_id']);
+        
         // Tính tổng tiền
         $totalAmount = 0;
+        error_log("=== PRICE CALCULATION ===");
+        error_log("Showtime price (base): " . $showtime['price']);
+        error_log("Movie prices: " . ($moviePrices ? json_encode($moviePrices) : 'NULL'));
+        error_log("Seat layout: " . ($seatLayout ? json_encode($seatLayout) : 'NULL'));
+        
         foreach ($seats as $seat) {
             $seat_type = $bookingModel->getSeatType($seat, $seatLayout);
-            $seat_price = $bookingModel->getSeatPrice($seat, $seatLayout, $showtime['price']);
+            $seat_price = $bookingModel->getSeatPrice($seat, $seatLayout, $showtime['price'], $moviePrices);
+            error_log("Seat: $seat, Type: $seat_type, Price: $seat_price");
             $totalAmount += $seat_price;
         }
+        error_log("Total seats price: $totalAmount");
         
         // Tính tiền food items
         if (!empty($food_items)) {
@@ -2136,6 +2156,9 @@ class BookingController extends Controller {
             $seatLayout = $bookingModel->getScreenSeatLayout($showtime['screen_id']);
         }
         
+        // Lấy giá ghế từ movie
+        $moviePrices = $bookingModel->getMoviePrices($showtime['movie_id']);
+        
         $db = Database::getInstance()->getConnection();
         $createdTickets = [];
         
@@ -2153,7 +2176,7 @@ class BookingController extends Controller {
                 }
                 
                 $seat_type = $bookingModel->getSeatType($seat, $seatLayout);
-                $seat_price = $bookingModel->getSeatPrice($seat, $seatLayout, $showtime['price']);
+                $seat_price = $bookingModel->getSeatPrice($seat, $seatLayout, $showtime['price'], $moviePrices);
                 
                 $qr_code = uniqid('TICKET_') . '_' . $user['id'] . '_' . $showtime_id . '_' . time() . '_' . $seat;
                 
@@ -2614,11 +2637,10 @@ class BookingController extends Controller {
                     die('Không tìm thấy QR code!');
                 }
                 
-                // Kiểm tra xem file QR code đã tồn tại chưa
-                $qrFiles = glob(__DIR__ . '/../../data/qr_codes/booking_' . $booking_id . '_*.png');
+                // Kiểm tra file SVG hoặc PNG
+                $qrFiles = glob(__DIR__ . '/../../data/qr_codes/booking_' . $booking_id . '_*.{svg,png}', GLOB_BRACE);
                 
                 if (!empty($qrFiles) && file_exists($qrFiles[0])) {
-                    // File đã tồn tại, sử dụng file đó
                     $qrFilePath = $qrFiles[0];
                 } else {
                     // Tạo QR code mới
@@ -2633,7 +2655,7 @@ class BookingController extends Controller {
                     }
                 }
             }
-            // Nếu có ticket_id, hiển thị QR code của ticket (tương thích ngược)
+            // Nếu có ticket_id
             else if ($ticket_id) {
                 $this->requireLogin();
                 $user = $this->getCurrentUser();
@@ -2645,21 +2667,17 @@ class BookingController extends Controller {
                     die('Không tìm thấy QR code!');
                 }
                 
-                // Kiểm tra xem file QR code đã tồn tại chưa
-                $qrFiles = glob(__DIR__ . '/../../data/qr_codes/ticket_' . $ticket_id . '_*.png');
+                $qrFiles = glob(__DIR__ . '/../../data/qr_codes/ticket_' . $ticket_id . '_*.{svg,png}', GLOB_BRACE);
                 
                 if (!empty($qrFiles) && file_exists($qrFiles[0])) {
-                    // File đã tồn tại, sử dụng file đó
                     $qrFilePath = $qrFiles[0];
                 } else {
-                    // Tạo QR code mới
                     $qrResult = $qrService->generateQRCode($ticket['qr_code'], $ticket_id);
                     
                     if ($qrResult['success'] && file_exists($qrResult['file_path'])) {
                         $qrFilePath = $qrResult['file_path'];
                     } else {
                         http_response_code(500);
-                        error_log("QR code generation failed: " . ($qrResult['error'] ?? 'Unknown error'));
                         die('Không thể tạo QR code!');
                     }
                 }
@@ -2667,26 +2685,28 @@ class BookingController extends Controller {
             
             // Hiển thị QR code
             if ($qrFilePath && file_exists($qrFilePath)) {
-                // Clear any output before sending image
                 while (ob_get_level()) {
                     ob_end_clean();
                 }
                 
-                header('Content-Type: image/png');
+                // Xác định content type dựa trên extension
+                $ext = strtolower(pathinfo($qrFilePath, PATHINFO_EXTENSION));
+                $contentType = ($ext === 'svg') ? 'image/svg+xml' : 'image/png';
+                
+                header('Content-Type: ' . $contentType);
                 header('Content-Length: ' . filesize($qrFilePath));
                 header('Cache-Control: public, max-age=3600');
                 readfile($qrFilePath);
                 exit;
             } else {
                 http_response_code(500);
-                error_log("QR code file not found: " . $qrFilePath);
                 die('Không tìm thấy file QR code!');
             }
             
         } catch (Exception $e) {
             error_log("Error showing QR code: " . $e->getMessage());
             http_response_code(500);
-            die('Có lỗi xảy ra!');
+            die('Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
     

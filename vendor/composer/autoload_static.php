@@ -4,13 +4,9 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit01e48d559185bbc3e280f6d0b51cfed3
+class ComposerStaticInit645c24b7730f8a2a28ebb2621cb0da4a
 {
     public static $prefixLengthsPsr4 = array (
-        'E' =>
-        array (
-            'Endroid\\QrCode\\' => 15,
-        ),
         'D' =>
         array (
             'DASPRiD\\Enum\\' => 13,
@@ -26,10 +22,6 @@ class ComposerStaticInit01e48d559185bbc3e280f6d0b51cfed3
     );
 
     public static $prefixDirsPsr4 = array (
-        'Endroid\\QrCode\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/endroid/qr-code/src',
-        ),
         'DASPRiD\\Enum\\' =>
         array (
             0 => __DIR__ . '/..' . '/dasprid/enum/src',
@@ -63,9 +55,9 @@ class ComposerStaticInit01e48d559185bbc3e280f6d0b51cfed3
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit01e48d559185bbc3e280f6d0b51cfed3::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit01e48d559185bbc3e280f6d0b51cfed3::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit01e48d559185bbc3e280f6d0b51cfed3::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit645c24b7730f8a2a28ebb2621cb0da4a::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit645c24b7730f8a2a28ebb2621cb0da4a::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit645c24b7730f8a2a28ebb2621cb0da4a::$classMap;
 
         }, null, ClassLoader::class);
     }
