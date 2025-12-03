@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 30, 2025 lúc 07:40 PM
+-- Thời gian đã tạo: Th12 03, 2025 lúc 03:20 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -89,25 +89,29 @@ CREATE TABLE `booking_pending` (
   `customer_email` varchar(255) NOT NULL,
   `total_amount` decimal(10,2) NOT NULL,
   `vnp_txn_ref` varchar(100) DEFAULT NULL,
-  `qr_code` varchar(255) DEFAULT NULL,
   `status` enum('pending','completed','cancelled') DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `expires_at` timestamp NULL DEFAULT NULL
+  `expires_at` timestamp NULL DEFAULT NULL,
+  `qr_code` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `booking_pending`
 --
 
-INSERT INTO `booking_pending` (`id`, `user_id`, `showtime_id`, `seats`, `food_items`, `customer_email`, `total_amount`, `vnp_txn_ref`, `status`, `created_at`, `expires_at`) VALUES
-(1, 9, 357, '[\"E9\",\"E10\"]', '{\"1\":\"0\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"0\",\"8\":\"0\",\"6\":\"0\",\"7\":\"0\"}', 'nguyenvanlinh25062006@gmail.com', 400000.00, 'BOOKING_9_357_1764295710_8141', 'completed', '2025-11-28 02:08:30', '2025-11-27 20:23:30'),
-(2, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764524690_6680', 'pending', '2025-11-30 17:44:50', '2025-11-30 11:54:50'),
-(3, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764524692_8687', 'pending', '2025-11-30 17:44:52', '2025-11-30 11:54:52'),
-(4, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764524694_6275', 'pending', '2025-11-30 17:44:54', '2025-11-30 11:54:54'),
-(5, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764524696_2416', 'pending', '2025-11-30 17:44:56', '2025-11-30 11:54:56'),
-(6, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764524698_4626', 'pending', '2025-11-30 17:44:58', '2025-11-30 11:54:58'),
-(7, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764524731_1057', 'pending', '2025-11-30 17:45:31', '2025-11-30 11:55:31'),
-(8, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764526271_9745', 'cancelled', '2025-11-30 18:11:11', '2025-11-30 12:21:11');
+INSERT INTO `booking_pending` (`id`, `user_id`, `showtime_id`, `seats`, `food_items`, `customer_email`, `total_amount`, `vnp_txn_ref`, `status`, `created_at`, `expires_at`, `qr_code`) VALUES
+(1, 9, 357, '[\"E9\",\"E10\"]', '{\"1\":\"0\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"0\",\"8\":\"0\",\"6\":\"0\",\"7\":\"0\"}', 'nguyenvanlinh25062006@gmail.com', 400000.00, 'BOOKING_9_357_1764295710_8141', 'completed', '2025-11-28 02:08:30', '2025-11-27 20:23:30', 'BOOKING_692e5744c04bd_1_1764644676'),
+(8, 9, 360, '[\"E7\",\"E8\",\"E9\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 600000.00, 'BOOKING_9_360_1764526271_9745', 'cancelled', '2025-11-30 18:11:11', '2025-11-30 12:21:11', NULL),
+(9, 9, 77, '[\"E3\",\"E4\",\"E5\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 525000.00, 'BOOKING_9_77_1764637319_4705', 'cancelled', '2025-12-02 01:01:59', '2025-12-01 19:11:59', NULL),
+(10, 9, 359, '[\"G5\",\"G6\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 360000.00, 'BOOKING_9_359_1764639648_1442', 'completed', '2025-12-02 01:40:48', '2025-12-01 19:50:48', 'BOOKING_692e5744b4a65_10_1764644676'),
+(11, 9, 359, '[\"G7\",\"G8\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 360000.00, 'BOOKING_9_359_1764640044_4658', 'completed', '2025-12-02 01:47:24', '2025-12-01 19:57:24', 'BOOKING_692e5744ab279_11_1764644676'),
+(12, 9, 359, '[\"F5\",\"F6\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 360000.00, 'BOOKING_9_359_1764641316_9484', 'completed', '2025-12-02 02:08:36', '2025-12-01 20:18:36', 'BOOKING_692e5744a1215_12_1764644676'),
+(13, 9, 359, '[\"F7\",\"F8\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 360000.00, 'BOOKING_9_359_1764641589_7388', 'completed', '2025-12-02 02:13:09', '2025-12-01 20:23:09', 'BOOKING_692e57448da90_13_1764644676'),
+(14, 9, 359, '[\"E7\",\"E8\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 360000.00, 'BOOKING_9_359_1764646695_8977', 'completed', '2025-12-02 03:38:15', '2025-12-01 21:48:15', 'BOOKING_692e5f4261e49_14_1764646722'),
+(15, 9, 324, '[\"I5\",\"I6\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 400000.00, 'BOOKING_9_324_1764647807_5974', 'completed', '2025-12-02 03:56:47', '2025-12-01 22:06:47', 'BOOKING_692e63f0b03d0_15_1764647920'),
+(16, 9, 321, '[\"I6\",\"I7\",\"I8\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 630000.00, 'BOOKING_9_321_1764648560_7856', 'completed', '2025-12-02 04:09:20', '2025-12-01 22:19:20', 'BOOKING_692e66988132e_16_1764648600'),
+(17, 9, 81, '[\"G4\",\"G5\",\"G6\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 510000.00, 'BOOKING_9_81_1764648968_2995', 'completed', '2025-12-02 04:16:08', '2025-12-01 22:26:08', 'BOOKING_692e682b362d2_17_1764649003'),
+(18, 9, 328, '[\"I4\",\"I5\",\"I6\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 630000.00, 'BOOKING_9_328_1764726288_9425', 'completed', '2025-12-03 01:44:48', '2025-12-02 19:54:48', 'BOOKING_692f9641bfe05_18_1764726337');
 
 -- --------------------------------------------------------
 
@@ -138,12 +142,18 @@ INSERT INTO `booking_session_tracking` (`id`, `user_id`, `showtime_id`, `screen_
 (2, 9, 354, 12, '2025-11-28 08:03:46', NULL, 0, 0, 0, NULL, '2025-11-28 01:03:46'),
 (3, 9, 355, 12, '2025-11-28 08:28:23', NULL, 0, 0, 0, NULL, '2025-11-28 01:28:23'),
 (4, 9, 352, 11, '2025-11-28 08:29:20', NULL, 0, 0, 0, NULL, '2025-11-28 01:29:20'),
-(5, 9, 353, 11, '2025-11-28 08:29:41', NULL, 0, 0, 0, NULL, '2025-11-28 01:29:41'),
+(5, 9, 353, 11, '2025-11-28 08:29:41', '2025-12-02 10:56:16', 332795, 2, 1, '2025-12-02 05:06:16', '2025-11-28 01:29:41'),
 (6, 3, 354, 12, '2025-11-28 08:31:52', NULL, 0, 0, 0, NULL, '2025-11-28 01:31:52'),
-(7, 9, 356, 11, '2025-11-28 08:46:36', NULL, 0, 0, 0, NULL, '2025-11-28 01:46:36'),
-(8, 9, 357, 12, '2025-11-28 08:46:38', NULL, 0, 0, 0, NULL, '2025-11-28 01:46:38'),
+(7, 9, 356, 11, '2025-11-28 08:46:36', '2025-12-02 10:55:52', 331756, 1, 0, NULL, '2025-11-28 01:46:36'),
+(8, 9, 357, 12, '2025-11-28 08:46:38', '2025-12-02 10:56:04', 331766, 1, 0, NULL, '2025-11-28 01:46:38'),
 (9, 9, 191, 1, '2025-11-28 09:12:14', NULL, 0, 0, 0, NULL, '2025-11-28 02:12:14'),
-(10, 9, 360, 12, '2025-12-01 00:44:40', NULL, 0, 0, 0, NULL, '2025-11-30 17:44:40');
+(10, 9, 360, 12, '2025-12-01 00:44:40', NULL, 0, 0, 0, NULL, '2025-11-30 17:44:40'),
+(11, 9, 77, 7, '2025-12-02 08:01:49', NULL, 0, 0, 0, NULL, '2025-12-02 01:01:49'),
+(12, 9, 359, 11, '2025-12-02 08:40:40', NULL, 0, 0, 0, NULL, '2025-12-02 01:40:40'),
+(13, 9, 324, 6, '2025-12-02 10:56:37', NULL, 0, 0, 0, NULL, '2025-12-02 03:56:37'),
+(14, 9, 321, 5, '2025-12-02 11:09:10', NULL, 0, 0, 0, NULL, '2025-12-02 04:09:10'),
+(15, 9, 81, 3, '2025-12-02 11:15:55', '2025-12-03 08:44:29', 55714, 1, 0, NULL, '2025-12-02 04:15:55'),
+(16, 9, 328, 5, '2025-12-03 08:44:40', NULL, 0, 0, 0, NULL, '2025-12-03 01:44:40');
 
 -- --------------------------------------------------------
 
@@ -289,7 +299,6 @@ CREATE TABLE `food_items` (
 --
 
 INSERT INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
--- Rạp 1: CGV Vincom Center
 (1, 1, 'Combo 1 - Bỏng + Nước', '1 bỏng ngô lớn + 1 nước ngọt lớn', 85000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
 (2, 1, 'Combo 2 - Bỏng + Nước + Snack', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack', 120000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
 (3, 1, 'Combo 3 - Đôi', '2 bỏng ngô lớn + 2 nước ngọt lớn', 150000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
@@ -298,7 +307,6 @@ INSERT INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `i
 (6, 1, 'Nước ngọt lớn', 'Nước ngọt size lớn', 35000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
 (7, 1, 'Nước ngọt vừa', 'Nước ngọt size vừa', 25000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
 (8, 1, 'Snack mix', 'Hỗn hợp snack', 45000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
--- Rạp 2: CGV Landmark
 (9, 2, 'Combo Premium', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 hotdog', 140000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
 (10, 2, 'Combo Family', '2 bỏng ngô lớn + 2 nước ngọt lớn + 2 snack', 250000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
 (11, 2, 'Combo Sweet', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 bánh ngọt', 110000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
@@ -307,7 +315,6 @@ INSERT INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `i
 (14, 2, 'Hotdog', 'Hotdog thịt bò', 75000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
 (15, 2, 'Nước ép trái cây', 'Nước ép trái cây tươi', 45000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
 (16, 2, 'Cà phê đá', 'Cà phê đá phin', 40000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
--- Rạp 3: Lotte Cinema
 (17, 3, 'Combo VIP', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack + 1 bánh ngọt', 160000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
 (18, 3, 'Combo Couple', '2 bỏng ngô lớn + 2 nước ngọt lớn + 1 snack lớn', 200000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
 (19, 3, 'Combo Kids', '1 bỏng ngô vừa + 1 nước ngọt vừa + 1 kẹo', 90000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
@@ -316,7 +323,6 @@ INSERT INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `i
 (22, 3, 'Bánh mì sandwich', 'Bánh mì sandwich thịt nguội', 70000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
 (23, 3, 'Trà sữa', 'Trà sữa thái xanh', 55000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
 (24, 3, 'Nước lọc', 'Nước lọc tinh khiết', 20000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
--- Rạp 4: Galaxy Cinema
 (25, 4, 'Combo Galaxy', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack + 1 bánh quy', 130000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
 (26, 4, 'Combo Star', '2 bỏng ngô lớn + 2 nước ngọt lớn + 2 snack', 220000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
 (27, 4, 'Combo Solo', '1 bỏng ngô vừa + 1 nước ngọt vừa', 70000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
@@ -325,7 +331,6 @@ INSERT INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `i
 (30, 4, 'Bánh ngọt', 'Bánh ngọt kem tươi', 60000.00, NULL, 'snack', 1, '2025-11-28 01:03:19'),
 (31, 4, 'Soda chanh', 'Soda chanh mát lạnh', 40000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
 (32, 4, 'Nước cam ép', 'Nước cam ép tươi', 50000.00, NULL, 'drink', 1, '2025-11-28 01:03:19'),
--- Rạp 5: BHD Star Cineplex
 (33, 5, 'Combo Star', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 hotdog + 1 snack', 170000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
 (34, 5, 'Combo Deluxe', '2 bỏng ngô lớn + 2 nước ngọt lớn + 2 hotdog', 280000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
 (35, 5, 'Combo Classic', '1 bỏng ngô lớn + 1 nước ngọt lớn', 95000.00, NULL, 'combo', 1, '2025-11-28 01:03:19'),
@@ -349,6 +354,41 @@ CREATE TABLE `ip_blocks` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `ip_room_tracking`
+--
+
+CREATE TABLE `ip_room_tracking` (
+  `id` int(11) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `screen_id` int(11) NOT NULL,
+  `showtime_id` int(11) NOT NULL,
+  `first_enter_time` datetime NOT NULL COMMENT 'Thời gian lần đầu vào phòng',
+  `last_enter_time` datetime NOT NULL COMMENT 'Thời gian lần cuối vào phòng',
+  `total_duration_seconds` int(11) DEFAULT 0 COMMENT 'Tổng thời gian đã ở trong phòng (giây)',
+  `is_banned` tinyint(1) DEFAULT 0 COMMENT 'Có bị cấm không',
+  `ban_until` datetime DEFAULT NULL COMMENT 'Cấm đến khi nào (thời gian phim chiếu)',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `ip_room_tracking`
+--
+
+INSERT INTO `ip_room_tracking` (`id`, `ip_address`, `screen_id`, `showtime_id`, `first_enter_time`, `last_enter_time`, `total_duration_seconds`, `is_banned`, `ban_until`, `created_at`, `updated_at`) VALUES
+(1, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 11, 359, '2025-12-02 04:38:07', '2025-12-02 04:38:44', 1029, 1, '2025-12-02 06:00:00', '2025-12-02 03:38:07', '2025-12-02 03:55:16'),
+(2, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 11, 356, '2025-12-02 04:55:52', '2025-12-02 04:55:52', 0, 0, NULL, '2025-12-02 03:55:52', '2025-12-02 03:55:52'),
+(3, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 12, 357, '2025-12-02 04:56:04', '2025-12-02 04:56:04', 0, 0, NULL, '2025-12-02 03:56:04', '2025-12-02 03:56:04'),
+(4, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 11, 353, '2025-12-02 04:56:16', '2025-12-02 04:56:16', 0, 0, NULL, '2025-12-02 03:56:16', '2025-12-02 03:56:16'),
+(5, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 6, 324, '2025-12-02 04:56:37', '2025-12-02 04:58:43', 126, 0, NULL, '2025-12-02 03:56:37', '2025-12-02 03:58:43'),
+(6, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 5, 321, '2025-12-02 05:09:10', '2025-12-02 05:10:02', 52, 0, NULL, '2025-12-02 04:09:10', '2025-12-02 04:10:02'),
+(7, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 3, 81, '2025-12-02 05:15:55', '2025-12-02 05:16:45', 1112, 1, '2025-12-07 15:00:00', '2025-12-02 04:15:55', '2025-12-02 04:34:27'),
+(8, '2401:d800:dda6:1d9f:9439:bad6:2e61:a103', 3, 81, '2025-12-03 02:44:29', '2025-12-03 02:44:29', 0, 0, NULL, '2025-12-03 01:44:29', '2025-12-03 01:44:29'),
+(9, '2401:d800:dda6:1d9f:9439:bad6:2e61:a103', 5, 328, '2025-12-03 02:44:40', '2025-12-03 02:45:42', 62, 0, NULL, '2025-12-03 01:44:40', '2025-12-03 01:45:42');
 
 -- --------------------------------------------------------
 
@@ -514,7 +554,14 @@ CREATE TABLE `notifications` (
 
 INSERT INTO `notifications` (`id`, `user_id`, `type`, `title`, `message`, `link`, `is_read`, `created_at`) VALUES
 (1, 9, 'warning', 'Yêu cầu thay đổi quyền thành viên', 'Admin Admin Mới muốn thay đổi quyền của jack thành Moderator cho rạp Lotte Cinema. Vui lòng xem xét và phê duyệt.', '?route=moderator/permissionRequests&id=1', 1, '2025-11-30 17:57:49'),
-(2, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 3 vé xem phim \"Bố Già\" tại ghế E7, E8, E9. Vé và QR code đã được gửi đến email của bạn.', '?route=profile/index', 1, '2025-11-30 18:12:26');
+(2, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 3 vé xem phim \"Bố Già\" tại ghế E7, E8, E9. Vé và QR code đã được gửi đến email của bạn.', '?route=profile/index', 1, '2025-11-30 18:12:26'),
+(3, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 2 vé xem phim \"Bố Già\" tại ghế G7, G8. Vé và QR code đã được gửi đến email của bạn.', '?route=booking/myTickets', 1, '2025-12-02 01:47:59'),
+(4, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 2 vé xem phim \"Bố Già\" tại ghế F7, F8. Vé và QR code đã được gửi đến email của bạn. Bạn có thể tải vé PDF tại đây.', '?route=booking/myTickets', 1, '2025-12-02 02:13:55'),
+(5, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 2 vé xem phim \"Bố Già\" tại ghế E7, E8. QR code đã được tạo, bạn có thể xem tại trang \'Vé của tôi\'.', '?route=booking/myTickets', 1, '2025-12-02 03:38:42'),
+(6, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 2 vé xem phim \"Mắt Biếc\" tại ghế I5, I6. QR code đã được tạo, bạn có thể xem tại trang \'Vé của tôi\'.', '?route=booking/myTickets', 1, '2025-12-02 03:58:40'),
+(7, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 3 vé xem phim \"Hai Phượng\" tại ghế I6, I7, I8. QR code đã được tạo, bạn có thể xem tại trang \'Vé của tôi\'.', '?route=booking/myTickets', 1, '2025-12-02 04:10:00'),
+(8, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 3 vé xem phim \"Avengers: Endgame\" tại ghế G4, G5, G6. QR code đã được tạo, bạn có thể xem tại trang \'Vé của tôi\'.', '?route=booking/myTickets', 1, '2025-12-02 04:16:43'),
+(9, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 3 vé xem phim \"Bố Già\" tại ghế I4, I5, I6. QR code đã được tạo, bạn có thể xem tại trang \'Vé của tôi\'.', '?route=booking/myTickets', 1, '2025-12-03 01:45:39');
 
 -- --------------------------------------------------------
 
@@ -770,7 +817,17 @@ INSERT INTO `seat_selection_logs` (`id`, `user_id`, `ip_address`, `showtime_id`,
 (36, 9, '::1', 360, 3, '[\"E7\",\"E8\",\"E9\"]', 0, '2025-11-30 17:44:56'),
 (37, 9, '::1', 360, 3, '[\"E7\",\"E8\",\"E9\"]', 0, '2025-11-30 17:44:58'),
 (38, 9, '::1', 360, 3, '[\"E7\",\"E8\",\"E9\"]', 0, '2025-11-30 17:45:31'),
-(39, 9, '::1', 360, 3, '[\"E7\",\"E8\",\"E9\"]', 0, '2025-11-30 18:11:11');
+(39, 9, '::1', 360, 3, '[\"E7\",\"E8\",\"E9\"]', 0, '2025-11-30 18:11:11'),
+(40, 9, '::1', 77, 3, '[\"E3\",\"E4\",\"E5\"]', 0, '2025-12-02 01:01:59'),
+(41, 9, '::1', 359, 2, '[\"G5\",\"G6\"]', 0, '2025-12-02 01:40:48'),
+(42, 9, '::1', 359, 2, '[\"G7\",\"G8\"]', 0, '2025-12-02 01:47:24'),
+(43, 9, '::1', 359, 2, '[\"F5\",\"F6\"]', 0, '2025-12-02 02:08:36'),
+(44, 9, '::1', 359, 2, '[\"F7\",\"F8\"]', 0, '2025-12-02 02:13:09'),
+(45, 9, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 359, 2, '[\"E7\",\"E8\"]', 0, '2025-12-02 03:38:15'),
+(46, 9, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 324, 2, '[\"I5\",\"I6\"]', 0, '2025-12-02 03:56:47'),
+(47, 9, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 321, 3, '[\"I6\",\"I7\",\"I8\"]', 0, '2025-12-02 04:09:20'),
+(48, 9, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 81, 3, '[\"G4\",\"G5\",\"G6\"]', 0, '2025-12-02 04:16:08'),
+(49, 9, '2401:d800:dda6:1d9f:9439:bad6:2e61:a103', 328, 3, '[\"I4\",\"I5\",\"I6\"]', 0, '2025-12-03 01:44:48');
 
 -- --------------------------------------------------------
 
@@ -1270,7 +1327,28 @@ INSERT INTO `tickets` (`id`, `user_id`, `showtime_id`, `booking_pending_id`, `se
 (57, 9, 357, NULL, 'E10', 'vip', 'TICKET_69290459eb7b9_9_357_1764295769_E10', 200000.00, 'Đã đặt', '2025-11-28 02:09:29'),
 (58, 9, 360, 8, 'E7', 'vip', 'TICKET_692c890a2b7f5_9_360_1764526346_E7', 200000.00, 'Đã đặt', '2025-11-30 18:12:26'),
 (59, 9, 360, 8, 'E8', 'vip', 'TICKET_692c890a2c1b7_9_360_1764526346_E8', 200000.00, 'Đã đặt', '2025-11-30 18:12:26'),
-(60, 9, 360, 8, 'E9', 'vip', 'TICKET_692c890a2c7c6_9_360_1764526346_E9', 200000.00, 'Đã đặt', '2025-11-30 18:12:26');
+(60, 9, 360, 8, 'E9', 'vip', 'TICKET_692c890a2c7c6_9_360_1764526346_E9', 200000.00, 'Đã đặt', '2025-11-30 18:12:26'),
+(61, 9, 359, 10, 'G5', 'vip', 'TICKET_692e43e81f834_9_359_1764639720_G5', 180000.00, 'Đã đặt', '2025-12-02 01:42:00'),
+(62, 9, 359, 10, 'G6', 'vip', 'TICKET_692e43e824faa_9_359_1764639720_G6', 180000.00, 'Đã đặt', '2025-12-02 01:42:00'),
+(63, 9, 359, 11, 'G7', 'vip', 'TICKET_692e454f87f53_9_359_1764640079_G7', 180000.00, 'Đã đặt', '2025-12-02 01:47:59'),
+(64, 9, 359, 11, 'G8', 'vip', 'TICKET_692e454f88fbb_9_359_1764640079_G8', 180000.00, 'Đã đặt', '2025-12-02 01:47:59'),
+(65, 9, 359, 12, 'F5', 'vip', 'TICKET_692e4a40e5a02_9_359_1764641344_F5', 180000.00, 'Đã đặt', '2025-12-02 02:09:04'),
+(66, 9, 359, 12, 'F6', 'vip', 'TICKET_692e4a40e6a61_9_359_1764641344_F6', 180000.00, 'Đã đặt', '2025-12-02 02:09:04'),
+(67, 9, 359, 13, 'F7', 'vip', 'TICKET_692e4b6354dea_9_359_1764641635_F7', 180000.00, 'Đã đặt', '2025-12-02 02:13:55'),
+(68, 9, 359, 13, 'F8', 'vip', 'TICKET_692e4b635572e_9_359_1764641635_F8', 180000.00, 'Đã đặt', '2025-12-02 02:13:55'),
+(69, 9, 359, 14, 'E7', 'vip', 'TICKET_692e5f425d498_9_359_1764646722_E7', 180000.00, 'Đã đặt', '2025-12-02 03:38:42'),
+(70, 9, 359, 14, 'E8', 'vip', 'TICKET_692e5f425dc79_9_359_1764646722_E8', 180000.00, 'Đã đặt', '2025-12-02 03:38:42'),
+(71, 9, 324, 15, 'I5', 'vip', 'TICKET_692e63f0aaa56_9_324_1764647920_I5', 200000.00, 'Đã đặt', '2025-12-02 03:58:40'),
+(72, 9, 324, 15, 'I6', 'vip', 'TICKET_692e63f0ab0e6_9_324_1764647920_I6', 200000.00, 'Đã đặt', '2025-12-02 03:58:40'),
+(73, 9, 321, 16, 'I6', 'vip', 'TICKET_692e6698797c3_9_321_1764648600_I6', 210000.00, 'Đã đặt', '2025-12-02 04:10:00'),
+(74, 9, 321, 16, 'I7', 'vip', 'TICKET_692e66987a245_9_321_1764648600_I7', 210000.00, 'Đã đặt', '2025-12-02 04:10:00'),
+(75, 9, 321, 16, 'I8', 'vip', 'TICKET_692e66987a6c3_9_321_1764648600_I8', 210000.00, 'Đã đặt', '2025-12-02 04:10:00'),
+(76, 9, 81, 17, 'G4', 'vip', 'TICKET_692e682b321d2_9_81_1764649003_G4', 170000.00, 'Đã đặt', '2025-12-02 04:16:43'),
+(77, 9, 81, 17, 'G5', 'vip', 'TICKET_692e682b32990_9_81_1764649003_G5', 170000.00, 'Đã đặt', '2025-12-02 04:16:43'),
+(78, 9, 81, 17, 'G6', 'vip', 'TICKET_692e682b32dce_9_81_1764649003_G6', 170000.00, 'Đã đặt', '2025-12-02 04:16:43'),
+(79, 9, 328, 18, 'I4', 'vip', 'TICKET_692f96415e6c9_9_328_1764726337_I4', 210000.00, 'Đã đặt', '2025-12-03 01:45:37'),
+(80, 9, 328, 18, 'I5', 'vip', 'TICKET_692f96415f32d_9_328_1764726337_I5', 210000.00, 'Đã đặt', '2025-12-03 01:45:37'),
+(81, 9, 328, 18, 'I6', 'vip', 'TICKET_692f96415f871_9_328_1764726337_I6', 210000.00, 'Đã đặt', '2025-12-03 01:45:37');
 
 -- --------------------------------------------------------
 
@@ -1304,7 +1382,16 @@ INSERT INTO `transactions` (`id`, `user_id`, `type`, `related_id`, `amount`, `me
 (8, 12, 'subscription', 2, 79000.00, '', 'Thành công', '2025-11-25 02:26:14'),
 (9, 12, 'subscription', 3, 129000.00, '', 'Thành công', '2025-11-25 02:27:04'),
 (10, 9, 'ticket', 1, 400000.00, '', 'Thành công', '2025-11-28 02:09:29'),
-(11, 9, 'ticket', 8, 600000.00, '', 'Thành công', '2025-11-30 18:12:26');
+(11, 9, 'ticket', 8, 600000.00, '', 'Thành công', '2025-11-30 18:12:26'),
+(12, 9, 'ticket', 10, 360000.00, '', 'Thành công', '2025-12-02 01:42:00'),
+(13, 9, 'ticket', 11, 360000.00, '', 'Thành công', '2025-12-02 01:47:59'),
+(14, 9, 'ticket', 12, 360000.00, '', 'Thành công', '2025-12-02 02:09:04'),
+(15, 9, 'ticket', 13, 360000.00, '', 'Thành công', '2025-12-02 02:13:55'),
+(16, 9, 'ticket', 14, 360000.00, '', 'Thành công', '2025-12-02 03:38:42'),
+(17, 9, 'ticket', 15, 400000.00, '', 'Thành công', '2025-12-02 03:58:40'),
+(18, 9, 'ticket', 16, 630000.00, '', 'Thành công', '2025-12-02 04:10:00'),
+(19, 9, 'ticket', 17, 510000.00, '', 'Thành công', '2025-12-02 04:16:43'),
+(20, 9, 'ticket', 18, 630000.00, '', 'Thành công', '2025-12-03 01:45:37');
 
 -- --------------------------------------------------------
 
@@ -1545,6 +1632,15 @@ ALTER TABLE `ip_blocks`
   ADD KEY `idx_ip_expires` (`ip_address`,`expires_at`);
 
 --
+-- Chỉ mục cho bảng `ip_room_tracking`
+--
+ALTER TABLE `ip_room_tracking`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_ip_screen_showtime` (`ip_address`,`screen_id`,`showtime_id`),
+  ADD KEY `idx_ip_screen` (`ip_address`,`screen_id`),
+  ADD KEY `idx_is_banned` (`is_banned`,`ban_until`);
+
+--
 -- Chỉ mục cho bảng `ip_spam_logs`
 --
 ALTER TABLE `ip_spam_logs`
@@ -1768,13 +1864,13 @@ ALTER TABLE `booking_food_items`
 -- AUTO_INCREMENT cho bảng `booking_pending`
 --
 ALTER TABLE `booking_pending`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT cho bảng `booking_session_tracking`
 --
 ALTER TABLE `booking_session_tracking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT cho bảng `categories`
@@ -1813,6 +1909,12 @@ ALTER TABLE `ip_blocks`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT cho bảng `ip_room_tracking`
+--
+ALTER TABLE `ip_room_tracking`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
 -- AUTO_INCREMENT cho bảng `ip_spam_logs`
 --
 ALTER TABLE `ip_spam_logs`
@@ -1834,7 +1936,7 @@ ALTER TABLE `movies`
 -- AUTO_INCREMENT cho bảng `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT cho bảng `permissions`
@@ -1870,13 +1972,13 @@ ALTER TABLE `role_permissions`
 -- AUTO_INCREMENT cho bảng `seat_reservations`
 --
 ALTER TABLE `seat_reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=209;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=234;
 
 --
 -- AUTO_INCREMENT cho bảng `seat_selection_logs`
 --
 ALTER TABLE `seat_selection_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT cho bảng `showtimes`
@@ -1924,13 +2026,13 @@ ALTER TABLE `theater_screens`
 -- AUTO_INCREMENT cho bảng `tickets`
 --
 ALTER TABLE `tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
 
 --
 -- AUTO_INCREMENT cho bảng `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT cho bảng `users`
@@ -2129,64 +2231,3 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
--- ============================================================
--- Script bổ sung: Đảm bảo có dữ liệu đồ ăn/combo cho tất cả các rạp
--- Script này sử dụng INSERT IGNORE để tránh lỗi duplicate key
--- Chạy script này nếu cần cập nhật/thêm lại dữ liệu đồ ăn
--- ============================================================
-
--- Kiểm tra và thêm dữ liệu cho Rạp 1: CGV Vincom Center (theater_id = 1)
-INSERT IGNORE INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
-(1, 1, 'Combo 1 - Bỏng + Nước', '1 bỏng ngô lớn + 1 nước ngọt lớn', 85000.00, NULL, 'combo', 1, NOW()),
-(2, 1, 'Combo 2 - Bỏng + Nước + Snack', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack', 120000.00, NULL, 'combo', 1, NOW()),
-(3, 1, 'Combo 3 - Đôi', '2 bỏng ngô lớn + 2 nước ngọt lớn', 150000.00, NULL, 'combo', 1, NOW()),
-(4, 1, 'Bỏng ngô lớn', 'Bỏng ngô size lớn', 55000.00, NULL, 'snack', 1, NOW()),
-(5, 1, 'Bỏng ngô vừa', 'Bỏng ngô size vừa', 40000.00, NULL, 'snack', 1, NOW()),
-(6, 1, 'Nước ngọt lớn', 'Nước ngọt size lớn', 35000.00, NULL, 'drink', 1, NOW()),
-(7, 1, 'Nước ngọt vừa', 'Nước ngọt size vừa', 25000.00, NULL, 'drink', 1, NOW()),
-(8, 1, 'Snack mix', 'Hỗn hợp snack', 45000.00, NULL, 'snack', 1, NOW());
-
--- Kiểm tra và thêm dữ liệu cho Rạp 2: CGV Landmark (theater_id = 2)
-INSERT IGNORE INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
-(9, 2, 'Combo Premium', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 hotdog', 140000.00, NULL, 'combo', 1, NOW()),
-(10, 2, 'Combo Family', '2 bỏng ngô lớn + 2 nước ngọt lớn + 2 snack', 250000.00, NULL, 'combo', 1, NOW()),
-(11, 2, 'Combo Sweet', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 bánh ngọt', 110000.00, NULL, 'combo', 1, NOW()),
-(12, 2, 'Bỏng ngô caramel', 'Bỏng ngô vị caramel size lớn', 65000.00, NULL, 'snack', 1, NOW()),
-(13, 2, 'Bỏng ngô phô mai', 'Bỏng ngô vị phô mai size lớn', 65000.00, NULL, 'snack', 1, NOW()),
-(14, 2, 'Hotdog', 'Hotdog thịt bò', 75000.00, NULL, 'snack', 1, NOW()),
-(15, 2, 'Nước ép trái cây', 'Nước ép trái cây tươi', 45000.00, NULL, 'drink', 1, NOW()),
-(16, 2, 'Cà phê đá', 'Cà phê đá phin', 40000.00, NULL, 'drink', 1, NOW());
-
--- Kiểm tra và thêm dữ liệu cho Rạp 3: Lotte Cinema (theater_id = 3)
-INSERT IGNORE INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
-(17, 3, 'Combo VIP', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack + 1 bánh ngọt', 160000.00, NULL, 'combo', 1, NOW()),
-(18, 3, 'Combo Couple', '2 bỏng ngô lớn + 2 nước ngọt lớn + 1 snack lớn', 200000.00, NULL, 'combo', 1, NOW()),
-(19, 3, 'Combo Kids', '1 bỏng ngô vừa + 1 nước ngọt vừa + 1 kẹo', 90000.00, NULL, 'combo', 1, NOW()),
-(20, 3, 'Bỏng ngô bơ', 'Bỏng ngô vị bơ size lớn', 60000.00, NULL, 'snack', 1, NOW()),
-(21, 3, 'Khoai tây chiên', 'Khoai tây chiên giòn', 50000.00, NULL, 'snack', 1, NOW()),
-(22, 3, 'Bánh mì sandwich', 'Bánh mì sandwich thịt nguội', 70000.00, NULL, 'snack', 1, NOW()),
-(23, 3, 'Trà sữa', 'Trà sữa thái xanh', 55000.00, NULL, 'drink', 1, NOW()),
-(24, 3, 'Nước lọc', 'Nước lọc tinh khiết', 20000.00, NULL, 'drink', 1, NOW());
-
--- Kiểm tra và thêm dữ liệu cho Rạp 4: Galaxy Cinema (theater_id = 4)
-INSERT IGNORE INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
-(25, 4, 'Combo Galaxy', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 snack + 1 bánh quy', 130000.00, NULL, 'combo', 1, NOW()),
-(26, 4, 'Combo Star', '2 bỏng ngô lớn + 2 nước ngọt lớn + 2 snack', 220000.00, NULL, 'combo', 1, NOW()),
-(27, 4, 'Combo Solo', '1 bỏng ngô vừa + 1 nước ngọt vừa', 70000.00, NULL, 'combo', 1, NOW()),
-(28, 4, 'Bỏng ngô mật ong', 'Bỏng ngô vị mật ong size lớn', 60000.00, NULL, 'snack', 1, NOW()),
-(29, 4, 'Bánh quy giòn', 'Bánh quy giòn thơm ngon', 35000.00, NULL, 'snack', 1, NOW()),
-(30, 4, 'Bánh ngọt', 'Bánh ngọt kem tươi', 60000.00, NULL, 'snack', 1, NOW()),
-(31, 4, 'Soda chanh', 'Soda chanh mát lạnh', 40000.00, NULL, 'drink', 1, NOW()),
-(32, 4, 'Nước cam ép', 'Nước cam ép tươi', 50000.00, NULL, 'drink', 1, NOW());
-
--- Kiểm tra và thêm dữ liệu cho Rạp 5: BHD Star Cineplex (theater_id = 5)
-INSERT IGNORE INTO `food_items` (`id`, `theater_id`, `name`, `description`, `price`, `image`, `type`, `is_active`, `created_at`) VALUES
-(33, 5, 'Combo Star', '1 bỏng ngô lớn + 1 nước ngọt lớn + 1 hotdog + 1 snack', 170000.00, NULL, 'combo', 1, NOW()),
-(34, 5, 'Combo Deluxe', '2 bỏng ngô lớn + 2 nước ngọt lớn + 2 hotdog', 280000.00, NULL, 'combo', 1, NOW()),
-(35, 5, 'Combo Classic', '1 bỏng ngô lớn + 1 nước ngọt lớn', 95000.00, NULL, 'combo', 1, NOW()),
-(36, 5, 'Bỏng ngô socola', 'Bỏng ngô vị socola size lớn', 70000.00, NULL, 'snack', 1, NOW()),
-(37, 5, 'Hotdog phô mai', 'Hotdog phô mai thơm ngon', 85000.00, NULL, 'snack', 1, NOW()),
-(38, 5, 'Bánh pizza mini', 'Bánh pizza mini 4 miếng', 120000.00, NULL, 'snack', 1, NOW()),
-(39, 5, 'Coca Cola', 'Coca Cola size lớn', 40000.00, NULL, 'drink', 1, NOW()),
-(40, 5, 'Pepsi', 'Pepsi size lớn', 40000.00, NULL, 'drink', 1, NOW());
