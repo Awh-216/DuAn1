@@ -7,8 +7,8 @@ class Database {
     private $host = 'localhost';
     private $port = 3306; // Port MySQL (kiểm tra trong phpMyAdmin config.inc.php)
     private $dbname = 'cinehub';
-    private $username = 'root';
-    private $password = ''; // Thay đổi password nếu cần
+    private $username = 'cinehub';
+    private $password = 'Cinehub1234@';
     private $charset = 'utf8mb4';
     
     private function __construct() {

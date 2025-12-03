@@ -31,7 +31,6 @@
     $baseUrl = UrlHelper::getBaseUrl();
     ?>
     <link rel="stylesheet" href="<?php echo htmlspecialchars($baseUrl); ?>/style.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -75,8 +74,39 @@
             $user = null;
         }
     }
+    
+    // Kiểm tra admin/moderator sớm để dùng trong cả desktop và mobile
+    $isAdmin = false;
+    $isModerator = false;
+    if (isset($user) && $user) {
+        if (isset($user['role']) && $user['role'] === 'admin') {
+            $isAdmin = true;
+        } else {
+            try {
+                require_once __DIR__ . '/../../core/AdminMiddleware.php';
+                $isAdmin = AdminMiddleware::hasRole($user['id'], 'Super Admin') || 
+                          AdminMiddleware::hasRole($user['id'], 'Admin');
+            } catch (Exception $e) {}
+        }
+        
+        if (!$isAdmin) {
+            if (isset($user['role']) && $user['role'] === 'moderator') {
+                $isModerator = true;
+            } elseif (isset($user['theater_id']) && !empty($user['theater_id'])) {
+                $isModerator = true;
+            } else {
+                try {
+                    require_once __DIR__ . '/../../core/AdminMiddleware.php';
+                    $isModerator = AdminMiddleware::hasRole($user['id'], 'Moderator') || 
+                                 AdminMiddleware::hasRole($user['id'], 'Theater Manager');
+                } catch (Exception $e) {}
+            }
+        }
+    }
     ?>
-    <header class="header-new">
+    
+    <!-- Desktop Header -->
+    <header class="header-new header-desktop">
         <div class="header-container">
             <div class="header-left">
                 <div class="logo-new">
@@ -139,50 +169,6 @@
             
             <div class="header-right">
                 <?php if (isset($user) && $user): ?>
-                    <?php 
-                    // Kiểm tra nếu là admin
-                    $isAdmin = false;
-                    if (isset($user['role']) && $user['role'] === 'admin') {
-                        $isAdmin = true;
-                    } else {
-                        try {
-                            require_once __DIR__ . '/../../core/AdminMiddleware.php';
-                            $isAdmin = AdminMiddleware::hasRole($user['id'], 'Super Admin') || 
-                                      AdminMiddleware::hasRole($user['id'], 'Admin');
-                        } catch (Exception $e) {
-                            // Bảng chưa tồn tại, bỏ qua
-                        }
-                    }
-                    
-                    // Kiểm tra nếu là moderator
-                    $isModerator = false;
-                    if (isset($user['role']) && $user['role'] === 'moderator') {
-                        $isModerator = true;
-                    } elseif (isset($user['theater_id']) && !empty($user['theater_id'])) {
-                        // Nếu có theater_id được gán, có thể là moderator
-                        $isModerator = true;
-                    } else {
-                        try {
-                            if (!isset($isAdmin) || !$isAdmin) {
-                                require_once __DIR__ . '/../../core/AdminMiddleware.php';
-                                $isModerator = AdminMiddleware::hasRole($user['id'], 'Moderator') || 
-                                             AdminMiddleware::hasRole($user['id'], 'Theater Manager');
-                            }
-                        } catch (Exception $e) {
-                            // Bảng chưa tồn tại, bỏ qua
-                        }
-                    }
-                    
-                    // Kiểm tra từ bảng roles nếu có
-                    if (!$isModerator && !$isAdmin && isset($user['roles']) && !empty($user['roles'])) {
-                        foreach ($user['roles'] as $role) {
-                            if (isset($role['name']) && ($role['name'] === 'Moderator' || $role['name'] === 'Theater Manager')) {
-                                $isModerator = true;
-                                break;
-                            }
-                        }
-                    }
-                    ?>
                     <?php if ($isAdmin): ?>
                         <a href="<?php echo $baseUrl; ?>/?route=admin/index" class="sign-in-btn" style="background-color: #FFFFFF37; margin-right: 10px;">
                             <i class="fas fa-cog"></i>
@@ -197,7 +183,6 @@
                     <a href="<?php echo $baseUrl; ?>/?route=profile/index" class="sign-in-btn">
                         <i class="fas fa-user"></i>
                         <span><?php echo htmlspecialchars($user['name']); ?></span>
-                        <!-- <i class="fas fa-chevron-down"></i> -->
                     </a>
                 <?php else: ?>
                     <a href="#" class="sign-in-btn" onclick="event.preventDefault(); openAuthModal('login');">
@@ -209,6 +194,192 @@
             </div>
         </div>
     </header>
+    
+    <!-- Mobile Header (Top Bar) -->
+    <header class="header-mobile">
+        <div class="mobile-header-container">
+            <div class="logo-new">
+                <a href="<?php echo $baseUrl; ?>/">
+                    <i class="fas fa-film"></i>
+                    <span>CineHub</span>
+                </a>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Mobile Bottom Navigation -->
+    <style>
+    @media screen and (max-width: 768px) {
+        .header-desktop { display: none !important; }
+        .header-mobile { display: block !important; }
+        .mobile-bottom-nav { display: flex !important; }
+    }
+    </style>
+    <nav class="mobile-bottom-nav">
+        <button class="mobile-nav-item" onclick="toggleMobileMenu()">
+            <i class="fas fa-bars"></i>
+            <span>Menu</span>
+        </button>
+        <a href="<?php echo $baseUrl; ?>/?route=movie/index" class="mobile-nav-item">
+            <i class="fas fa-search"></i>
+            <span>Tìm kiếm</span>
+        </a>
+        <a href="<?php echo $baseUrl; ?>/" class="mobile-nav-item mobile-nav-home">
+            <i class="fas fa-home"></i>
+        </a>
+        <?php if (isset($user) && $user): ?>
+            <a href="<?php echo $baseUrl; ?>/?route=profile/index" class="mobile-nav-item">
+                <i class="fas fa-user"></i>
+                <span>Tài khoản</span>
+            </a>
+        <?php else: ?>
+            <a href="#" class="mobile-nav-item" onclick="event.preventDefault(); openAuthModal('login');">
+                <i class="fas fa-user"></i>
+                <span>Đăng nhập</span>
+            </a>
+        <?php endif; ?>
+    </nav>
+    
+    <!-- Mobile Slide Menu -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
+    <div class="mobile-slide-menu" id="mobileSlideMenu">
+        <div class="mobile-menu-header">
+            <div class="mobile-menu-logo">
+                <i class="fas fa-film"></i>
+                <span>CineHub</span>
+            </div>
+            <button class="mobile-menu-close" onclick="closeMobileMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <?php if (isset($user) && $user): ?>
+        <div class="mobile-menu-user">
+            <div class="mobile-user-avatar">
+                <?php if (!empty($user['avatar'])): ?>
+                    <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar">
+                <?php else: ?>
+                    <i class="fas fa-user"></i>
+                <?php endif; ?>
+            </div>
+            <div class="mobile-user-info">
+                <span class="mobile-user-name"><?php echo htmlspecialchars($user['name']); ?></span>
+                <span class="mobile-user-email"><?php echo htmlspecialchars($user['email']); ?></span>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <div class="mobile-menu-search">
+            <form method="GET" action="<?php echo $baseUrl; ?>/?route=movie/index">
+                <input type="hidden" name="route" value="movie/index">
+                <input type="text" name="search" placeholder="Tìm kiếm phim..." class="mobile-search-input">
+                <button type="submit" class="mobile-search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-section">
+                <a href="<?php echo $baseUrl; ?>/?route=movie/index&type=phimle" class="mobile-menu-link" onclick="closeMobileMenu()">
+                    <i class="fas fa-film"></i>
+                    <span>Phim lẻ</span>
+                </a>
+                <a href="<?php echo $baseUrl; ?>/?route=movie/index&type=phimbo" class="mobile-menu-link" onclick="closeMobileMenu()">
+                    <i class="fas fa-tv"></i>
+                    <span>Phim bộ</span>
+                </a>
+                <a href="<?php echo $baseUrl; ?>/?route=movie/index" class="mobile-menu-link" onclick="closeMobileMenu()">
+                    <i class="fas fa-star"></i>
+                    <span>Top phim</span>
+                </a>
+                <a href="<?php echo $baseUrl; ?>/?route=booking/index" class="mobile-menu-link" onclick="closeMobileMenu()">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Vé xem phim</span>
+                </a>
+            </div>
+            
+            <div class="mobile-menu-section">
+                <div class="mobile-menu-section-title">Thể loại</div>
+                <div class="mobile-menu-tags">
+                    <?php foreach (array_slice($menuCategories, 0, 8) as $cat): ?>
+                        <a href="<?php echo $baseUrl; ?>/?route=movie/index&category=<?php echo $cat['id']; ?>" class="mobile-menu-tag" onclick="closeMobileMenu()">
+                            <?php echo htmlspecialchars($cat['name']); ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            
+            <div class="mobile-menu-section">
+                <div class="mobile-menu-section-title">Quốc gia</div>
+                <div class="mobile-menu-tags">
+                    <?php foreach (array_slice($countries, 0, 6) as $country): ?>
+                        <a href="<?php echo $baseUrl; ?>/?route=movie/index&country=<?php echo urlencode($country['country']); ?>" class="mobile-menu-tag" onclick="closeMobileMenu()">
+                            <?php echo htmlspecialchars($country['country']); ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            
+            <?php if (isset($user) && $user): ?>
+            <div class="mobile-menu-section">
+                <div class="mobile-menu-section-title">Tài khoản</div>
+                <a href="<?php echo $baseUrl; ?>/?route=profile/index" class="mobile-menu-link" onclick="closeMobileMenu()">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Hồ sơ của tôi</span>
+                </a>
+                <a href="<?php echo $baseUrl; ?>/?route=booking/myTickets" class="mobile-menu-link" onclick="closeMobileMenu()">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Vé của tôi</span>
+                </a>
+                <?php if ($isAdmin): ?>
+                <a href="<?php echo $baseUrl; ?>/?route=admin/index" class="mobile-menu-link" onclick="closeMobileMenu()">
+                    <i class="fas fa-cog"></i>
+                    <span>Admin Panel</span>
+                </a>
+                <?php elseif ($isModerator): ?>
+                <a href="<?php echo $baseUrl; ?>/?route=moderator/index" class="mobile-menu-link" onclick="closeMobileMenu()">
+                    <i class="fas fa-building"></i>
+                    <span>Quản lý rạp</span>
+                </a>
+                <?php endif; ?>
+                <a href="<?php echo $baseUrl; ?>/?route=auth/logout" class="mobile-menu-link mobile-menu-logout" onclick="closeMobileMenu()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng xuất</span>
+                </a>
+            </div>
+            <?php else: ?>
+            <div class="mobile-menu-section">
+                <a href="#" class="mobile-menu-link mobile-menu-login" onclick="event.preventDefault(); closeMobileMenu(); openAuthModal('login');">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Đăng nhập</span>
+                </a>
+                <a href="#" class="mobile-menu-link" onclick="event.preventDefault(); closeMobileMenu(); openAuthModal('register');">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Đăng ký</span>
+                </a>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    
+    <script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobileSlideMenu');
+        const overlay = document.getElementById('mobileMenuOverlay');
+        menu.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+    }
+    
+    function closeMobileMenu() {
+        const menu = document.getElementById('mobileSlideMenu');
+        const overlay = document.getElementById('mobileMenuOverlay');
+        menu.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    </script>
     <?php endif; ?>
     
     <?php

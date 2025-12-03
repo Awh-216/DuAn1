@@ -7,10 +7,9 @@
 // CẤU HÌNH PUBLIC URL CHO QR CODE
 // ============================================
 
-// Cách 1: Sử dụng NGROK (Khuyến nghị cho development)
-// Sau khi chạy ngrok, copy URL và paste vào đây
-// Ví dụ: 'https://abc123.ngrok-free.app' hoặc 'https://abc123.ngrok.io'
-define('PUBLIC_BASE_URL', 'https://tressie-decurrent-nonpastorally.ngrok-free.dev');
+// Cách 1: Sử dụng Domain Public
+// Domain của website: tuanawh.store
+define('PUBLIC_BASE_URL', 'https://tuanawh.store');
 
 // Cách 2: Sử dụng Domain/IP Public
 // - Nếu dùng domain: 'https://yourdomain.com'
@@ -24,7 +23,7 @@ define('PUBLIC_BASE_URL', 'https://tressie-decurrent-nonpastorally.ngrok-free.de
 define('AUTO_DETECT_PUBLIC_URL', false);
 
 // Path của ứng dụng (thường là /DuAn1 hoặc /)
-define('APP_PATH', '/DuAn1');
+define('APP_PATH', '/');
 
 // ============================================
 // HƯỚNG DẪN SỬ DỤNG NGROK

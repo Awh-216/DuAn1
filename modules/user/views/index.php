@@ -643,7 +643,7 @@ $title = 'Hồ Sơ';
                         </h3>
                     </div>
                     <div class="card-body-luxury">
-                        <form method="POST" action="http://localhost/DuAn1/?route=profile/update" enctype="multipart/form-data">
+                        <form method="POST" action="?route=profile/update" enctype="multipart/form-data">
                             <div class="form-group-luxury">
                                 <label for="name" class="form-label-luxury">Họ và tên</label>
                                 <input type="text" class="form-control-luxury" id="name" name="name" value="<?php echo htmlspecialchars($user['name']); ?>" required>
@@ -679,7 +679,7 @@ $title = 'Hồ Sơ';
                             </div>
                         <?php else: ?>
                             <?php foreach ($history as $item): ?>
-                                <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $item['movie_id']; ?>" class="history-item-luxury">
+                                <a href="?route=movie/watch&id=<?php echo $item['movie_id']; ?>" class="history-item-luxury">
                                     <?php if ($item['thumbnail']): ?>
                                         <img src="<?php echo htmlspecialchars($item['thumbnail']); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>" class="history-thumbnail-luxury">
                                     <?php endif; ?>
@@ -819,7 +819,7 @@ $title = 'Hồ Sơ';
                                     <?php elseif (!$canAfford): ?>
                                         <button class="btn btn-secondary w-100" disabled>Không đủ điểm</button>
                                     <?php else: ?>
-                                        <form method="POST" action="http://localhost/DuAn1/?route=profile/upgradeSubscription" class="d-inline">
+                                        <form method="POST" action="?route=profile/upgradeSubscription" class="d-inline">
                                             <input type="hidden" name="subscription_id" value="<?php echo $sub['id']; ?>">
                                             <button type="submit" class="btn btn-warning w-100" onclick="return confirm('Bạn có chắc muốn nâng cấp lên gói <?php echo htmlspecialchars($sub['name']); ?> với giá <?php echo number_format($subPrice, 0, ',', '.'); ?> điểm?');">
                                                 <i class="fas fa-arrow-up me-2"></i> Nâng cấp

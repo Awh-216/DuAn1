@@ -12,7 +12,7 @@ define('DB_PASS', ''); // Nếu MySQL có password, điền vào đây
 define('DB_CHARSET', 'utf8mb4');
 
 // Cấu hình ứng dụng
-define('BASE_URL', 'http://localhost/DuAn1/');
+define('BASE_URL', '?route=');
 define('SITE_NAME', 'CineHub');
 
 // Khởi động session

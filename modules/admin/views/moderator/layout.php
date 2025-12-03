@@ -347,7 +347,7 @@
                     <span class="badge bg-danger ms-2"><?php echo $pendingCount; ?></span>
                 <?php endif; } catch (Exception $e) {} ?>
             </a></li>
-            <li><a href="http://localhost/DuAn1/">
+            <li><a href="?route=">
                 <i class="fas fa-home"></i> Về trang chủ
             </a></li>
             <li><a href="?route=profile/index">

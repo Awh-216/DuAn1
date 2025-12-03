@@ -146,7 +146,7 @@ $title = 'Xem Phim';
         <div class="movie-grid">
                 <?php foreach ($movies as $movie): ?>
                 <div class="movie-card">
-                    <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $movie['id']; ?>">
+                    <a href="?route=movie/watch&id=<?php echo $movie['id']; ?>">
                         <div class="movie-thumbnail">
                             <?php if ($movie['thumbnail']): ?>
                                 <img src="<?php echo htmlspecialchars($movie['thumbnail']); ?>" alt="<?php echo htmlspecialchars($movie['title']); ?>">
@@ -169,7 +169,7 @@ $title = 'Xem Phim';
                     </a>
                     <div class="movie-info">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                            <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $movie['id']; ?>" style="flex: 1; text-decoration: none; color: inherit;">
+                            <a href="?route=movie/watch&id=<?php echo $movie['id']; ?>" style="flex: 1; text-decoration: none; color: inherit;">
                                 <h3><?php echo htmlspecialchars($movie['title']); ?></h3>
                             </a>
                             <?php if (isset($user) && $user): ?>

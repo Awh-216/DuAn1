@@ -8,11 +8,6 @@ if (file_exists($configFile)) {
 // Load UrlHelper
 require_once __DIR__ . '/core/UrlHelper.php';
 
-// Bypass ngrok warning page
-if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'ngrok') !== false) {
-    header('ngrok-skip-browser-warning: true');
-}
-
 // Khởi động session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

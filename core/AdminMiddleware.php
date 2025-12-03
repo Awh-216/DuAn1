@@ -10,7 +10,7 @@ class AdminMiddleware {
         }
         
         if (!isset($_SESSION['user_id'])) {
-            header('Location: http://localhost/DuAn1/?route=auth/login');
+            header('Location: ?route=auth/login');
             exit;
         }
         
@@ -19,7 +19,7 @@ class AdminMiddleware {
         
         if (!$user) {
             $_SESSION['error'] = 'Người dùng không tồn tại!';
-            header('Location: http://localhost/DuAn1/');
+            header('Location: ?route=');
             exit;
         }
         
@@ -57,7 +57,7 @@ class AdminMiddleware {
         
         if (!$isAdmin && !$isModerator) {
             $_SESSION['error'] = 'Bạn không có quyền truy cập trang này!';
-            header('Location: http://localhost/DuAn1/');
+            header('Location: ?route=');
             exit;
         }
         

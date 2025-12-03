@@ -323,7 +323,7 @@ class BookingController extends Controller {
                 if ($selected_theater) $redirectUrl .= '&theater=' . urlencode($selected_theater);
                 if ($selected_date) $redirectUrl .= '&date=' . urlencode($selected_date);
                 if ($selected_showtime_id) $redirectUrl .= '&showtime_id=' . urlencode($selected_showtime_id);
-                header('Location: http://localhost/DuAn1/' . $redirectUrl);
+                header('Location: https://tuanawh.store/' . $redirectUrl);
                 exit;
             }
         }
@@ -2317,11 +2317,6 @@ class BookingController extends Controller {
      * Hỗ trợ cả booking_id (hiển thị tất cả vé trong booking) và ticket_id (hiển thị 1 vé)
      */
     public function verify() {
-        // Bypass ngrok warning page
-        if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'ngrok') !== false) {
-            header('ngrok-skip-browser-warning: true');
-        }
-        
         // Clear output buffer
         while (ob_get_level()) {
             ob_end_clean();

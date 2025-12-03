@@ -324,7 +324,7 @@ class ProfileController extends Controller {
                 'avatar' => $avatarPath
             ]);
             
-            $baseUrl = defined('BASE_URL') ? BASE_URL : 'http://localhost/DuAn1/';
+            $baseUrl = defined('BASE_URL') ? BASE_URL : 'https://tuanawh.store/';
             echo json_encode([
                 'success' => true, 
                 'message' => 'Cập nhật ảnh đại diện thành công!',

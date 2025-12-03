@@ -74,7 +74,7 @@ $title = 'Trang chủ';
                                         
                                         <!-- Action Buttons -->
                                         <div class="hero-actions">
-                                            <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $featuredMovie['id']; ?>" class="btn-play-large">
+                                            <a href="?route=movie/watch&id=<?php echo $featuredMovie['id']; ?>" class="btn-play-large">
                                                 <i class="fas fa-play"></i>
                                             </a>
                                             <button class="btn-action-icon" title="Yêu thích">
@@ -128,7 +128,7 @@ $title = 'Trang chủ';
         <div class="movies-row">
             <?php foreach (array_slice($phimLe, 0, 4) as $movie): ?>
             <div class="movie-card-new">
-                <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $movie['id']; ?>">
+                <a href="?route=movie/watch&id=<?php echo $movie['id']; ?>">
                     <div class="movie-thumbnail-new">
                         <?php if ($movie['thumbnail']): ?>
                             <img src="<?php echo htmlspecialchars($movie['thumbnail']); ?>" alt="<?php echo htmlspecialchars($movie['title']); ?>">
@@ -149,7 +149,7 @@ $title = 'Trang chủ';
                 </a>
                 <div class="movie-info-new">
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                        <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $movie['id']; ?>" style="flex: 1; text-decoration: none; color: inherit;">
+                        <a href="?route=movie/watch&id=<?php echo $movie['id']; ?>" style="flex: 1; text-decoration: none; color: inherit;">
                             <h3 class="movie-title-new"><?php echo htmlspecialchars($movie['title']); ?></h3>
                         </a>
                         <?php if (isset($user) && $user): ?>
@@ -188,7 +188,7 @@ $title = 'Trang chủ';
         <div class="movies-grid-new">
             <?php foreach (array_slice($phimBo, 0, 8) as $movie): ?>
             <div class="movie-card-new">
-                <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $movie['id']; ?>">
+                <a href="?route=movie/watch&id=<?php echo $movie['id']; ?>">
                     <div class="movie-thumbnail-new">
                         <?php if ($movie['thumbnail']): ?>
                             <img src="<?php echo htmlspecialchars($movie['thumbnail']); ?>" alt="<?php echo htmlspecialchars($movie['title']); ?>">
@@ -207,7 +207,7 @@ $title = 'Trang chủ';
                 </a>
                 <div class="movie-info-new">
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                        <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $movie['id']; ?>" style="flex: 1; text-decoration: none; color: inherit;">
+                        <a href="?route=movie/watch&id=<?php echo $movie['id']; ?>" style="flex: 1; text-decoration: none; color: inherit;">
                             <h3 class="movie-title-new"><?php echo htmlspecialchars($movie['title']); ?></h3>
                         </a>
                         <?php if (isset($user) && $user): ?>
@@ -246,7 +246,7 @@ $title = 'Trang chủ';
         <div class="movies-row">
             <?php foreach (array_slice($latestMovies, 0, 4) as $movie): ?>
             <div class="movie-card-new">
-                <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $movie['id']; ?>">
+                <a href="?route=movie/watch&id=<?php echo $movie['id']; ?>">
                     <div class="movie-thumbnail-new">
                         <?php if ($movie['thumbnail']): ?>
                             <img src="<?php echo htmlspecialchars($movie['thumbnail']); ?>" alt="<?php echo htmlspecialchars($movie['title']); ?>">
@@ -267,7 +267,7 @@ $title = 'Trang chủ';
                 </a>
                 <div class="movie-info-new">
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                        <a href="http://localhost/DuAn1/?route=movie/watch&id=<?php echo $movie['id']; ?>" style="flex: 1; text-decoration: none; color: inherit;">
+                        <a href="?route=movie/watch&id=<?php echo $movie['id']; ?>" style="flex: 1; text-decoration: none; color: inherit;">
                             <h3 class="movie-title-new"><?php echo htmlspecialchars($movie['title']); ?></h3>
                         </a>
                         <?php if (isset($user) && $user): ?>

@@ -1,11 +1,4 @@
 <?php
-// Bypass ngrok warning page
-if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'ngrok') !== false) {
-    if (!headers_sent()) {
-        header('ngrok-skip-browser-warning: true');
-    }
-}
-
 // Lấy base URL
 if (!class_exists('UrlHelper')) {
     require_once __DIR__ . '/../../../core/UrlHelper.php';

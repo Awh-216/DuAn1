@@ -14,7 +14,7 @@ $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" :
 $host = $_SERVER['HTTP_HOST'];
 $baseUrl = $protocol . "://" . $host;
 // Return URL trỏ về BookingController vnpayReturn method
-$vnp_Returnurl = $baseUrl . "/DuAn1/?route=booking/vnpay-return";
+$vnp_Returnurl = $baseUrl . "/?route=booking/vnpay-return";
 $vnp_apiUrl = "http://sandbox.vnpayment.vn/merchant_webapi/merchant.html";
 $apiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
 //Config input format

@@ -14,7 +14,7 @@ class ModeratorController extends Controller {
         // Kiểm tra xem user có phải moderator không
         if (!AdminMiddleware::isModerator($user['id'])) {
             $_SESSION['error'] = 'Bạn không có quyền truy cập trang này!';
-            header('Location: http://localhost/DuAn1/');
+            header('Location: ?route=');
             exit;
         }
         
@@ -23,7 +23,7 @@ class ModeratorController extends Controller {
         
         if (!$this->theaterId) {
             $_SESSION['error'] = 'Bạn chưa được gán quản lý rạp nào!';
-            header('Location: http://localhost/DuAn1/');
+            header('Location: ?route=');
             exit;
         }
     }

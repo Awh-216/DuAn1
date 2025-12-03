@@ -419,7 +419,7 @@
             <li><a href="?route=admin/logs" class="<?php echo ($current_page ?? '') === 'logs' ? 'active' : ''; ?>">
                 <i class="fas fa-history"></i> Lịch sử hoạt động
             </a></li>
-            <li><a href="http://localhost/DuAn1/">
+            <li><a href="?route=">
                 <i class="fas fa-home"></i> Về trang chủ
             </a></li>
             <li><a href="?route=auth/logout">

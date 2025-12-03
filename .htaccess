@@ -1,12 +1,7 @@
-# Bypass ngrok warning page
-<IfModule mod_headers.c>
-    Header set ngrok-skip-browser-warning "true"
-</IfModule>
-
 # Enable rewrite engine
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /DuAn1/
+    RewriteBase /
     
     # Redirect to index.php if file doesn't exist
     RewriteCond %{REQUEST_FILENAME} !-f
