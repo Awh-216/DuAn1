@@ -4,9 +4,9 @@
  */
 
 // ============================================
-// CẤU HÌNH PUBLIC URL - LOCAL
+// CẤU HÌNH PUBLIC URL - NGROK
 // ============================================
-define('PUBLIC_BASE_URL', 'http://localhost');
+define('PUBLIC_BASE_URL', 'https://unadmired-estimatingly-amare.ngrok-free.dev');
 define('APP_PATH', '/DuAn1');
 define('AUTO_DETECT_PUBLIC_URL', false);
 

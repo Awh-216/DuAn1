@@ -617,12 +617,10 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                         $vip_rows = $layout['vip_rows'] ?? [];
                                         $couple_rows = $layout['couple_rows'] ?? [];
                                         
-                                        // Tính toán 3 hàng ở giữa rạp làm VIP (tự động, không cố định C, D, E)
-                                        if (!empty($rows) && count($rows) >= 3) {
+                                        // Chỉ tự tính vip_rows nếu layout không có (rỗng)
+                                        if (empty($vip_rows) && !empty($rows) && count($rows) >= 3) {
                                             $totalRows = count($rows);
                                             // Tính toán vị trí bắt đầu để có 3 hàng ở giữa
-                                            // Ví dụ: 12 hàng (0-11) -> lấy hàng 4, 5, 6 (index 4, 5, 6)
-                                            // Công thức: (totalRows - 3) / 2, làm tròn xuống
                                             $middleStartIndex = floor(($totalRows - 3) / 2);
                                             $vip_rows = array_slice($rows, $middleStartIndex, 3); // Lấy 3 hàng ở giữa
                                             
@@ -750,7 +748,8 @@ $meta_og_image = ($movie && $movie['thumbnail']) ? $movie['thumbnail'] : null;
                                             
                                             // Tính toán 3 hàng ở giữa rạp làm VIP (tự động, không cố định)
                                             $allRows = array_keys($rowColsMap);
-                                            if (!empty($allRows) && count($allRows) >= 3) {
+                                            // Chỉ tự tính vip_rows nếu layout không có (rỗng)
+                                            if (empty($vip_rows) && !empty($allRows) && count($allRows) >= 3) {
                                                 $totalRows = count($allRows);
                                                 // Tính toán vị trí bắt đầu để có 3 hàng ở giữa
                                                 $middleStartIndex = floor(($totalRows - 3) / 2);
@@ -1522,6 +1521,28 @@ function updateModalFoodTotal() {
 function confirmFoodSelection() {
     // Sync modal values to form
     syncModalToForm();
+    
+    // Tạo hidden inputs cho food_items để đảm bảo được gửi khi submit
+    const form = document.getElementById('booking-form');
+    if (form) {
+        // Xóa hidden inputs cũ nếu có
+        form.querySelectorAll('input[name^="food_items"][type="hidden"]').forEach(el => el.remove());
+        
+        // Tạo hidden inputs mới từ modal values
+        document.querySelectorAll('.food-quantity-input-modal').forEach(function(modalInput) {
+            const itemId = modalInput.getAttribute('data-item-id');
+            const quantity = parseInt(modalInput.value) || 0;
+            if (quantity > 0) {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'food_items[' + itemId + ']';
+                hiddenInput.value = quantity;
+                form.appendChild(hiddenInput);
+                console.log('Added hidden input for food_items[' + itemId + '] = ' + quantity);
+            }
+        });
+    }
+    
     // Update total in main form
     if (typeof updateSelection === 'function') {
         updateSelection();
@@ -1529,8 +1550,8 @@ function confirmFoodSelection() {
     // Close modal
     closeFoodModal();
     // Submit form
-    const form = document.getElementById('booking-form');
     if (form) {
+        console.log('Submitting form with food items...');
         form.submit();
     }
 }
@@ -1751,9 +1772,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ?>;
     // Giá ghế từ PHP (đã tính từ movie hoặc seatLayout)
-    const normalPrice = <?php echo isset($normalPrice) ? (int)$normalPrice : 90000; ?>;
-    const vipPrice = <?php echo isset($vipPrice) ? (int)$vipPrice : 120000; ?>;
-    const couplePrice = <?php echo isset($couplePrice) ? (int)$couplePrice : 180000; ?>;
+    const normalPrice = <?php echo isset($normalPrice) ? (int)$normalPrice : 120000; ?>;
+    const vipPrice = <?php echo isset($vipPrice) ? (int)$vipPrice : 180000; ?>;
+    const couplePrice = <?php echo isset($couplePrice) ? (int)$couplePrice : 240000; ?>;
     
     // Timer variables đã được khai báo ở trên
     
@@ -1920,7 +1941,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!label) return normalPrice;
         
         if (label.classList.contains('couple-seat')) {
-            return couplePrice;
+            // Giá ghế đôi là giá cho cả cặp, mỗi ghế tính nửa giá
+            return couplePrice / 2;
         } else if (label.classList.contains('vip-seat')) {
             return vipPrice;
         }

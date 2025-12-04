@@ -80,7 +80,7 @@
     <!-- Revenue Chart -->
     <div class="col-md-8">
         <div class="stat-card">
-            <h5 class="mb-3">Doanh thu 7 ngày gần nhất</h5>
+            <h5 class="mb-3" style="color: black;">Doanh thu 7 ngày gần nhất</h5>
             <canvas id="revenueChart" height="100"></canvas>
         </div>
     </div>

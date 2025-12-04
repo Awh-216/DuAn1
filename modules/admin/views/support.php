@@ -135,7 +135,7 @@
                                             <form method="POST" action="?route=admin/support/update-status" style="display: inline;" class="status-update-form" onsubmit="return handleStatusUpdate(this, 'Đang xử lý');">
                                                 <input type="hidden" name="ticket_id" value="<?php echo $ticket['id']; ?>">
                                                 <input type="hidden" name="status" value="Đang xử lý">
-                                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Đang giải quyết">
+                                                <button style="color: green;" type="submit" class="btn btn-sm btn-outline-warning" title="Đang giải quyết">
                                                     <i class="fas fa-spinner"></i>
                                                 </button>
                                             </form>

@@ -2002,13 +2002,189 @@ class AdminController extends Controller {
         // Lấy thông tin moderator của rạp
         $moderator = $db->fetch("SELECT id, name, email, created_at FROM users WHERE role = 'moderator' AND theater_id = ?", [$theater['id']]);
         
+        // Lấy danh sách phòng chiếu
+        $screens = $db->fetchAll("SELECT * FROM theater_screens WHERE theater_id = ? ORDER BY screen_name", [$theater['id']]);
+        
         $this->adminView('theaters/view', [
             'theater' => $theater,
             'moderator' => $moderator,
+            'screens' => $screens,
             'user' => $user,
             'title' => 'Thông tin rạp: ' . $theater['name'],
             'current_page' => 'theaters'
         ]);
+    }
+    
+    // Thêm phòng chiếu mới
+    public function theatersAddScreen() {
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/theaters');
+            return;
+        }
+        
+        $theater_id = intval($_POST['theater_id'] ?? 0);
+        $screen_name = trim($_POST['screen_name'] ?? '');
+        $screen_type = $_POST['screen_type'] ?? '2D';
+        $num_rows = intval($_POST['num_rows'] ?? 10);
+        $num_cols = intval($_POST['num_cols'] ?? 12);
+        $vip_rows_str = trim($_POST['vip_rows'] ?? '');
+        $couple_rows_str = trim($_POST['couple_rows'] ?? '');
+        $normal_price = intval($_POST['normal_price'] ?? 90000);
+        $vip_price = intval($_POST['vip_price'] ?? 120000);
+        $couple_price = intval($_POST['couple_price'] ?? 180000);
+        
+        if (!$theater_id || empty($screen_name)) {
+            $_SESSION['error'] = 'Vui lòng nhập đầy đủ thông tin!';
+            $this->redirect('admin/theaters/view&id=' . $theater_id);
+            return;
+        }
+        
+        // Tạo danh sách hàng (A, B, C, ...)
+        $rows = [];
+        for ($i = 0; $i < min($num_rows, 26); $i++) {
+            $rows[] = chr(65 + $i);
+        }
+        
+        // Tạo danh sách cột
+        $cols = range(1, $num_cols);
+        
+        // Parse VIP rows và couple rows
+        $vip_rows = array_filter(array_map('trim', explode(',', strtoupper($vip_rows_str))));
+        $couple_rows = array_filter(array_map('trim', explode(',', strtoupper($couple_rows_str))));
+        
+        // Tạo seat_layout_config
+        $layout = [
+            'rows' => $rows,
+            'cols' => $cols,
+            'vip_rows' => array_values($vip_rows),
+            'couple_rows' => array_values($couple_rows),
+            'normal_price' => $normal_price,
+            'vip_price' => $vip_price,
+            'couple_price' => $couple_price,
+            'layout_type' => 'standard'
+        ];
+        
+        $total_seats = $num_rows * $num_cols;
+        
+        try {
+            $db = Database::getInstance();
+            $db->execute("
+                INSERT INTO theater_screens (theater_id, screen_name, total_seats, seat_layout_config, screen_type, is_active)
+                VALUES (?, ?, ?, ?, ?, 1)
+            ", [$theater_id, $screen_name, $total_seats, json_encode($layout), $screen_type]);
+            
+            $_SESSION['success'] = 'Đã thêm phòng chiếu "' . $screen_name . '" thành công!';
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Lỗi khi thêm phòng chiếu: ' . $e->getMessage();
+        }
+        
+        $this->redirect('admin/theaters/view&id=' . $theater_id);
+    }
+    
+    // Cập nhật phòng chiếu
+    public function theatersUpdateScreen() {
+        $user = AdminMiddleware::checkAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/theaters');
+            return;
+        }
+        
+        $screen_id = intval($_POST['screen_id'] ?? 0);
+        $theater_id = intval($_POST['theater_id'] ?? 0);
+        $screen_name = trim($_POST['screen_name'] ?? '');
+        $screen_type = $_POST['screen_type'] ?? '2D';
+        $is_active = isset($_POST['is_active']) ? 1 : 0;
+        $num_rows = intval($_POST['num_rows'] ?? 10);
+        $num_cols = intval($_POST['num_cols'] ?? 12);
+        $vip_rows_str = trim($_POST['vip_rows'] ?? '');
+        $couple_rows_str = trim($_POST['couple_rows'] ?? '');
+        $normal_price = intval($_POST['normal_price'] ?? 90000);
+        $vip_price = intval($_POST['vip_price'] ?? 120000);
+        $couple_price = intval($_POST['couple_price'] ?? 180000);
+        
+        if (!$screen_id || empty($screen_name)) {
+            $_SESSION['error'] = 'Vui lòng nhập đầy đủ thông tin!';
+            $this->redirect('admin/theaters/view&id=' . $theater_id);
+            return;
+        }
+        
+        // Tạo danh sách hàng
+        $rows = [];
+        for ($i = 0; $i < min($num_rows, 26); $i++) {
+            $rows[] = chr(65 + $i);
+        }
+        
+        // Tạo danh sách cột
+        $cols = range(1, $num_cols);
+        
+        // Parse VIP rows và couple rows
+        $vip_rows = array_filter(array_map('trim', explode(',', strtoupper($vip_rows_str))));
+        $couple_rows = array_filter(array_map('trim', explode(',', strtoupper($couple_rows_str))));
+        
+        // Tạo seat_layout_config
+        $layout = [
+            'rows' => $rows,
+            'cols' => $cols,
+            'vip_rows' => array_values($vip_rows),
+            'couple_rows' => array_values($couple_rows),
+            'normal_price' => $normal_price,
+            'vip_price' => $vip_price,
+            'couple_price' => $couple_price,
+            'layout_type' => 'standard'
+        ];
+        
+        $total_seats = $num_rows * $num_cols;
+        
+        try {
+            $db = Database::getInstance();
+            $db->execute("
+                UPDATE theater_screens 
+                SET screen_name = ?, total_seats = ?, seat_layout_config = ?, screen_type = ?, is_active = ?
+                WHERE id = ?
+            ", [$screen_name, $total_seats, json_encode($layout), $screen_type, $is_active, $screen_id]);
+            
+            $_SESSION['success'] = 'Đã cập nhật phòng chiếu "' . $screen_name . '" thành công!';
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Lỗi khi cập nhật phòng chiếu: ' . $e->getMessage();
+        }
+        
+        $this->redirect('admin/theaters/view&id=' . $theater_id);
+    }
+    
+    // Xóa phòng chiếu
+    public function theatersDeleteScreen() {
+        $user = AdminMiddleware::checkAdmin();
+        
+        $screen_id = intval($_GET['id'] ?? 0);
+        $theater_id = intval($_GET['theater_id'] ?? 0);
+        
+        if (!$screen_id) {
+            $_SESSION['error'] = 'Không tìm thấy phòng chiếu!';
+            $this->redirect('admin/theaters');
+            return;
+        }
+        
+        try {
+            $db = Database::getInstance();
+            
+            // Kiểm tra xem có suất chiếu nào đang sử dụng phòng này không
+            $showtimes = $db->fetch("SELECT COUNT(*) as count FROM showtimes WHERE screen_id = ? AND show_date >= CURDATE()", [$screen_id]);
+            if ($showtimes && $showtimes['count'] > 0) {
+                $_SESSION['error'] = 'Không thể xóa phòng chiếu này vì đang có ' . $showtimes['count'] . ' suất chiếu sắp tới!';
+                $this->redirect('admin/theaters/view&id=' . $theater_id);
+                return;
+            }
+            
+            $db->execute("DELETE FROM theater_screens WHERE id = ?", [$screen_id]);
+            $_SESSION['success'] = 'Đã xóa phòng chiếu thành công!';
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Lỗi khi xóa phòng chiếu: ' . $e->getMessage();
+        }
+        
+        $this->redirect('admin/theaters/view&id=' . $theater_id);
     }
     
     // Create Theater (Form)

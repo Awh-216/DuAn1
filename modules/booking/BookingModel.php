@@ -660,13 +660,24 @@ class BookingModel {
             if ($screen && $screen['seat_layout_config']) {
                 return json_decode($screen['seat_layout_config'], true);
             }
-            // Default layout: 3 hàng đầu = thường, từ hàng 4 (D) trở xuống = VIP, cuối = ghế đôi
+            // Default layout: 3 hàng ở giữa = VIP, hàng cuối = ghế đôi, còn lại = thường
             $defaultRows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+            $totalRows = count($defaultRows);
+            // Tính 3 hàng ở giữa làm VIP (giống logic trong view)
+            $middleStartIndex = floor(($totalRows - 3) / 2);
+            $vipRows = array_slice($defaultRows, $middleStartIndex, 3); // D, E, F (3 hàng ở giữa)
+            // Loại bỏ hàng cuối khỏi vip_rows nếu có
+            $lastRow = end($defaultRows);
+            $vipRows = array_filter($vipRows, function($row) use ($lastRow) {
+                return $row !== $lastRow;
+            });
+            $vipRows = array_values($vipRows);
+            
             return [
                 'rows' => $defaultRows,
                 'cols' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                'vip_rows' => array_slice($defaultRows, 3, -1), // D, E, F, G, H, I, J, K (từ hàng 4 trở xuống)
-                'couple_rows' => [end($defaultRows)], // L
+                'vip_rows' => $vipRows, // D, E, F (3 hàng ở giữa)
+                'couple_rows' => [$lastRow], // L
                 'normal_price' => 120000,
                 'vip_price' => 180000,
                 'couple_price' => 240000,
@@ -699,24 +710,29 @@ class BookingModel {
         $seat_type = $this->getSeatType($seat, $layout);
         
         // Ưu tiên lấy giá từ layout (phòng chiếu) vì giá theo loại phòng (2D, 3D, IMAX...)
+        // LƯU Ý: couple_price là giá cho CẢ CẶP ghế đôi, nên mỗi ghế chỉ tính nửa giá
         if ($layout) {
             switch ($seat_type) {
                 case 'vip':
-                    return $layout['vip_price'] ?? ($base_price * 1.5);
+                    return $layout['vip_price'] ?? ($movie['vip_price'] ?? ($base_price * 1.5));
                 case 'couple':
-                    return $layout['couple_price'] ?? ($base_price * 2);
+                    // Giá ghế đôi là giá cho cả cặp, mỗi ghế tính nửa giá
+                    $couplePrice = $layout['couple_price'] ?? ($movie['couple_price'] ?? ($base_price * 2));
+                    return $couplePrice / 2;
                 default:
-                    return $layout['normal_price'] ?? $base_price;
+                    return $layout['normal_price'] ?? ($movie['normal_price'] ?? $base_price);
             }
         }
         
-        // Fallback: lấy từ movie hoặc tính từ base_price
+        // Fallback: lấy từ movie
         if ($movie) {
             switch ($seat_type) {
                 case 'vip':
                     return $movie['vip_price'] ?? ($base_price * 1.5);
                 case 'couple':
-                    return $movie['couple_price'] ?? ($base_price * 2);
+                    // Giá ghế đôi là giá cho cả cặp, mỗi ghế tính nửa giá
+                    $couplePrice = $movie['couple_price'] ?? ($base_price * 2);
+                    return $couplePrice / 2;
                 default:
                     return $movie['normal_price'] ?? $base_price;
             }
@@ -727,7 +743,8 @@ class BookingModel {
             case 'vip':
                 return $base_price * 1.5;
             case 'couple':
-                return $base_price * 2;
+                // Giá ghế đôi là giá cho cả cặp, mỗi ghế tính nửa giá
+                return $base_price;
             default:
                 return $base_price;
         }

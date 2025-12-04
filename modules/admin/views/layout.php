@@ -248,7 +248,7 @@
         .admin-main > form h6,
         .admin-main > .mb-4 h5,
         .admin-main > .mb-3 h5 {
-            color: #fff !important;
+            color: black !important;
         }
         
         /* Form elements ngoài card (trên nền tối) */

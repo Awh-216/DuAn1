@@ -11,5 +11,5 @@
  */
 
 // Cấu hình public URL - Domain của website
-define('PUBLIC_BASE_URL', 'https://tuanawh.store');
+define('PUBLIC_BASE_URL', 'https://unadmired-estimatingly-amare.ngrok-free.dev');
 
