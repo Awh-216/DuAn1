@@ -99,10 +99,22 @@ class AdminController extends Controller {
             LIMIT 5
         ");
         
+        // Suất chiếu sắp tới
+        $upcomingShowtimes = $db->fetchAll("
+            SELECT s.*, m.title as movie_title, t.name as theater_name
+            FROM showtimes s
+            JOIN movies m ON s.movie_id = m.id
+            JOIN theaters t ON s.theater_id = t.id
+            WHERE s.show_date >= CURDATE()
+            ORDER BY s.show_date ASC, s.show_time ASC
+            LIMIT 10
+        ");
+        
         $this->adminView('dashboard', [
             'stats' => $stats,
             'revenueByDay' => $revenueByDay,
             'topMovies' => $topMovies,
+            'upcomingShowtimes' => $upcomingShowtimes,
             'user' => $user,
             'title' => 'Dashboard',
             'current_page' => 'dashboard'
