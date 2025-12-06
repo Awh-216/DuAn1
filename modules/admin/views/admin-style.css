@@ -1,0 +1,2759 @@
+/* =====================================================
+   CINEHUB ADMIN PANEL - MODERN CSS WITH EFFECTS
+   ===================================================== */
+
+/* CSS Variables */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --warning-gradient: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+    --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --dark-bg: #0f0f23;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --sidebar-bg: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    --glow-primary: 0 0 20px rgba(102, 126, 234, 0.4);
+    --glow-success: 0 0 20px rgba(56, 239, 125, 0.4);
+    --glow-danger: 0 0 20px rgba(235, 51, 73, 0.4);
+}
+
+/* =====================================================
+   SIDEBAR STYLES
+   ===================================================== */
+.admin-sidebar {
+    background: var(--sidebar-bg) !important;
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.sidebar-brand {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar-brand::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) rotate(45deg); }
+}
+
+.sidebar-menu a {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sidebar-menu a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background: var(--primary-gradient);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.sidebar-menu a:hover::before,
+.sidebar-menu a.active::before {
+    transform: scaleY(1);
+}
+
+.sidebar-menu a:hover {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.2) 0%, transparent 100%) !important;
+    transform: translateX(5px);
+    box-shadow: inset 0 0 20px rgba(102, 126, 234, 0.1);
+}
+
+.sidebar-menu a.active {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.3) 0%, transparent 100%) !important;
+    border-left: 3px solid #667eea;
+}
+
+.sidebar-menu a i {
+    transition: all 0.3s ease;
+}
+
+.sidebar-menu a:hover i {
+    transform: scale(1.2) rotate(5deg);
+    color: #667eea;
+}
+
+/* =====================================================
+   MAIN CONTENT AREA
+   ===================================================== */
+.admin-main {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important;
+    background-attachment: fixed;
+}
+
+.admin-main::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 250px;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* =====================================================
+   STAT CARDS WITH EFFECTS
+   ===================================================== */
+.stat-card {
+    background: var(--card-bg) !important;
+    border-radius: 16px !important;
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary-gradient);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(102, 126, 234, 0.3),
+        var(--glow-primary) !important;
+}
+
+/* Stat Icon Animations */
+.stat-card .stat-icon {
+    transition: all 0.4s ease;
+    position: relative;
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(10deg);
+    box-shadow: var(--glow-primary);
+}
+
+.stat-card .stat-value {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Different card colors */
+.stat-card.card-primary::before { background: var(--primary-gradient); }
+.stat-card.card-success::before { background: var(--success-gradient); }
+.stat-card.card-warning::before { background: var(--warning-gradient); }
+.stat-card.card-danger::before { background: var(--danger-gradient); }
+.stat-card.card-info::before { background: var(--info-gradient); }
+
+/* =====================================================
+   BUTTONS WITH EFFECTS
+   ===================================================== */
+.btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn:hover::after {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: var(--primary-gradient) !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+}
+
+.btn-success {
+    background: var(--success-gradient) !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(56, 239, 125, 0.4);
+}
+
+.btn-danger {
+    background: var(--danger-gradient) !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(235, 51, 73, 0.3);
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(235, 51, 73, 0.4);
+}
+
+.btn-warning {
+    background: var(--warning-gradient) !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(242, 153, 74, 0.3);
+}
+
+.btn-info {
+    background: var(--info-gradient) !important;
+    border: none !important;
+    color: #fff !important;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.btn-outline-primary {
+    border: 2px solid #667eea !important;
+    color: #667eea !important;
+    background: transparent !important;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-gradient) !important;
+    color: #fff !important;
+    transform: translateY(-2px);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d !important;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d !important;
+    transform: translateY(-2px);
+}
+
+
+/* =====================================================
+   TABLE STYLES
+   ===================================================== */
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    border: none !important;
+    padding: 15px !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    color: #495057 !important;
+}
+
+.table thead th:first-child {
+    border-radius: 10px 0 0 0;
+}
+
+.table thead th:last-child {
+    border-radius: 0 10px 0 0;
+}
+
+.table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%) !important;
+    transform: scale(1.01);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.table tbody td {
+    padding: 15px !important;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover td {
+    border-color: transparent !important;
+}
+
+/* =====================================================
+   FORM CONTROLS
+   ===================================================== */
+.form-control, .form-select {
+    border: 2px solid #e9ecef !important;
+    border-radius: 10px !important;
+    padding: 12px 16px !important;
+    transition: all 0.3s ease !important;
+    background: #fff !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 5px 20px rgba(102, 126, 234, 0.1) !important;
+    transform: translateY(-2px);
+}
+
+.form-control:hover, .form-select:hover {
+    border-color: #667eea !important;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+/* =====================================================
+   BADGES WITH EFFECTS
+   ===================================================== */
+.badge {
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+}
+
+.badge:hover {
+    transform: scale(1.1);
+}
+
+.badge.bg-success {
+    background: var(--success-gradient) !important;
+    box-shadow: 0 3px 10px rgba(56, 239, 125, 0.3);
+}
+
+.badge.bg-danger {
+    background: var(--danger-gradient) !important;
+    box-shadow: 0 3px 10px rgba(235, 51, 73, 0.3);
+}
+
+.badge.bg-warning {
+    background: var(--warning-gradient) !important;
+    color: #fff !important;
+    box-shadow: 0 3px 10px rgba(242, 153, 74, 0.3);
+}
+
+.badge.bg-info {
+    background: var(--info-gradient) !important;
+    box-shadow: 0 3px 10px rgba(79, 172, 254, 0.3);
+}
+
+.badge.bg-primary {
+    background: var(--primary-gradient) !important;
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+}
+
+/* =====================================================
+   MODAL STYLES
+   ===================================================== */
+.modal-content {
+    border: none !important;
+    border-radius: 20px !important;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3) !important;
+    overflow: hidden;
+}
+
+.modal-header {
+    background: var(--primary-gradient);
+    color: #fff;
+    border: none !important;
+    padding: 20px 25px !important;
+}
+
+.modal-header .modal-title {
+    color: #fff !important;
+    font-weight: 600;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.modal-header .btn-close:hover {
+    opacity: 1;
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 25px !important;
+}
+
+.modal-footer {
+    border: none !important;
+    padding: 20px 25px !important;
+    background: #f8f9fa;
+}
+
+.modal.fade .modal-dialog {
+    transform: scale(0.8) translateY(-50px);
+    transition: all 0.3s ease;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1) translateY(0);
+}
+
+/* =====================================================
+   ALERTS WITH EFFECTS
+   ===================================================== */
+.alert {
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-success {
+    background: linear-gradient(135deg, rgba(17, 153, 142, 0.15) 0%, rgba(56, 239, 125, 0.15) 100%) !important;
+    border-left: 4px solid #38ef7d !important;
+    color: #0d6832 !important;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, rgba(235, 51, 73, 0.15) 0%, rgba(244, 92, 67, 0.15) 100%) !important;
+    border-left: 4px solid #eb3349 !important;
+    color: #842029 !important;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, rgba(242, 153, 74, 0.15) 0%, rgba(242, 201, 76, 0.15) 100%) !important;
+    border-left: 4px solid #f2994a !important;
+    color: #856404 !important;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.15) 0%, rgba(0, 242, 254, 0.15) 100%) !important;
+    border-left: 4px solid #4facfe !important;
+    color: #0c5460 !important;
+}
+
+/* =====================================================
+   PAGINATION
+   ===================================================== */
+.pagination .page-link {
+    border: none;
+    border-radius: 10px !important;
+    margin: 0 3px;
+    padding: 10px 16px;
+    color: #667eea;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background: var(--primary-gradient);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary-gradient);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* =====================================================
+   DROPDOWN MENUS
+   ===================================================== */
+.dropdown-menu {
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    padding: 10px !important;
+    animation: dropdownFade 0.3s ease;
+}
+
+@keyframes dropdownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-item {
+    border-radius: 8px !important;
+    padding: 10px 15px !important;
+    transition: all 0.3s ease !important;
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, transparent 100%) !important;
+    transform: translateX(5px);
+}
+
+/* =====================================================
+   LOADING ANIMATIONS
+   ===================================================== */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(102, 126, 234, 0.2);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Pulse animation for icons */
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* =====================================================
+   SCROLLBAR STYLES
+   ===================================================== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-gradient);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+}
+
+/* =====================================================
+   CARD HOVER EFFECTS - SPECIAL
+   ===================================================== */
+.hover-lift {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hover-lift:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.4);
+}
+
+.hover-border:hover {
+    border-color: #667eea !important;
+}
+
+/* Floating animation */
+.float {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Gradient text */
+.gradient-text {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Glass effect */
+.glass {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* =====================================================
+   RESPONSIVE ADJUSTMENTS
+   ===================================================== */
+@media (max-width: 768px) {
+    .admin-sidebar {
+        width: 100%;
+        position: relative;
+    }
+    
+    .admin-main {
+        margin-left: 0;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px) scale(1.005);
+    }
+}
+
+/* =====================================================
+   DARK MODE SUPPORT
+   ===================================================== */
+@media (prefers-color-scheme: dark) {
+    .stat-card {
+        background: rgba(30, 30, 50, 0.95) !important;
+        color: #fff !important;
+    }
+    
+    .stat-card h5, .stat-card h6, .stat-card p {
+        color: #fff !important;
+    }
+    
+    .form-control, .form-select {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+        color: #fff !important;
+    }
+}
+
+
+/* =====================================================
+   SPECIAL FRAMES & BORDERS
+   ===================================================== */
+
+/* Neon Frame */
+.neon-frame {
+    position: relative;
+    border: 2px solid transparent;
+    border-radius: 16px;
+    background: linear-gradient(#1a1a2e, #1a1a2e) padding-box,
+                linear-gradient(135deg, #667eea, #764ba2, #f093fb, #667eea) border-box;
+    animation: borderRotate 4s linear infinite;
+}
+
+@keyframes borderRotate {
+    0% { background: linear-gradient(#1a1a2e, #1a1a2e) padding-box, linear-gradient(0deg, #667eea, #764ba2, #f093fb, #667eea) border-box; }
+    25% { background: linear-gradient(#1a1a2e, #1a1a2e) padding-box, linear-gradient(90deg, #667eea, #764ba2, #f093fb, #667eea) border-box; }
+    50% { background: linear-gradient(#1a1a2e, #1a1a2e) padding-box, linear-gradient(180deg, #667eea, #764ba2, #f093fb, #667eea) border-box; }
+    75% { background: linear-gradient(#1a1a2e, #1a1a2e) padding-box, linear-gradient(270deg, #667eea, #764ba2, #f093fb, #667eea) border-box; }
+    100% { background: linear-gradient(#1a1a2e, #1a1a2e) padding-box, linear-gradient(360deg, #667eea, #764ba2, #f093fb, #667eea) border-box; }
+}
+
+/* Glowing Frame */
+.glow-frame {
+    border: 2px solid rgba(102, 126, 234, 0.5);
+    border-radius: 16px;
+    box-shadow: 
+        0 0 10px rgba(102, 126, 234, 0.3),
+        0 0 20px rgba(102, 126, 234, 0.2),
+        0 0 30px rgba(102, 126, 234, 0.1),
+        inset 0 0 10px rgba(102, 126, 234, 0.05);
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(102, 126, 234, 0.3), 0 0 20px rgba(102, 126, 234, 0.2), 0 0 30px rgba(102, 126, 234, 0.1); }
+    50% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5), 0 0 40px rgba(102, 126, 234, 0.3), 0 0 60px rgba(102, 126, 234, 0.2); }
+}
+
+/* Rainbow Frame */
+.rainbow-frame {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.rainbow-frame::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+    background-size: 400%;
+    z-index: -1;
+    border-radius: 18px;
+    animation: rainbowMove 20s linear infinite;
+}
+
+@keyframes rainbowMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Cyber Frame */
+.cyber-frame {
+    border: 2px solid #00ff88;
+    border-radius: 0;
+    clip-path: polygon(0 10px, 10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px));
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.1);
+}
+
+/* Dotted Animated Frame */
+.dotted-frame {
+    border: 3px dashed transparent;
+    border-radius: 16px;
+    background: 
+        linear-gradient(#fff, #fff) padding-box,
+        repeating-linear-gradient(90deg, #667eea 0, #667eea 10px, transparent 10px, transparent 20px) border-box;
+    animation: marchingAnts 1s linear infinite;
+}
+
+@keyframes marchingAnts {
+    to { background-position: 40px 0; }
+}
+
+/* =====================================================
+   SPECIAL TEXT COLORS & EFFECTS
+   ===================================================== */
+
+/* Neon Text */
+.text-neon {
+    color: #fff;
+    text-shadow: 
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px #667eea,
+        0 0 40px #667eea,
+        0 0 80px #667eea;
+}
+
+.text-neon-pink {
+    color: #fff;
+    text-shadow: 
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px #f093fb,
+        0 0 40px #f093fb,
+        0 0 80px #f093fb;
+}
+
+.text-neon-green {
+    color: #fff;
+    text-shadow: 
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px #38ef7d,
+        0 0 40px #38ef7d,
+        0 0 80px #38ef7d;
+}
+
+.text-neon-cyan {
+    color: #fff;
+    text-shadow: 
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px #00f2fe,
+        0 0 40px #00f2fe,
+        0 0 80px #00f2fe;
+}
+
+/* Gradient Texts */
+.text-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-gold {
+    background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-ocean {
+    background: linear-gradient(135deg, #667eea 0%, #00f2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-sunset {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-forest {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-rainbow {
+    background: linear-gradient(90deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: rainbowText 3s linear infinite;
+}
+
+@keyframes rainbowText {
+    to { background-position: 200% center; }
+}
+
+/* Animated Typing Text */
+.text-typing {
+    overflow: hidden;
+    border-right: 3px solid #667eea;
+    white-space: nowrap;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: #667eea; }
+}
+
+/* Glitch Text Effect */
+.text-glitch {
+    position: relative;
+    color: #fff;
+}
+
+.text-glitch::before,
+.text-glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.text-glitch::before {
+    color: #ff00c8;
+    animation: glitch-1 2s infinite linear alternate-reverse;
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+}
+
+.text-glitch::after {
+    color: #00fff9;
+    animation: glitch-2 3s infinite linear alternate-reverse;
+    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+}
+
+@keyframes glitch-1 {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-3px); }
+    40% { transform: translateX(3px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes glitch-2 {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(3px); }
+    40% { transform: translateX(-3px); }
+    60% { transform: translateX(3px); }
+    80% { transform: translateX(-3px); }
+    100% { transform: translateX(0); }
+}
+
+/* =====================================================
+   ENHANCED ADMIN MAIN CONTENT COLORS
+   ===================================================== */
+
+/* Page titles */
+.admin-main h4,
+.admin-main h5:not(.stat-card h5),
+.moderator-main h4,
+.moderator-main h5:not(.stat-card h5) {
+    color: #fff !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Highlighted text on dark background */
+.admin-main .text-highlight,
+.moderator-main .text-highlight {
+    color: #00f2fe !important;
+    font-weight: 600;
+}
+
+.admin-main .text-accent,
+.moderator-main .text-accent {
+    color: #f093fb !important;
+}
+
+.admin-main .text-gold,
+.moderator-main .text-gold {
+    color: #ffd700 !important;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* =====================================================
+   SPECIAL CARD VARIANTS
+   ===================================================== */
+
+/* Glass Card */
+.card-glass {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff !important;
+}
+
+.card-glass h5, .card-glass h6, .card-glass p, .card-glass span {
+    color: #fff !important;
+}
+
+/* Gradient Border Card */
+.card-gradient-border {
+    position: relative;
+    background: #fff;
+    border-radius: 16px;
+}
+
+.card-gradient-border::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: var(--primary-gradient);
+    border-radius: 18px;
+    z-index: -1;
+}
+
+/* Holographic Card */
+.card-holographic {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(240, 147, 251, 0.1) 25%,
+        rgba(102, 126, 234, 0.1) 50%,
+        rgba(0, 242, 254, 0.1) 75%,
+        rgba(255, 255, 255, 0.9) 100%
+    ) !important;
+    background-size: 400% 400%;
+    animation: holographic 8s ease infinite;
+}
+
+@keyframes holographic {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* =====================================================
+   ANIMATED ICONS
+   ===================================================== */
+
+.icon-bounce {
+    animation: iconBounce 2s ease infinite;
+}
+
+@keyframes iconBounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+.icon-spin {
+    animation: iconSpin 2s linear infinite;
+}
+
+@keyframes iconSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.icon-shake {
+    animation: iconShake 0.5s ease infinite;
+}
+
+@keyframes iconShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.icon-heartbeat {
+    animation: iconHeartbeat 1.5s ease infinite;
+}
+
+@keyframes iconHeartbeat {
+    0%, 100% { transform: scale(1); }
+    14% { transform: scale(1.3); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.3); }
+    70% { transform: scale(1); }
+}
+
+/* =====================================================
+   PARTICLE BACKGROUND EFFECT
+   ===================================================== */
+
+.particles-bg {
+    position: relative;
+    overflow: hidden;
+}
+
+.particles-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(2px 2px at 50px 160px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(2px 2px at 130px 80px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(2px 2px at 160px 120px, rgba(255,255,255,0.2), transparent);
+    background-size: 200px 200px;
+    animation: particlesMove 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes particlesMove {
+    from { transform: translateY(0); }
+    to { transform: translateY(-200px); }
+}
+
+/* =====================================================
+   STAT CARD ENHANCED COLORS
+   ===================================================== */
+
+.stat-card .stat-value {
+    font-size: 2.5rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-card.card-revenue .stat-value {
+    background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-card.card-users .stat-value {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-card.card-tickets .stat-value {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-card.card-movies .stat-value {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* =====================================================
+   ENHANCED TABLE ROW COLORS
+   ===================================================== */
+
+.table tbody tr:nth-child(odd) {
+    background: rgba(102, 126, 234, 0.02);
+}
+
+.table tbody tr:hover {
+    background: linear-gradient(90deg, 
+        rgba(102, 126, 234, 0.1) 0%, 
+        rgba(118, 75, 162, 0.08) 50%,
+        rgba(240, 147, 251, 0.05) 100%
+    ) !important;
+}
+
+/* Status colors in tables */
+.status-active, .status-success {
+    color: #38ef7d !important;
+    font-weight: 600;
+}
+
+.status-pending, .status-warning {
+    color: #f2994a !important;
+    font-weight: 600;
+}
+
+.status-inactive, .status-danger {
+    color: #f5576c !important;
+    font-weight: 600;
+}
+
+/* =====================================================
+   TOOLTIP ENHANCED
+   ===================================================== */
+
+[data-tooltip] {
+    position: relative;
+    cursor: pointer;
+}
+
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px);
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+[data-tooltip]:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-10px);
+}
+
+/* =====================================================
+   PROGRESS BAR ENHANCED
+   ===================================================== */
+
+.progress {
+    height: 10px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.1);
+    overflow: visible;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    background: var(--primary-gradient);
+    position: relative;
+    overflow: visible;
+    animation: progressGlow 2s ease-in-out infinite;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.8);
+}
+
+@keyframes progressGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.8); }
+}
+
+/* =====================================================
+   NOTIFICATION DOT
+   ===================================================== */
+
+.notification-dot {
+    position: relative;
+}
+
+.notification-dot::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    background: #f5576c;
+    border-radius: 50%;
+    animation: notificationPulse 1.5s ease infinite;
+}
+
+@keyframes notificationPulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+
+/* =====================================================
+   FIX: DROPDOWN & SELECT TEXT COLORS
+   ===================================================== */
+
+/* Select dropdown - text color fix */
+.form-select {
+    color: #333 !important;
+    background-color: #fff !important;
+}
+
+.form-select option {
+    color: #333 !important;
+    background-color: #fff !important;
+    padding: 10px !important;
+}
+
+.form-select option:hover,
+.form-select option:focus,
+.form-select option:checked {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+    color: #333 !important;
+}
+
+/* Form control text color */
+.form-control {
+    color: #333 !important;
+}
+
+.form-control::placeholder {
+    color: #999 !important;
+}
+
+/* Dropdown menu items */
+.dropdown-menu {
+    background: #fff !important;
+}
+
+.dropdown-item {
+    color: #333 !important;
+}
+
+.dropdown-item:hover {
+    color: #333 !important;
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.15) 0%, transparent 100%) !important;
+}
+
+/* Modal form controls */
+.modal-body .form-control,
+.modal-body .form-select {
+    color: #333 !important;
+    background-color: #fff !important;
+}
+
+.modal-body .form-label {
+    color: #333 !important;
+}
+
+.modal-body label {
+    color: #333 !important;
+}
+
+/* Stat card form controls */
+.stat-card .form-control,
+.stat-card .form-select {
+    color: #333 !important;
+    background-color: #fff !important;
+}
+
+.stat-card .form-label,
+.stat-card label {
+    color: #495057 !important;
+}
+
+/* Table text colors */
+.stat-card .table {
+    color: #333 !important;
+}
+
+.stat-card .table th {
+    color: #495057 !important;
+}
+
+.stat-card .table td {
+    color: #333 !important;
+}
+
+/* Fix for dark text on white background in cards */
+.stat-card,
+.stat-card p,
+.stat-card span:not(.badge),
+.stat-card div:not(.stat-icon) {
+    color: #333;
+}
+
+.stat-card h5,
+.stat-card h6 {
+    color: #333 !important;
+}
+
+.stat-card .text-muted {
+    color: #6c757d !important;
+}
+
+/* Fix select2 or custom dropdowns if any */
+.select2-container--default .select2-selection--single {
+    background-color: #fff !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #333 !important;
+}
+
+.select2-results__option {
+    color: #333 !important;
+    background-color: #fff !important;
+}
+
+.select2-results__option--highlighted {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.2) 0%, transparent 100%) !important;
+    color: #333 !important;
+}
+
+/* Fix input groups */
+.input-group-text {
+    color: #333 !important;
+    background-color: #e9ecef !important;
+}
+
+/* Fix datalist options */
+datalist option {
+    color: #333 !important;
+    background-color: #fff !important;
+}
+
+/* Ensure all inputs in admin area have dark text */
+.admin-main input,
+.admin-main select,
+.admin-main textarea,
+.moderator-main input,
+.moderator-main select,
+.moderator-main textarea {
+    color: #333 !important;
+}
+
+.admin-main input::placeholder,
+.moderator-main input::placeholder {
+    color: #999 !important;
+}
+
+/* Fix autocomplete dropdown */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+    -webkit-text-fill-color: #333 !important;
+    background-color: #fff !important;
+}
+
+
+/* =====================================================
+   FIX: TEXT ON DARK BACKGROUND - MAKE IT BRIGHT
+   ===================================================== */
+
+/* All text directly on dark admin/moderator background */
+.admin-main,
+.moderator-main {
+    color: #e0e0e0 !important;
+}
+
+/* Headers on dark background */
+.admin-main > h1,
+.admin-main > h2,
+.admin-main > h3,
+.admin-main > h4,
+.admin-main > h5,
+.admin-main > h6,
+.moderator-main > h1,
+.moderator-main > h2,
+.moderator-main > h3,
+.moderator-main > h4,
+.moderator-main > h5,
+.moderator-main > h6,
+.admin-main .d-flex h4,
+.admin-main .d-flex h5,
+.moderator-main .d-flex h4,
+.moderator-main .d-flex h5 {
+    color: #fff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Small text, labels on dark background */
+.admin-main > small,
+.admin-main > label,
+.admin-main > span,
+.admin-main > p,
+.admin-main .form-label,
+.admin-main .small,
+.moderator-main > small,
+.moderator-main > label,
+.moderator-main > span,
+.moderator-main > p,
+.moderator-main .form-label,
+.moderator-main .small {
+    color: #b8c5d6 !important;
+}
+
+/* Text muted on dark background - make it lighter */
+.admin-main .text-muted:not(.stat-card .text-muted),
+.moderator-main .text-muted:not(.stat-card .text-muted) {
+    color: #8fa4bd !important;
+}
+
+/* Filter section labels */
+.admin-main .form-label,
+.moderator-main .form-label,
+.admin-main label:not(.stat-card label):not(.modal label),
+.moderator-main label:not(.stat-card label):not(.modal label) {
+    color: #c5d3e8 !important;
+}
+
+/* Links on dark background */
+.admin-main a:not(.btn):not(.stat-card a):not(.sidebar-menu a):not(.dropdown-item),
+.moderator-main a:not(.btn):not(.stat-card a):not(.sidebar-menu a):not(.dropdown-item) {
+    color: #7eb8ff !important;
+}
+
+.admin-main a:not(.btn):not(.stat-card a):not(.sidebar-menu a):not(.dropdown-item):hover,
+.moderator-main a:not(.btn):not(.stat-card a):not(.sidebar-menu a):not(.dropdown-item):hover {
+    color: #a8d4ff !important;
+}
+
+/* Breadcrumb on dark background */
+.admin-main .breadcrumb-item,
+.admin-main .breadcrumb-item a,
+.moderator-main .breadcrumb-item,
+.moderator-main .breadcrumb-item a {
+    color: #b8c5d6 !important;
+}
+
+.admin-main .breadcrumb-item.active,
+.moderator-main .breadcrumb-item.active {
+    color: #fff !important;
+}
+
+/* Page title area */
+.admin-main .d-flex.justify-content-between h5,
+.admin-main .d-flex.justify-content-between span,
+.moderator-main .d-flex.justify-content-between h5,
+.moderator-main .d-flex.justify-content-between span {
+    color: #fff !important;
+}
+
+/* Filter area text */
+.admin-main .row.g-2 label,
+.admin-main .row.g-2 .form-label,
+.admin-main .row.g-2 small,
+.moderator-main .row.g-2 label,
+.moderator-main .row.g-2 .form-label,
+.moderator-main .row.g-2 small {
+    color: #c5d3e8 !important;
+}
+
+/* Alert text colors - ensure readable */
+.admin-main .alert,
+.moderator-main .alert {
+    color: inherit;
+}
+
+/* List items on dark background */
+.admin-main ul:not(.stat-card ul) li,
+.admin-main ol:not(.stat-card ol) li,
+.moderator-main ul:not(.stat-card ul) li,
+.moderator-main ol:not(.stat-card ol) li {
+    color: #d0dae8 !important;
+}
+
+/* Description text */
+.admin-main .description,
+.admin-main .subtitle,
+.admin-main .info-text,
+.moderator-main .description,
+.moderator-main .subtitle,
+.moderator-main .info-text {
+    color: #a8b8cc !important;
+}
+
+/* Icon colors on dark background */
+.admin-main > i,
+.admin-main .d-flex > i,
+.moderator-main > i,
+.moderator-main .d-flex > i {
+    color: #7eb8ff !important;
+}
+
+/* Badge text - ensure contrast */
+.badge {
+    color: #fff !important;
+}
+
+/* Button outline text on dark */
+.admin-main .btn-outline-light,
+.moderator-main .btn-outline-light {
+    color: #fff !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.admin-main .btn-outline-secondary,
+.moderator-main .btn-outline-secondary {
+    color: #c5d3e8 !important;
+    border-color: #6c757d !important;
+}
+
+.admin-main .btn-outline-secondary:hover,
+.moderator-main .btn-outline-secondary:hover {
+    color: #fff !important;
+}
+
+/* Card headers outside stat-card */
+.admin-main .card-header:not(.stat-card .card-header),
+.moderator-main .card-header:not(.stat-card .card-header) {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Empty state text */
+.admin-main .text-center.text-muted,
+.moderator-main .text-center.text-muted {
+    color: #8fa4bd !important;
+}
+
+/* Pagination text on dark */
+.admin-main .pagination .page-link,
+.moderator-main .pagination .page-link {
+    color: #7eb8ff !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.admin-main .pagination .page-item.active .page-link,
+.moderator-main .pagination .page-item.active .page-link {
+    color: #fff !important;
+}
+
+/* Tab text on dark */
+.admin-main .nav-tabs .nav-link,
+.moderator-main .nav-tabs .nav-link {
+    color: #b8c5d6 !important;
+}
+
+.admin-main .nav-tabs .nav-link.active,
+.moderator-main .nav-tabs .nav-link.active {
+    color: #fff !important;
+    background: rgba(102, 126, 234, 0.3) !important;
+}
+
+/* Help text / hints */
+.admin-main .form-text,
+.admin-main .help-block,
+.moderator-main .form-text,
+.moderator-main .help-block {
+    color: #8fa4bd !important;
+}
+
+/* Counter / stats text outside cards */
+.admin-main .counter,
+.admin-main .stat-number,
+.moderator-main .counter,
+.moderator-main .stat-number {
+    color: #fff !important;
+    text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+}
+
+/* Ensure white cards have dark text */
+.stat-card,
+.stat-card *:not(.badge):not(.btn):not(.stat-icon):not(.stat-icon *) {
+    color: #333;
+}
+
+.stat-card h1, .stat-card h2, .stat-card h3, 
+.stat-card h4, .stat-card h5, .stat-card h6 {
+    color: #333 !important;
+}
+
+.stat-card .text-muted {
+    color: #6c757d !important;
+}
+
+.stat-card .stat-value {
+    color: transparent !important; /* Keep gradient text */
+}
+
+/* Modal content - dark text on white background */
+.modal-content {
+    color: #333 !important;
+}
+
+.modal-body,
+.modal-body * {
+    color: #333;
+}
+
+.modal-body .form-label,
+.modal-body label {
+    color: #333 !important;
+}
+
+.modal-footer {
+    color: #333 !important;
+}
+
+/* Dropdown menu - dark text */
+.dropdown-menu,
+.dropdown-menu * {
+    color: #333 !important;
+}
+
+
+/* =====================================================
+   DARK THEME CARDS - CHANGE WHITE TO DARK
+   ===================================================== */
+
+/* Stat cards - dark background */
+.stat-card {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%) !important;
+    border: 1px solid rgba(102, 126, 234, 0.2) !important;
+    backdrop-filter: blur(10px);
+}
+
+.stat-card,
+.stat-card p,
+.stat-card span:not(.badge),
+.stat-card div:not(.stat-icon),
+.stat-card li {
+    color: #e0e6f0 !important;
+}
+
+.stat-card h1, .stat-card h2, .stat-card h3,
+.stat-card h4, .stat-card h5, .stat-card h6 {
+    color: #fff !important;
+}
+
+.stat-card .text-muted {
+    color: #8fa4bd !important;
+}
+
+.stat-card label,
+.stat-card .form-label {
+    color: #c5d3e8 !important;
+}
+
+/* Admin header - dark background */
+.admin-header,
+.moderator-header {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%) !important;
+    border: 1px solid rgba(102, 126, 234, 0.2) !important;
+    color: #fff !important;
+}
+
+.admin-header h1, .admin-header h2, .admin-header h3,
+.admin-header h4, .admin-header h5, .admin-header h6,
+.moderator-header h1, .moderator-header h2, .moderator-header h3,
+.moderator-header h4, .moderator-header h5, .moderator-header h6 {
+    color: #fff !important;
+}
+
+.admin-header p, .admin-header span,
+.moderator-header p, .moderator-header span {
+    color: #b8c5d6 !important;
+}
+
+/* Tables in dark cards */
+.stat-card .table {
+    color: #e0e6f0 !important;
+}
+
+.stat-card .table thead th {
+    background: rgba(102, 126, 234, 0.15) !important;
+    color: #c5d3e8 !important;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.3) !important;
+}
+
+.stat-card .table tbody td {
+    color: #e0e6f0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.stat-card .table tbody tr:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+}
+
+.stat-card .table tbody tr:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Form controls in dark cards */
+.stat-card .form-control,
+.stat-card .form-select {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(102, 126, 234, 0.3) !important;
+    color: #fff !important;
+}
+
+.stat-card .form-control::placeholder {
+    color: #8fa4bd !important;
+}
+
+.stat-card .form-control:focus,
+.stat-card .form-select:focus {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2) !important;
+    color: #fff !important;
+}
+
+/* Select options - keep readable */
+.stat-card .form-select option {
+    background: #1a1a2e !important;
+    color: #fff !important;
+}
+
+/* Card hover effect update */
+.stat-card:hover {
+    border-color: rgba(102, 126, 234, 0.5) !important;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(102, 126, 234, 0.2) !important;
+}
+
+/* Buttons in dark cards */
+.stat-card .btn-outline-primary {
+    color: #7eb8ff !important;
+    border-color: #667eea !important;
+}
+
+.stat-card .btn-outline-primary:hover {
+    background: var(--primary-gradient) !important;
+    color: #fff !important;
+}
+
+.stat-card .btn-outline-secondary {
+    color: #b8c5d6 !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.stat-card .btn-outline-secondary:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+}
+
+/* Links in dark cards */
+.stat-card a:not(.btn) {
+    color: #7eb8ff !important;
+}
+
+.stat-card a:not(.btn):hover {
+    color: #a8d4ff !important;
+}
+
+/* Empty state in dark cards */
+.stat-card .text-center.text-muted {
+    color: #6c7a8d !important;
+}
+
+/* Card titles with icons */
+.stat-card .card-title,
+.stat-card .card-header {
+    color: #fff !important;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+/* Input groups in dark cards */
+.stat-card .input-group-text {
+    background: rgba(102, 126, 234, 0.2) !important;
+    border: 1px solid rgba(102, 126, 234, 0.3) !important;
+    color: #c5d3e8 !important;
+}
+
+/* Alerts in dark theme */
+.stat-card .alert {
+    border: none !important;
+}
+
+.stat-card .alert-success {
+    background: rgba(56, 239, 125, 0.15) !important;
+    color: #6ee7a0 !important;
+    border-left: 4px solid #38ef7d !important;
+}
+
+.stat-card .alert-danger {
+    background: rgba(245, 87, 108, 0.15) !important;
+    color: #ff8a9b !important;
+    border-left: 4px solid #f5576c !important;
+}
+
+.stat-card .alert-warning {
+    background: rgba(242, 153, 74, 0.15) !important;
+    color: #ffb86c !important;
+    border-left: 4px solid #f2994a !important;
+}
+
+.stat-card .alert-info {
+    background: rgba(79, 172, 254, 0.15) !important;
+    color: #7ec8ff !important;
+    border-left: 4px solid #4facfe !important;
+}
+
+/* Progress bars in dark theme */
+.stat-card .progress {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* List groups in dark cards */
+.stat-card .list-group-item {
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #e0e6f0 !important;
+}
+
+.stat-card .list-group-item:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Pagination in dark cards */
+.stat-card .pagination .page-link {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(102, 126, 234, 0.3) !important;
+    color: #7eb8ff !important;
+}
+
+.stat-card .pagination .page-item.active .page-link {
+    background: var(--primary-gradient) !important;
+    color: #fff !important;
+}
+
+/* Dropdown in dark cards */
+.stat-card .dropdown-menu {
+    background: #1a1a2e !important;
+    border: 1px solid rgba(102, 126, 234, 0.3) !important;
+}
+
+.stat-card .dropdown-item {
+    color: #e0e6f0 !important;
+}
+
+.stat-card .dropdown-item:hover {
+    background: rgba(102, 126, 234, 0.2) !important;
+    color: #fff !important;
+}
+
+/* Stat value gradient - keep visible */
+.stat-card .stat-value {
+    -webkit-text-fill-color: transparent !important;
+}
+
+/* Icons in stat cards */
+.stat-card .stat-icon {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Small text in dark cards */
+.stat-card small {
+    color: #8fa4bd !important;
+}
+
+/* Bold text in dark cards */
+.stat-card .fw-bold,
+.stat-card strong,
+.stat-card b {
+    color: #fff !important;
+}
+
+
+/* =====================================================
+   FIX ALL WHITE BACKGROUNDS TO DARK THEME
+   ===================================================== */
+
+/* All cards, panels, boxes */
+.card,
+.panel,
+.box,
+.content-box,
+.data-card,
+.info-card,
+.widget {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%) !important;
+    border: 1px solid rgba(102, 126, 234, 0.2) !important;
+    color: #e0e6f0 !important;
+}
+
+/* Card headers */
+.card-header,
+.panel-header,
+.box-header {
+    background: rgba(102, 126, 234, 0.15) !important;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2) !important;
+    color: #fff !important;
+}
+
+/* Card body */
+.card-body,
+.panel-body,
+.box-body {
+    background: transparent !important;
+    color: #e0e6f0 !important;
+}
+
+/* Card footer */
+.card-footer,
+.panel-footer,
+.box-footer {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-top: 1px solid rgba(102, 126, 234, 0.2) !important;
+    color: #b8c5d6 !important;
+}
+
+/* All tables */
+.table,
+table {
+    color: #e0e6f0 !important;
+    background: transparent !important;
+}
+
+.table thead th,
+table thead th,
+.table-responsive thead th {
+    background: rgba(102, 126, 234, 0.2) !important;
+    color: #c5d3e8 !important;
+    border-color: rgba(102, 126, 234, 0.3) !important;
+}
+
+.table tbody td,
+table tbody td,
+.table-responsive tbody td {
+    background: transparent !important;
+    color: #e0e6f0 !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.table tbody tr:hover,
+table tbody tr:hover {
+    background: rgba(102, 126, 234, 0.15) !important;
+}
+
+.table tbody tr:nth-child(even),
+table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Table responsive wrapper */
+.table-responsive {
+    background: transparent !important;
+}
+
+/* All modals - keep light for contrast */
+.modal-content {
+    background: linear-gradient(135deg, #1e1e3f 0%, #252550 100%) !important;
+    border: 1px solid rgba(102, 126, 234, 0.3) !important;
+    color: #e0e6f0 !important;
+}
+
+.modal-header {
+    background: var(--primary-gradient) !important;
+    border-bottom: none !important;
+    color: #fff !important;
+}
+
+.modal-header .modal-title {
+    color: #fff !important;
+}
+
+.modal-body {
+    background: transparent !important;
+    color: #e0e6f0 !important;
+}
+
+.modal-body label,
+.modal-body .form-label {
+    color: #c5d3e8 !important;
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(102, 126, 234, 0.3) !important;
+    color: #fff !important;
+}
+
+.modal-body .form-control::placeholder {
+    color: #8fa4bd !important;
+}
+
+.modal-body .form-select option {
+    background: #1a1a2e !important;
+    color: #fff !important;
+}
+
+.modal-footer {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-top: 1px solid rgba(102, 126, 234, 0.2) !important;
+}
+
+/* All form controls in admin area */
+.admin-main .form-control,
+.admin-main .form-select,
+.moderator-main .form-control,
+.moderator-main .form-select {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(102, 126, 234, 0.3) !important;
+    color: #fff !important;
+}
+
+.admin-main .form-control:focus,
+.admin-main .form-select:focus,
+.moderator-main .form-control:focus,
+.moderator-main .form-select:focus {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25) !important;
+    color: #fff !important;
+}
+
+.admin-main .form-control::placeholder,
+.moderator-main .form-control::placeholder {
+    color: #8fa4bd !important;
+}
+
+.admin-main .form-select option,
+.moderator-main .form-select option {
+    background: #1a1a2e !important;
+    color: #fff !important;
+}
+
+/* Input groups */
+.input-group-text {
+    background: rgba(102, 126, 234, 0.2) !important;
+    border: 1px solid rgba(102, 126, 234, 0.3) !important;
+    color: #c5d3e8 !important;
+}
+
+/* All dropdowns */
+.dropdown-menu {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+    border: 1px solid rgba(102, 126, 234, 0.3) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dropdown-item {
+    color: #e0e6f0 !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background: rgba(102, 126, 234, 0.2) !important;
+    color: #fff !important;
+}
+
+.dropdown-divider {
+    border-color: rgba(102, 126, 234, 0.2) !important;
+}
+
+/* List groups */
+.list-group-item {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(102, 126, 234, 0.2) !important;
+    color: #e0e6f0 !important;
+}
+
+.list-group-item:hover {
+    background: rgba(102, 126, 234, 0.15) !important;
+}
+
+.list-group-item.active {
+    background: var(--primary-gradient) !important;
+    border-color: transparent !important;
+}
+
+/* Tabs and navs */
+.nav-tabs {
+    border-color: rgba(102, 126, 234, 0.3) !important;
+}
+
+.nav-tabs .nav-link {
+    color: #b8c5d6 !important;
+    border-color: transparent !important;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: rgba(102, 126, 234, 0.3) !important;
+    color: #fff !important;
+}
+
+.nav-tabs .nav-link.active {
+    background: rgba(102, 126, 234, 0.2) !important;
+    border-color: rgba(102, 126, 234, 0.3) !important;
+    color: #fff !important;
+}
+
+.nav-pills .nav-link {
+    color: #b8c5d6 !important;
+}
+
+.nav-pills .nav-link.active {
+    background: var(--primary-gradient) !important;
+    color: #fff !important;
+}
+
+/* Accordion */
+.accordion-item {
+    background: rgba(26, 26, 46, 0.95) !important;
+    border-color: rgba(102, 126, 234, 0.2) !important;
+}
+
+.accordion-button {
+    background: rgba(102, 126, 234, 0.1) !important;
+    color: #fff !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background: rgba(102, 126, 234, 0.2) !important;
+    color: #fff !important;
+}
+
+.accordion-body {
+    background: transparent !important;
+    color: #e0e6f0 !important;
+}
+
+/* Popovers and tooltips */
+.popover {
+    background: #1a1a2e !important;
+    border-color: rgba(102, 126, 234, 0.3) !important;
+}
+
+.popover-header {
+    background: rgba(102, 126, 234, 0.2) !important;
+    color: #fff !important;
+}
+
+.popover-body {
+    color: #e0e6f0 !important;
+}
+
+.tooltip-inner {
+    background: #1a1a2e !important;
+    color: #fff !important;
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.breadcrumb-item a {
+    color: #7eb8ff !important;
+}
+
+.breadcrumb-item.active {
+    color: #fff !important;
+}
+
+/* Pagination */
+.pagination .page-link {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(102, 126, 234, 0.3) !important;
+    color: #7eb8ff !important;
+}
+
+.pagination .page-link:hover {
+    background: rgba(102, 126, 234, 0.3) !important;
+    color: #fff !important;
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary-gradient) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+}
+
+.pagination .page-item.disabled .page-link {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #6c7a8d !important;
+}
+
+/* Alerts - dark versions */
+.alert {
+    border: none !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.alert-primary {
+    background: rgba(102, 126, 234, 0.2) !important;
+    color: #a8c5ff !important;
+    border-left: 4px solid #667eea !important;
+}
+
+.alert-secondary {
+    background: rgba(108, 117, 125, 0.2) !important;
+    color: #b8c5d6 !important;
+    border-left: 4px solid #6c757d !important;
+}
+
+.alert-success {
+    background: rgba(56, 239, 125, 0.15) !important;
+    color: #6ee7a0 !important;
+    border-left: 4px solid #38ef7d !important;
+}
+
+.alert-danger {
+    background: rgba(245, 87, 108, 0.15) !important;
+    color: #ff8a9b !important;
+    border-left: 4px solid #f5576c !important;
+}
+
+.alert-warning {
+    background: rgba(242, 153, 74, 0.15) !important;
+    color: #ffb86c !important;
+    border-left: 4px solid #f2994a !important;
+}
+
+.alert-info {
+    background: rgba(79, 172, 254, 0.15) !important;
+    color: #7ec8ff !important;
+    border-left: 4px solid #4facfe !important;
+}
+
+/* Progress bars */
+.progress {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Borders */
+.border {
+    border-color: rgba(102, 126, 234, 0.2) !important;
+}
+
+.border-top, .border-bottom, .border-start, .border-end {
+    border-color: rgba(102, 126, 234, 0.2) !important;
+}
+
+/* Background utilities override */
+.bg-white {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%) !important;
+}
+
+.bg-light {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Text colors for dark theme */
+.text-dark {
+    color: #e0e6f0 !important;
+}
+
+.text-body {
+    color: #e0e6f0 !important;
+}
+
+/* Specific fix for white table cells */
+td, th {
+    background: transparent !important;
+}
+
+/* Fix any remaining white backgrounds */
+[style*="background: white"],
+[style*="background-color: white"],
+[style*="background:#fff"],
+[style*="background-color:#fff"],
+[style*="background: #fff"],
+[style*="background-color: #fff"] {
+    background: rgba(26, 26, 46, 0.95) !important;
+}
+
+
+/* =====================================================
+   PROFILE PAGE ENHANCED EFFECTS
+   ===================================================== */
+
+/* Profile Sidebar Glow Effect */
+.profile-luxury-sidebar {
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-luxury-sidebar::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(212, 175, 55, 0.1), transparent 30%);
+    animation: rotateBorder 8s linear infinite;
+    z-index: -1;
+}
+
+@keyframes rotateBorder {
+    100% { transform: rotate(360deg); }
+}
+
+/* Avatar Pulse Effect */
+.profile-avatar-wrapper {
+    position: relative;
+}
+
+.profile-avatar-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #d4af37, #f4e4bc, #d4af37);
+    background-size: 400% 400%;
+    animation: gradientShift 3s ease infinite;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.profile-avatar-wrapper:hover::before {
+    opacity: 1;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Avatar Float Animation */
+.profile-avatar-container {
+    animation: avatarFloat 4s ease-in-out infinite;
+}
+
+@keyframes avatarFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* Profile Name Shine Effect */
+.profile-name-luxury h2 {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-name-luxury h2::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: nameShine 3s ease-in-out infinite;
+}
+
+@keyframes nameShine {
+    0% { left: -100%; }
+    50%, 100% { left: 100%; }
+}
+
+/* Badge Sparkle Effect */
+.profile-badge-luxury {
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-badge-luxury::before {
+    content: '✨';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    transform: translateY(-50%);
+    animation: sparkle 2s ease-in-out infinite;
+    font-size: 0.8rem;
+}
+
+@keyframes sparkle {
+    0%, 100% { opacity: 0; transform: translateY(-50%) scale(0.5); }
+    50% { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
+/* Upgrade Button Glow */
+.btn-upgrade-luxury {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-upgrade-luxury::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: buttonShine 2s ease-in-out infinite;
+}
+
+@keyframes buttonShine {
+    0% { left: -100%; }
+    50%, 100% { left: 100%; }
+}
+
+/* Balance Card Pulse */
+.balance-card-luxury {
+    animation: balancePulse 3s ease-in-out infinite;
+}
+
+@keyframes balancePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.2); }
+    50% { box-shadow: 0 0 20px 5px rgba(212, 175, 55, 0.1); }
+}
+
+/* Balance Amount Counter Effect */
+.balance-amount-luxury {
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 50%, #d4af37 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: goldShimmer 3s linear infinite;
+}
+
+@keyframes goldShimmer {
+    to { background-position: 200% center; }
+}
+
+/* Menu Item Hover Effects */
+.menu-item-luxury {
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-item-luxury::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background: linear-gradient(180deg, #d4af37, #f4e4bc);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.menu-item-luxury:hover::before {
+    transform: scaleY(1);
+}
+
+.menu-item-luxury i {
+    transition: all 0.3s ease;
+}
+
+.menu-item-luxury:hover i {
+    transform: scale(1.2) rotate(10deg);
+    color: #d4af37;
+}
+
+/* Card Luxury Hover */
+.card-luxury {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card-luxury:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 30px rgba(212, 175, 55, 0.1);
+}
+
+/* Card Header Icon Animation */
+.card-header-luxury h3 i {
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Form Control Focus Glow */
+.form-control-luxury:focus {
+    animation: inputGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes inputGlow {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2); }
+    50% { box-shadow: 0 0 0 6px rgba(212, 175, 55, 0.3); }
+}
+
+/* History Item Slide In */
+.history-item-luxury {
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: slideInLeft 0.5s ease forwards;
+}
+
+.history-item-luxury:nth-child(1) { animation-delay: 0.1s; }
+.history-item-luxury:nth-child(2) { animation-delay: 0.2s; }
+.history-item-luxury:nth-child(3) { animation-delay: 0.3s; }
+.history-item-luxury:nth-child(4) { animation-delay: 0.4s; }
+.history-item-luxury:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes slideInLeft {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* History Thumbnail Hover */
+.history-thumbnail-luxury {
+    transition: all 0.3s ease;
+}
+
+.history-item-luxury:hover .history-thumbnail-luxury {
+    transform: scale(1.05) rotate(2deg);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+}
+
+/* Ticket Item Effects */
+.ticket-item-luxury {
+    position: relative;
+    overflow: hidden;
+}
+
+.ticket-item-luxury::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #d4af37, #f4e4bc);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.ticket-item-luxury:hover::before {
+    transform: scaleY(1);
+}
+
+/* Badge Bounce */
+.badge-luxury {
+    animation: badgeBounce 2s ease-in-out infinite;
+}
+
+@keyframes badgeBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+/* Empty State Animation */
+.empty-state-luxury i {
+    animation: emptyPulse 3s ease-in-out infinite;
+}
+
+@keyframes emptyPulse {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.1); opacity: 0.6; }
+}
+
+/* Button Update Ripple */
+.btn-update-luxury {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-update-luxury::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(212, 175, 55, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn-update-luxury:hover::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* Ticket Info Icons */
+.ticket-info-luxury i {
+    transition: all 0.3s ease;
+}
+
+.ticket-item-luxury:hover .ticket-info-luxury i {
+    transform: scale(1.2);
+    color: #f4e4bc;
+}
+
+/* Crown Icon Animation for Upgrade */
+.btn-upgrade-luxury i.fa-crown {
+    animation: crownBounce 1s ease-in-out infinite;
+}
+
+@keyframes crownBounce {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-3px) rotate(-5deg); }
+    75% { transform: translateY(-3px) rotate(5deg); }
+}
+
+/* Deposit Button Hover */
+.btn-deposit-luxury {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-deposit-luxury::before {
+    content: '+';
+    position: absolute;
+    top: 50%;
+    left: -30px;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.btn-deposit-luxury:hover::before {
+    left: 15px;
+    opacity: 1;
+}
+
+/* Change Avatar Button Camera Flash */
+.btn-change-avatar:hover i {
+    animation: cameraFlash 0.5s ease;
+}
+
+@keyframes cameraFlash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; transform: scale(1.3); }
+}
+
+/* Scrollbar for Profile Sidebar */
+.profile-luxury-sidebar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #d4af37, #f4e4bc);
+}
+
+/* Modal Upgrade Cards */
+#upgradeModal .card {
+    transition: all 0.3s ease;
+}
+
+#upgradeModal .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+}
+
+#upgradeModal .card.border-warning {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+/* Particles Background for Profile */
+.profile-luxury-container {
+    position: relative;
+}
+
+.profile-luxury-container::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(2px 2px at 100px 50px, rgba(212, 175, 55, 0.3), transparent),
+        radial-gradient(2px 2px at 200px 150px, rgba(212, 175, 55, 0.2), transparent),
+        radial-gradient(2px 2px at 300px 250px, rgba(212, 175, 55, 0.3), transparent),
+        radial-gradient(2px 2px at 400px 100px, rgba(212, 175, 55, 0.2), transparent),
+        radial-gradient(2px 2px at 500px 300px, rgba(212, 175, 55, 0.3), transparent);
+    background-size: 550px 350px;
+    animation: particlesFloat 30s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+}
+
+@keyframes particlesFloat {
+    from { transform: translateY(0); }
+    to { transform: translateY(-350px); }
+}
+
+/* Ensure content is above particles */
+.profile-luxury-sidebar,
+.card-luxury {
+    position: relative;
+    z-index: 1;
+}

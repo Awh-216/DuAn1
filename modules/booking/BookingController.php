@@ -202,13 +202,6 @@ class BookingController extends Controller {
             
             $user = $this->getCurrentUser();
             
-            // Lấy giá từ seatLayout (phòng chiếu) - ưu tiên vì giá theo loại phòng
-            // Movie prices chỉ dùng làm fallback nếu seatLayout không có
-            $moviePrices = $movie ? $bookingModel->getMoviePrices($movie['id']) : null;
-            $normalPrice = $seatLayout['normal_price'] ?? $moviePrices['normal_price'] ?? 90000;
-            $vipPrice = $seatLayout['vip_price'] ?? $moviePrices['vip_price'] ?? 120000;
-            $couplePrice = $seatLayout['couple_price'] ?? $moviePrices['couple_price'] ?? 180000;
-            
             $this->view('booking/index', [
                 'allMovies' => $allMovies,
                 'theaters' => $theaters,
@@ -223,9 +216,9 @@ class BookingController extends Controller {
                 'bookedSeats' => $bookedSeats,
                 'reservedSeats' => $reservedSeats,
                 'seatLayout' => $seatLayout,
-                'normalPrice' => $normalPrice,
-                'vipPrice' => $vipPrice,
-                'couplePrice' => $couplePrice,
+                'normalPrice' => $seatLayout['normal_price'] ?? 120000,
+                'vipPrice' => $seatLayout['vip_price'] ?? 180000,
+                'couplePrice' => $seatLayout['couple_price'] ?? 240000,
                 'foodItems' => $foodItems,
                 'user' => $user,
                 'screenInfo' => $screenInfo ?? null,
@@ -303,12 +296,6 @@ class BookingController extends Controller {
                     }
                 }
                 
-            // Lấy giá từ seatLayout (phòng chiếu) - ưu tiên vì giá theo loại phòng
-            $moviePrices = $movie ? $bookingModel->getMoviePrices($movie['id']) : null;
-            $normalPrice = $seatLayout['normal_price'] ?? $moviePrices['normal_price'] ?? 90000;
-            $vipPrice = $seatLayout['vip_price'] ?? $moviePrices['vip_price'] ?? 120000;
-            $couplePrice = $seatLayout['couple_price'] ?? $moviePrices['couple_price'] ?? 180000;
-            
             $this->view('booking/index', [
                 'allMovies' => $allMovies,
                 'theaters' => $theaters,
@@ -323,9 +310,9 @@ class BookingController extends Controller {
                 'bookedSeats' => $bookedSeats,
                 'reservedSeats' => $reservedSeats,
                 'seatLayout' => $seatLayout,
-                'normalPrice' => $normalPrice,
-                'vipPrice' => $vipPrice,
-                'couplePrice' => $couplePrice,
+                'normalPrice' => $seatLayout['normal_price'] ?? 120000,
+                'vipPrice' => $seatLayout['vip_price'] ?? 180000,
+                'couplePrice' => $seatLayout['couple_price'] ?? 240000,
                 'user' => $user
             ]);
             } catch (Exception $e2) {
@@ -336,7 +323,7 @@ class BookingController extends Controller {
                 if ($selected_theater) $redirectUrl .= '&theater=' . urlencode($selected_theater);
                 if ($selected_date) $redirectUrl .= '&date=' . urlencode($selected_date);
                 if ($selected_showtime_id) $redirectUrl .= '&showtime_id=' . urlencode($selected_showtime_id);
-                header('Location: https://tuanawh.store/' . $redirectUrl);
+                header('Location: http://localhost/DuAn1/' . $redirectUrl);
                 exit;
             }
         }
@@ -862,25 +849,6 @@ class BookingController extends Controller {
         $customer_email = trim($_POST['customer_email'] ?? '');
         $food_items = $_POST['food_items'] ?? []; // Array of [food_item_id => quantity]
         
-        // Debug: Log food_items nhận được từ form
-        error_log("=== DEBUG FOOD ITEMS FROM FORM ===");
-        error_log("Raw POST food_items: " . json_encode($_POST['food_items'] ?? 'NOT SET'));
-        error_log("Parsed food_items: " . json_encode($food_items));
-        
-        // Lọc food_items chỉ giữ những item có quantity > 0
-        $filteredFoodItems = [];
-        if (!empty($food_items) && is_array($food_items)) {
-            foreach ($food_items as $itemId => $qty) {
-                $quantity = intval($qty);
-                if ($quantity > 0) {
-                    $filteredFoodItems[$itemId] = $quantity;
-                    error_log("Food item $itemId: quantity = $quantity");
-                }
-            }
-        }
-        $food_items = $filteredFoodItems;
-        error_log("Filtered food_items: " . json_encode($food_items));
-        
         // Validate showtime và seats
         if (!$showtime_id || empty($seats)) {
             $_SESSION['error'] = 'Vui lòng chọn ghế!';
@@ -1027,54 +995,25 @@ class BookingController extends Controller {
             return;
         }
         
-        // Lấy giá ghế từ movie
-        $moviePrices = $bookingModel->getMoviePrices($showtime['movie_id']);
-        
         // Tính tổng tiền
         $totalAmount = 0;
-        error_log("=== PRICE CALCULATION ===");
-        error_log("Showtime price (base): " . $showtime['price']);
-        error_log("Movie prices: " . ($moviePrices ? json_encode($moviePrices) : 'NULL'));
-        error_log("Seat layout: " . ($seatLayout ? json_encode($seatLayout) : 'NULL'));
-        
-        // Debug seatLayout
-        error_log("SeatLayout vip_rows: " . json_encode($seatLayout['vip_rows'] ?? 'NOT SET'));
-        error_log("SeatLayout couple_rows: " . json_encode($seatLayout['couple_rows'] ?? 'NOT SET'));
-        
         foreach ($seats as $seat) {
             $seat_type = $bookingModel->getSeatType($seat, $seatLayout);
-            $seat_price = $bookingModel->getSeatPrice($seat, $seatLayout, $showtime['price'], $moviePrices);
-            $row = substr($seat, 0, 1);
-            error_log("Seat: $seat, Row: $row, Type: $seat_type, Price: $seat_price");
+            $seat_price = $bookingModel->getSeatPrice($seat, $seatLayout, $showtime['price']);
             $totalAmount += $seat_price;
         }
-        error_log("Total seats price: $totalAmount");
         
         // Tính tiền food items
-        error_log("=== CALCULATING FOOD ITEMS ===");
-        error_log("Food items to calculate: " . json_encode($food_items));
-        $foodTotal = 0;
         if (!empty($food_items)) {
             foreach ($food_items as $food_item_id => $quantity) {
-                $qty = intval($quantity);
-                error_log("Processing food_item_id: $food_item_id, quantity: $qty");
-                if ($qty > 0) {
+                if ($quantity > 0) {
                     $foodItem = $bookingModel->getFoodItemById($food_item_id);
                     if ($foodItem) {
-                        $itemTotal = floatval($foodItem['price']) * $qty;
-                        $foodTotal += $itemTotal;
-                        $totalAmount += $itemTotal;
-                        error_log("Food item found: " . $foodItem['name'] . ", price: " . $foodItem['price'] . ", qty: $qty, itemTotal: $itemTotal");
-                    } else {
-                        error_log("Food item NOT FOUND for id: $food_item_id");
+                        $totalAmount += $foodItem['price'] * $quantity;
                     }
                 }
             }
-        } else {
-            error_log("No food items to calculate (empty array)");
         }
-        error_log("Food total: $foodTotal");
-        error_log("Grand total (seats + food): $totalAmount");
         
         // Tạo mã giao dịch VNPay
         $vnp_TxnRef = 'BOOKING_' . $user['id'] . '_' . $showtime_id . '_' . time() . '_' . rand(1000, 9999);
@@ -2197,9 +2136,6 @@ class BookingController extends Controller {
             $seatLayout = $bookingModel->getScreenSeatLayout($showtime['screen_id']);
         }
         
-        // Lấy giá ghế từ movie
-        $moviePrices = $bookingModel->getMoviePrices($showtime['movie_id']);
-        
         $db = Database::getInstance()->getConnection();
         $createdTickets = [];
         
@@ -2217,7 +2153,7 @@ class BookingController extends Controller {
                 }
                 
                 $seat_type = $bookingModel->getSeatType($seat, $seatLayout);
-                $seat_price = $bookingModel->getSeatPrice($seat, $seatLayout, $showtime['price'], $moviePrices);
+                $seat_price = $bookingModel->getSeatPrice($seat, $seatLayout, $showtime['price']);
                 
                 $qr_code = uniqid('TICKET_') . '_' . $user['id'] . '_' . $showtime_id . '_' . time() . '_' . $seat;
                 
@@ -2381,6 +2317,11 @@ class BookingController extends Controller {
      * Hỗ trợ cả booking_id (hiển thị tất cả vé trong booking) và ticket_id (hiển thị 1 vé)
      */
     public function verify() {
+        // Bypass ngrok warning page
+        if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'ngrok') !== false) {
+            header('ngrok-skip-browser-warning: true');
+        }
+        
         // Clear output buffer
         while (ob_get_level()) {
             ob_end_clean();
@@ -2507,12 +2448,7 @@ class BookingController extends Controller {
                 $bookingFoodItems = [];
                 $foodItemsMap = [];
                 try {
-                    // Debug: Log booking food_items từ database
-                    error_log("=== DEBUG FOOD ITEMS ===");
-                    error_log("Booking ID: " . $booking_id);
-                    error_log("Booking food_items (JSON): " . ($booking['food_items'] ?? 'NULL'));
-                    
-                    // Lấy food items từ booking_food_items table
+                    // Lấy food items từ booking_food_items
                     $db = Database::getInstance();
                     $bookingFoodItems = $db->fetchAll("
                         SELECT bfi.*, fi.name, fi.type, fi.image
@@ -2522,38 +2458,29 @@ class BookingController extends Controller {
                         ORDER BY fi.type, fi.name
                     ", [$booking_id]);
                     
-                    error_log("Food items from booking_food_items table: " . count($bookingFoodItems));
-                    
                     // Nếu không có trong booking_food_items, thử lấy từ booking_pending.food_items (JSON)
                     if (empty($bookingFoodItems) && !empty($booking['food_items'])) {
-                        error_log("Trying to get food items from JSON...");
                         $foodItemsData = json_decode($booking['food_items'], true);
-                        error_log("Decoded food items: " . json_encode($foodItemsData));
-                        
-                        if ($foodItemsData && is_array($foodItemsData)) {
+                        if ($foodItemsData) {
                             $allFoodItems = $bookingModel->getFoodItems();
                             foreach ($allFoodItems as $food) {
                                 $foodItemsMap[$food['id']] = $food;
                             }
                             
                             foreach ($foodItemsData as $foodId => $quantity) {
-                                $qty = intval($quantity);
-                                if ($qty > 0 && isset($foodItemsMap[$foodId])) {
+                                if ($quantity > 0 && isset($foodItemsMap[$foodId])) {
                                     $bookingFoodItems[] = [
                                         'food_item_id' => $foodId,
                                         'name' => $foodItemsMap[$foodId]['name'],
                                         'type' => $foodItemsMap[$foodId]['type'],
-                                        'quantity' => $qty,
+                                        'quantity' => $quantity,
                                         'price' => $foodItemsMap[$foodId]['price'],
                                         'image' => $foodItemsMap[$foodId]['image'] ?? null
                                     ];
-                                    error_log("Added food item: " . $foodItemsMap[$foodId]['name'] . " x " . $qty);
                                 }
                             }
                         }
                     }
-                    
-                    error_log("Final food items count: " . count($bookingFoodItems));
                 } catch (Exception $e) {
                     error_log("Error getting booking food items: " . $e->getMessage());
                 }
@@ -2692,10 +2619,11 @@ class BookingController extends Controller {
                     die('Không tìm thấy QR code!');
                 }
                 
-                // Kiểm tra file SVG hoặc PNG
-                $qrFiles = glob(__DIR__ . '/../../data/qr_codes/booking_' . $booking_id . '_*.{svg,png}', GLOB_BRACE);
+                // Kiểm tra xem file QR code đã tồn tại chưa
+                $qrFiles = glob(__DIR__ . '/../../data/qr_codes/booking_' . $booking_id . '_*.png');
                 
                 if (!empty($qrFiles) && file_exists($qrFiles[0])) {
+                    // File đã tồn tại, sử dụng file đó
                     $qrFilePath = $qrFiles[0];
                 } else {
                     // Tạo QR code mới
@@ -2710,7 +2638,7 @@ class BookingController extends Controller {
                     }
                 }
             }
-            // Nếu có ticket_id
+            // Nếu có ticket_id, hiển thị QR code của ticket (tương thích ngược)
             else if ($ticket_id) {
                 $this->requireLogin();
                 $user = $this->getCurrentUser();
@@ -2722,17 +2650,21 @@ class BookingController extends Controller {
                     die('Không tìm thấy QR code!');
                 }
                 
-                $qrFiles = glob(__DIR__ . '/../../data/qr_codes/ticket_' . $ticket_id . '_*.{svg,png}', GLOB_BRACE);
+                // Kiểm tra xem file QR code đã tồn tại chưa
+                $qrFiles = glob(__DIR__ . '/../../data/qr_codes/ticket_' . $ticket_id . '_*.png');
                 
                 if (!empty($qrFiles) && file_exists($qrFiles[0])) {
+                    // File đã tồn tại, sử dụng file đó
                     $qrFilePath = $qrFiles[0];
                 } else {
+                    // Tạo QR code mới
                     $qrResult = $qrService->generateQRCode($ticket['qr_code'], $ticket_id);
                     
                     if ($qrResult['success'] && file_exists($qrResult['file_path'])) {
                         $qrFilePath = $qrResult['file_path'];
                     } else {
                         http_response_code(500);
+                        error_log("QR code generation failed: " . ($qrResult['error'] ?? 'Unknown error'));
                         die('Không thể tạo QR code!');
                     }
                 }
@@ -2740,28 +2672,26 @@ class BookingController extends Controller {
             
             // Hiển thị QR code
             if ($qrFilePath && file_exists($qrFilePath)) {
+                // Clear any output before sending image
                 while (ob_get_level()) {
                     ob_end_clean();
                 }
                 
-                // Xác định content type dựa trên extension
-                $ext = strtolower(pathinfo($qrFilePath, PATHINFO_EXTENSION));
-                $contentType = ($ext === 'svg') ? 'image/svg+xml' : 'image/png';
-                
-                header('Content-Type: ' . $contentType);
+                header('Content-Type: image/png');
                 header('Content-Length: ' . filesize($qrFilePath));
                 header('Cache-Control: public, max-age=3600');
                 readfile($qrFilePath);
                 exit;
             } else {
                 http_response_code(500);
+                error_log("QR code file not found: " . $qrFilePath);
                 die('Không tìm thấy file QR code!');
             }
             
         } catch (Exception $e) {
             error_log("Error showing QR code: " . $e->getMessage());
             http_response_code(500);
-            die('Có lỗi xảy ra: ' . $e->getMessage());
+            die('Có lỗi xảy ra!');
         }
     }
     

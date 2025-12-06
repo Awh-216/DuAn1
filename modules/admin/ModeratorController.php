@@ -256,34 +256,60 @@ class ModeratorController extends Controller {
         $db = Database::getInstance();
         $user = AdminMiddleware::checkAdmin();
         
-        $date = $_GET['date'] ?? date('Y-m-d');
+        // Lấy các filter
+        $date = $_GET['date'] ?? '';
+        $screen_id = $_GET['screen_id'] ?? '';
+        $time_range = $_GET['time_range'] ?? '';
+        $showAll = isset($_GET['all']) && $_GET['all'] == '1';
         
-        // Lấy danh sách lịch chiếu - lấy tất cả showtimes của rạp, không chỉ theo ngày
-        // Nếu có filter date thì lọc theo date, nếu không thì lấy tất cả
-        if ($date) {
-            $showtimes = $db->fetchAll("
-                SELECT s.*, m.title as movie_title, m.thumbnail,
-                       ts.screen_name, ts.screen_type
-                FROM showtimes s
-                INNER JOIN movies m ON s.movie_id = m.id
-                LEFT JOIN theater_screens ts ON s.screen_id = ts.id
-                WHERE s.theater_id = ? AND s.show_date = ?
-                ORDER BY s.show_date DESC, s.show_time ASC
-            ", [$this->theaterId, $date]);
-        } else {
-            // Lấy tất cả showtimes của rạp (7 ngày tới)
+        // Build query với các filter
+        $sql = "
+            SELECT s.*, m.title as movie_title, m.thumbnail,
+                   ts.screen_name, ts.screen_type
+            FROM showtimes s
+            INNER JOIN movies m ON s.movie_id = m.id
+            LEFT JOIN theater_screens ts ON s.screen_id = ts.id
+            WHERE s.theater_id = ?
+        ";
+        $params = [$this->theaterId];
+        
+        // Filter theo ngày
+        if (!empty($date)) {
+            $sql .= " AND s.show_date = ?";
+            $params[] = $date;
+        } elseif ($showAll || empty($date)) {
+            // Mặc định hiển thị 7 ngày tới
             $today = date('Y-m-d');
             $nextWeek = date('Y-m-d', strtotime('+7 days'));
-            $showtimes = $db->fetchAll("
-                SELECT s.*, m.title as movie_title, m.thumbnail,
-                       ts.screen_name, ts.screen_type
-                FROM showtimes s
-                INNER JOIN movies m ON s.movie_id = m.id
-                LEFT JOIN theater_screens ts ON s.screen_id = ts.id
-                WHERE s.theater_id = ? AND s.show_date >= ? AND s.show_date <= ?
-                ORDER BY s.show_date ASC, s.show_time ASC
-            ", [$this->theaterId, $today, $nextWeek]);
+            $sql .= " AND s.show_date >= ? AND s.show_date <= ?";
+            $params[] = $today;
+            $params[] = $nextWeek;
         }
+        
+        // Filter theo phòng chiếu
+        if (!empty($screen_id)) {
+            $sql .= " AND s.screen_id = ?";
+            $params[] = $screen_id;
+        }
+        
+        // Filter theo khung giờ
+        if (!empty($time_range)) {
+            switch ($time_range) {
+                case 'morning':
+                    $sql .= " AND TIME(s.show_time) >= '06:00:00' AND TIME(s.show_time) < '12:00:00'";
+                    break;
+                case 'afternoon':
+                    $sql .= " AND TIME(s.show_time) >= '12:00:00' AND TIME(s.show_time) < '18:00:00'";
+                    break;
+                case 'evening':
+                    $sql .= " AND TIME(s.show_time) >= '18:00:00' AND TIME(s.show_time) <= '23:59:59'";
+                    break;
+            }
+        }
+        
+        $sql .= " ORDER BY s.show_date ASC, s.show_time ASC";
+        
+        $showtimes = $db->fetchAll($sql, $params);
         
         // Lấy danh sách phim
         $movies = $db->fetchAll("SELECT id, title FROM movies WHERE status = 'Chiếu rạp' ORDER BY title");
@@ -339,6 +365,20 @@ class ModeratorController extends Controller {
         // Lấy theater_id từ screen (đảm bảo có theater_id)
         $theater_id = $screen['theater_id'] ?? $this->theaterId;
         
+        // Kiểm tra trùng lặp: 1 phòng, 1 khung giờ chỉ chiếu 1 phim
+        $existingShowtime = $db->fetch("
+            SELECT s.*, m.title as movie_title 
+            FROM showtimes s
+            INNER JOIN movies m ON s.movie_id = m.id
+            WHERE s.screen_id = ? AND s.show_date = ? AND s.show_time = ?
+        ", [$screen_id, $show_date, $show_time]);
+        
+        if ($existingShowtime) {
+            $_SESSION['error'] = 'Phòng chiếu này đã có suất chiếu phim "' . $existingShowtime['movie_title'] . '" vào lúc ' . date('H:i', strtotime($show_time)) . ' ngày ' . date('d/m/Y', strtotime($show_date)) . '!';
+            $this->redirect('moderator/showtimes');
+            return;
+        }
+        
         try {
             $db->execute("
                 INSERT INTO showtimes (movie_id, theater_id, screen_id, show_date, show_time, price)
@@ -392,6 +432,20 @@ class ModeratorController extends Controller {
         $screen = $db->fetch("SELECT * FROM theater_screens WHERE id = ? AND theater_id = ?", [$screen_id, $this->theaterId]);
         if (!$screen) {
             $_SESSION['error'] = 'Phòng chiếu không thuộc rạp của bạn!';
+            $this->redirect('moderator/showtimes');
+            return;
+        }
+        
+        // Kiểm tra trùng lặp: 1 phòng, 1 khung giờ chỉ chiếu 1 phim (trừ chính nó)
+        $existingShowtime = $db->fetch("
+            SELECT s.*, m.title as movie_title 
+            FROM showtimes s
+            INNER JOIN movies m ON s.movie_id = m.id
+            WHERE s.screen_id = ? AND s.show_date = ? AND s.show_time = ? AND s.id != ?
+        ", [$screen_id, $show_date, $show_time, $id]);
+        
+        if ($existingShowtime) {
+            $_SESSION['error'] = 'Phòng chiếu này đã có suất chiếu phim "' . $existingShowtime['movie_title'] . '" vào lúc ' . date('H:i', strtotime($show_time)) . ' ngày ' . date('d/m/Y', strtotime($show_date)) . '!';
             $this->redirect('moderator/showtimes');
             return;
         }
@@ -697,14 +751,37 @@ class ModeratorController extends Controller {
         $theater_id = $screen['theater_id'] ?? $this->theaterId;
         
         try {
+            $addedCount = 0;
+            $skippedTimes = [];
+            
             foreach ($showtimes_time as $time) {
+                // Kiểm tra trùng lặp: 1 phòng, 1 khung giờ chỉ chiếu 1 phim
+                $existingShowtime = $db->fetch("
+                    SELECT s.*, m.title as movie_title 
+                    FROM showtimes s
+                    INNER JOIN movies m ON s.movie_id = m.id
+                    WHERE s.screen_id = ? AND s.show_date = ? AND s.show_time = ?
+                ", [$screen_id, $show_date, $time]);
+                
+                if ($existingShowtime) {
+                    $skippedTimes[] = date('H:i', strtotime($time)) . ' (đã có phim "' . $existingShowtime['movie_title'] . '")';
+                    continue;
+                }
+                
                 $db->execute("
                     INSERT INTO showtimes (movie_id, theater_id, screen_id, show_date, show_time, price)
                     VALUES (?, ?, ?, ?, ?, ?)
                 ", [$movie_id, $theater_id, $screen_id, $show_date, $time, $price]);
+                $addedCount++;
             }
             
-            $_SESSION['success'] = 'Thêm phim vào phòng thành công!';
+            if ($addedCount > 0 && empty($skippedTimes)) {
+                $_SESSION['success'] = 'Thêm ' . $addedCount . ' suất chiếu thành công!';
+            } elseif ($addedCount > 0 && !empty($skippedTimes)) {
+                $_SESSION['warning'] = 'Đã thêm ' . $addedCount . ' suất chiếu. Bỏ qua các khung giờ đã có: ' . implode(', ', $skippedTimes);
+            } else {
+                $_SESSION['error'] = 'Không thể thêm suất chiếu. Các khung giờ đã có phim: ' . implode(', ', $skippedTimes);
+            }
         } catch (Exception $e) {
             $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
         }

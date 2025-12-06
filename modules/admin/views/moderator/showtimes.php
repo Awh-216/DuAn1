@@ -12,25 +12,45 @@
 
 <!-- Filters -->
 <div class="stat-card mb-3">
-    <form method="GET" class="row g-2">
+    <form method="GET" class="row g-2 align-items-end">
         <input type="hidden" name="route" value="moderator/showtimes">
-        <div class="col-md-4">
-            <input type="date" name="date" class="form-control" value="<?php echo htmlspecialchars($date ?? date('Y-m-d')); ?>" onchange="this.form.submit()">
+        <div class="col-md-2">
+            <label class="form-label small text-muted">Ngày chiếu</label>
+            <input type="date" name="date" class="form-control" value="<?php echo htmlspecialchars($date ?? ''); ?>">
         </div>
         <div class="col-md-2">
-            <label class="form-label small">Hoặc xem tất cả (7 ngày tới)</label>
-            <a href="?route=moderator/showtimes&date=" class="btn btn-outline-info w-100 btn-sm">
-                <i class="fas fa-list"></i> Tất cả
-            </a>
+            <label class="form-label small text-muted">Phòng chiếu</label>
+            <select name="screen_id" class="form-select">
+                <option value="">Tất cả phòng</option>
+                <?php foreach ($screens as $screen): ?>
+                    <option value="<?php echo $screen['id']; ?>" <?php echo (isset($_GET['screen_id']) && $_GET['screen_id'] == $screen['id']) ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($screen['screen_name']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-secondary w-100">
+            <label class="form-label small text-muted">Khung giờ</label>
+            <select name="time_range" class="form-select">
+                <option value="">Tất cả giờ</option>
+                <option value="morning" <?php echo (isset($_GET['time_range']) && $_GET['time_range'] == 'morning') ? 'selected' : ''; ?>>Sáng (6:00 - 12:00)</option>
+                <option value="afternoon" <?php echo (isset($_GET['time_range']) && $_GET['time_range'] == 'afternoon') ? 'selected' : ''; ?>>Chiều (12:00 - 18:00)</option>
+                <option value="evening" <?php echo (isset($_GET['time_range']) && $_GET['time_range'] == 'evening') ? 'selected' : ''; ?>>Tối (18:00 - 24:00)</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
                 <i class="fas fa-search"></i> Lọc
             </button>
         </div>
         <div class="col-md-2">
             <a href="?route=moderator/showtimes" class="btn btn-outline-secondary w-100">
                 <i class="fas fa-redo"></i> Xóa lọc
+            </a>
+        </div>
+        <div class="col-md-2">
+            <a href="?route=moderator/showtimes&all=1" class="btn btn-outline-info w-100">
+                <i class="fas fa-list"></i> 7 ngày tới
             </a>
         </div>
     </form>
@@ -149,10 +169,8 @@
                         <label for="show_time" class="form-label" style="color: black;">Giờ chiếu <span class="text-danger">*</span></label>
                         <input type="time" name="show_time" id="show_time" class="form-control" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="price" class="form-label" style="color: black;">Giá vé (VNĐ) <span class="text-danger">*</span></label>
-                        <input type="number" name="price" id="price" class="form-control" min="0" required>
-                    </div>
+                    <!-- Giá vé được lấy tự động từ cấu hình phòng chiếu -->
+                    <input type="hidden" name="price" value="0">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -203,10 +221,8 @@
                         <label for="edit_show_time" class="form-label">Giờ chiếu <span class="text-danger">*</span></label>
                         <input type="time" name="show_time" id="edit_show_time" class="form-control" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit_price" class="form-label">Giá vé (VNĐ) <span class="text-danger">*</span></label>
-                        <input type="number" name="price" id="edit_price" class="form-control" min="0" required>
-                    </div>
+                    <!-- Giá vé được lấy tự động từ cấu hình phòng chiếu -->
+                    <input type="hidden" name="price" id="edit_price" value="0">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>

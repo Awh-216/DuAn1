@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 03, 2025 at 05:08 PM
+-- Generation Time: Dec 06, 2025 at 07:38 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -113,14 +113,9 @@ INSERT INTO `booking_pending` (`id`, `user_id`, `showtime_id`, `seats`, `food_it
 (16, 9, 321, '[\"I6\",\"I7\",\"I8\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 630000.00, 'BOOKING_9_321_1764648560_7856', 'completed', '2025-12-02 04:09:20', '2025-12-01 22:19:20', 'BOOKING_692e66988132e_16_1764648600'),
 (17, 9, 81, '[\"G4\",\"G5\",\"G6\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 510000.00, 'BOOKING_9_81_1764648968_2995', 'completed', '2025-12-02 04:16:08', '2025-12-01 22:26:08', 'BOOKING_692e682b362d2_17_1764649003'),
 (18, 9, 328, '[\"I4\",\"I5\",\"I6\"]', NULL, 'nguyenvanlinh25062006@gmail.com', 630000.00, 'BOOKING_9_328_1764726288_9425', 'completed', '2025-12-03 01:44:48', '2025-12-02 19:54:48', 'BOOKING_692f9641bfe05_18_1764726337'),
-(19, 10, 76, '[\"I6\"]', NULL, 'tuanawh@gmail.com', 120000.00, 'BOOKING_10_76_1764774753_4907', 'pending', '2025-12-03 15:12:33', '2025-12-03 09:22:33', NULL),
-(20, 10, 76, '[\"I5\",\"I6\"]', NULL, 'tuanawh@gmail.com', 240000.00, 'BOOKING_10_76_1764774777_6104', 'pending', '2025-12-03 15:12:57', '2025-12-03 09:22:57', NULL),
-(21, 10, 76, '[\"I5\",\"I6\"]', NULL, 'tuanawh@gmail.com', 240000.00, 'BOOKING_10_76_1764774820_8768', 'pending', '2025-12-03 15:13:40', '2025-12-03 09:23:40', NULL),
-(22, 10, 76, '[\"K7\"]', NULL, 'tuanawh@gmail.com', 120000.00, 'BOOKING_10_76_1764775380_5907', 'pending', '2025-12-03 15:23:00', '2025-12-03 09:33:00', NULL),
-(23, 10, 76, '[\"L7\",\"L8\"]', NULL, 'tuanawh@gmail.com', 240000.00, 'BOOKING_10_76_1764775404_1491', 'pending', '2025-12-03 15:23:24', '2025-12-03 09:33:24', NULL),
 (24, 10, 76, '[\"L7\",\"L8\"]', NULL, 'tuanawh@gmail.com', 240000.00, 'BOOKING_10_76_1764775440_7012', 'cancelled', '2025-12-03 15:24:00', '2025-12-03 09:34:00', NULL),
-(25, 10, 76, '[\"I6\"]', NULL, 'tuanawh@gmail.com', 200000.00, 'BOOKING_10_76_1764776540_3528', 'pending', '2025-12-03 15:42:20', '2025-12-03 09:52:20', NULL),
-(26, 10, 76, '[\"I6\"]', NULL, 'tuanawh@gmail.com', 200000.00, 'BOOKING_10_76_1764776555_8796', 'pending', '2025-12-03 15:42:35', '2025-12-03 09:52:35', NULL);
+(27, 10, 91, '[\"K6\"]', NULL, 'tuanawh@gmail.com', 210000.00, 'BOOKING_10_91_1765041470_4442', 'completed', '2025-12-06 17:17:50', '2025-12-06 11:27:50', NULL),
+(28, 10, 91, '[\"C7\"]', NULL, 'tuanawh@gmail.com', 140000.00, 'BOOKING_10_91_1765041704_5251', 'completed', '2025-12-06 17:21:44', '2025-12-06 11:31:44', 'BOOKING_69346641263d2_28_1765041729');
 
 -- --------------------------------------------------------
 
@@ -163,7 +158,10 @@ INSERT INTO `booking_session_tracking` (`id`, `user_id`, `showtime_id`, `screen_
 (14, 9, 321, 5, '2025-12-02 11:09:10', NULL, 0, 0, 0, NULL, '2025-12-02 04:09:10'),
 (15, 9, 81, 3, '2025-12-02 11:15:55', '2025-12-03 08:44:29', 55714, 1, 0, NULL, '2025-12-02 04:15:55'),
 (16, 9, 328, 5, '2025-12-03 08:44:40', NULL, 0, 0, 0, NULL, '2025-12-03 01:44:40'),
-(17, 10, 76, 6, '2025-12-03 22:12:25', NULL, 0, 0, 0, NULL, '2025-12-03 15:12:25');
+(17, 10, 76, 6, '2025-12-03 22:12:25', '2025-12-07 00:17:28', 245103, 1, 0, NULL, '2025-12-03 15:12:25'),
+(18, 10, 91, 5, '2025-12-07 00:17:42', NULL, 0, 0, 0, NULL, '2025-12-06 17:17:42'),
+(19, 10, 327, 4, '2025-12-07 00:34:49', NULL, 0, 0, 0, NULL, '2025-12-06 17:34:49'),
+(20, 10, 361, 4, '2025-12-07 00:37:38', NULL, 0, 0, 0, NULL, '2025-12-06 17:37:38');
 
 -- --------------------------------------------------------
 
@@ -398,7 +396,11 @@ INSERT INTO `ip_room_tracking` (`id`, `ip_address`, `screen_id`, `showtime_id`, 
 (6, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 5, 321, '2025-12-02 05:09:10', '2025-12-02 05:10:02', 52, 0, NULL, '2025-12-02 04:09:10', '2025-12-02 04:10:02'),
 (7, '2402:9d80:87c:9670:49:6a1a:e920:9a1c', 3, 81, '2025-12-02 05:15:55', '2025-12-02 05:16:45', 1112, 1, '2025-12-07 15:00:00', '2025-12-02 04:15:55', '2025-12-02 04:34:27'),
 (8, '2401:d800:dda6:1d9f:9439:bad6:2e61:a103', 3, 81, '2025-12-03 02:44:29', '2025-12-03 02:44:29', 0, 0, NULL, '2025-12-03 01:44:29', '2025-12-03 01:44:29'),
-(9, '2401:d800:dda6:1d9f:9439:bad6:2e61:a103', 5, 328, '2025-12-03 02:44:40', '2025-12-03 02:45:42', 62, 0, NULL, '2025-12-03 01:44:40', '2025-12-03 01:45:42');
+(9, '2401:d800:dda6:1d9f:9439:bad6:2e61:a103', 5, 328, '2025-12-03 02:44:40', '2025-12-03 02:45:42', 62, 0, NULL, '2025-12-03 01:44:40', '2025-12-03 01:45:42'),
+(10, '2001:ee0:471a:32f0:61:b6ff:3a8e:5658', 6, 76, '2025-12-06 18:17:27', '2025-12-06 18:17:27', 0, 0, NULL, '2025-12-06 17:17:27', '2025-12-06 17:17:27'),
+(11, '2001:ee0:471a:32f0:61:b6ff:3a8e:5658', 5, 91, '2025-12-06 18:17:42', '2025-12-06 18:27:43', 1007, 1, '2025-12-07 19:00:00', '2025-12-06 17:17:42', '2025-12-06 17:34:29'),
+(12, '2001:ee0:471a:32f0:61:b6ff:3a8e:5658', 4, 327, '2025-12-06 18:34:49', '2025-12-06 18:37:25', 156, 0, NULL, '2025-12-06 17:34:49', '2025-12-06 17:37:25'),
+(13, '2001:ee0:471a:32f0:61:b6ff:3a8e:5658', 4, 361, '2025-12-06 18:37:38', '2025-12-06 18:37:38', 0, 0, NULL, '2025-12-06 17:37:38', '2025-12-06 17:37:38');
 
 -- --------------------------------------------------------
 
@@ -574,7 +576,8 @@ INSERT INTO `notifications` (`id`, `user_id`, `type`, `title`, `message`, `link`
 (6, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 2 vé xem phim \"Mắt Biếc\" tại ghế I5, I6. QR code đã được tạo, bạn có thể xem tại trang \'Vé của tôi\'.', '?route=booking/myTickets', 1, '2025-12-02 03:58:40'),
 (7, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 3 vé xem phim \"Hai Phượng\" tại ghế I6, I7, I8. QR code đã được tạo, bạn có thể xem tại trang \'Vé của tôi\'.', '?route=booking/myTickets', 1, '2025-12-02 04:10:00'),
 (8, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 3 vé xem phim \"Avengers: Endgame\" tại ghế G4, G5, G6. QR code đã được tạo, bạn có thể xem tại trang \'Vé của tôi\'.', '?route=booking/myTickets', 1, '2025-12-02 04:16:43'),
-(9, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 3 vé xem phim \"Bố Già\" tại ghế I4, I5, I6. QR code đã được tạo, bạn có thể xem tại trang \'Vé của tôi\'.', '?route=booking/myTickets', 1, '2025-12-03 01:45:39');
+(9, 9, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 3 vé xem phim \"Bố Già\" tại ghế I4, I5, I6. QR code đã được tạo, bạn có thể xem tại trang \'Vé của tôi\'.', '?route=booking/myTickets', 1, '2025-12-03 01:45:39'),
+(10, 10, 'success', 'Đặt vé thành công', 'Bạn đã đặt thành công 1 vé xem phim \"Avengers: Endgame\" tại ghế C7. QR code đã được tạo, bạn có thể xem tại trang \'Vé của tôi\'.', '?route=booking/myTickets', 1, '2025-12-06 17:22:11');
 
 -- --------------------------------------------------------
 
@@ -848,7 +851,9 @@ INSERT INTO `seat_selection_logs` (`id`, `user_id`, `ip_address`, `showtime_id`,
 (54, 10, '::1', 76, 2, '[\"L7\",\"L8\"]', 0, '2025-12-03 15:23:24'),
 (55, 10, '::1', 76, 2, '[\"L7\",\"L8\"]', 0, '2025-12-03 15:24:00'),
 (56, 10, '::1', 76, 1, '[\"I6\"]', 0, '2025-12-03 15:42:20'),
-(57, 10, '::1', 76, 1, '[\"I6\"]', 0, '2025-12-03 15:42:35');
+(57, 10, '::1', 76, 1, '[\"I6\"]', 0, '2025-12-03 15:42:35'),
+(58, 10, '2001:ee0:471a:32f0:61:b6ff:3a8e:5658', 91, 1, '[\"K6\"]', 0, '2025-12-06 17:17:50'),
+(59, 10, '2001:ee0:471a:32f0:61:b6ff:3a8e:5658', 91, 1, '[\"C7\"]', 0, '2025-12-06 17:21:44');
 
 -- --------------------------------------------------------
 
@@ -1104,7 +1109,8 @@ INSERT INTO `showtimes` (`id`, `movie_id`, `theater_id`, `show_date`, `show_time
 (356, 18, 3, '2025-12-07', '03:00:00', 120000.00, '2025-11-28 01:03:25', 11),
 (357, 18, 3, '2025-12-07', '04:00:00', 130000.00, '2025-11-28 01:03:25', 12),
 (359, 20, 3, '2025-12-02', '06:00:00', 200000.00, '2025-11-30 17:43:52', 11),
-(360, 20, 3, '2025-12-01', '10:00:00', 200000.00, '2025-11-30 17:44:28', 12);
+(360, 20, 3, '2025-12-01', '10:00:00', 200000.00, '2025-11-30 17:44:28', 12),
+(361, 23, 2, '2025-12-07', '19:59:00', 120000.00, '2025-12-06 17:35:47', 4);
 
 -- --------------------------------------------------------
 
@@ -1369,7 +1375,9 @@ INSERT INTO `tickets` (`id`, `user_id`, `showtime_id`, `booking_pending_id`, `se
 (78, 9, 81, 17, 'G6', 'vip', 'TICKET_692e682b32dce_9_81_1764649003_G6', 170000.00, 'Đã đặt', '2025-12-02 04:16:43'),
 (79, 9, 328, 18, 'I4', 'vip', 'TICKET_692f96415e6c9_9_328_1764726337_I4', 210000.00, 'Đã đặt', '2025-12-03 01:45:37'),
 (80, 9, 328, 18, 'I5', 'vip', 'TICKET_692f96415f32d_9_328_1764726337_I5', 210000.00, 'Đã đặt', '2025-12-03 01:45:37'),
-(81, 9, 328, 18, 'I6', 'vip', 'TICKET_692f96415f871_9_328_1764726337_I6', 210000.00, 'Đã đặt', '2025-12-03 01:45:37');
+(81, 9, 328, 18, 'I6', 'vip', 'TICKET_692f96415f871_9_328_1764726337_I6', 210000.00, 'Đã đặt', '2025-12-03 01:45:37'),
+(82, 10, 91, 27, 'K6', 'vip', 'TICKET_69346562b6217_10_91_1765041506_K6', 210000.00, 'Đã đặt', '2025-12-06 17:18:26'),
+(83, 10, 91, 28, 'C7', 'normal', 'TICKET_693466411f431_10_91_1765041729_C7', 140000.00, 'Đã đặt', '2025-12-06 17:22:09');
 
 -- --------------------------------------------------------
 
@@ -1412,7 +1420,9 @@ INSERT INTO `transactions` (`id`, `user_id`, `type`, `related_id`, `amount`, `me
 (17, 9, 'ticket', 15, 400000.00, '', 'Thành công', '2025-12-02 03:58:40'),
 (18, 9, 'ticket', 16, 630000.00, '', 'Thành công', '2025-12-02 04:10:00'),
 (19, 9, 'ticket', 17, 510000.00, '', 'Thành công', '2025-12-02 04:16:43'),
-(20, 9, 'ticket', 18, 630000.00, '', 'Thành công', '2025-12-03 01:45:37');
+(20, 9, 'ticket', 18, 630000.00, '', 'Thành công', '2025-12-03 01:45:37'),
+(21, 10, 'ticket', 27, 210000.00, '', 'Thành công', '2025-12-06 17:18:26'),
+(22, 10, 'ticket', 28, 140000.00, '', 'Thành công', '2025-12-06 17:22:09');
 
 -- --------------------------------------------------------
 
@@ -1885,13 +1895,13 @@ ALTER TABLE `booking_food_items`
 -- AUTO_INCREMENT for table `booking_pending`
 --
 ALTER TABLE `booking_pending`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `booking_session_tracking`
 --
 ALTER TABLE `booking_session_tracking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -1933,7 +1943,7 @@ ALTER TABLE `ip_blocks`
 -- AUTO_INCREMENT for table `ip_room_tracking`
 --
 ALTER TABLE `ip_room_tracking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `ip_spam_logs`
@@ -1957,7 +1967,7 @@ ALTER TABLE `movies`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `permissions`
@@ -1993,19 +2003,19 @@ ALTER TABLE `role_permissions`
 -- AUTO_INCREMENT for table `seat_reservations`
 --
 ALTER TABLE `seat_reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=250;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=252;
 
 --
 -- AUTO_INCREMENT for table `seat_selection_logs`
 --
 ALTER TABLE `seat_selection_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- AUTO_INCREMENT for table `showtimes`
 --
 ALTER TABLE `showtimes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=361;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=362;
 
 --
 -- AUTO_INCREMENT for table `subscriptions`
@@ -2047,13 +2057,13 @@ ALTER TABLE `theater_screens`
 -- AUTO_INCREMENT for table `tickets`
 --
 ALTER TABLE `tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
 
 --
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `users`

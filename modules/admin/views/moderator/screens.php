@@ -154,22 +154,18 @@
                     <div class="card-body">
                         <form id="addMovieToScreenForm" method="POST" action="?route=moderator/screenAddMovie">
                             <input type="hidden" name="screen_id" id="addMovieScreenId">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="add_movie_id" class="form-label">Chọn phim <span class="text-danger">*</span></label>
-                                    <select name="movie_id" id="add_movie_id" class="form-select" required>
-                                        <option value="">-- Chọn phim --</option>
-                                        <?php foreach ($movies as $movie): ?>
-                                            <option value="<?php echo $movie['id']; ?>">
-                                                <?php echo htmlspecialchars($movie['title']); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="add_price" class="form-label">Giá vé (VNĐ) <span class="text-danger">*</span></label>
-                                    <input type="number" name="price" id="add_price" class="form-control" min="0" value="120000" required>
-                                </div>
+                            <div class="mb-3">
+                                <label for="add_movie_id" class="form-label">Chọn phim <span class="text-danger">*</span></label>
+                                <select name="movie_id" id="add_movie_id" class="form-select" required>
+                                    <option value="">-- Chọn phim --</option>
+                                    <?php foreach ($movies as $movie): ?>
+                                        <option value="<?php echo $movie['id']; ?>">
+                                            <?php echo htmlspecialchars($movie['title']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <!-- Giá vé được lấy tự động từ cấu hình phòng chiếu -->
+                                <input type="hidden" name="price" value="0">
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">

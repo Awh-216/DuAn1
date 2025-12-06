@@ -14,6 +14,7 @@
     $baseUrl = UrlHelper::getBaseUrl();
     ?>
     <link rel="stylesheet" href="<?php echo htmlspecialchars($baseUrl); ?>/style.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($baseUrl); ?>/modules/admin/views/admin-style.css?v=<?php echo time(); ?>">
     <style>
         .admin-sidebar {
             min-height: 100vh;

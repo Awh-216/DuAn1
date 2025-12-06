@@ -14,8 +14,9 @@
     $baseUrl = UrlHelper::getBaseUrl();
     ?>
     <link rel="stylesheet" href="<?php echo htmlspecialchars($baseUrl); ?>/style.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($baseUrl); ?>/modules/admin/views/admin-style.css?v=<?php echo time(); ?>">
     <style>
-        .moderator-sidebar {
+        .moderator-sidebar, .admin-sidebar {
             min-height: 100vh;
             background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
             padding: 0;
@@ -26,10 +27,10 @@
             z-index: 1000;
         }
         
-        .moderator-main {
+        .moderator-main, .admin-main {
             margin-left: 250px;
             padding: 20px;
-            background-color: rgba(60, 60 ,60);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important;
             min-height: 100vh;
         }
         

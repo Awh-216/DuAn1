@@ -22,6 +22,65 @@ $title = 'Hồ Sơ';
     max-height: calc(100vh - 4rem);
     overflow-y: auto;
     overflow-x: hidden;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+}
+
+/* Animated Border Frame cho Sidebar */
+.profile-luxury-sidebar::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 24px;
+    padding: 2px;
+    background: linear-gradient(45deg, #d4af37, #f4e4bc, #d4af37, #ff6b6b, #d4af37);
+    background-size: 300% 300%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: borderRotate 3s ease infinite;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.profile-luxury-sidebar:hover::before {
+    opacity: 1;
+}
+
+.profile-luxury-sidebar:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 70px rgba(212, 175, 55, 0.2), 0 0 40px rgba(212, 175, 55, 0.1);
+}
+
+@keyframes borderRotate {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* Glowing Effect */
+.profile-luxury-sidebar::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.profile-luxury-sidebar:hover::after {
+    width: 200%;
+    height: 200%;
 }
 
 .profile-luxury-sidebar::-webkit-scrollbar {
@@ -48,15 +107,71 @@ $title = 'Hồ Sơ';
     height: 160px;
     margin: 0 auto 2rem;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+/* Animated Frame cho Avatar */
+.profile-avatar-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #d4af37, #f4e4bc, #ff6b6b, #4ecdc4, #d4af37);
+    background-size: 400% 400%;
+    animation: avatarBorderSpin 4s linear infinite;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+}
+
+.profile-avatar-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    z-index: -1;
+}
+
+@keyframes avatarBorderSpin {
+    0% {
+        background-position: 0% 50%;
+        transform: rotate(0deg);
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+        transform: rotate(360deg);
+    }
 }
 
 .profile-avatar-wrapper:hover {
-    transform: scale(1.05);
+    transform: scale(1.1) rotate(5deg);
+}
+
+.profile-avatar-wrapper:hover::before {
+    opacity: 1;
 }
 
 .profile-avatar-wrapper:hover .avatar-overlay {
     opacity: 1;
+}
+
+/* Floating Animation */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.profile-avatar-wrapper {
+    animation: float 3s ease-in-out infinite;
 }
 
 .profile-avatar-container {
@@ -67,6 +182,13 @@ $title = 'Hồ Sơ';
     border: 4px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     position: relative;
+    transition: all 0.4s ease;
+    z-index: 2;
+}
+
+.profile-avatar-container:hover {
+    border-color: #d4af37;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.6), 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
 .profile-avatar-container img {
@@ -121,25 +243,78 @@ $title = 'Hồ Sơ';
     font-weight: 600;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     margin-bottom: 1.5rem;
     letter-spacing: 0.3px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated Background Effect */
+.btn-change-avatar::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: #d4af37;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+    z-index: 0;
+}
+
+.btn-change-avatar:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-change-avatar span,
+.btn-change-avatar i {
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
 }
 
 .btn-change-avatar:hover {
-    background: #d4af37;
     color: #1a1a1a;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4), 0 0 20px rgba(212, 175, 55, 0.2);
+    border-color: #f4e4bc;
+}
+
+.btn-change-avatar:hover i {
+    transform: rotate(15deg) scale(1.2);
 }
 
 .profile-name-luxury {
     text-align: center;
     margin-bottom: 1.5rem;
+    position: relative;
+    padding: 1rem;
+    border-radius: 16px;
+    transition: all 0.4s ease;
+}
+
+/* Glow Effect cho Name Section */
+.profile-name-luxury::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.profile-luxury-sidebar:hover .profile-name-luxury::before {
+    opacity: 1;
 }
 
 .profile-name-luxury h2 {
@@ -148,6 +323,17 @@ $title = 'Hồ Sơ';
     color: #ffffff;
     margin-bottom: 0.5rem;
     letter-spacing: -0.5px;
+    position: relative;
+    transition: all 0.4s ease;
+    background: linear-gradient(135deg, #ffffff 0%, #d4af37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.profile-luxury-sidebar:hover .profile-name-luxury h2 {
+    transform: scale(1.05);
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
 }
 
 .profile-role-luxury {
@@ -168,6 +354,48 @@ $title = 'Hồ Sơ';
     font-weight: 600;
     margin-top: 0.5rem;
     letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+/* Animated Shine Effect */
+.profile-badge-luxury::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+    opacity: 0;
+}
+
+.profile-badge-luxury:hover::before {
+    animation: badgeShine 1.5s ease;
+}
+
+@keyframes badgeShine {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+        opacity: 0;
+    }
+}
+
+.profile-badge-luxury:hover {
+    transform: scale(1.1) rotate(2deg);
+    box-shadow: 0 6px 25px rgba(212, 175, 55, 0.5), 0 0 30px rgba(212, 175, 55, 0.3);
+    background: linear-gradient(135deg, #f4e4bc 0%, #d4af37 100%);
 }
 
 .btn-upgrade-luxury {
@@ -180,15 +408,86 @@ $title = 'Hồ Sơ';
     font-weight: 600;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     margin-bottom: 2rem;
     box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
     letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated Gradient */
+.btn-upgrade-luxury::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #f4e4bc 0%, #d4af37 50%, #f4e4bc 100%);
+    background-size: 200% 200%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.btn-upgrade-luxury:hover::before {
+    opacity: 1;
+    animation: upgradeGradient 2s ease infinite;
+}
+
+@keyframes upgradeGradient {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.btn-upgrade-luxury span,
+.btn-upgrade-luxury i {
+    position: relative;
+    z-index: 1;
 }
 
 .btn-upgrade-luxury:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5), 0 0 40px rgba(212, 175, 55, 0.3);
+}
+
+.btn-upgrade-luxury:hover i {
+    transform: rotate(360deg) scale(1.2);
+    transition: transform 0.6s ease;
+}
+
+/* Sparkle Effect */
+.btn-upgrade-luxury::after {
+    content: '✨';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    opacity: 0;
+    transition: all 0.4s ease;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.btn-upgrade-luxury:hover::after {
+    animation: sparkle 1s ease;
+}
+
+@keyframes sparkle {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.5) rotate(180deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0) rotate(360deg);
+    }
 }
 
 .balance-card-luxury {
@@ -198,6 +497,77 @@ $title = 'Hồ Sơ';
     padding: 1.5rem;
     margin-bottom: 2rem;
     backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animated Frame cho Balance Card */
+.balance-card-luxury::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    padding: 2px;
+    background: linear-gradient(135deg, #d4af37, transparent, #d4af37, transparent);
+    background-size: 200% 200%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: balanceBorderFlow 3s linear infinite;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.balance-card-luxury:hover::before {
+    opacity: 1;
+}
+
+.balance-card-luxury:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2);
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+@keyframes balanceBorderFlow {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 200% 200%;
+    }
+}
+
+/* Shimmer Effect */
+.balance-card-luxury::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+    opacity: 0;
+}
+
+.balance-card-luxury:hover::after {
+    animation: shimmer 1.5s ease;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+        opacity: 0;
+    }
 }
 
 .balance-header-luxury {
@@ -235,14 +605,77 @@ $title = 'Hồ Sơ';
     font-weight: 600;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated Border */
+.btn-deposit-luxury::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 10px;
+    padding: 2px;
+    background: linear-gradient(45deg, #d4af37, #f4e4bc, #4ecdc4, #d4af37);
+    background-size: 300% 300%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    animation: depositBorder 3s linear infinite;
+}
+
+.btn-deposit-luxury:hover::before {
+    opacity: 1;
+}
+
+@keyframes depositBorder {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 300% 50%;
+    }
+}
+
+/* Fill Effect */
+.btn-deposit-luxury::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: #d4af37;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+    z-index: 0;
+}
+
+.btn-deposit-luxury:hover::after {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-deposit-luxury span,
+.btn-deposit-luxury i {
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
 }
 
 .btn-deposit-luxury:hover {
-    background: #d4af37;
     color: #1a1a1a;
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+}
+
+.btn-deposit-luxury:hover i {
+    transform: rotate(180deg) scale(1.2);
 }
 
 .profile-menu-luxury {
@@ -259,21 +692,70 @@ $title = 'Hồ Sơ';
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     border-radius: 12px;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     font-weight: 500;
     font-size: 0.95rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated Background cho Menu Items */
+.menu-item-luxury::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: linear-gradient(180deg, #d4af37, #f4e4bc);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.4s ease;
+}
+
+.menu-item-luxury:hover::before {
+    transform: scaleY(1);
+    transform-origin: top;
+}
+
+.menu-item-luxury::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(212, 175, 55, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.menu-item-luxury:hover::after {
+    opacity: 1;
 }
 
 .menu-item-luxury:hover {
     background: rgba(255, 255, 255, 0.08);
     color: #ffffff;
-    transform: translateX(5px);
+    transform: translateX(8px) scale(1.02);
+    box-shadow: -4px 0 15px rgba(212, 175, 55, 0.2);
+    padding-left: 1.5rem;
 }
 
 .menu-item-luxury i {
     width: 24px;
     text-align: center;
     font-size: 1.1rem;
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.menu-item-luxury:hover i {
+    transform: scale(1.2) rotate(5deg);
+    color: #d4af37;
+}
+
+.menu-item-luxury span {
+    position: relative;
+    z-index: 1;
 }
 
 .menu-item-luxury.logout {
@@ -304,12 +786,126 @@ $title = 'Hồ Sơ';
     margin-bottom: 2rem;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Unique Frame Design cho Cards */
+.card-luxury::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 24px;
+    padding: 3px;
+    background: linear-gradient(135deg, 
+        #d4af37 0%, 
+        transparent 25%, 
+        transparent 75%, 
+        #d4af37 100%,
+        transparent 125%,
+        #4ecdc4 150%,
+        transparent 175%,
+        #ff6b6b 200%);
+    background-size: 300% 300%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: cardBorderAnimation 4s ease infinite;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 0;
+}
+
+.card-luxury:hover::before {
+    opacity: 1;
+}
+
+.card-luxury:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 20px 60px rgba(212, 175, 55, 0.15), 0 0 50px rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+@keyframes cardBorderAnimation {
+    0%, 100% {
+        background-position: 0% 0%;
+    }
+    25% {
+        background-position: 100% 0%;
+    }
+    50% {
+        background-position: 100% 100%;
+    }
+    75% {
+        background-position: 0% 100%;
+    }
+}
+
+/* Corner Accents */
+.card-luxury::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), transparent);
+    border-radius: 0 24px 0 100%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.card-luxury:hover::after {
+    opacity: 1;
 }
 
 .card-header-luxury {
     padding: 2rem 2.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+
+/* Animated Background Pattern */
+.card-header-luxury::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+    animation: headerPulse 3s ease-in-out infinite;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.card-luxury:hover .card-header-luxury::before {
+    opacity: 1;
+}
+
+@keyframes headerPulse {
+    0%, 100% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.3;
+    }
+}
+
+.card-header-luxury h3 {
+    position: relative;
+    z-index: 1;
+}
+
+.card-luxury:hover .card-header-luxury {
+    background: linear-gradient(135deg, #2f2f2f 0%, #242424 100%);
+    border-bottom-color: rgba(212, 175, 55, 0.2);
 }
 
 .card-header-luxury h3 {
@@ -354,15 +950,47 @@ $title = 'Hồ Sơ';
     font-size: 1rem;
     color: #ffffff;
     background: rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: inherit;
+    position: relative;
+}
+
+.form-control-luxury::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(45deg, #d4af37, #f4e4bc, #d4af37);
+    background-size: 200% 200%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
 }
 
 .form-control-luxury:focus {
     outline: none;
     border-color: #d4af37;
-    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2), 0 0 20px rgba(212, 175, 55, 0.1);
     background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.form-control-luxury:focus::before {
+    opacity: 1;
+    animation: inputBorderFlow 2s linear infinite;
+}
+
+@keyframes inputBorderFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 200% 50%;
+    }
 }
 
 .form-control-luxury::placeholder {
@@ -378,14 +1006,69 @@ $title = 'Hồ Sơ';
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     letter-spacing: 0.3px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated Gradient Background */
+.btn-update-luxury::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 50%, #d4af37 100%);
+    background-size: 200% 200%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 0;
+}
+
+.btn-update-luxury:hover::before {
+    opacity: 1;
+    animation: buttonGradient 2s ease infinite;
+}
+
+.btn-update-luxury span,
+.btn-update-luxury i {
+    position: relative;
+    z-index: 1;
 }
 
 .btn-update-luxury:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4), 0 0 30px rgba(212, 175, 55, 0.2);
+    color: #1a1a1a;
+}
+
+@keyframes buttonGradient {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* Ripple Effect */
+.btn-update-luxury::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+    z-index: 1;
+}
+
+.btn-update-luxury:active::after {
+    width: 300px;
+    height: 300px;
 }
 
 .history-item-luxury {
@@ -393,20 +1076,69 @@ $title = 'Hồ Sơ';
     gap: 1.5rem;
     padding: 1.5rem;
     border-radius: 16px;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     color: inherit;
     border: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 1rem;
     background: rgba(255, 255, 255, 0.03);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated Border cho History Items */
+.history-item-luxury::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    padding: 2px;
+    background: linear-gradient(45deg, #d4af37, transparent, #4ecdc4, transparent, #d4af37);
+    background-size: 300% 300%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    animation: historyBorder 3s linear infinite;
+}
+
+.history-item-luxury:hover::before {
+    opacity: 1;
+}
+
+@keyframes historyBorder {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 300% 300%;
+    }
 }
 
 .history-item-luxury:hover {
     background: rgba(255, 255, 255, 0.08);
-    transform: translateX(5px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transform: translateX(10px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2), -4px 0 15px rgba(212, 175, 55, 0.1);
     text-decoration: none;
     color: inherit;
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+/* Glow Effect */
+.history-item-luxury::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+    transition: left 0.6s ease;
+}
+
+.history-item-luxury:hover::after {
+    left: 100%;
 }
 
 .history-thumbnail-luxury {
@@ -438,12 +1170,57 @@ $title = 'Hồ Sơ';
     text-align: center;
     padding: 4rem 2rem;
     color: rgba(255, 255, 255, 0.5);
+    position: relative;
+}
+
+/* Animated Background Pattern */
+.empty-state-luxury::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: emptyStatePulse 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes emptyStatePulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.6;
+    }
 }
 
 .empty-state-luxury i {
     font-size: 4rem;
     margin-bottom: 1rem;
     opacity: 0.4;
+    transition: all 0.4s ease;
+    display: inline-block;
+    animation: emptyStateFloat 3s ease-in-out infinite;
+}
+
+@keyframes emptyStateFloat {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-15px) rotate(5deg);
+    }
+}
+
+.empty-state-luxury:hover i {
+    opacity: 0.7;
+    transform: scale(1.1);
+    color: #d4af37;
 }
 
 .ticket-item-luxury {
@@ -451,14 +1228,76 @@ $title = 'Hồ Sơ';
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     margin-bottom: 1rem;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     background: rgba(255, 255, 255, 0.03);
+    position: relative;
+    overflow: hidden;
 }
 
+/* Unique Frame Design cho Tickets */
+.ticket-item-luxury::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 2px;
+    background: linear-gradient(135deg, 
+        #d4af37 0%, 
+        transparent 20%,
+        #4ecdc4 40%,
+        transparent 60%,
+        #ff6b6b 80%,
+        transparent 100%);
+    background-size: 200% 200%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    animation: ticketBorder 4s linear infinite;
+}
+
+.ticket-item-luxury:hover::before {
+    opacity: 1;
+}
+
+@keyframes ticketBorder {
+    0% {
+        background-position: 0% 0%;
+    }
+    50% {
+        background-position: 100% 100%;
+    }
+    100% {
+        background-position: 0% 0%;
+    }
+}
+
+/* 3D Lift Effect */
 .ticket-item-luxury:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2), 0 0 40px rgba(212, 175, 55, 0.1);
+    transform: translateY(-5px) rotateX(2deg);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(212, 175, 55, 0.4);
+}
+
+/* Corner Highlight */
+.ticket-item-luxury::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.2), transparent 70%);
+    border-radius: 0 16px 0 100%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.ticket-item-luxury:hover::after {
+    opacity: 1;
 }
 
 .ticket-header-luxury {
@@ -481,6 +1320,36 @@ $title = 'Hồ Sơ';
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.3px;
+    position: relative;
+    transition: all 0.4s ease;
+    overflow: hidden;
+}
+
+/* Pulse Effect cho Badges */
+.badge-luxury::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: currentColor;
+    opacity: 0.2;
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.2;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.4;
+    }
+}
+
+.badge-luxury:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .badge-success-luxury {
@@ -511,6 +1380,58 @@ $title = 'Hồ Sơ';
     width: 18px;
 }
 
+/* Additional Smooth Transitions */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth Scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Performance Optimization */
+.profile-luxury-sidebar,
+.card-luxury,
+.history-item-luxury,
+.ticket-item-luxury {
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* Custom Scrollbar Enhancement */
+.profile-luxury-sidebar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #d4af37, #f4e4bc);
+    border-radius: 3px;
+}
+
+.profile-luxury-sidebar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #f4e4bc, #d4af37);
+}
+
+/* Loading Animation for Images */
+.profile-avatar-container img,
+.history-thumbnail-luxury {
+    transition: opacity 0.3s ease;
+}
+
+.profile-avatar-container img:hover,
+.history-thumbnail-luxury:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+/* Enhanced Focus States for Accessibility */
+.form-control-luxury:focus,
+.btn-change-avatar:focus,
+.btn-update-luxury:focus,
+.btn-upgrade-luxury:focus,
+.btn-deposit-luxury:focus {
+    outline: 2px solid #d4af37;
+    outline-offset: 2px;
+}
+
 @media (max-width: 992px) {
     .profile-content-luxury {
         padding-left: 0;
@@ -520,6 +1441,18 @@ $title = 'Hồ Sơ';
     .profile-luxury-sidebar {
         position: relative;
         top: 0;
+    }
+    
+    /* Reduce animations on mobile for performance */
+    .profile-avatar-wrapper {
+        animation: none;
+    }
+    
+    .profile-luxury-sidebar::before,
+    .card-luxury::before,
+    .history-item-luxury::before,
+    .ticket-item-luxury::before {
+        animation-duration: 6s;
     }
 }
 </style>
